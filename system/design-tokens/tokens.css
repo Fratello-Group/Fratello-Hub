@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════════════════════════════
+   FRATELLO DESIGN TOKENS
+   Fratello Group Inc. — Brand Design System
+   
+   Import this file into any Hub tool for consistent branding.
+   Usage: <link rel="stylesheet" href="/system/design-tokens/tokens.css">
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ─── Brand Colors ─────────────────────────────── */
+    --brewing-blue: #36B3AF;
+    --brewing-blue-light: #4DC9C5;
+    --brewing-blue-dark: #2A8F8C;
+    --brewing-blue-subtle: rgba(54, 179, 175, 0.08);
+    --brewing-blue-glow: rgba(54, 179, 175, 0.15);
+
+    --bean-black: #1A1A1A;
+    --bean-black-soft: #2C2C2C;
+
+    --fratello-white: #FFFFFF;
+
+    /* ─── Neutral Palette ──────────────────────────── */
+    --warm-gray-50: #FAFAF9;
+    --warm-gray-100: #F5F5F4;
+    --warm-gray-200: #E7E5E4;
+    --warm-gray-300: #D6D3D1;
+    --warm-gray-400: #A8A29E;
+    --warm-gray-500: #78716C;
+    --warm-gray-600: #57534E;
+    --warm-gray-700: #44403C;
+
+    /* ─── Typography ───────────────────────────────── */
+    --font-primary: 'Montserrat', sans-serif;
+
+    /* ─── Spacing ──────────────────────────────────── */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+
+    /* ─── Shadows ──────────────────────────────────── */
+    --shadow-sm: 0 1px 2px rgba(26, 26, 26, 0.05);
+    --shadow-md: 0 4px 12px rgba(26, 26, 26, 0.08);
+    --shadow-lg: 0 8px 30px rgba(26, 26, 26, 0.1);
+    --shadow-card-hover: 0 12px 40px rgba(26, 26, 26, 0.12);
+
+    /* ─── Border Radius ────────────────────────────── */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    /* ─── Header Height ────────────────────────────── */
+    --header-height: 64px;
+}
