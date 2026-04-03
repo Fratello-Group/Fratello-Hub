@@ -272,7 +272,7 @@
     function handleLogin(e) {
         e.preventDefault();
         const code = document.getElementById('accessCode').value.trim();
-        if (TIERS[code]) { tier=TIERS[code]; sessionStorage.setItem('fh-tier',JSON.stringify(tier)); openHub(); return false; }
+        if (TIERS[code]) { tier=TIERS[code]; localStorage.setItem('fh-tier',JSON.stringify(tier)); openHub(); return false; }
         const err=document.getElementById('loginError'); err.classList.add('show');
         document.getElementById('accessCode').value='';
         setTimeout(()=>err.classList.remove('show'),2500);
@@ -280,7 +280,7 @@
     }
 
     function logout() {
-        sessionStorage.removeItem('fh-tier'); tier=null;
+        localStorage.removeItem('fh-tier'); tier=null;
         document.getElementById('hub').classList.remove('active');
         document.getElementById('loginScreen').style.display='flex';
         document.getElementById('accessCode').value='';
@@ -326,7 +326,7 @@
         });
     }
 
-    (function(){const s=sessionStorage.getItem('fh-tier');if(s){tier=JSON.parse(s);openHub();}})();
+    (function(){const s=localStorage.getItem('fh-tier');if(s){tier=JSON.parse(s);openHub();}})();
 </script>
 </body>
 </html>
