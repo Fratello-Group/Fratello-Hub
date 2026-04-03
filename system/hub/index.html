@@ -2,10 +2,1063 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=system/hub/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fratello Ops Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════
+           FRATELLO DESIGN TOKENS
+           ═══════════════════════════════════════════ */
+        :root {
+            --brewing-blue: #36B3AF;
+            --brewing-blue-light: #4DC9C5;
+            --brewing-blue-dark: #2A8F8C;
+            --brewing-blue-subtle: rgba(54, 179, 175, 0.08);
+            --brewing-blue-glow: rgba(54, 179, 175, 0.15);
+            --bean-black: #1A1A1A;
+            --bean-black-soft: #2C2C2C;
+            --fratello-white: #FFFFFF;
+            --warm-gray-50: #FAFAF9;
+            --warm-gray-100: #F5F5F4;
+            --warm-gray-200: #E7E5E4;
+            --warm-gray-300: #D6D3D1;
+            --warm-gray-400: #A8A29E;
+            --warm-gray-500: #78716C;
+            --warm-gray-600: #57534E;
+            --warm-gray-700: #44403C;
+            --font-primary: 'Montserrat', sans-serif;
+            --shadow-sm: 0 1px 2px rgba(26, 26, 26, 0.05);
+            --shadow-md: 0 4px 12px rgba(26, 26, 26, 0.08);
+            --shadow-lg: 0 8px 30px rgba(26, 26, 26, 0.1);
+            --shadow-card-hover: 0 12px 40px rgba(26, 26, 26, 0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        /* ═══════════════════════════════════════════
+           RESET & BASE
+           ═══════════════════════════════════════════ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--warm-gray-50);
+            color: var(--bean-black);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════════════
+           LOGIN SCREEN
+           ═══════════════════════════════════════════ */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bean-black);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-screen::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--brewing-blue-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .login-screen::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(54, 179, 175, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .login-logo {
+            font-family: var(--font-primary);
+            font-weight: 800;
+            font-size: 2rem;
+            letter-spacing: 0.25em;
+            color: var(--fratello-white);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .login-logo span {
+            color: var(--brewing-blue);
+        }
+
+        .login-sub {
+            font-size: 0.7rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--warm-gray-400);
+            font-weight: 500;
+        }
+
+        .login-divider {
+            width: 32px;
+            height: 2px;
+            background: var(--brewing-blue);
+            margin: 20px auto 0;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .login-input-group {
+            position: relative;
+        }
+
+        .login-input-group label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--warm-gray-400);
+            margin-bottom: 8px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bean-black-soft);
+            border: 1px solid var(--warm-gray-700);
+            border-radius: var(--radius-sm);
+            color: var(--fratello-white);
+            font-family: var(--font-primary);
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease;
+            outline: none;
+        }
+
+        .login-input:focus {
+            border-color: var(--brewing-blue);
+        }
+
+        .login-input::placeholder {
+            color: var(--warm-gray-600);
+        }
+
+        .login-btn {
+            margin-top: 8px;
+            padding: 14px 24px;
+            background: var(--brewing-blue);
+            color: var(--fratello-white);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--brewing-blue-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(54, 179, 175, 0.3);
+        }
+
+        .login-error {
+            display: none;
+            padding: 12px 16px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: var(--radius-sm);
+            color: #FCA5A5;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .login-error.visible {
+            display: block;
+        }
+
+        .login-hint {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--warm-gray-600);
+            margin-top: 24px;
+            line-height: 1.8;
+        }
+
+        /* ═══════════════════════════════════════════
+           HUB LAYOUT
+           ═══════════════════════════════════════════ */
+        .hub {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .hub.active {
+            display: block;
+        }
+
+        /* Header */
+        .hub-header {
+            background: var(--bean-black);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .hub-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hub-wordmark {
+            font-family: var(--font-primary);
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.2em;
+            color: var(--fratello-white);
+            text-transform: uppercase;
+        }
+
+        .hub-wordmark span {
+            color: var(--brewing-blue);
+        }
+
+        .hub-header-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--warm-gray-700);
+        }
+
+        .hub-header-label {
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--warm-gray-400);
+        }
+
+        .hub-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hub-tier-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 2px;
+            background: var(--brewing-blue);
+            color: var(--fratello-white);
+        }
+
+        .hub-logout {
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--warm-gray-400);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: var(--font-primary);
+            transition: color 0.2s;
+        }
+
+        .hub-logout:hover {
+            color: var(--fratello-white);
+        }
+
+        /* Welcome bar */
+        .hub-welcome {
+            background: var(--fratello-white);
+            border-bottom: 1px solid var(--warm-gray-200);
+            padding: 32px;
+        }
+
+        .hub-welcome-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hub-welcome h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--bean-black);
+            margin-bottom: 4px;
+        }
+
+        .hub-welcome p {
+            font-size: 0.85rem;
+            color: var(--warm-gray-500);
+            font-weight: 400;
+        }
+
+        /* Main content */
+        .hub-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Section headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            margin-top: 12px;
+        }
+
+        .section-header:not(:first-child) {
+            margin-top: 40px;
+        }
+
+        .section-accent {
+            width: 3px;
+            height: 18px;
+            background: var(--brewing-blue);
+            border-radius: 2px;
+        }
+
+        .section-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--warm-gray-500);
+        }
+
+        /* Card grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .dept-card {
+            background: var(--fratello-white);
+            border: 1px solid var(--warm-gray-200);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dept-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--brewing-blue);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .dept-card:hover {
+            border-color: var(--brewing-blue);
+            box-shadow: var(--shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .dept-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--brewing-blue-subtle);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--bean-black);
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--warm-gray-500);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-tool-count {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--brewing-blue);
+        }
+
+        .card-status {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 2px;
+            background: var(--brewing-blue-subtle);
+            color: var(--brewing-blue-dark);
+        }
+
+        /* Department detail view */
+        .dept-detail {
+            display: none;
+        }
+
+        .dept-detail.active {
+            display: block;
+        }
+
+        .dept-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-primary);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--warm-gray-500);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: var(--brewing-blue);
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .dept-detail-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Tool cards (inside department) */
+        .tool-card {
+            background: var(--fratello-white);
+            border: 1px solid var(--warm-gray-200);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .tool-card:hover {
+            border-color: var(--brewing-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tool-info {
+            flex: 1;
+        }
+
+        .tool-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--bean-black);
+            margin-bottom: 2px;
+        }
+
+        .tool-description {
+            font-size: 0.78rem;
+            color: var(--warm-gray-500);
+        }
+
+        .tool-status-badge {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 2px;
+        }
+
+        .tool-status-badge.active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16A34A;
+        }
+
+        .tool-status-badge.draft {
+            background: rgba(234, 179, 8, 0.1);
+            color: #CA8A04;
+        }
+
+        .tool-status-badge.planned {
+            background: var(--brewing-blue-subtle);
+            color: var(--brewing-blue-dark);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--warm-gray-400);
+        }
+
+        .empty-state-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .empty-state small {
+            font-size: 0.75rem;
+            color: var(--warm-gray-400);
+        }
+
+        /* Footer */
+        .hub-footer {
+            margin-top: 60px;
+            padding: 24px 32px;
+            border-top: 1px solid var(--warm-gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hub-footer-left {
+            font-size: 0.65rem;
+            color: var(--warm-gray-400);
+            letter-spacing: 0.05em;
+        }
+
+        .hub-footer-right {
+            font-size: 0.65rem;
+            color: var(--warm-gray-400);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ═══════════════════════════════════════════
+           ANIMATIONS
+           ═══════════════════════════════════════════ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hub.active .dept-card {
+            animation: fadeIn 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .hub.active .dept-card:nth-child(1) { animation-delay: 0.05s; }
+        .hub.active .dept-card:nth-child(2) { animation-delay: 0.1s; }
+        .hub.active .dept-card:nth-child(3) { animation-delay: 0.15s; }
+        .hub.active .dept-card:nth-child(4) { animation-delay: 0.2s; }
+        .hub.active .dept-card:nth-child(5) { animation-delay: 0.25s; }
+        .hub.active .dept-card:nth-child(6) { animation-delay: 0.3s; }
+        .hub.active .dept-card:nth-child(7) { animation-delay: 0.35s; }
+
+        /* ═══════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            .hub-header {
+                padding: 0 16px;
+                height: 56px;
+            }
+
+            .hub-header-divider,
+            .hub-header-label {
+                display: none;
+            }
+
+            .hub-welcome {
+                padding: 24px 16px;
+            }
+
+            .hub-welcome h1 {
+                font-size: 1.2rem;
+            }
+
+            .hub-content {
+                padding: 20px 16px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .hub-footer {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+                padding: 20px 16px;
+            }
+        }
+
+        /* Hidden utility */
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
-    <p>Redirecting to <a href="system/hub/">Fratello Ops Hub</a>...</p>
+
+    <!-- ═══════════════════════════════════════════
+         LOGIN SCREEN
+         ═══════════════════════════════════════════ -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-brand">
+                <div class="login-logo">FRATEL<span>L</span>O</div>
+                <div class="login-sub">Operations Hub</div>
+                <div class="login-divider"></div>
+            </div>
+
+            <form class="login-form" id="loginForm" onsubmit="return handleLogin(event)">
+                <div class="login-input-group">
+                    <label for="accessCode">Access Code</label>
+                    <input
+                        type="password"
+                        id="accessCode"
+                        class="login-input"
+                        placeholder="Enter your access code"
+                        autocomplete="off"
+                    />
+                </div>
+
+                <div class="login-error" id="loginError">
+                    Invalid access code. Please try again.
+                </div>
+
+                <button type="submit" class="login-btn">Enter Hub</button>
+            </form>
+
+            <div class="login-hint">
+                Contact your manager for access credentials.
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         HUB MAIN
+         ═══════════════════════════════════════════ -->
+    <div class="hub" id="hub">
+
+        <!-- Header -->
+        <header class="hub-header">
+            <div class="hub-header-left">
+                <div class="hub-wordmark">FRATEL<span>L</span>O</div>
+                <div class="hub-header-divider"></div>
+                <div class="hub-header-label">Ops Hub</div>
+            </div>
+            <div class="hub-header-right">
+                <div class="hub-tier-badge" id="tierBadge">Owner</div>
+                <button class="hub-logout" onclick="handleLogout()">Sign Out</button>
+            </div>
+        </header>
+
+        <!-- Welcome -->
+        <div class="hub-welcome">
+            <div class="hub-welcome-inner">
+                <h1 id="welcomeMsg">Welcome back</h1>
+                <p id="welcomeSub">Fratello Operations Hub &mdash; your tools, dashboards, and workflows in one place.</p>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="hub-content">
+
+            <!-- ═══ MAIN GRID VIEW ═══ -->
+            <div id="mainView">
+
+                <!-- Operational Tools -->
+                <div class="section-header">
+                    <div class="section-accent"></div>
+                    <div class="section-title">Departments</div>
+                </div>
+
+                <div class="card-grid" id="deptGrid">
+                    <!-- Cards injected by JS -->
+                </div>
+
+                <!-- System & Admin (Owner only) -->
+                <div id="systemSection" class="hidden">
+                    <div class="section-header">
+                        <div class="section-accent"></div>
+                        <div class="section-title">System &amp; Administration</div>
+                    </div>
+                    <div class="card-grid" id="systemGrid">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ═══ DEPARTMENT DETAIL VIEW ═══ -->
+            <div class="dept-detail" id="detailView">
+                <div class="dept-detail-header">
+                    <button class="back-btn" onclick="showMainView()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                        Back
+                    </button>
+                    <div class="dept-detail-title" id="detailTitle"></div>
+                </div>
+                <div id="detailTools">
+                    <!-- Tool cards injected by JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="hub-footer">
+            <div class="hub-footer-left">
+                &copy; 2026 Fratello Group Inc. &middot; 4021 9 St SE, Calgary AB
+            </div>
+            <div class="hub-footer-right">
+                Internal Use Only
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         APPLICATION LOGIC
+         ═══════════════════════════════════════════ -->
+    <script>
+        // ─── ACCESS TIERS & CREDENTIALS ───────────────────
+        // Phase 1: Simple password-per-tier
+        // Replace these with your chosen passwords before deploying
+        const ACCESS_TIERS = {
+            'fratello-staff-2026':   { tier: 'Staff',   level: 1 },
+            'fratello-manager-2026': { tier: 'Manager', level: 2 },
+            'fratello-owner-2026':   { tier: 'Owner',   level: 3 }
+        };
+
+        let currentTier = null;
+
+        // ─── DEPARTMENT DATA ──────────────────────────────
+        const departments = [
+            {
+                id: 'finance',
+                name: 'Finance',
+                icon: '📊',
+                desc: 'Dashboards, costing tools, reports, and margin analysis.',
+                tier: 2,
+                tools: [
+                    { name: 'Financial Dashboard', desc: 'Monthly P&L, cash flow, and KPI tracking', status: 'planned', tier: 3 },
+                    { name: 'Margin Calculator', desc: 'Product-level costing and margin analysis', status: 'planned', tier: 2 },
+                    { name: 'Budget Tracker', desc: 'Department budgets vs. actuals', status: 'planned', tier: 3 }
+                ]
+            },
+            {
+                id: 'production',
+                name: 'Production',
+                icon: '⚙️',
+                desc: 'Roasting schedules, QC, packaging, warehouse, and safety.',
+                tier: 2,
+                tools: [
+                    { name: 'Production Planning Engine', desc: 'Weekly roast scheduling and capacity planning', status: 'planned', tier: 2 },
+                    { name: 'Green Inventory Tracker', desc: 'Green coffee stock levels and projections', status: 'planned', tier: 2 },
+                    { name: 'QC Log', desc: 'Roast quality control and cupping records', status: 'planned', tier: 2 },
+                    { name: 'H&S Compliance', desc: 'Safety checklists and incident tracking', status: 'planned', tier: 1 }
+                ]
+            },
+            {
+                id: 'sales',
+                name: 'Sales',
+                icon: '📈',
+                desc: 'Sales intelligence, territory analysis, and forecasting.',
+                tier: 2,
+                tools: [
+                    { name: 'Sales Intelligence Report', desc: 'Territory performance and customer analysis', status: 'planned', tier: 2 },
+                    { name: 'Pipeline Tracker', desc: 'New business pipeline and conversion tracking', status: 'planned', tier: 2 }
+                ]
+            },
+            {
+                id: 'marketing',
+                name: 'Marketing',
+                icon: '🎨',
+                desc: 'Brand assets, product catalogs, promotional tools.',
+                tier: 2,
+                tools: [
+                    { name: 'Brand Guide & Skill', desc: 'Fratello brand voice, visual identity, and Claude skill', status: 'active', tier: 2 },
+                    { name: 'Product Catalog Generator', desc: 'Automated catalog output with current SKUs', status: 'planned', tier: 2 }
+                ]
+            },
+            {
+                id: 'hr',
+                name: 'HR & People',
+                icon: '👥',
+                desc: 'Performance reviews, wage tools, onboarding, policies.',
+                tier: 2,
+                tools: [
+                    { name: 'Employee Handbook', desc: 'Company policies, procedures, and expectations', status: 'planned', tier: 1 },
+                    { name: 'Wage Assessment Tool', desc: 'Compensation analysis and benchmarking', status: 'planned', tier: 2 },
+                    { name: 'Performance Review System', desc: 'Annual review forms and tracking', status: 'planned', tier: 2 }
+                ]
+            },
+            {
+                id: 'operations',
+                name: 'Operations',
+                icon: '📋',
+                desc: 'Forms, SOPs, legal docs, and company-wide processes.',
+                tier: 1,
+                tools: [
+                    { name: 'Company Forms', desc: 'Fillable forms for leave, expenses, requests', status: 'planned', tier: 1 },
+                    { name: 'SOPs & Manuals', desc: 'Standard operating procedures library', status: 'planned', tier: 1 }
+                ]
+            }
+        ];
+
+        const systemCards = [
+            {
+                id: 'system-hub',
+                name: 'Hub Settings',
+                icon: '🔧',
+                desc: 'Portal configuration, access management, and deployment.',
+                tier: 3,
+                tools: []
+            },
+            {
+                id: 'system-registry',
+                name: 'Tool Registry',
+                icon: '📑',
+                desc: 'Master list of all tools, owners, and status.',
+                tier: 3,
+                tools: []
+            },
+            {
+                id: 'system-integrations',
+                name: 'Integrations',
+                icon: '🔗',
+                desc: 'Odoo, Shopify, and Google Sheets API connections.',
+                tier: 3,
+                tools: []
+            }
+        ];
+
+        // ─── LOGIN HANDLER ────────────────────────────────
+        function handleLogin(e) {
+            e.preventDefault();
+            const code = document.getElementById('accessCode').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            if (ACCESS_TIERS[code]) {
+                currentTier = ACCESS_TIERS[code];
+                sessionStorage.setItem('fratello-tier', JSON.stringify(currentTier));
+                showHub();
+                return false;
+            }
+
+            errorEl.classList.add('visible');
+            document.getElementById('accessCode').value = '';
+            setTimeout(() => errorEl.classList.remove('visible'), 3000);
+            return false;
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('fratello-tier');
+            currentTier = null;
+            document.getElementById('hub').classList.remove('active');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('accessCode').value = '';
+        }
+
+        // ─── HUB RENDERING ───────────────────────────────
+        function showHub() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('hub').classList.add('active');
+            document.getElementById('tierBadge').textContent = currentTier.tier;
+
+            // Welcome message
+            const greetings = {
+                1: 'Welcome to the Hub',
+                2: 'Welcome back',
+                3: 'Welcome back, Boss'
+            };
+            document.getElementById('welcomeMsg').textContent = greetings[currentTier.level];
+
+            renderDepartments();
+            renderSystem();
+            showMainView();
+        }
+
+        function renderDepartments() {
+            const grid = document.getElementById('deptGrid');
+            grid.innerHTML = '';
+
+            departments.forEach(dept => {
+                if (currentTier.level < dept.tier) return;
+
+                const toolCount = dept.tools.filter(t => currentTier.level >= t.tier).length;
+                const activeCount = dept.tools.filter(t => t.status === 'active' && currentTier.level >= t.tier).length;
+
+                const card = document.createElement('div');
+                card.className = 'dept-card';
+                card.onclick = () => showDeptDetail(dept);
+                card.innerHTML = `
+                    <div class="card-icon">${dept.icon}</div>
+                    <div class="card-title">${dept.name}</div>
+                    <div class="card-desc">${dept.desc}</div>
+                    <div class="card-meta">
+                        <span class="card-tool-count">${toolCount} tool${toolCount !== 1 ? 's' : ''}</span>
+                        ${activeCount > 0 ? `<span class="card-status">${activeCount} active</span>` : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderSystem() {
+            const section = document.getElementById('systemSection');
+            const grid = document.getElementById('systemGrid');
+
+            if (currentTier.level < 3) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            grid.innerHTML = '';
+
+            systemCards.forEach(card => {
+                const el = document.createElement('div');
+                el.className = 'dept-card';
+                el.innerHTML = `
+                    <div class="card-icon">${card.icon}</div>
+                    <div class="card-title">${card.name}</div>
+                    <div class="card-desc">${card.desc}</div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        // ─── DETAIL VIEW ─────────────────────────────────
+        function showDeptDetail(dept) {
+            document.getElementById('mainView').style.display = 'none';
+            const detail = document.getElementById('detailView');
+            detail.classList.add('active');
+            document.getElementById('detailTitle').textContent = dept.name;
+
+            const container = document.getElementById('detailTools');
+            const visibleTools = dept.tools.filter(t => currentTier.level >= t.tier);
+
+            if (visibleTools.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">${dept.icon}</div>
+                        <p>No tools available yet.</p>
+                        <small>Tools will appear here as they're built and deployed.</small>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = visibleTools.map(tool => `
+                <div class="tool-card">
+                    <div class="tool-info">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-description">${tool.desc}</div>
+                    </div>
+                    <span class="tool-status-badge ${tool.status}">${tool.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function showMainView() {
+            document.getElementById('mainView').style.display = 'block';
+            document.getElementById('detailView').classList.remove('active');
+        }
+
+        // ─── SESSION RESTORE ─────────────────────────────
+        (function init() {
+            const saved = sessionStorage.getItem('fratello-tier');
+            if (saved) {
+                currentTier = JSON.parse(saved);
+                showHub();
+            }
+        })();
+    </script>
+
 </body>
 </html>
