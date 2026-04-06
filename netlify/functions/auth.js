@@ -9,12 +9,8 @@
 // SETUP: In Netlify → Project configuration → Environment variables,
 // add these variables:
 //
-//   AUTH_OWNER        = owner-7419
-//   AUTH_CONTROLLER   = controller-3856
-//   AUTH_MARKETING    = marketing-6203
-//   AUTH_PRODUCTION   = production-4187
-//   AUTH_SALES        = sales-9034
-//   AUTH_STAFF        = staff-5271
+//   //   AUTH_OWNER, AUTH_CONTROLLER, AUTH_MARKETING,
+//   AUTH_PRODUCTION, AUTH_SALES, AUTH_STAFF
 //
 // To change a password, just update the env var in Netlify.
 // No code changes needed. No redeployment needed.
