@@ -2,10 +2,910 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=system/hub/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fratello Ops Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── Reset & Base ── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --teal: #36B3AF;
+            --teal-light: #4DC9C5;
+            --teal-dark: #2A8F8C;
+            --black: #1A1A1A;
+            --white: #FFFFFF;
+            --gray-50: #FAFAFA;
+            --gray-100: #F5F5F5;
+            --gray-200: #E5E5E5;
+            --gray-300: #D4D4D4;
+            --gray-400: #9E9E9E;
+            --gray-600: #616161;
+            --gray-800: #333333;
+            --font: 'Montserrat', -apple-system, sans-serif;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+            --radius: 10px;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--gray-50);
+            color: var(--black);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Login Screen ── */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .login-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 380px;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .login-logo {
+            height: 28px;
+            margin-bottom: 48px;
+            opacity: 0.9;
+        }
+
+        .login-title {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--teal);
+            margin-bottom: 40px;
+        }
+
+        .login-input-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius);
+            color: var(--white);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .login-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .login-input:focus {
+            border-color: var(--teal);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .login-input.error {
+            border-color: #E57373;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .login-error {
+            font-size: 12px;
+            color: #E57373;
+            margin-bottom: 16px;
+            height: 16px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .login-error.visible { opacity: 1; }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--teal);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .login-btn:hover { background: var(--teal-dark); }
+        .login-btn:active { transform: scale(0.98); }
+
+        .login-footer {
+            margin-top: 48px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.25);
+            letter-spacing: 1px;
+        }
+
+        /* ── Dashboard Shell ── */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard.active { display: block; }
+
+        /* ── Top Bar ── */
+        .topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-logo {
+            height: 20px;
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--gray-300);
+        }
+
+        .topbar-role {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--teal);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .signout-btn {
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-400);
+            background: none;
+            border: 1px solid var(--gray-200);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .signout-btn:hover {
+            color: var(--gray-600);
+            border-color: var(--gray-300);
+        }
+
+        /* ── Main Content ── */
+        .main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 40px 32px 80px;
+        }
+
+        .greeting {
+            margin-bottom: 8px;
+        }
+
+        .greeting h1 {
+            font-size: 28px;
+            font-weight: 300;
+            color: var(--black);
+            line-height: 1.3;
+        }
+
+        .greeting-sub {
+            font-size: 14px;
+            color: var(--gray-400);
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+
+        /* ── Section Headers ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            margin-top: 44px;
+        }
+
+        .section-header:first-of-type { margin-top: 0; }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--gray-400);
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: var(--gray-200);
+        }
+
+        /* ── Card Grid ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--teal);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--gray-300);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card:hover::before { transform: scaleX(1); }
+
+        .card-icon {
+            font-size: 24px;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: var(--gray-400);
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .card-badge {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--teal);
+            background: rgba(54, 179, 175, 0.08);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .card-badge.coming-soon {
+            color: var(--gray-400);
+            background: var(--gray-100);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 32px;
+            font-size: 11px;
+            color: var(--gray-300);
+            letter-spacing: 0.5px;
+        }
+
+        .footer-accent {
+            color: var(--teal);
+            opacity: 0.5;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .topbar { padding: 0 16px; }
+            .main { padding: 24px 16px 60px; }
+            .greeting h1 { font-size: 22px; }
+            .card-grid { grid-template-columns: 1fr; }
+            .topbar-divider, .topbar-role { display: none; }
+        }
+
+        /* ── Entrance Animation ── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(12px);
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in:nth-child(1) { animation-delay: 0.05s; }
+        .fade-in:nth-child(2) { animation-delay: 0.1s; }
+        .fade-in:nth-child(3) { animation-delay: 0.15s; }
+        .fade-in:nth-child(4) { animation-delay: 0.2s; }
+        .fade-in:nth-child(5) { animation-delay: 0.25s; }
+        .fade-in:nth-child(6) { animation-delay: 0.3s; }
+    </style>
 </head>
 <body>
-    <p>Redirecting to <a href="system/hub/">Fratello Ops Hub</a>...</p>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- LOGIN SCREEN                                 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-container">
+        <img src="assets/Logo_Fratello-White.png" alt="Fratello" class="login-logo">
+        <div class="login-title">Operations Hub</div>
+        <div class="login-input-wrap">
+            <input 
+                type="password" 
+                id="accessCode" 
+                class="login-input" 
+                placeholder="Access Code"
+                autocomplete="off"
+                autofocus
+            >
+        </div>
+        <div class="login-error" id="loginError">Invalid access code</div>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">Enter</button>
+        <div class="login-footer">Internal &middot; Fratello Group Inc.</div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- DASHBOARD                                    -->
+<!-- ════════════════════════════════════════════ -->
+<div class="dashboard" id="dashboard">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <img src="assets/fratello.png" alt="Fratello" class="topbar-logo">
+            <div class="topbar-divider"></div>
+            <div class="topbar-role" id="roleLabel"></div>
+        </div>
+        <div class="topbar-right">
+            <button class="signout-btn" onclick="signOut()">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main" id="mainContent">
+        <!-- Populated by JavaScript based on role -->
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        Fratello Group Inc. &middot; 4021 9 St SE, Calgary AB<br>
+        <span class="footer-accent">Serving Exceptional Coffee With Style &middot; Since 1974</span>
+    </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// ROLE CONFIGURATION
+// ════════════════════════════════════════════════
+//
+// Each password maps to a role. Each role defines:
+//   - label: what appears in the top bar
+//   - sections: which groups of cards to show
+//
+// Section keys: finance, production, sales, marketing, 
+//               operations, hr-open, hr-confidential, system
+//
+
+const ROLES = {
+    'fratello-owner-2026': {
+        key: 'owner',
+        label: 'Owner',
+        sections: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-confidential', 'system']
+    },
+    'fratello-controller-2026': {
+        key: 'controller',
+        label: 'Controller',
+        sections: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-confidential']
+    },
+    'fratello-marketing-2026': {
+        key: 'marketing',
+        label: 'Marketing',
+        sections: ['marketing', 'operations', 'hr-open']
+    },
+    'fratello-production-2026': {
+        key: 'production',
+        label: 'Production',
+        sections: ['production', 'operations', 'hr-open']
+    },
+    'fratello-sales-2026': {
+        key: 'sales',
+        label: 'Sales',
+        sections: ['sales', 'operations', 'hr-open']
+    },
+    'fratello-staff-2026': {
+        key: 'staff',
+        label: 'Staff',
+        sections: ['operations', 'hr-open']
+    }
+};
+
+// ════════════════════════════════════════════════
+// SECTION & CARD DEFINITIONS
+// ════════════════════════════════════════════════
+//
+// Each section has a group label and an array of cards.
+// Cards link to tools as they get built. 
+// Set href to '#' for coming-soon items.
+//
+
+const SECTIONS = {
+
+    // ── Department Tools ──
+
+    finance: {
+        group: 'Departments',
+        label: 'Finance',
+        cards: [
+            {
+                icon: '📊',
+                title: 'Financial Dashboards',
+                desc: 'Monthly reporting, income statements, and KPI tracking',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '🧮',
+                title: 'D2C Scenario Model',
+                desc: 'Channel economics, break-even analysis, and promotion costing',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '💰',
+                title: 'Costing & Margins',
+                desc: 'Product costing, TMC analysis, and pricing tools',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    production: {
+        group: 'Departments',
+        label: 'Production',
+        cards: [
+            {
+                icon: '🔥',
+                title: 'Roasting',
+                desc: 'Green buying, inventory, roast scheduling, and QC',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📦',
+                title: 'Packaging & Warehouse',
+                desc: 'Packaging runs, labels, SKUs, finished goods, and fulfillment',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📋',
+                title: 'Production Planning',
+                desc: 'Forecasting, scheduling, and capacity planning',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '🦺',
+                title: 'Health & Safety',
+                desc: 'H&S compliance, incident tracking, safety checklists',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    sales: {
+        group: 'Departments',
+        label: 'Sales',
+        cards: [
+            {
+                icon: '📈',
+                title: 'Sales Intelligence',
+                desc: 'Territory analysis, performance reports, and pipeline tracking',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '🎯',
+                title: 'Sales Forecasting',
+                desc: 'Revenue forecasting and target tracking',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    marketing: {
+        group: 'Departments',
+        label: 'Marketing',
+        cards: [
+            {
+                icon: '🎨',
+                title: 'Brand & Creative',
+                desc: 'Brand voice docs, design skills, style guides, and photography direction',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📖',
+                title: 'Product Catalogs',
+                desc: 'Automated catalog generation and product sheets',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '🛒',
+                title: 'D2C Marketing Tools',
+                desc: 'Promotion calculator, pricing tools, and campaign planning',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    // ── Company-Wide ──
+
+    operations: {
+        group: 'Company-Wide',
+        label: 'Operations',
+        cards: [
+            {
+                icon: '📄',
+                title: 'Forms',
+                desc: 'Company forms — expense reports, requests, and submissions',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📘',
+                title: 'SOPs & Manuals',
+                desc: 'Standard operating procedures and reference documentation',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    'hr-open': {
+        group: 'Company-Wide',
+        label: 'Employee Resources',
+        cards: [
+            {
+                icon: '📕',
+                title: 'Employee Handbook',
+                desc: 'Company policies, code of conduct, and employee guidelines',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '🏖️',
+                title: 'Leave & Time Off',
+                desc: 'Leave requests, vacation tracking, and time-off policies',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📝',
+                title: 'HR Forms',
+                desc: 'Personal info updates, tax forms, and onboarding documents',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    // ── Confidential (Owner + Controller) ──
+
+    'hr-confidential': {
+        group: 'Confidential',
+        label: 'HR & People Management',
+        cards: [
+            {
+                icon: '💼',
+                title: 'Performance Reviews',
+                desc: 'Employee assessments, feedback records, and development plans',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '💵',
+                title: 'Wages & Compensation',
+                desc: 'Wage assessment, pay equity analysis, and compensation planning',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📂',
+                title: 'Employee Records',
+                desc: 'Confidential personnel files and disciplinary records',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    },
+
+    // ── System (Owner only) ──
+
+    system: {
+        group: 'System & Admin',
+        label: 'System',
+        cards: [
+            {
+                icon: '⚙️',
+                title: 'Hub Admin',
+                desc: 'Portal configuration, access management, and deployment status',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '🔌',
+                title: 'Integrations',
+                desc: 'Odoo, Shopify, and Google Sheets API connections',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            },
+            {
+                icon: '📋',
+                title: 'Tool Registry',
+                desc: 'Master list of all tools, owners, and deployment status',
+                href: '#',
+                badge: 'Coming Soon',
+                badgeClass: 'coming-soon'
+            }
+        ]
+    }
+};
+
+// ════════════════════════════════════════════════
+// LOGIN LOGIC
+// ════════════════════════════════════════════════
+
+function handleLogin() {
+    const code = document.getElementById('accessCode').value.trim().toLowerCase();
+    const role = ROLES[code];
+
+    if (role) {
+        sessionStorage.setItem('fratello-role', JSON.stringify(role));
+        showDashboard(role);
+    } else {
+        const input = document.getElementById('accessCode');
+        const error = document.getElementById('loginError');
+        input.classList.add('error');
+        error.classList.add('visible');
+        setTimeout(() => {
+            input.classList.remove('error');
+        }, 400);
+        setTimeout(() => {
+            error.classList.remove('visible');
+        }, 2500);
+    }
+}
+
+// Enter key support
+document.getElementById('accessCode').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+});
+
+// ════════════════════════════════════════════════
+// DASHBOARD RENDERING
+// ════════════════════════════════════════════════
+
+function showDashboard(role) {
+    // Hide login
+    document.getElementById('loginScreen').classList.add('hidden');
+    
+    // Show dashboard
+    const dashboard = document.getElementById('dashboard');
+    dashboard.classList.add('active');
+
+    // Set role label
+    document.getElementById('roleLabel').textContent = role.label;
+
+    // Build content
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+
+    // Greeting
+    const hour = new Date().getHours();
+    let greetWord = 'Good evening.';
+    if (hour < 12) greetWord = 'Good morning.';
+    else if (hour < 17) greetWord = 'Good afternoon.';
+
+    const greetDiv = document.createElement('div');
+    greetDiv.className = 'greeting fade-in';
+    greetDiv.innerHTML = `<h1>${greetWord}</h1>`;
+    main.appendChild(greetDiv);
+
+    const subDiv = document.createElement('div');
+    subDiv.className = 'greeting-sub fade-in';
+    subDiv.textContent = 'Your tools, dashboards, and workflows — all in one place.';
+    main.appendChild(subDiv);
+
+    // Group sections by their group label
+    const groups = {};
+    role.sections.forEach(sectionKey => {
+        const section = SECTIONS[sectionKey];
+        if (!section) return;
+        if (!groups[section.group]) groups[section.group] = [];
+        groups[section.group].push({ key: sectionKey, ...section });
+    });
+
+    // Render each group
+    Object.entries(groups).forEach(([groupName, sections]) => {
+        // Group header
+        const header = document.createElement('div');
+        header.className = 'section-header fade-in';
+        header.innerHTML = `
+            <span class="section-label">${groupName}</span>
+            <div class="section-line"></div>
+        `;
+        main.appendChild(header);
+
+        // All cards in this group, with sub-labels
+        sections.forEach(section => {
+            if (sections.length > 1 || section.cards.length > 2) {
+                // Show section sub-label if the group has multiple sections
+                // (keeps visual hierarchy clear when Finance + Production + Sales etc. are all under "Departments")
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'card-grid';
+            grid.style.marginBottom = '16px';
+
+            section.cards.forEach(card => {
+                const a = document.createElement('a');
+                a.className = 'card fade-in';
+                a.href = card.href || '#';
+                if (card.href && card.href !== '#') a.target = '_self';
+
+                let badgeHtml = '';
+                if (card.badge) {
+                    badgeHtml = `<span class="card-badge ${card.badgeClass || ''}">${card.badge}</span>`;
+                }
+
+                a.innerHTML = `
+                    <span class="card-icon">${card.icon}</span>
+                    <div class="card-title">${card.title}</div>
+                    <div class="card-desc">${card.desc}</div>
+                    ${badgeHtml}
+                `;
+                grid.appendChild(a);
+            });
+
+            main.appendChild(grid);
+        });
+    });
+}
+
+// ════════════════════════════════════════════════
+// SIGN OUT
+// ════════════════════════════════════════════════
+
+function signOut() {
+    sessionStorage.removeItem('fratello-role');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('accessCode').value = '';
+    document.getElementById('mainContent').innerHTML = '';
+}
+
+// ════════════════════════════════════════════════
+// SESSION RESTORE
+// ════════════════════════════════════════════════
+
+(function init() {
+    const saved = sessionStorage.getItem('fratello-role');
+    if (saved) {
+        try {
+            const role = JSON.parse(saved);
+            showDashboard(role);
+        } catch (e) {
+            sessionStorage.removeItem('fratello-role');
+        }
+    }
+})();
+</script>
+
 </body>
 </html>
