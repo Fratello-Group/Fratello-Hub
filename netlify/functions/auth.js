@@ -9,7 +9,7 @@
 // SETUP: In Netlify → Project configuration → Environment variables,
 // add these variables:
 //
-//   //   AUTH_OWNER, AUTH_CONTROLLER, AUTH_MARKETING,
+//   AUTH_OWNER, AUTH_CONTROLLER, AUTH_MARKETING,
 //   AUTH_PRODUCTION, AUTH_SALES, AUTH_STAFF
 //
 // To change a password, just update the env var in Netlify.
@@ -47,14 +47,33 @@ exports.handler = async (event) => {
         };
     }
 
-    // Role definitions — passwords come from environment variables
+    const ALL_TEAM = ['operations', 'hr-open'];
+    const MANAGEMENT_TOOLS = ['hr-hiring'];
+    const CONFIDENTIAL_TOOLS = ['hr-confidential'];
+    const OWNER_TOOLS = ['system'];
+
+    // Role definitions — passwords come from environment variables.
+    // Access ladder:
+    // - Staff: shared company resources
+    // - Department managers: their department + shared company + management tools
+    // - Controller: department visibility + confidential finance/people tools
+    // - Owner: everything
     const roles = [
         {
             password: process.env.AUTH_OWNER,
             role: {
                 key: 'owner',
                 label: 'Owner',
-                sections: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-confidential', 'system']
+                sections: [
+                    'finance',
+                    'production',
+                    'sales',
+                    'marketing',
+                    ...ALL_TEAM,
+                    ...MANAGEMENT_TOOLS,
+                    ...CONFIDENTIAL_TOOLS,
+                    ...OWNER_TOOLS
+                ]
             }
         },
         {
@@ -62,7 +81,15 @@ exports.handler = async (event) => {
             role: {
                 key: 'controller',
                 label: 'Controller',
-                sections: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-confidential']
+                sections: [
+                    'finance',
+                    'production',
+                    'sales',
+                    'marketing',
+                    ...ALL_TEAM,
+                    ...MANAGEMENT_TOOLS,
+                    ...CONFIDENTIAL_TOOLS
+                ]
             }
         },
         {
@@ -70,7 +97,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'marketing',
                 label: 'Marketing',
-                sections: ['marketing', 'operations', 'hr-open']
+                sections: ['marketing', ...ALL_TEAM, ...MANAGEMENT_TOOLS]
             }
         },
         {
@@ -78,7 +105,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'production',
                 label: 'Production',
-                sections: ['production', 'operations', 'hr-open']
+                sections: ['production', ...ALL_TEAM, ...MANAGEMENT_TOOLS]
             }
         },
         {
@@ -86,7 +113,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'sales',
                 label: 'Sales',
-                sections: ['sales', 'operations', 'hr-open']
+                sections: ['sales', ...ALL_TEAM, ...MANAGEMENT_TOOLS]
             }
         },
         {
@@ -94,7 +121,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'staff',
                 label: 'Staff',
-                sections: ['operations', 'hr-open']
+                sections: ALL_TEAM
             }
         }
     ];

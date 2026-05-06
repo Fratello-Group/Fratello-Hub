@@ -33,6 +33,14 @@ Each entry includes:
 - **Data Source:** Manual
 - **Description:** Fratello brand voice, visual identity, and Claude AI skill file.
 
+### Hiring Document Generator
+- **Location:** `/hr/hiring/hiring-document-generator.html`
+- **Owner:** Chris Prefontaine
+- **Tier:** Manager (Owner, Controller, Production, Marketing, Sales)
+- **Status:** Active
+- **Data Source:** Manual
+- **Description:** Generates offer letters, employment agreements, and job descriptions as downloadable PDFs. Includes role presets for all Fratello positions with auto-filled titles, reporting lines, pay structures, and protection levels. Supports salaried and hourly employees, configurable restrictive covenants, and company signatory selection.
+
 ---
 
 ## Planned Tools
