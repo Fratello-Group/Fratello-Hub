@@ -629,7 +629,7 @@ const SECTIONS = {
     production: {
         group: 'Departments',
         label: 'Production',
-        access: 'Production + Leadership',
+        access: 'Owner + Controller + Production',
         cards: [
             { title: 'Roasting',              desc: 'Roast planning, batch records, and production notes.', href: '#', badge: 'In Preparation' },
             { title: 'Packaging & Warehouse', desc: 'Packaging workflow, warehouse priorities, and inventory support.', href: '#', badge: 'In Preparation' },
@@ -641,7 +641,7 @@ const SECTIONS = {
     sales: {
         group: 'Departments',
         label: 'Sales',
-        access: 'Sales + Leadership',
+        access: 'Owner + Controller + Sales',
         cards: [
             { title: 'Sales Intelligence', desc: 'Account insights, territory context, and prospecting tools.', href: '#', badge: 'In Preparation' },
             { title: 'Sales Forecasting',  desc: 'Pipeline planning and monthly sales visibility.', href: '#', badge: 'In Preparation' }
@@ -651,7 +651,7 @@ const SECTIONS = {
     marketing: {
         group: 'Departments',
         label: 'Marketing',
-        access: 'Marketing + Leadership',
+        access: 'Owner + Marketing + Sales',
         cards: [
             { title: 'Brand & Creative',    desc: 'Brand system files, campaign references, and creative tools.', href: '#', badge: 'In Preparation' },
             { title: 'Product Catalogs',    desc: 'Wholesale and retail product catalog resources.', href: '#', badge: 'In Preparation' },
@@ -659,62 +659,43 @@ const SECTIONS = {
         ]
     },
 
-    // ── Company-Wide ──
-
-    operations: {
-        group: 'Company-Wide',
-        label: 'Operations',
-        access: 'All team access',
+    'employee-resources': {
+        group: 'Employee Resources',
+        label: 'Shared Docs & Forms',
+        access: 'Everyone',
         cards: [
-            { title: 'Forms',          desc: 'Everyday forms and request workflows for the team.', href: '#', badge: 'In Preparation' },
-            { title: 'SOPs & Manuals', desc: 'Operating procedures, manuals, and shared reference material.', href: '#', badge: 'In Preparation' }
-        ]
-    },
-
-    'hr-open': {
-        group: 'Company-Wide',
-        label: 'Employee Resources',
-        access: 'All team access',
-        cards: [
+            { title: 'Staff Forms',       desc: 'Everyday shared documents, forms, and request workflows for the team.', href: '#', badge: 'In Preparation' },
+            { title: 'SOPs & Manuals',    desc: 'Operating procedures, manuals, and shared reference material.', href: '#', badge: 'In Preparation' },
             { title: 'Employee Handbook', desc: 'Shared team policies and employment reference material.', href: '#', badge: 'In Preparation' },
             { title: 'Leave & Time Off',  desc: 'Vacation, absence, and time-off guidance.', href: '#', badge: 'In Preparation' },
             { title: 'HR Forms',          desc: 'Common people forms for staff and managers.', href: '#', badge: 'In Preparation' }
         ]
     },
 
-    // ── Management (Owner, Controller, Production, Marketing, Sales) ──
+    // ── HR & People (Hiring access excludes Sales) ──
 
-    'hr-hiring': {
-        group: 'Management',
-        label: 'Hiring & Recruitment',
-        access: 'Owner + Controller + Managers',
+    'hr-people': {
+        group: 'Departments',
+        label: 'HR & People',
+        access: 'Hiring: Owner + Controller + Production + Marketing',
         cards: [
             {
                 title: 'Hiring Document Generator',
                 desc: 'Generate offer letters, employment agreements, and job descriptions as downloadable PDFs. Includes role presets for all Fratello positions.',
-                href: 'hr/hiring/hiring-document-generator.html'
-            }
+                href: 'hr/hiring/hiring-document-generator.html',
+                roles: ['owner', 'controller', 'production', 'marketing']
+            },
+            { title: 'Performance Reviews',  desc: 'Manager review records and people-performance workflows.', href: '#', badge: 'In Preparation', roles: ['owner', 'controller'] },
+            { title: 'Wages & Compensation', desc: 'Compensation planning and wage review tools.', href: '#', badge: 'In Preparation', roles: ['owner', 'controller'] },
+            { title: 'Employee Records',     desc: 'Confidential employee documentation and records.', href: '#', badge: 'In Preparation', roles: ['owner', 'controller'] }
         ]
     },
 
-    // ── Confidential (Owner + Controller) ──
+    // ── Owner/Admin (Owner only) ──
 
-    'hr-confidential': {
-        group: 'Confidential',
-        label: 'HR & People Management',
-        access: 'Owner + Controller',
-        cards: [
-            { title: 'Performance Reviews',  desc: 'Manager review records and people-performance workflows.', href: '#', badge: 'In Preparation' },
-            { title: 'Wages & Compensation', desc: 'Compensation planning and wage review tools.', href: '#', badge: 'In Preparation' },
-            { title: 'Employee Records',     desc: 'Confidential employee documentation and records.', href: '#', badge: 'In Preparation' }
-        ]
-    },
-
-    // ── System (Owner only) ──
-
-    system: {
-        group: 'System & Admin',
-        label: 'System',
+    'owner-admin': {
+        group: 'Owner/Admin',
+        label: 'Permissions & System',
         access: 'Owner only',
         cards: [
             { title: 'Hub Admin',     desc: 'Portal administration and access planning.', href: '#', badge: 'In Preparation' },
@@ -725,12 +706,12 @@ const SECTIONS = {
 };
 
 const ROLE_SECTION_MAP = {
-    owner: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-hiring', 'hr-confidential', 'system'],
-    controller: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-hiring', 'hr-confidential'],
-    marketing: ['marketing', 'operations', 'hr-open', 'hr-hiring'],
-    production: ['production', 'operations', 'hr-open', 'hr-hiring'],
-    sales: ['sales', 'operations', 'hr-open', 'hr-hiring'],
-    staff: ['operations', 'hr-open']
+    owner: ['finance', 'production', 'sales', 'marketing', 'hr-people', 'employee-resources', 'owner-admin'],
+    controller: ['finance', 'production', 'sales', 'hr-people', 'employee-resources'],
+    marketing: ['marketing', 'hr-people', 'employee-resources'],
+    production: ['production', 'hr-people', 'employee-resources'],
+    sales: ['sales', 'marketing', 'employee-resources'],
+    staff: ['employee-resources']
 };
 
 function normalizeRole(role) {
@@ -881,7 +862,9 @@ function showDashboard(role) {
             const list = document.createElement('div');
             list.className = 'tool-list';
 
-            section.cards.forEach(card => {
+            section.cards
+                .filter(card => !card.roles || card.roles.includes(role.key))
+                .forEach(card => {
                 const isActive = card.href && card.href !== '#';
                 const a = document.createElement('a');
                 a.className = 'tool ' + (isActive ? 'active' : 'inactive');

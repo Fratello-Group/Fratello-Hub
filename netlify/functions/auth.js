@@ -47,17 +47,16 @@ exports.handler = async (event) => {
         };
     }
 
-    const ALL_TEAM = ['operations', 'hr-open'];
-    const MANAGEMENT_TOOLS = ['hr-hiring'];
-    const CONFIDENTIAL_TOOLS = ['hr-confidential'];
-    const OWNER_TOOLS = ['system'];
+    const EMPLOYEE_RESOURCES = ['employee-resources'];
+    const OWNER_TOOLS = ['owner-admin'];
 
     // Role definitions — passwords come from environment variables.
     // Access ladder:
-    // - Staff: shared company resources
-    // - Department managers: their department + shared company + management tools
-    // - Controller: department visibility + confidential finance/people tools
-    // - Owner: everything
+    // - Staff: shared employee resources
+    // - Department teams: their department + shared employee resources
+    // - Hiring access: Owner, Controller, Production, Marketing
+    // - Confidential HR cards: filtered client-side to Owner + Controller
+    // - Owner/Admin: Owner only
     const roles = [
         {
             password: process.env.AUTH_OWNER,
@@ -69,9 +68,8 @@ exports.handler = async (event) => {
                     'production',
                     'sales',
                     'marketing',
-                    ...ALL_TEAM,
-                    ...MANAGEMENT_TOOLS,
-                    ...CONFIDENTIAL_TOOLS,
+                    'hr-people',
+                    ...EMPLOYEE_RESOURCES,
                     ...OWNER_TOOLS
                 ]
             }
@@ -85,10 +83,8 @@ exports.handler = async (event) => {
                     'finance',
                     'production',
                     'sales',
-                    'marketing',
-                    ...ALL_TEAM,
-                    ...MANAGEMENT_TOOLS,
-                    ...CONFIDENTIAL_TOOLS
+                    'hr-people',
+                    ...EMPLOYEE_RESOURCES
                 ]
             }
         },
@@ -97,7 +93,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'marketing',
                 label: 'Marketing',
-                sections: ['marketing', ...ALL_TEAM, ...MANAGEMENT_TOOLS]
+                sections: ['marketing', 'hr-people', ...EMPLOYEE_RESOURCES]
             }
         },
         {
@@ -105,7 +101,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'production',
                 label: 'Production',
-                sections: ['production', ...ALL_TEAM, ...MANAGEMENT_TOOLS]
+                sections: ['production', 'hr-people', ...EMPLOYEE_RESOURCES]
             }
         },
         {
@@ -113,7 +109,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'sales',
                 label: 'Sales',
-                sections: ['sales', ...ALL_TEAM, ...MANAGEMENT_TOOLS]
+                sections: ['sales', 'marketing', ...EMPLOYEE_RESOURCES]
             }
         },
         {
@@ -121,7 +117,7 @@ exports.handler = async (event) => {
             role: {
                 key: 'staff',
                 label: 'Staff',
-                sections: ALL_TEAM
+                sections: EMPLOYEE_RESOURCES
             }
         }
     ];
