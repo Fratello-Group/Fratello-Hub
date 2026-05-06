@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Staff Permissions</title>
+    <link rel="icon" type="image/png" href="../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black: #1A1A1A;
+            --cream: #F6F1E9;
+            --teal: #36B3AF;
+            --teal-bright: #00D4C8;
+            --white: #FFFFFF;
+            --slate: #4A4A4A;
+            --grey: #908F8A;
+            --grey-light: #C4C3C0;
+            --card-bg-dark: #232323;
+            --divider-dark: #2E2E2E;
+            --error: #D9533D;
+            --font: 'Montserrat', Helvetica, Arial, sans-serif;
+        }
+
+        html, body {
+            background: var(--black);
+            color: var(--cream);
+            font-family: var(--font);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        button, select, input { font-family: inherit; }
+
+        .page-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .masthead {
+            max-width: 1120px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 40px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .masthead-logo {
+            height: 32px;
+            width: auto;
+            display: block;
+        }
+
+        .masthead-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .role-pill {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--teal);
+        }
+
+        .nav-link,
+        .ghost-button {
+            color: var(--grey-light);
+            background: none;
+            border: 1px solid var(--divider-dark);
+            border-radius: 4px;
+            padding: 10px 14px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color 0.25s ease, color 0.25s ease;
+        }
+
+        .nav-link:hover,
+        .ghost-button:hover {
+            color: var(--cream);
+            border-color: var(--teal);
+        }
+
+        main {
+            max-width: 1120px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 56px 40px 88px;
+        }
+
+        .eyebrow {
+            color: var(--teal);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: 0;
+            color: var(--cream);
+            max-width: 760px;
+        }
+
+        .lede {
+            margin-top: 16px;
+            color: var(--grey-light);
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 760px;
+        }
+
+        .access-grid {
+            margin-top: 48px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .access-profile {
+            border: 1px solid var(--divider-dark);
+            border-left: 3px solid var(--teal);
+            border-radius: 4px;
+            background: var(--card-bg-dark);
+            padding: 18px;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--cream);
+        }
+
+        .profile-access {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            border: 1px solid rgba(54, 179, 175, 0.35);
+            border-radius: 3px;
+            padding: 4px 8px;
+            color: var(--grey-light);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            line-height: 1.3;
+            text-transform: uppercase;
+        }
+
+        .section-label {
+            margin-top: 64px;
+            color: var(--grey);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--divider-dark);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-bottom: 1px solid var(--divider-dark);
+        }
+
+        table {
+            width: 100%;
+            min-width: 840px;
+            border-collapse: collapse;
+        }
+
+        th {
+            color: var(--grey);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-align: left;
+            text-transform: uppercase;
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--divider-dark);
+        }
+
+        td {
+            padding: 18px 12px;
+            border-bottom: 1px solid var(--divider-dark);
+            vertical-align: top;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .person-name {
+            display: block;
+            color: var(--cream);
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.4;
+        }
+
+        .person-title {
+            display: block;
+            margin-top: 5px;
+            color: var(--grey-light);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        select,
+        .text-input {
+            width: 100%;
+            min-width: 150px;
+            border: 1px solid var(--divider-dark);
+            border-radius: 4px;
+            background: #202020;
+            color: var(--cream);
+            padding: 10px 12px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        select:focus,
+        .text-input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 2px rgba(54, 179, 175, 0.12);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            color: var(--teal);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .status.draft { color: var(--grey); }
+
+        .actions {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .save-state {
+            color: var(--grey-light);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .future-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .future-item {
+            min-height: 86px;
+            border: 1px solid var(--divider-dark);
+            border-left: 3px solid var(--divider-dark);
+            border-radius: 4px;
+            background: var(--card-bg-dark);
+            padding: 18px;
+        }
+
+        .future-item.ready {
+            border-left-color: var(--teal);
+        }
+
+        .future-title {
+            color: var(--cream);
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.4;
+        }
+
+        .future-note {
+            margin-top: 7px;
+            color: var(--grey-light);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .locked {
+            min-height: 100vh;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .locked-box {
+            max-width: 480px;
+        }
+
+        .locked-box img {
+            width: 240px;
+            max-width: 70vw;
+            margin-bottom: 40px;
+        }
+
+        .locked-box h1 {
+            font-size: 30px;
+            margin: 0 auto 14px;
+        }
+
+        .locked-box p {
+            color: var(--grey-light);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 860px) {
+            .masthead {
+                padding: 28px 24px 0;
+                align-items: flex-start;
+            }
+
+            .masthead-logo { height: 28px; }
+            .masthead-right { gap: 12px; }
+            .role-pill { display: none; }
+
+            main { padding: 40px 24px 64px; }
+            h1 { font-size: 30px; }
+            .lede { font-size: 14px; }
+            .access-grid { grid-template-columns: 1fr; margin-top: 36px; }
+            .section-label { margin-top: 44px; }
+            .future-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="locked" id="lockedState">
+        <div class="locked-box">
+            <img src="../assets/Fratello_Logo_White.png" alt="Fratello">
+            <h1>Owner access only.</h1>
+            <p>This page is reserved for the Owner/Admin area of the HUB.</p>
+            <a href="/" class="nav-link">Back to Hub</a>
+        </div>
+    </div>
+
+    <div class="page-shell" id="pageShell">
+        <header class="masthead">
+            <img src="../assets/Fratello_Logo_White.png" alt="Fratello" class="masthead-logo">
+            <div class="masthead-right">
+                <span class="role-pill">Owner/Admin</span>
+                <a class="nav-link" href="/">Back to Hub</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="eyebrow">Permissions</div>
+            <h1>Staff access by person, role, and department.</h1>
+            <p class="lede">This is the working permissions map for the HUB concept. It lets us decide who should see each area before we connect real individual logins, password resets, and two-factor security.</p>
+
+            <div class="access-grid" id="profileGrid"></div>
+
+            <div class="section-label">People Access</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Person</th>
+                            <th>Access Profile</th>
+                            <th>Visible Areas</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffRows"></tbody>
+                </table>
+            </div>
+
+            <div class="actions">
+                <span class="save-state" id="saveState">Draft saved in this browser.</span>
+                <button class="ghost-button" type="button" onclick="resetDraft()">Reset Draft</button>
+            </div>
+
+            <div class="section-label">Security Roadmap</div>
+            <div class="future-list">
+                <div class="future-item ready">
+                    <div class="future-title">Current concept</div>
+                    <div class="future-note">Role access exists now. This page maps people to those roles.</div>
+                </div>
+                <div class="future-item">
+                    <div class="future-title">Individual login</div>
+                    <div class="future-note">Each person signs in with their own name and password.</div>
+                </div>
+                <div class="future-item">
+                    <div class="future-title">Password controls</div>
+                    <div class="future-note">Secure password storage, resets, and inactive staff lockouts.</div>
+                </div>
+                <div class="future-item">
+                    <div class="future-title">2FA and audit log</div>
+                    <div class="future-note">Extra protection for Finance, HR records, and Owner/Admin changes.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const PROFILES = {
+            owner: {
+                label: 'Owner',
+                access: ['Finance', 'Production', 'Sales', 'Marketing', 'HR & People', 'Shared Docs & Forms', 'Owner/Admin']
+            },
+            controller: {
+                label: 'Controller',
+                access: ['Finance', 'Production', 'Sales', 'HR & People', 'Shared Docs & Forms']
+            },
+            production: {
+                label: 'Production',
+                access: ['Production', 'HR & People', 'Shared Docs & Forms']
+            },
+            marketing: {
+                label: 'Marketing',
+                access: ['Marketing', 'HR & People', 'Shared Docs & Forms']
+            },
+            sales: {
+                label: 'Sales',
+                access: ['Sales', 'Marketing', 'Shared Docs & Forms']
+            },
+            staff: {
+                label: 'Staff',
+                access: ['Shared Docs & Forms']
+            }
+        };
+
+        const DEFAULT_STAFF = [
+            { id: 'chris-prefontaine', name: 'Chris Prefontaine', title: 'CEO', profile: 'owner', status: 'Active' },
+            { id: 'russ-prefontaine', name: 'Russ Prefontaine', title: 'President', profile: 'owner', status: 'Active' },
+            { id: 'chris-mcghee', name: 'Chris McGhee', title: 'Controller', profile: 'controller', status: 'Active' },
+            { id: 'kyle-park', name: 'Kyle Park', title: 'Production & Operations Manager', profile: 'production', status: 'Active' },
+            { id: 'mateo-corredor', name: 'Mateo Corredor', title: 'Marketing & Brand Manager', profile: 'marketing', status: 'Active' },
+            { id: 'sales-team', name: 'Sales Team', title: 'Sales Representatives', profile: 'sales', status: 'Draft' },
+            { id: 'staff-team', name: 'General Staff', title: 'Shared staff access', profile: 'staff', status: 'Draft' }
+        ];
+
+        const STORAGE_KEY = 'fratello-permissions-draft';
+
+        function currentRole() {
+            try {
+                return JSON.parse(localStorage.getItem('fratello-role'));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function requireOwner() {
+            const role = currentRole();
+            const isOwner = role && (role.key === 'owner' || role.label === 'Owner');
+            document.getElementById('pageShell').style.display = isOwner ? 'flex' : 'none';
+            document.getElementById('lockedState').style.display = isOwner ? 'none' : 'flex';
+            return isOwner;
+        }
+
+        function loadStaff() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (Array.isArray(saved)) return saved;
+            } catch (e) {
+                return DEFAULT_STAFF;
+            }
+            return DEFAULT_STAFF;
+        }
+
+        function saveStaff(staff) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(staff));
+            const stamp = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('saveState').textContent = `Draft saved in this browser at ${stamp}.`;
+        }
+
+        function accessTags(profileKey) {
+            const profile = PROFILES[profileKey] || PROFILES.staff;
+            return profile.access.map(item => `<span class="tag">${item}</span>`).join('');
+        }
+
+        function renderProfiles() {
+            const grid = document.getElementById('profileGrid');
+            grid.innerHTML = Object.entries(PROFILES).map(([key, profile]) => `
+                <div class="access-profile">
+                    <div class="profile-name">${profile.label}</div>
+                    <div class="profile-access">${accessTags(key)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderStaff() {
+            const staff = loadStaff();
+            const rows = document.getElementById('staffRows');
+            rows.innerHTML = staff.map(person => `
+                <tr>
+                    <td>
+                        <span class="person-name">${person.name}</span>
+                        <span class="person-title">${person.title}</span>
+                    </td>
+                    <td>
+                        <select data-person="${person.id}" onchange="updateProfile(event)">
+                            ${Object.entries(PROFILES).map(([key, profile]) => `
+                                <option value="${key}" ${person.profile === key ? 'selected' : ''}>${profile.label}</option>
+                            `).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <div class="profile-access" id="access-${person.id}">${accessTags(person.profile)}</div>
+                    </td>
+                    <td>
+                        <span class="status ${person.status === 'Draft' ? 'draft' : ''}">${person.status}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateProfile(event) {
+            const personId = event.target.dataset.person;
+            const nextProfile = event.target.value;
+            const staff = loadStaff().map(person => {
+                if (person.id !== personId) return person;
+                return { ...person, profile: nextProfile };
+            });
+            saveStaff(staff);
+            document.getElementById(`access-${personId}`).innerHTML = accessTags(nextProfile);
+        }
+
+        function resetDraft() {
+            localStorage.removeItem(STORAGE_KEY);
+            renderStaff();
+            document.getElementById('saveState').textContent = 'Draft reset to the current concept map.';
+        }
+
+        if (requireOwner()) {
+            renderProfiles();
+            renderStaff();
+        }
+    </script>
+</body>
+</html>

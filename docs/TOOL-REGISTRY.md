@@ -36,10 +36,18 @@ Each entry includes:
 ### Hiring Document Generator
 - **Location:** `/hr/hiring/hiring-document-generator.html`
 - **Owner:** Chris Prefontaine
-- **Tier:** Manager (Owner, Controller, Production, Marketing, Sales)
+- **Tier:** Manager (Owner, Controller, Production, Marketing)
 - **Status:** Active
 - **Data Source:** Manual
 - **Description:** Generates offer letters, employment agreements, and job descriptions as downloadable PDFs. Includes role presets for all Fratello positions with auto-filled titles, reporting lines, pay structures, and protection levels. Supports salaried and hourly employees, configurable restrictive covenants, and company signatory selection.
+
+### Staff Permissions
+- **Location:** `/system/permissions.html`
+- **Owner:** Chris Prefontaine
+- **Tier:** Owner
+- **Status:** Draft
+- **Data Source:** Browser draft
+- **Description:** Owner-only working access map for staff, roles, departments, and future login/security planning.
 
 ---
 
