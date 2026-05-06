@@ -724,6 +724,29 @@ const SECTIONS = {
     }
 };
 
+const ROLE_SECTION_MAP = {
+    owner: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-hiring', 'hr-confidential', 'system'],
+    controller: ['finance', 'production', 'sales', 'marketing', 'operations', 'hr-open', 'hr-hiring', 'hr-confidential'],
+    marketing: ['marketing', 'operations', 'hr-open', 'hr-hiring'],
+    production: ['production', 'operations', 'hr-open', 'hr-hiring'],
+    sales: ['sales', 'operations', 'hr-open', 'hr-hiring'],
+    staff: ['operations', 'hr-open']
+};
+
+function normalizeRole(role) {
+    if (!role || !role.label) return role;
+
+    const key = role.key || role.label.toLowerCase();
+    const sections = ROLE_SECTION_MAP[key];
+    if (!sections) return role;
+
+    return {
+        ...role,
+        key,
+        sections
+    };
+}
+
 // ════════════════════════════════════════════════
 // LOGIN LOGIC  ─  UNCHANGED FROM ORIGINAL
 // ════════════════════════════════════════════════
@@ -746,8 +769,9 @@ async function handleLogin() {
 
         if (response.ok) {
             const data = await response.json();
-            localStorage.setItem('fratello-role', JSON.stringify(data.role));
-            showDashboard(data.role);
+            const role = normalizeRole(data.role);
+            localStorage.setItem('fratello-role', JSON.stringify(role));
+            showDashboard(role);
         } else {
             const input = document.getElementById('accessCode');
             const error = document.getElementById('loginError');
@@ -923,7 +947,8 @@ function signOut() {
     const saved = localStorage.getItem('fratello-role');
     if (saved) {
         try {
-            const role = JSON.parse(saved);
+            const role = normalizeRole(JSON.parse(saved));
+            localStorage.setItem('fratello-role', JSON.stringify(role));
             showDashboard(role);
         } catch (e) {
             localStorage.removeItem('fratello-role');
