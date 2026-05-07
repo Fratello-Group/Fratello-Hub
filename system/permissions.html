@@ -704,6 +704,19 @@
             return isOwner;
         }
 
+        async function refreshOwnerSession() {
+            if (!sessionToken()) return false;
+            try {
+                const data = await authRequest({ action: 'session' });
+                localStorage.setItem('fratello-role', JSON.stringify(data.role));
+                return data.role && data.role.key === 'owner';
+            } catch (error) {
+                localStorage.removeItem('fratello-session');
+                localStorage.removeItem('fratello-role');
+                return false;
+            }
+        }
+
         function sessionToken() {
             return localStorage.getItem('fratello-session') || '';
         }
@@ -885,12 +898,20 @@
             await loadUsers();
         }
 
-        if (requireOwner()) {
-            renderProfiles();
-            loadUsers().catch(error => {
-                document.getElementById('saveState').textContent = error.message;
-            });
-        }
+        (async function initPermissions() {
+            let isOwner = requireOwner();
+            if (!isOwner) {
+                isOwner = await refreshOwnerSession();
+                if (isOwner) requireOwner();
+            }
+
+            if (isOwner) {
+                renderProfiles();
+                loadUsers().catch(error => {
+                    document.getElementById('saveState').textContent = error.message;
+                });
+            }
+        })();
     </script>
 </body>
 </html>
