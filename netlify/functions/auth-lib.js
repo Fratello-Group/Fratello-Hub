@@ -203,10 +203,16 @@ function localStorePath() {
 
 async function readUsers() {
     if (getStore) {
-        const store = getStore(STORE_NAME);
-        const entry = await store.get(USERS_KEY, { type: 'json', consistency: 'strong' });
-        if (entry && Array.isArray(entry.users)) return entry.users;
-    } else if (fs.existsSync(localStorePath())) {
+        try {
+            const store = getStore(STORE_NAME);
+            const entry = await store.get(USERS_KEY, { type: 'json', consistency: 'strong' });
+            if (entry && Array.isArray(entry.users)) return entry.users;
+        } catch (error) {
+            console.error('Netlify Blobs read failed; using fallback store', error);
+        }
+    }
+
+    if (fs.existsSync(localStorePath())) {
         return JSON.parse(fs.readFileSync(localStorePath(), 'utf8')).users || [];
     }
 
@@ -221,9 +227,13 @@ async function readUsers() {
 async function writeUsers(users) {
     const value = { users, updatedAt: nowIso() };
     if (getStore) {
-        const store = getStore(STORE_NAME);
-        await store.setJSON(USERS_KEY, value);
-        return;
+        try {
+            const store = getStore(STORE_NAME);
+            await store.setJSON(USERS_KEY, value);
+            return;
+        } catch (error) {
+            console.error('Netlify Blobs write failed; using fallback store', error);
+        }
     }
     fs.writeFileSync(localStorePath(), JSON.stringify(value, null, 2));
 }
@@ -231,6 +241,21 @@ async function writeUsers(users) {
 async function findUserBySession(event) {
     const payload = verifySessionToken(getBearer(event));
     if (!payload) return null;
+
+    if (payload.sub === 'temporary-owner' && payload.profile === 'owner') {
+        return {
+            user: {
+                id: 'temporary-owner',
+                email: '',
+                name: 'Temporary Owner Setup',
+                title: 'Owner setup access',
+                profile: 'owner',
+                status: 'active'
+            },
+            users: await readUsers()
+        };
+    }
+
     const users = await readUsers();
     const user = users.find(item => item.id === payload.sub && item.email === payload.email);
     if (!user || user.status !== 'active') return null;
