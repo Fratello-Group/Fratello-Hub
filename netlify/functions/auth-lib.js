@@ -14,7 +14,6 @@ const USERS_KEY = 'users.json';
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 const RESET_TTL_MS = 48 * 60 * 60 * 1000;
-const TEMP_OWNER_SETUP_CODE = 'fratello-owner-setup';
 
 const EMPLOYEE_RESOURCES = ['employee-resources'];
 
@@ -280,7 +279,6 @@ async function legacyCodeRole(code) {
 
     const roles = [
         { password: process.env.AUTH_OWNER, profile: 'owner' },
-        { password: TEMP_OWNER_SETUP_CODE, profile: 'owner' },
         { password: process.env.AUTH_CONTROLLER, profile: 'controller' },
         { password: process.env.AUTH_MARKETING, profile: 'marketing' },
         { password: process.env.AUTH_PRODUCTION, profile: 'production' },
