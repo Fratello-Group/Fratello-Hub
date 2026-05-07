@@ -9,7 +9,7 @@ This repository contains all tools, dashboards, forms, reports, and workflows us
 ## Quick Start
 
 1. Clone this repo
-2. Open `system/hub/index.html` in a browser to preview the portal
+2. Open `index.html` in a browser to preview the portal
 3. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for how to add new tools
 4. See [TOOL-REGISTRY.md](docs/TOOL-REGISTRY.md) for the master list of all tools
 
@@ -38,6 +38,17 @@ fratello-hub/
 | Staff | All employees | Handbook, forms, safety, personal tools |
 | Manager | Department leads | + Department dashboards, planning, performance |
 | Owner | Chris, Russ | + Financial reporting, strategic tools, system admin |
+
+## Login & Permissions
+
+The HUB uses Netlify Functions for login and Netlify Blobs for the small staff/access list.
+
+- Owners invite people from `/system/permissions.html`
+- Invite links open `/system/accept-invite.html`
+- Staff create their own password, but the Owner-assigned profile controls what they see
+- Owners can change profiles, create reset links, and disable users
+
+The temporary Owner setup code still works during setup. For production use, set `AUTH_SESSION_SECRET` in Netlify and move sensitive records to a full database before storing confidential HR/finance content in the HUB.
 
 ---
 

@@ -165,6 +165,13 @@
             font-weight: 400;
         }
 
+        .login-helper {
+            margin-top: 18px;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
         /* ────────────────────────────────────────────
            DASHBOARD
            ──────────────────────────────────────────── */
@@ -558,16 +565,35 @@
         <form onsubmit="event.preventDefault(); handleLogin();">
             <div class="login-input-wrap">
                 <input
+                    type="email"
+                    class="login-input"
+                    id="loginEmail"
+                    placeholder="Email"
+                    autocomplete="email"
+                    autofocus
+                >
+            </div>
+            <div class="login-input-wrap">
+                <input
+                    type="password"
+                    class="login-input"
+                    id="loginPassword"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                >
+            </div>
+            <div class="login-input-wrap">
+                <input
                     type="password"
                     class="login-input"
                     id="accessCode"
-                    placeholder="Access Code"
+                    placeholder="Setup Code"
                     autocomplete="off"
-                    autofocus
                 >
             </div>
             <div class="login-error" id="loginError">Invalid access code</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
+            <div class="login-helper">Use email and password after accepting an invite. Owner setup codes still work while we finish account setup.</div>
         </form>
         <div class="login-footer">Internal &middot; Fratello Group Inc.</div>
     </div>
@@ -734,29 +760,37 @@ function normalizeRole(role) {
 // ════════════════════════════════════════════════
 
 async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
     const code = document.getElementById('accessCode').value.trim();
     const btn = document.getElementById('loginBtn');
 
-    if (!code) return;
+    if ((!email || !password) && !code) return;
 
     btn.disabled = true;
     btn.textContent = '...';
 
     try {
+        const body = email && password
+            ? { action: 'login', email, password }
+            : { action: 'login', code };
+
         const response = await fetch('/.netlify/functions/auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: code })
+            body: JSON.stringify(body)
         });
 
         if (response.ok) {
             const data = await response.json();
             const role = normalizeRole(data.role);
+            if (data.sessionToken) localStorage.setItem('fratello-session', data.sessionToken);
             localStorage.setItem('fratello-role', JSON.stringify(role));
             showDashboard(role);
         } else {
-            const input = document.getElementById('accessCode');
+            const input = email ? document.getElementById('loginEmail') : document.getElementById('accessCode');
             const error = document.getElementById('loginError');
+            error.textContent = 'Invalid login';
             input.classList.add('error');
             error.classList.add('visible');
             setTimeout(() => input.classList.remove('error'), 400);
@@ -917,8 +951,11 @@ function showDashboard(role) {
 
 function signOut() {
     localStorage.removeItem('fratello-role');
+    localStorage.removeItem('fratello-session');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
     document.getElementById('accessCode').value = '';
     document.getElementById('mainContent').innerHTML = '';
 }
@@ -927,17 +964,32 @@ function signOut() {
 // SESSION RESTORE
 // ════════════════════════════════════════════════
 
-(function init() {
-    const saved = localStorage.getItem('fratello-role');
-    if (saved) {
+(async function init() {
+    const sessionToken = localStorage.getItem('fratello-session');
+    if (sessionToken) {
         try {
-            const role = normalizeRole(JSON.parse(saved));
-            localStorage.setItem('fratello-role', JSON.stringify(role));
-            showDashboard(role);
+            const response = await fetch('/.netlify/functions/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken}`
+                },
+                body: JSON.stringify({ action: 'session' })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const role = normalizeRole(data.role);
+                localStorage.setItem('fratello-role', JSON.stringify(role));
+                showDashboard(role);
+                return;
+            }
         } catch (e) {
-            localStorage.removeItem('fratello-role');
+            localStorage.removeItem('fratello-session');
         }
+        localStorage.removeItem('fratello-session');
     }
+
+    localStorage.removeItem('fratello-role');
 })();
 </script>
 

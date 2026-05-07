@@ -278,6 +278,50 @@
             line-height: 1.6;
         }
 
+        .admin-panel {
+            margin-top: 44px;
+            border: 1px solid var(--divider-dark);
+            border-left: 3px solid var(--teal);
+            border-radius: 4px;
+            background: var(--card-bg-dark);
+            padding: 20px;
+        }
+
+        .admin-panel-title {
+            color: var(--cream);
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .form-grid .ghost-button {
+            min-height: 40px;
+        }
+
+        .link-output {
+            display: none;
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px solid rgba(54, 179, 175, 0.35);
+            border-radius: 4px;
+            color: var(--grey-light);
+            font-size: 12px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .link-output strong {
+            display: block;
+            color: var(--cream);
+            margin-bottom: 6px;
+        }
+
         .future-list {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -359,6 +403,7 @@
             .access-grid { grid-template-columns: 1fr; margin-top: 36px; }
             .section-label { margin-top: 44px; }
             .future-list { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -384,9 +429,24 @@
         <main>
             <div class="eyebrow">Permissions</div>
             <h1>Staff access by person, role, and department.</h1>
-            <p class="lede">This is the working permissions map for the HUB concept. It lets us decide who should see each area before we connect real individual logins, password resets, and two-factor security.</p>
+            <p class="lede">Invite a person, assign their access profile, and send them the generated link. They set their own password, but they do not choose what they can see.</p>
 
             <div class="access-grid" id="profileGrid"></div>
+
+            <div class="admin-panel">
+                <div class="admin-panel-title">Invite someone</div>
+                <div class="form-grid">
+                    <input class="text-input" id="inviteName" type="text" placeholder="Name">
+                    <input class="text-input" id="inviteEmail" type="email" placeholder="Email">
+                    <input class="text-input" id="inviteTitle" type="text" placeholder="Title">
+                    <select id="inviteProfile"></select>
+                </div>
+                <div class="actions">
+                    <span class="save-state" id="adminMessage">Invites and profile changes are saved to the HUB.</span>
+                    <button class="ghost-button" type="button" onclick="inviteUser()">Create Invite Link</button>
+                </div>
+                <div class="link-output" id="inviteOutput"></div>
+            </div>
 
             <div class="section-label">People Access</div>
             <div class="table-wrap">
@@ -404,23 +464,22 @@
             </div>
 
             <div class="actions">
-                <span class="save-state" id="saveState">Draft saved in this browser.</span>
-                <button class="ghost-button" type="button" onclick="resetDraft()">Reset Draft</button>
+                <span class="save-state" id="saveState">Loading staff permissions...</span>
             </div>
 
             <div class="section-label">Security Roadmap</div>
             <div class="future-list">
                 <div class="future-item ready">
-                    <div class="future-title">Current concept</div>
-                    <div class="future-note">Role access exists now. This page maps people to those roles.</div>
+                    <div class="future-title">Working now</div>
+                    <div class="future-note">Owner invite links, user passwords, profile changes, resets, and disabled users.</div>
                 </div>
                 <div class="future-item">
-                    <div class="future-title">Individual login</div>
-                    <div class="future-note">Each person signs in with their own name and password.</div>
+                    <div class="future-title">Email delivery</div>
+                    <div class="future-note">Send invite and reset links automatically instead of copying the link.</div>
                 </div>
                 <div class="future-item">
-                    <div class="future-title">Password controls</div>
-                    <div class="future-note">Secure password storage, resets, and inactive staff lockouts.</div>
+                    <div class="future-title">Database upgrade</div>
+                    <div class="future-note">Move the user list into a full database before the HUB holds sensitive records.</div>
                 </div>
                 <div class="future-item">
                     <div class="future-title">2FA and audit log</div>
@@ -458,17 +517,7 @@
             }
         };
 
-        const DEFAULT_STAFF = [
-            { id: 'chris-prefontaine', name: 'Chris Prefontaine', title: 'CEO', profile: 'owner', status: 'Active' },
-            { id: 'russ-prefontaine', name: 'Russ Prefontaine', title: 'President', profile: 'owner', status: 'Active' },
-            { id: 'chris-mcghee', name: 'Chris McGhee', title: 'Controller', profile: 'controller', status: 'Active' },
-            { id: 'kyle-park', name: 'Kyle Park', title: 'Production & Operations Manager', profile: 'production', status: 'Active' },
-            { id: 'mateo-corredor', name: 'Mateo Corredor', title: 'Marketing & Brand Manager', profile: 'marketing', status: 'Active' },
-            { id: 'sales-team', name: 'Sales Team', title: 'Sales Representatives', profile: 'sales', status: 'Draft' },
-            { id: 'staff-team', name: 'General Staff', title: 'Shared staff access', profile: 'staff', status: 'Draft' }
-        ];
-
-        const STORAGE_KEY = 'fratello-permissions-draft';
+        let STAFF = [];
 
         function currentRole() {
             try {
@@ -480,26 +529,28 @@
 
         function requireOwner() {
             const role = currentRole();
-            const isOwner = role && (role.key === 'owner' || role.label === 'Owner');
+            const isOwner = sessionToken() && role && (role.key === 'owner' || role.label === 'Owner');
             document.getElementById('pageShell').style.display = isOwner ? 'flex' : 'none';
             document.getElementById('lockedState').style.display = isOwner ? 'none' : 'flex';
             return isOwner;
         }
 
-        function loadStaff() {
-            try {
-                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-                if (Array.isArray(saved)) return saved;
-            } catch (e) {
-                return DEFAULT_STAFF;
-            }
-            return DEFAULT_STAFF;
+        function sessionToken() {
+            return localStorage.getItem('fratello-session') || '';
         }
 
-        function saveStaff(staff) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(staff));
-            const stamp = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            document.getElementById('saveState').textContent = `Draft saved in this browser at ${stamp}.`;
+        async function authRequest(payload) {
+            const response = await fetch('/.netlify/functions/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken()}`
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Request failed');
+            return data;
         }
 
         function accessTags(profileKey) {
@@ -515,16 +566,19 @@
                     <div class="profile-access">${accessTags(key)}</div>
                 </div>
             `).join('');
+
+            document.getElementById('inviteProfile').innerHTML = Object.entries(PROFILES).map(([key, profile]) => `
+                <option value="${key}">${profile.label}</option>
+            `).join('');
         }
 
         function renderStaff() {
-            const staff = loadStaff();
             const rows = document.getElementById('staffRows');
-            rows.innerHTML = staff.map(person => `
+            rows.innerHTML = STAFF.map(person => `
                 <tr>
                     <td>
                         <span class="person-name">${person.name}</span>
-                        <span class="person-title">${person.title}</span>
+                        <span class="person-title">${person.title || ''}<br>${person.email}</span>
                     </td>
                     <td>
                         <select data-person="${person.id}" onchange="updateProfile(event)">
@@ -537,32 +591,68 @@
                         <div class="profile-access" id="access-${person.id}">${accessTags(person.profile)}</div>
                     </td>
                     <td>
-                        <span class="status ${person.status === 'Draft' ? 'draft' : ''}">${person.status}</span>
+                        <span class="status ${person.status !== 'active' ? 'draft' : ''}">${person.status}</span>
+                        <div class="actions">
+                            <button class="ghost-button" type="button" onclick="resetPassword('${person.id}')">Reset</button>
+                            <button class="ghost-button" type="button" onclick="toggleDisabled('${person.id}', ${person.status !== 'disabled'})">${person.status === 'disabled' ? 'Enable' : 'Disable'}</button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function updateProfile(event) {
-            const personId = event.target.dataset.person;
-            const nextProfile = event.target.value;
-            const staff = loadStaff().map(person => {
-                if (person.id !== personId) return person;
-                return { ...person, profile: nextProfile };
-            });
-            saveStaff(staff);
-            document.getElementById(`access-${personId}`).innerHTML = accessTags(nextProfile);
+        async function loadUsers() {
+            const data = await authRequest({ action: 'users:list' });
+            STAFF = data.users;
+            renderStaff();
+            document.getElementById('saveState').textContent = 'Staff permissions loaded from the HUB.';
         }
 
-        function resetDraft() {
-            localStorage.removeItem(STORAGE_KEY);
-            renderStaff();
-            document.getElementById('saveState').textContent = 'Draft reset to the current concept map.';
+        async function inviteUser() {
+            const output = document.getElementById('inviteOutput');
+            output.style.display = 'none';
+            const data = await authRequest({
+                action: 'users:invite',
+                name: document.getElementById('inviteName').value,
+                email: document.getElementById('inviteEmail').value,
+                title: document.getElementById('inviteTitle').value,
+                profile: document.getElementById('inviteProfile').value
+            });
+            output.innerHTML = `<strong>Invite link for ${data.user.name}</strong>${data.inviteUrl}`;
+            output.style.display = 'block';
+            document.getElementById('adminMessage').textContent = 'Invite created. Send this link to the person.';
+            await loadUsers();
+        }
+
+        async function updateProfile(event) {
+            const personId = event.target.dataset.person;
+            const nextProfile = event.target.value;
+            await authRequest({ action: 'users:update', id: personId, profile: nextProfile });
+            document.getElementById(`access-${personId}`).innerHTML = accessTags(nextProfile);
+            document.getElementById('saveState').textContent = 'Profile updated.';
+            await loadUsers();
+        }
+
+        async function resetPassword(personId) {
+            const output = document.getElementById('inviteOutput');
+            const data = await authRequest({ action: 'users:reset', id: personId });
+            output.innerHTML = `<strong>Password reset link for ${data.user.name}</strong>${data.resetUrl}`;
+            output.style.display = 'block';
+            document.getElementById('adminMessage').textContent = 'Reset link created. Send this link to the person.';
+            await loadUsers();
+        }
+
+        async function toggleDisabled(personId, disabled) {
+            await authRequest({ action: 'users:disable', id: personId, disabled });
+            document.getElementById('saveState').textContent = disabled ? 'User disabled.' : 'User enabled.';
+            await loadUsers();
         }
 
         if (requireOwner()) {
             renderProfiles();
-            renderStaff();
+            loadUsers().catch(error => {
+                document.getElementById('saveState').textContent = error.message;
+            });
         }
     </script>
 </body>

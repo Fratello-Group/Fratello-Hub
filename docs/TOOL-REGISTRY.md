@@ -18,7 +18,7 @@ Each entry includes:
 ## Active Tools
 
 ### Fratello Ops Hub Portal
-- **Location:** `/system/hub/index.html`
+- **Location:** `/index.html`
 - **Owner:** Chris
 - **Tier:** All (login required)
 - **Status:** Active
@@ -45,9 +45,17 @@ Each entry includes:
 - **Location:** `/system/permissions.html`
 - **Owner:** Chris Prefontaine
 - **Tier:** Owner
-- **Status:** Draft
-- **Data Source:** Browser draft
-- **Description:** Owner-only working access map for staff, roles, departments, and future login/security planning.
+- **Status:** Active concept
+- **Data Source:** Netlify Blobs
+- **Description:** Owner-only staff access management for invites, profile assignment, password resets, and disabled users.
+
+### Invite & Password Setup
+- **Location:** `/system/accept-invite.html`
+- **Owner:** Chris Prefontaine
+- **Tier:** Invite link only
+- **Status:** Active concept
+- **Data Source:** Netlify Functions
+- **Description:** Lets invited staff create or reset their own password while keeping their access profile owner-assigned.
 
 ---
 

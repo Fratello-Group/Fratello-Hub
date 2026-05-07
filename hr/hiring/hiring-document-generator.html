@@ -951,6 +951,38 @@ select {
 </style>
 </head>
 <body>
+<script>
+(async function guardHiringAccess() {
+  const allowed = ['owner', 'controller', 'production', 'marketing'];
+
+  function isAllowed(role) {
+    return role && allowed.includes(role.key);
+  }
+
+  const token = localStorage.getItem('fratello-session');
+  if (token) {
+    try {
+      const response = await fetch('/.netlify/functions/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: 'session' })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('fratello-role', JSON.stringify(data.role));
+        if (isAllowed(data.role)) return;
+      }
+    } catch (e) {
+      localStorage.removeItem('fratello-session');
+    }
+  }
+
+  document.body.innerHTML = '<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;font-family:Montserrat,Arial,sans-serif;text-align:center;background:#1A1A1A;color:#F6F1E9;"><div><h1 style="font-size:30px;margin-bottom:12px;">Access required.</h1><p style="color:#C4C3C0;margin-bottom:24px;">This hiring tool is available to Owner, Controller, Production, and Marketing access.</p><a style="color:#36B3AF;text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:700;" href="/">Back to Hub</a></div></main>';
+})();
+</script>
 
 <!-- ============== HEADER ============== -->
 <header class="app-header">

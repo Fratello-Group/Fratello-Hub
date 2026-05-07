@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Set Password</title>
+    <link rel="icon" type="image/png" href="../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black: #1A1A1A;
+            --cream: #F6F1E9;
+            --teal: #36B3AF;
+            --teal-bright: #00D4C8;
+            --white: #FFFFFF;
+            --grey: #908F8A;
+            --grey-light: #C4C3C0;
+            --divider-dark: #2E2E2E;
+            --error: #D9533D;
+            --font: 'Montserrat', Helvetica, Arial, sans-serif;
+        }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--black);
+            color: var(--cream);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 260px;
+            max-width: 70vw;
+            margin: 0 auto 56px;
+            display: block;
+        }
+
+        .eyebrow {
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: var(--grey-light);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 14px;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            color: var(--white);
+            font-family: var(--font);
+            font-size: 14px;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 2px rgba(54, 179, 175, 0.12);
+        }
+
+        button,
+        .hub-link {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            border: none;
+            border-radius: 4px;
+            background: var(--teal);
+            color: var(--white);
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover,
+        .hub-link:hover {
+            background: var(--teal-bright);
+            color: var(--black);
+        }
+
+        .message {
+            min-height: 22px;
+            margin-top: 16px;
+            color: var(--grey-light);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .message.error { color: var(--error); }
+        .success { display: none; }
+    </style>
+</head>
+<body>
+    <main class="panel">
+        <img src="../assets/Fratello_Logo_White.png" alt="Fratello" class="logo">
+
+        <div id="formState">
+            <div class="eyebrow">Hub Invite</div>
+            <h1>Create your password.</h1>
+            <p>Your access level has already been assigned by an Owner. This just activates your login.</p>
+            <form onsubmit="event.preventDefault(); acceptInvite();">
+                <input id="displayName" type="text" placeholder="Name" autocomplete="name">
+                <input id="password" type="password" placeholder="Password" autocomplete="new-password">
+                <input id="confirmPassword" type="password" placeholder="Confirm Password" autocomplete="new-password">
+                <button id="submitBtn" type="submit">Activate Login</button>
+            </form>
+            <div class="message" id="message">Use at least 10 characters.</div>
+        </div>
+
+        <div class="success" id="successState">
+            <div class="eyebrow">Ready</div>
+            <h1>Your HUB login is active.</h1>
+            <p>You can now open the HUB. Your view will be filtered to the access profile assigned to you.</p>
+            <a href="/" class="hub-link">Open Hub</a>
+        </div>
+    </main>
+
+    <script>
+        const token = new URLSearchParams(window.location.search).get('token') || '';
+
+        async function acceptInvite() {
+            const name = document.getElementById('displayName').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const message = document.getElementById('message');
+            const button = document.getElementById('submitBtn');
+
+            message.className = 'message';
+            if (!token) {
+                message.textContent = 'This invite link is missing its token.';
+                message.classList.add('error');
+                return;
+            }
+            if (password.length < 10) {
+                message.textContent = 'Please use at least 10 characters.';
+                message.classList.add('error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                message.textContent = 'The passwords do not match.';
+                message.classList.add('error');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Activating...';
+
+            try {
+                const response = await fetch('/.netlify/functions/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'invite:accept', token, password, name })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Invite could not be activated');
+
+                localStorage.setItem('fratello-session', data.sessionToken);
+                localStorage.setItem('fratello-role', JSON.stringify(data.role));
+                document.getElementById('formState').style.display = 'none';
+                document.getElementById('successState').style.display = 'block';
+            } catch (error) {
+                message.textContent = error.message;
+                message.classList.add('error');
+            }
+
+            button.disabled = false;
+            button.textContent = 'Activate Login';
+        }
+    </script>
+</body>
+</html>
