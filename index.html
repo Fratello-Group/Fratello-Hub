@@ -172,6 +172,24 @@
             line-height: 1.7;
         }
 
+        .setup-toggle {
+            display: inline-flex;
+            margin-top: 18px;
+            color: rgba(255, 255, 255, 0.45);
+            background: none;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .setup-toggle:hover { color: var(--teal); }
+
+        .setup-code-wrap { display: none; }
+        .setup-code-wrap.visible { display: block; }
+
         /* ────────────────────────────────────────────
            DASHBOARD
            ──────────────────────────────────────────── */
@@ -582,18 +600,19 @@
                     autocomplete="current-password"
                 >
             </div>
-            <div class="login-input-wrap">
+            <div class="login-input-wrap setup-code-wrap" id="setupCodeWrap">
                 <input
                     type="password"
                     class="login-input"
                     id="accessCode"
-                    placeholder="Setup Code"
+                    placeholder="Owner Setup Code"
                     autocomplete="off"
                 >
             </div>
-            <div class="login-error" id="loginError">Invalid access code</div>
+            <div class="login-error" id="loginError">Invalid login</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
-            <div class="login-helper">Use email and password after accepting an invite. Owner setup codes still work while we finish account setup.</div>
+            <div class="login-helper">Use the email and password from your HUB invite.</div>
+            <button class="setup-toggle" type="button" onclick="toggleSetupCode()">Owner setup code</button>
         </form>
         <div class="login-footer">Internal &middot; Fratello Group Inc.</div>
     </div>
@@ -726,8 +745,7 @@ const SECTIONS = {
         cards: [
             { title: 'Staff Permissions', desc: 'Owner-only access planning by person, role, and visible HUB area.', href: 'system/permissions.html' },
             { title: 'Hub Admin',     desc: 'Portal administration and access planning.', href: '#', badge: 'In Preparation' },
-            { title: 'Integrations',  desc: 'Future Odoo, Shopify, and reporting connections.', href: '#', badge: 'In Preparation' },
-            { title: 'Tool Registry', desc: 'Master list of active and planned Hub tools.', href: 'docs/TOOL-REGISTRY.md' }
+            { title: 'Integrations',  desc: 'Future Odoo, Shopify, and reporting connections.', href: '#', badge: 'In Preparation' }
         ]
     }
 };
@@ -756,8 +774,16 @@ function normalizeRole(role) {
 }
 
 // ════════════════════════════════════════════════
-// LOGIN LOGIC  ─  UNCHANGED FROM ORIGINAL
+// LOGIN LOGIC
 // ════════════════════════════════════════════════
+
+function toggleSetupCode() {
+    const wrap = document.getElementById('setupCodeWrap');
+    wrap.classList.toggle('visible');
+    if (wrap.classList.contains('visible')) {
+        document.getElementById('accessCode').focus();
+    }
+}
 
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
@@ -801,7 +827,7 @@ async function handleLogin() {
         error.textContent = 'Connection error — try again';
         error.classList.add('visible');
         setTimeout(() => {
-            error.textContent = 'Invalid access code';
+            error.textContent = 'Invalid login';
             error.classList.remove('visible');
         }, 3000);
     }
