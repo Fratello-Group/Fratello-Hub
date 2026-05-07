@@ -57,6 +57,14 @@ Each entry includes:
 - **Data Source:** Netlify Functions
 - **Description:** Lets invited staff create or reset their own password while keeping their access profile owner-assigned.
 
+### HUB QA Checklist
+- **Location:** `/docs/HUB-QA-CHECKLIST.md`
+- **Owner:** Chris Prefontaine
+- **Tier:** Owner
+- **Status:** Active
+- **Data Source:** Manual
+- **Description:** Plain-English checklist for testing Owner, Staff, Sales, Hiring, disabled-user, and reset-link behavior.
+
 ---
 
 ## Planned Tools

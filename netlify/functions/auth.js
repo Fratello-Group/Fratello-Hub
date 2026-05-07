@@ -33,6 +33,14 @@ function findByEmail(users, email) {
     return users.find(user => normalizeEmail(user.email) === normalizeEmail(email));
 }
 
+function isActiveOwner(user) {
+    return user.profile === 'owner' && user.status === 'active';
+}
+
+function isOnlyActiveOwner(users, user) {
+    return isActiveOwner(user) && !users.some(item => item.id !== user.id && isActiveOwner(item));
+}
+
 function scrubExpiredTokens(user) {
     const now = Date.now();
     const inviteExpired = user.inviteExpiresAt && new Date(user.inviteExpiresAt).getTime() < now;
@@ -40,9 +48,9 @@ function scrubExpiredTokens(user) {
     return {
         ...user,
         inviteTokenHash: inviteExpired ? '' : user.inviteTokenHash,
-        inviteExpiresAt: inviteExpired ? '' : user.inviteExpiresAt,
         resetTokenHash: resetExpired ? '' : user.resetTokenHash,
-        resetExpiresAt: resetExpired ? '' : user.resetExpiresAt
+        inviteExpiresAt: user.inviteExpiresAt || '',
+        resetExpiresAt: user.resetExpiresAt || ''
     };
 }
 
@@ -52,20 +60,6 @@ async function login(event) {
     if (body.code && !body.email && !body.password) {
         const role = await legacyCodeRole(body.code);
         if (!role) return json(401, { error: 'Invalid access code' });
-        if (String(body.code || '').trim().toLowerCase() === 'fratello-owner-setup') {
-            return json(200, {
-                sessionToken: createSession({
-                    id: 'temporary-owner',
-                    email: '',
-                    name: 'Temporary Owner Setup',
-                    title: 'Owner setup access',
-                    profile: 'owner',
-                    status: 'active'
-                }),
-                role,
-                legacy: true
-            });
-        }
 
         const users = await readUsers();
         const setupUser = users.find(user => user.profile === role.key);
@@ -142,10 +136,14 @@ async function inviteUser(event) {
         createdAt: existing ? existing.createdAt : stamp,
         updatedAt: stamp,
         invitedAt: stamp,
+        acceptedAt: existing ? existing.acceptedAt || '' : '',
         invitedBy: owner.user.id,
         passwordHash: existing ? existing.passwordHash : '',
         passwordSalt: existing ? existing.passwordSalt : '',
-        lastLoginAt: existing ? existing.lastLoginAt : ''
+        passwordChangedAt: existing ? existing.passwordChangedAt || '' : '',
+        resetCreatedAt: existing ? existing.resetCreatedAt || '' : '',
+        lastLoginAt: existing ? existing.lastLoginAt || '' : '',
+        disabledAt: ''
     };
 
     if (existing) {
@@ -175,6 +173,9 @@ async function updateUser(event) {
     if (body.profile !== undefined) {
         const profile = String(body.profile || 'staff').trim();
         if (!PROFILES[profile]) return json(400, { error: 'Invalid access profile' });
+        if (profile !== 'owner' && isOnlyActiveOwner(users, user)) {
+            return json(400, { error: 'At least one active owner account must remain' });
+        }
         user.profile = profile;
     }
     user.updatedAt = nowIso();
@@ -194,6 +195,9 @@ async function disableUser(event) {
     if (user.profile === 'owner' && user.id === owner.user.id) {
         return json(400, { error: 'You cannot disable your own owner account' });
     }
+    if (body.disabled && isOnlyActiveOwner(users, user)) {
+        return json(400, { error: 'At least one active owner account must remain' });
+    }
 
     user.status = body.disabled ? 'disabled' : 'active';
     user.disabledAt = body.disabled ? nowIso() : '';
@@ -212,9 +216,11 @@ async function createReset(event) {
     if (!user) return json(404, { error: 'User not found' });
 
     const token = randomToken();
+    const stamp = nowIso();
     user.resetTokenHash = hashToken(token);
     user.resetExpiresAt = new Date(Date.now() + RESET_TTL_MS).toISOString();
-    user.updatedAt = nowIso();
+    user.resetCreatedAt = stamp;
+    user.updatedAt = stamp;
     await writeUsers(users);
 
     return json(200, {
@@ -248,16 +254,18 @@ async function acceptInvite(event) {
     }
 
     const passwordParts = hashPassword(password);
+    const stamp = nowIso();
     user.passwordHash = passwordParts.hash;
     user.passwordSalt = passwordParts.salt;
     user.status = 'active';
     if (name) user.name = name;
+    if (isInvite || !user.acceptedAt) user.acceptedAt = stamp;
     user.inviteTokenHash = '';
     user.inviteExpiresAt = '';
     user.resetTokenHash = '';
     user.resetExpiresAt = '';
-    user.passwordChangedAt = nowIso();
-    user.updatedAt = nowIso();
+    user.passwordChangedAt = stamp;
+    user.updatedAt = stamp;
     await writeUsers(users);
 
     return json(200, withSession(user));

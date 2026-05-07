@@ -161,6 +161,31 @@ function verifyPassword(password, user) {
     return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(user.passwordHash, 'hex'));
 }
 
+function isExpired(value) {
+    const time = new Date(value || '').getTime();
+    return Number.isFinite(time) && time < Date.now();
+}
+
+function timestamp(value) {
+    const time = new Date(value || '').getTime();
+    return Number.isFinite(time) ? time : 0;
+}
+
+function inviteStatus(user) {
+    if (user.inviteExpiresAt) return isExpired(user.inviteExpiresAt) ? 'expired' : 'pending';
+    if (user.acceptedAt || user.status === 'active') return user.invitedAt ? 'accepted' : 'none';
+    if (user.status === 'invited') return 'pending';
+    return user.invitedAt ? 'sent' : 'none';
+}
+
+function resetStatus(user) {
+    if (user.resetExpiresAt) return isExpired(user.resetExpiresAt) ? 'expired' : 'pending';
+    if (!user.resetCreatedAt) return 'none';
+    const resetCreatedTime = timestamp(user.resetCreatedAt);
+    if (resetCreatedTime && timestamp(user.passwordChangedAt) >= resetCreatedTime) return 'completed';
+    return 'created';
+}
+
 function roleFromUser(user) {
     const profile = PROFILES[user.profile] || PROFILES.staff;
     return {
@@ -179,6 +204,7 @@ function roleFromUser(user) {
 
 function publicUser(user) {
     const profile = PROFILES[user.profile] || PROFILES.staff;
+    const lastLoginAt = user.lastLoginAt || '';
     return {
         id: user.id,
         name: user.name,
@@ -190,7 +216,15 @@ function publicUser(user) {
         status: user.status,
         createdAt: user.createdAt || '',
         updatedAt: user.updatedAt || '',
-        lastLoginAt: user.lastLoginAt || '',
+        invitedAt: user.invitedAt || '',
+        acceptedAt: user.acceptedAt || '',
+        resetCreatedAt: user.resetCreatedAt || '',
+        passwordChangedAt: user.passwordChangedAt || '',
+        disabledAt: user.disabledAt || '',
+        lastLoginAt,
+        lastLoginStatus: lastLoginAt ? 'logged-in' : 'never-logged-in',
+        inviteStatus: inviteStatus(user),
+        resetStatus: resetStatus(user),
         inviteExpiresAt: user.inviteExpiresAt || '',
         resetExpiresAt: user.resetExpiresAt || ''
     };
@@ -219,7 +253,8 @@ async function readUsers() {
     return DEFAULT_USERS.map(user => ({
         ...user,
         createdAt: stamp,
-        updatedAt: stamp
+        updatedAt: stamp,
+        invitedAt: stamp
     }));
 }
 
@@ -240,20 +275,6 @@ async function writeUsers(users) {
 async function findUserBySession(event) {
     const payload = verifySessionToken(getBearer(event));
     if (!payload) return null;
-
-    if (payload.sub === 'temporary-owner' && payload.profile === 'owner') {
-        return {
-            user: {
-                id: 'temporary-owner',
-                email: '',
-                name: 'Temporary Owner Setup',
-                title: 'Owner setup access',
-                profile: 'owner',
-                status: 'active'
-            },
-            users: await readUsers()
-        };
-    }
 
     const users = await readUsers();
     const user = users.find(item => item.id === payload.sub && item.email === payload.email);
