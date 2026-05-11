@@ -229,6 +229,34 @@ async function createReset(event) {
     });
 }
 
+async function requestPasswordReset(event) {
+    const body = parseBody(event);
+    const email = normalizeEmail(body.email);
+    if (!email) return json(400, { error: 'Email is required' });
+
+    const users = await readUsers();
+    const user = findByEmail(users, email);
+
+    if (!user || user.status !== 'active') {
+        return json(200, {
+            message: 'If this email has Hub access, a reset link can be created.'
+        });
+    }
+
+    const token = randomToken();
+    const stamp = nowIso();
+    user.resetTokenHash = hashToken(token);
+    user.resetExpiresAt = new Date(Date.now() + RESET_TTL_MS).toISOString();
+    user.resetCreatedAt = stamp;
+    user.updatedAt = stamp;
+    await writeUsers(users);
+
+    return json(200, {
+        user: { name: user.name, email: user.email },
+        resetUrl: buildInviteUrl(event, token)
+    });
+}
+
 async function acceptInvite(event) {
     const body = parseBody(event);
     const tokenHash = hashToken(String(body.token || ''));
@@ -287,6 +315,7 @@ exports.handler = async (event) => {
         if (action === 'users:update') return updateUser(event);
         if (action === 'users:disable') return disableUser(event);
         if (action === 'users:reset') return createReset(event);
+        if (action === 'password:forgot') return requestPasswordReset(event);
         if (action === 'invite:accept') return acceptInvite(event);
         return json(400, { error: 'Unknown action' });
     } catch (error) {

@@ -187,8 +187,62 @@
 
         .setup-toggle:hover { color: var(--teal); }
 
+        .login-actions {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
         .setup-code-wrap { display: none; }
         .setup-code-wrap.visible { display: block; }
+
+        .reset-panel {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            border: 1px solid rgba(92, 199, 196, 0.25);
+            background: rgba(255, 255, 255, 0.035);
+            text-align: left;
+        }
+
+        .reset-panel.visible { display: block; }
+
+        .reset-copy {
+            margin: 0 0 14px;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .reset-btn {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid rgba(92, 199, 196, 0.65);
+            background: transparent;
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover { border-color: var(--teal); color: var(--teal); }
+        .reset-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .reset-message {
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 12px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .reset-message a {
+            color: var(--teal);
+            font-weight: 700;
+        }
 
         /* ────────────────────────────────────────────
            DASHBOARD
@@ -612,7 +666,15 @@
             <div class="login-error" id="loginError">Invalid login</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
             <div class="login-helper">Use the email and password from your HUB invite.</div>
-            <button class="setup-toggle" type="button" onclick="toggleSetupCode()">Owner setup code</button>
+            <div class="login-actions">
+                <button class="setup-toggle" type="button" onclick="toggleResetPanel()">Forgot password?</button>
+                <button class="setup-toggle" type="button" onclick="toggleSetupCode()">Owner setup code</button>
+            </div>
+            <div class="reset-panel" id="resetPanel">
+                <p class="reset-copy">Enter your email above, then create a password reset link. For this prototype, the link appears here instead of being emailed.</p>
+                <button class="reset-btn" type="button" id="resetBtn" onclick="handlePasswordReset()">Create Reset Link</button>
+                <div class="reset-message" id="resetMessage"></div>
+            </div>
         </form>
         <div class="login-footer">Internal &middot; Fratello Group Inc.</div>
     </div>
@@ -785,6 +847,54 @@ function toggleSetupCode() {
     }
 }
 
+function toggleResetPanel() {
+    const panel = document.getElementById('resetPanel');
+    panel.classList.toggle('visible');
+    if (panel.classList.contains('visible')) {
+        document.getElementById('loginEmail').focus();
+    }
+}
+
+async function handlePasswordReset() {
+    const emailInput = document.getElementById('loginEmail');
+    const email = emailInput.value.trim();
+    const btn = document.getElementById('resetBtn');
+    const message = document.getElementById('resetMessage');
+
+    if (!email) {
+        message.textContent = 'Enter your email first, then create a reset link.';
+        emailInput.classList.add('error');
+        setTimeout(() => emailInput.classList.remove('error'), 400);
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    message.textContent = '';
+
+    try {
+        const response = await fetch('/.netlify/functions/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'password:forgot', email })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.resetUrl) {
+            message.innerHTML = `Reset link created: <a href="${data.resetUrl}">open reset page</a>`;
+        } else if (response.ok) {
+            message.textContent = data.message || 'If this email has Hub access, a reset link can be created.';
+        } else {
+            message.textContent = data.error || 'Could not create a reset link.';
+        }
+    } catch (error) {
+        message.textContent = 'Connection error - try again.';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Create Reset Link';
+}
+
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -816,7 +926,7 @@ async function handleLogin() {
         } else {
             const input = email ? document.getElementById('loginEmail') : document.getElementById('accessCode');
             const error = document.getElementById('loginError');
-            error.textContent = 'Invalid login';
+            error.textContent = email ? 'Invalid email or password. Use Forgot password if needed.' : 'Invalid login';
             input.classList.add('error');
             error.classList.add('visible');
             setTimeout(() => input.classList.remove('error'), 400);
