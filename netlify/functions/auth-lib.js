@@ -298,7 +298,7 @@ async function legacyCodeRole(code) {
     const normalized = String(code || '').trim().toLowerCase();
     if (!normalized) return null;
 
-    const temporaryOwnerRecoveryExpiresAt = Date.UTC(2026, 4, 12, 6, 0, 0);
+    const temporaryOwnerRecoveryExpiresAt = Date.UTC(2026, 4, 13, 6, 0, 0);
     if (Date.now() < temporaryOwnerRecoveryExpiresAt && normalized === 'fratello-owner-recovery') {
         const profile = PROFILES.owner;
         return {
