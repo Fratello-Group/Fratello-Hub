@@ -1,0 +1,4 @@
+.DS_Store
+security/reports/*.html
+security/reports/*.json
+!security/reports/.gitkeep
