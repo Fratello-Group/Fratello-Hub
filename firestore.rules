@@ -11,42 +11,42 @@ service cloud.firestore {
     }
 
     function isBootstrapOwner() {
-      return signedIn() && signedInEmail() in [
-        'prefontainech@gmail.com',
-        'russ@fratellocoffee.com'
-      ];
+      return signedIn()
+        && (
+          signedInEmail() == 'prefontainech@gmail.com'
+          || signedInEmail() == 'russ@fratellocoffee.com'
+        );
     }
 
-    function ownerProfile() {
-      return get(/databases/$(database)/documents/hubProfiles/$(request.auth.uid));
+    function profilePath(uid) {
+      return /databases/$(database)/documents/hubProfiles/$(uid);
+    }
+
+    function invitePath(email) {
+      return /databases/$(database)/documents/hubInvites/$(email);
     }
 
     function isOwner() {
       return signedIn()
-        && exists(/databases/$(database)/documents/hubProfiles/$(request.auth.uid))
-        && ownerProfile().data.profile == 'owner'
-        && ownerProfile().data.status == 'active';
+        && exists(profilePath(request.auth.uid))
+        && get(profilePath(request.auth.uid)).data.profile == 'owner'
+        && get(profilePath(request.auth.uid)).data.status == 'active';
     }
 
-    function isSelf(uid) {
-      return signedIn() && request.auth.uid == uid;
-    }
-
-    function hasInvite() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/hubInvites/$(signedInEmail()))
-        && get(/databases/$(database)/documents/hubInvites/$(signedInEmail())).data.status != 'disabled';
-    }
-
-    function profileMatchesSignedInUser() {
-      return request.resource.data.email == signedInEmail();
+    function selfProfileFieldsDoNotEscalate(uid) {
+      return request.auth.uid == uid
+        && resource.data.email == signedInEmail()
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.profile == resource.data.profile
+        && request.resource.data.status == resource.data.status;
     }
 
     match /hubProfiles/{uid} {
-      allow read: if isSelf(uid) || isOwner();
+      allow read: if signedIn() && (request.auth.uid == uid || isOwner());
 
-      allow create: if isSelf(uid)
-        && profileMatchesSignedInUser()
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.email == signedInEmail()
         && (
           (
             isBootstrapOwner()
@@ -54,26 +54,19 @@ service cloud.firestore {
             && request.resource.data.status == 'active'
           )
           || (
-            hasInvite()
-            && request.resource.data.profile == get(/databases/$(database)/documents/hubInvites/$(signedInEmail())).data.profile
+            exists(invitePath(signedInEmail()))
+            && get(invitePath(signedInEmail())).data.status != 'disabled'
+            && request.resource.data.profile == get(invitePath(signedInEmail())).data.profile
             && request.resource.data.status == 'active'
           )
         );
 
-      allow update: if isOwner()
-        || (
-          isSelf(uid)
-          && resource.data.email == signedInEmail()
-          && request.resource.data.email == resource.data.email
-          && request.resource.data.profile == resource.data.profile
-          && request.resource.data.status == resource.data.status
-        );
-
+      allow update: if isOwner() || selfProfileFieldsDoNotEscalate(uid);
       allow delete: if false;
     }
 
     match /hubInvites/{email} {
-      allow read: if isOwner() || (signedIn() && resource.data.email == signedInEmail());
+      allow read: if isOwner() || (signedIn() && email == signedInEmail());
       allow create, update: if isOwner();
       allow delete: if false;
     }
