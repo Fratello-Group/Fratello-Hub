@@ -26,12 +26,20 @@ Each entry includes:
 - **Description:** Main portal entry point with tier-based access and department navigation.
 
 ### Brand Guide & Claude Skill
-- **Location:** `/marketing/brand/fratello-brand-guide-SKILL.md`
+- **Location:** `/system/skills/fratello-design-skill.html`
 - **Owner:** Mateo
-- **Tier:** Manager
+- **Tier:** All Hub users
 - **Status:** Active
 - **Data Source:** Manual
-- **Description:** Fratello brand voice, visual identity, and Claude AI skill file.
+- **Description:** Download page and setup instructions for the Fratello Claude design skill.
+
+### Wholesale Proposal Builder
+- **Location:** `/sales/proposal-builder.html`
+- **Owner:** Mateo
+- **Tier:** Sales, Controller, Owner
+- **Status:** Active
+- **Data Source:** External Vercel app
+- **Description:** Sales proposal builder embedded inside the Hub with a Hub header, back navigation, proposal links, and PDF saving.
 
 ### Hiring Document Generator
 - **Location:** `/hr/hiring/hiring-document-generator.html`
@@ -46,7 +54,7 @@ Each entry includes:
 - **Owner:** Chris Prefontaine
 - **Tier:** Owner
 - **Status:** Active concept
-- **Data Source:** Netlify Blobs
+- **Data Source:** Firebase Auth + Firestore
 - **Description:** Owner-only staff access management for invites, profile assignment, password resets, and disabled users.
 
 ### Invite & Password Setup
@@ -54,7 +62,7 @@ Each entry includes:
 - **Owner:** Chris Prefontaine
 - **Tier:** Invite link only
 - **Status:** Active concept
-- **Data Source:** Netlify Functions
+- **Data Source:** Firebase Auth + Firestore
 - **Description:** Lets invited staff create or reset their own password while keeping their access profile owner-assigned.
 
 ### HUB QA Checklist

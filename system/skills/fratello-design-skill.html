@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Design Skill</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --black: #1A1A1A;
+            --cream: #F6F1E9;
+            --teal: #36B3AF;
+            --teal-bright: #00D4C8;
+            --grey: #908F8A;
+            --grey-light: #C4C3C0;
+            --card-bg-dark: #232323;
+            --divider-dark: #2E2E2E;
+            --font: 'Montserrat', Helvetica, Arial, sans-serif;
+        }
+
+        html, body {
+            min-height: 100%;
+            background: var(--black);
+            color: var(--cream);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        .masthead {
+            max-width: 1120px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 34px 40px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .masthead-logo {
+            height: 32px;
+            width: auto;
+            display: block;
+        }
+
+        .masthead-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .role-pill {
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .nav-link,
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            border: 1px solid var(--divider-dark);
+            border-radius: 4px;
+            padding: 10px 14px;
+            color: var(--grey-light);
+            background: transparent;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+        }
+
+        .nav-link:hover,
+        .button:hover {
+            color: var(--cream);
+            border-color: var(--teal);
+        }
+
+        .button.primary {
+            color: var(--black);
+            background: var(--teal);
+            border-color: var(--teal);
+        }
+
+        .button.primary:hover {
+            color: var(--black);
+            background: var(--teal-bright);
+            border-color: var(--teal-bright);
+        }
+
+        main {
+            max-width: 1120px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 58px 40px 88px;
+        }
+
+        .eyebrow {
+            color: var(--teal);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            color: var(--cream);
+            font-size: clamp(40px, 6vw, 72px);
+            font-weight: 800;
+            line-height: 1.04;
+            letter-spacing: 0;
+            max-width: 780px;
+        }
+
+        .lede {
+            margin-top: 18px;
+            color: var(--grey-light);
+            font-size: 16px;
+            line-height: 1.7;
+            max-width: 760px;
+        }
+
+        .action-row {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .grid {
+            margin-top: 54px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .panel {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--divider-dark);
+            border-left: 3px solid var(--teal);
+            border-radius: 4px;
+            padding: 24px;
+        }
+
+        .panel h2 {
+            color: var(--cream);
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 14px;
+        }
+
+        .panel p,
+        .panel li {
+            color: var(--grey-light);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        ol,
+        ul {
+            padding-left: 20px;
+        }
+
+        li + li {
+            margin-top: 8px;
+        }
+
+        .small-note {
+            margin-top: 18px;
+            color: var(--grey);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .blocked {
+            display: none;
+            min-height: 100vh;
+            place-items: center;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .blocked h1 {
+            font-size: clamp(34px, 6vw, 58px);
+            margin-bottom: 18px;
+        }
+
+        body.denied .page {
+            display: none;
+        }
+
+        body.denied .blocked {
+            display: grid;
+        }
+
+        @media (max-width: 800px) {
+            .masthead {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 28px 24px 0;
+            }
+
+            .masthead-right {
+                justify-content: flex-start;
+            }
+
+            main {
+                padding: 48px 24px 72px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="../firebase-config.js"></script>
+</head>
+<body class="denied">
+    <div class="page">
+        <header class="masthead">
+            <img src="../../assets/Fratello_Logo_White.png" alt="Fratello" class="masthead-logo">
+            <div class="masthead-right">
+                <span class="role-pill">Brand Resource</span>
+                <a class="nav-link" href="../../index.html">Back to Hub</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="eyebrow">Claude Design Skill</div>
+            <h1>Make Fratello work look like Fratello.</h1>
+            <p class="lede">
+                This is Mateo's Fratello design skill for Claude. Upload it into a Claude project so Claude knows the Fratello brand system before creating documents, decks, PDFs, social content, or other visual work.
+            </p>
+
+            <div class="action-row">
+                <a class="button primary" href="fratello-design-skill.md" download>Download Skill File</a>
+                <a class="button" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Open Claude</a>
+            </div>
+
+            <section class="grid">
+                <div class="panel">
+                    <h2>First-time setup</h2>
+                    <ol>
+                        <li>Go to Claude and open the Fratello project you want to use.</li>
+                        <li>Choose Add Content, then upload the downloaded skill file.</li>
+                        <li>If an older version is already there, delete the old one first.</li>
+                    </ol>
+                    <p class="small-note">The skill file is the brand brain. Once uploaded, Claude can use it in that project.</p>
+                </div>
+
+                <div class="panel">
+                    <h2>How to use it</h2>
+                    <ul>
+                        <li>Ask in plain language, like "make a one-pager for Godfather Espresso."</li>
+                        <li>Upload any photos you want Claude to use at the start of the chat.</li>
+                        <li>Do not attach logos unless needed; the skill already includes logo guidance.</li>
+                    </ul>
+                    <p class="small-note">Claude cannot pull from Google Drive by itself, so upload the actual images you want used.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <section class="blocked">
+        <div>
+            <h1>Hub access required.</h1>
+            <p class="lede">Sign in to the Hub before opening this brand resource.</p>
+            <div class="action-row" style="justify-content: center;">
+                <a class="button primary" href="../../index.html">Back to Hub</a>
+            </div>
+        </div>
+    </section>
+
+    <script type="module">
+        import { firebaseConfigured, onHubAuthChange } from '../fratello-auth.js';
+
+        function allowAccess() {
+            document.body.classList.remove('denied');
+        }
+
+        function denyAccess() {
+            document.body.classList.add('denied');
+        }
+
+        function hasLocalRole() {
+            try {
+                return Boolean(JSON.parse(localStorage.getItem('fratello-role') || 'null'));
+            } catch (error) {
+                return false;
+            }
+        }
+
+        if (firebaseConfigured()) {
+            onHubAuthChange(role => {
+                if (role) allowAccess();
+                else denyAccess();
+            });
+        } else if (hasLocalRole()) {
+            allowAccess();
+        } else {
+            denyAccess();
+        }
+    </script>
+</body>
+</html>
