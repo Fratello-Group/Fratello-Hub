@@ -702,8 +702,8 @@
             <div class="login-error" id="loginError">Invalid login</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
             <div class="provider-grid" id="providerGrid">
-                <button class="provider-btn" type="button" onclick="handleProviderLogin('google')">Google</button>
-                <button class="provider-btn" type="button" onclick="handleProviderLogin('apple')">Apple</button>
+                <button class="provider-btn" id="googleProviderBtn" type="button" onclick="handleProviderLogin('google')">Google</button>
+                <button class="provider-btn" id="appleProviderBtn" type="button" onclick="handleProviderLogin('apple')">Apple</button>
             </div>
             <div class="login-helper" id="loginHelper">Use the email and password from your HUB invite.</div>
             <div class="login-actions">
@@ -906,7 +906,10 @@ function setLoginError(message) {
 function setupAuthModeUi() {
     if (!USE_FIREBASE_AUTH) return;
 
+    const providers = window.FRATELLO_AUTH_PROVIDERS || {};
     document.getElementById('providerGrid').classList.add('visible');
+    document.getElementById('googleProviderBtn').style.display = providers.google === false ? 'none' : '';
+    document.getElementById('appleProviderBtn').style.display = providers.apple === true ? '' : 'none';
     document.getElementById('createAccountToggle').classList.add('visible');
     document.getElementById('setupCodeToggle').classList.add('hidden');
     document.getElementById('loginBtn').textContent = 'Sign In';

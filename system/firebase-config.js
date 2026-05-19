@@ -20,3 +20,9 @@ window.FRATELLO_OWNER_EMAILS = [
     'prefontainech@gmail.com',
     'russ@fratellocoffee.com'
 ];
+
+window.FRATELLO_AUTH_PROVIDERS = {
+    email: true,
+    google: true,
+    apple: false
+};
