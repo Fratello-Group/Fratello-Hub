@@ -860,6 +860,7 @@ const SECTIONS = {
         label: 'Sales',
         access: 'Owner + Controller + Sales',
         cards: [
+            { title: 'Wholesale Proposal Builder', desc: 'Build custom product proposals, share a proposal link, or save as PDF.', href: 'https://fratello-proposal-builder.vercel.app/', badge: 'Live' },
             { title: 'Sales Intelligence', desc: 'Account insights, territory context, and prospecting tools.', href: '#', badge: 'In Preparation' },
             { title: 'Sales Forecasting',  desc: 'Pipeline planning and monthly sales visibility.', href: '#', badge: 'In Preparation' }
         ]
@@ -1243,7 +1244,11 @@ function showDashboard(role) {
                 const a = document.createElement('a');
                 a.className = 'tool ' + (isActive ? 'active' : 'inactive');
                 a.href = card.href || '#';
-                if (isActive) a.target = '_self';
+                if (isActive) {
+                    const isExternal = /^https?:\/\//.test(card.href);
+                    a.target = isExternal ? '_blank' : '_self';
+                    if (isExternal) a.rel = 'noopener noreferrer';
+                }
                 if (!isActive) a.addEventListener('click', e => e.preventDefault());
 
                 const copy = document.createElement('span');
