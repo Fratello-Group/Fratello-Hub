@@ -34,13 +34,19 @@ Technical decisions and patterns for the Fratello Hub. Updated as the system evo
 
 ---
 
-## Authentication (Phased)
+## Authentication
 
-| Phase | Method | Status |
-|-------|--------|--------|
-| Phase 1 | Simple password-per-tier | Current |
-| Phase 2 | Google OAuth with Fratello domain restriction | Planned |
-| Phase 3 | Individual accounts with granular permissions | Future |
+**Decision:** Firebase Authentication + Firestore access profiles
+**Why:** The prototype Netlify password system was too fragile for real use. Firebase handles Google, Apple, email/password, password resets, and signed-in sessions. Firestore stores the Hub-specific access profile for each person.
+
+| Layer | Responsibility |
+|-------|----------------|
+| Firebase Authentication | Proves who the person is |
+| Firestore `hubProfiles` | Stores the person’s Hub role, status, title, and visible areas |
+| Firestore `hubInvites` | Lets Owners pre-assign access before a person signs in |
+| Firestore Rules | Enforces who can read or change access records |
+
+The old Netlify auth function remains as a temporary fallback until `system/firebase-config.js` is filled in and `enabled` is set to `true`.
 
 ---
 

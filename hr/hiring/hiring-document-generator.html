@@ -951,12 +951,35 @@ select {
 </style>
 </head>
 <body>
-<script>
+<script src="../../system/firebase-config.js"></script>
+<script type="module">
+import {
+  firebaseConfigured,
+  friendlyAuthError,
+  onHubAuthChange
+} from '../../system/fratello-auth.js';
+
 (async function guardHiringAccess() {
   const allowed = ['owner', 'controller', 'production', 'marketing'];
+  const useFirebaseAuth = firebaseConfigured();
 
   function isAllowed(role) {
     return role && allowed.includes(role.key);
+  }
+
+  function showLocked(message = 'This hiring tool is available to Owner, Controller, Production, and Marketing access.') {
+    document.body.innerHTML = `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;font-family:Montserrat,Arial,sans-serif;text-align:center;background:#1A1A1A;color:#F6F1E9;"><div><h1 style="font-size:30px;margin-bottom:12px;">Access required.</h1><p style="color:#C4C3C0;margin-bottom:24px;">${message}</p><a style="color:#36B3AF;text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:700;" href="/">Back to Hub</a></div></main>`;
+  }
+
+  if (useFirebaseAuth) {
+    onHubAuthChange((role, error) => {
+      if (isAllowed(role)) {
+        localStorage.setItem('fratello-role', JSON.stringify(role));
+        return;
+      }
+      showLocked(error ? friendlyAuthError(error) : undefined);
+    });
+    return;
   }
 
   const token = localStorage.getItem('fratello-session');
@@ -980,7 +1003,7 @@ select {
     }
   }
 
-  document.body.innerHTML = '<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;font-family:Montserrat,Arial,sans-serif;text-align:center;background:#1A1A1A;color:#F6F1E9;"><div><h1 style="font-size:30px;margin-bottom:12px;">Access required.</h1><p style="color:#C4C3C0;margin-bottom:24px;">This hiring tool is available to Owner, Controller, Production, and Marketing access.</p><a style="color:#36B3AF;text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:700;" href="/">Back to Hub</a></div></main>';
+  showLocked();
 })();
 </script>
 

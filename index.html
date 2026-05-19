@@ -156,6 +156,37 @@
         .login-btn:active { transform: scale(0.99); }
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .provider-grid {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 18px 0 0;
+        }
+
+        .provider-grid.visible { display: grid; }
+
+        .provider-btn {
+            min-height: 46px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+        }
+
+        .provider-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal);
+            background: rgba(54, 179, 175, 0.08);
+        }
+
+        .provider-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
         .login-footer {
             margin-top: 72px;
             font-size: 11px;
@@ -243,6 +274,11 @@
             color: var(--teal);
             font-weight: 700;
         }
+
+        .legacy-only.hidden,
+        .firebase-only { display: none; }
+
+        .firebase-only.visible { display: block; }
 
         /* ────────────────────────────────────────────
            DASHBOARD
@@ -665,14 +701,19 @@
             </div>
             <div class="login-error" id="loginError">Invalid login</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
-            <div class="login-helper">Use the email and password from your HUB invite.</div>
+            <div class="provider-grid" id="providerGrid">
+                <button class="provider-btn" type="button" onclick="handleProviderLogin('google')">Google</button>
+                <button class="provider-btn" type="button" onclick="handleProviderLogin('apple')">Apple</button>
+            </div>
+            <div class="login-helper" id="loginHelper">Use the email and password from your HUB invite.</div>
             <div class="login-actions">
                 <button class="setup-toggle" type="button" onclick="toggleResetPanel()">Forgot password?</button>
-                <button class="setup-toggle" type="button" onclick="toggleSetupCode()">Owner setup code</button>
+                <button class="setup-toggle firebase-only" id="createAccountToggle" type="button" onclick="handleCreateAccount()">Create account</button>
+                <button class="setup-toggle legacy-only" id="setupCodeToggle" type="button" onclick="toggleSetupCode()">Owner setup code</button>
             </div>
             <div class="reset-panel" id="resetPanel">
-                <p class="reset-copy">Enter your email above, then create a password reset link. For this prototype, the link appears here instead of being emailed.</p>
-                <button class="reset-btn" type="button" id="resetBtn" onclick="handlePasswordReset()">Create Reset Link</button>
+                <p class="reset-copy" id="resetCopy">Enter your email above, then create a password reset link. For this prototype, the link appears here instead of being emailed.</p>
+                <button class="reset-btn" type="button" id="resetBtn" onclick="handlePasswordReset()">Reset Password</button>
                 <div class="reset-message" id="resetMessage"></div>
             </div>
         </form>
@@ -703,15 +744,27 @@
     </div>
 </div>
 
-<script>
+<script src="system/firebase-config.js"></script>
+<script type="module">
+import {
+    createEmailAccount,
+    firebaseConfigured,
+    friendlyAuthError,
+    onHubAuthChange,
+    sendResetEmail,
+    signInWithApple,
+    signInWithEmail,
+    signInWithGoogle,
+    signOutHub
+} from './system/fratello-auth.js';
+
 // ════════════════════════════════════════════════
 // ROLE CONFIGURATION
 // ════════════════════════════════════════════════
 //
-// Passwords are stored server-side in Netlify environment
-// variables. The client sends the code to /.netlify/functions/auth
-// which validates it and returns the role. No passwords exist
-// in this file.
+// Firebase Authentication is the professional login path. The older
+// Netlify code-login path remains only as a fallback until Firebase
+// project settings are pasted into system/firebase-config.js.
 //
 
 // ════════════════════════════════════════════════
@@ -839,6 +892,29 @@ function normalizeRole(role) {
 // LOGIN LOGIC
 // ════════════════════════════════════════════════
 
+const USE_FIREBASE_AUTH = firebaseConfigured();
+
+function setLoginError(message) {
+    const error = document.getElementById('loginError');
+    error.textContent = message;
+    error.classList.add('visible');
+    setTimeout(() => {
+        error.classList.remove('visible');
+    }, 4200);
+}
+
+function setupAuthModeUi() {
+    if (!USE_FIREBASE_AUTH) return;
+
+    document.getElementById('providerGrid').classList.add('visible');
+    document.getElementById('createAccountToggle').classList.add('visible');
+    document.getElementById('setupCodeToggle').classList.add('hidden');
+    document.getElementById('loginBtn').textContent = 'Sign In';
+    document.getElementById('loginHelper').textContent = 'Use Google, Apple, or your Hub email/password.';
+    document.getElementById('resetCopy').textContent = 'Enter your email above and Firebase will email you a private password reset link.';
+    document.getElementById('resetBtn').textContent = 'Email Reset Link';
+}
+
 function toggleSetupCode() {
     const wrap = document.getElementById('setupCodeWrap');
     wrap.classList.toggle('visible');
@@ -872,6 +948,19 @@ async function handlePasswordReset() {
     btn.textContent = 'Creating...';
     message.textContent = '';
 
+    if (USE_FIREBASE_AUTH) {
+        try {
+            await sendResetEmail(email);
+            message.textContent = 'Password reset email sent. Check your inbox and spam folder.';
+        } catch (error) {
+            message.textContent = friendlyAuthError(error);
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Email Reset Link';
+        return;
+    }
+
     try {
         const response = await fetch('/.netlify/functions/auth', {
             method: 'POST',
@@ -895,6 +984,41 @@ async function handlePasswordReset() {
     btn.textContent = 'Create Reset Link';
 }
 
+async function handleProviderLogin(provider) {
+    if (!USE_FIREBASE_AUTH) return;
+
+    try {
+        const role = provider === 'apple'
+            ? await signInWithApple()
+            : await signInWithGoogle();
+        localStorage.setItem('fratello-role', JSON.stringify(role));
+        localStorage.removeItem('fratello-session');
+        showDashboard(role);
+    } catch (error) {
+        setLoginError(friendlyAuthError(error));
+    }
+}
+
+async function handleCreateAccount() {
+    if (!USE_FIREBASE_AUTH) return;
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) {
+        setLoginError('Enter your email and a password, then create the account.');
+        return;
+    }
+
+    try {
+        const role = await createEmailAccount(email, password);
+        localStorage.setItem('fratello-role', JSON.stringify(role));
+        localStorage.removeItem('fratello-session');
+        showDashboard(role);
+    } catch (error) {
+        setLoginError(friendlyAuthError(error));
+    }
+}
+
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -905,6 +1029,24 @@ async function handleLogin() {
 
     btn.disabled = true;
     btn.textContent = '...';
+
+    if (USE_FIREBASE_AUTH && email && password) {
+        try {
+            const role = await signInWithEmail(email, password);
+            localStorage.setItem('fratello-role', JSON.stringify(role));
+            localStorage.removeItem('fratello-session');
+            showDashboard(role);
+        } catch (error) {
+            const input = document.getElementById('loginEmail');
+            input.classList.add('error');
+            setTimeout(() => input.classList.remove('error'), 400);
+            setLoginError(friendlyAuthError(error));
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+        return;
+    }
 
     try {
         const body = email && password
@@ -1085,7 +1227,10 @@ function showDashboard(role) {
 // SIGN OUT
 // ════════════════════════════════════════════════
 
-function signOut() {
+async function signOut() {
+    if (USE_FIREBASE_AUTH) {
+        await signOutHub();
+    }
     localStorage.removeItem('fratello-role');
     localStorage.removeItem('fratello-session');
     document.getElementById('loginScreen').classList.remove('hidden');
@@ -1101,6 +1246,23 @@ function signOut() {
 // ════════════════════════════════════════════════
 
 (async function init() {
+    setupAuthModeUi();
+
+    if (USE_FIREBASE_AUTH) {
+        onHubAuthChange((role, error) => {
+            if (role) {
+                localStorage.setItem('fratello-role', JSON.stringify(role));
+                localStorage.removeItem('fratello-session');
+                showDashboard(role);
+                return;
+            }
+
+            localStorage.removeItem('fratello-role');
+            if (error) setLoginError(friendlyAuthError(error));
+        });
+        return;
+    }
+
     const sessionToken = localStorage.getItem('fratello-session');
     if (sessionToken) {
         try {
@@ -1127,6 +1289,14 @@ function signOut() {
 
     localStorage.removeItem('fratello-role');
 })();
+
+window.toggleSetupCode = toggleSetupCode;
+window.toggleResetPanel = toggleResetPanel;
+window.handlePasswordReset = handlePasswordReset;
+window.handleProviderLogin = handleProviderLogin;
+window.handleCreateAccount = handleCreateAccount;
+window.handleLogin = handleLogin;
+window.signOut = signOut;
 </script>
 
 </body>

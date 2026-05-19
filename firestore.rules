@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    function signedInEmail() {
+      return request.auth.token.email;
+    }
+
+    function isBootstrapOwner() {
+      return signedIn() && signedInEmail() in [
+        'prefontainech@gmail.com',
+        'russ@fratellocoffee.com'
+      ];
+    }
+
+    function ownerProfile() {
+      return get(/databases/$(database)/documents/hubProfiles/$(request.auth.uid));
+    }
+
+    function isOwner() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/hubProfiles/$(request.auth.uid))
+        && ownerProfile().data.profile == 'owner'
+        && ownerProfile().data.status == 'active';
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function hasInvite() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/hubInvites/$(signedInEmail()))
+        && get(/databases/$(database)/documents/hubInvites/$(signedInEmail())).data.status != 'disabled';
+    }
+
+    function profileMatchesSignedInUser() {
+      return request.resource.data.email == signedInEmail();
+    }
+
+    match /hubProfiles/{uid} {
+      allow read: if isSelf(uid) || isOwner();
+
+      allow create: if isSelf(uid)
+        && profileMatchesSignedInUser()
+        && (
+          (
+            isBootstrapOwner()
+            && request.resource.data.profile == 'owner'
+            && request.resource.data.status == 'active'
+          )
+          || (
+            hasInvite()
+            && request.resource.data.profile == get(/databases/$(database)/documents/hubInvites/$(signedInEmail())).data.profile
+            && request.resource.data.status == 'active'
+          )
+        );
+
+      allow update: if isOwner()
+        || (
+          isSelf(uid)
+          && resource.data.email == signedInEmail()
+          && request.resource.data.email == resource.data.email
+          && request.resource.data.profile == resource.data.profile
+          && request.resource.data.status == resource.data.status
+        );
+
+      allow delete: if false;
+    }
+
+    match /hubInvites/{email} {
+      allow read: if isOwner() || (signedIn() && resource.data.email == signedInEmail());
+      allow create, update: if isOwner();
+      allow delete: if false;
+    }
+  }
+}

@@ -620,7 +620,21 @@
         </main>
     </div>
 
-    <script>
+    <script src="firebase-config.js"></script>
+    <script type="module">
+        import {
+            firebaseConfigured,
+            friendlyAuthError,
+            listHubUsers,
+            onHubAuthChange,
+            saveHubInvite,
+            sendResetEmail,
+            setHubUserDisabled,
+            updateHubUser
+        } from './fratello-auth.js';
+
+        const USE_FIREBASE_AUTH = firebaseConfigured();
+
         const PROFILES = {
             owner: {
                 label: 'Owner',
@@ -698,7 +712,8 @@
 
         function requireOwner() {
             const role = currentRole();
-            const isOwner = sessionToken() && role && (role.key === 'owner' || role.label === 'Owner');
+            const hasLogin = USE_FIREBASE_AUTH || sessionToken();
+            const isOwner = hasLogin && role && (role.key === 'owner' || role.label === 'Owner');
             document.getElementById('pageShell').style.display = isOwner ? 'flex' : 'none';
             document.getElementById('lockedState').style.display = isOwner ? 'none' : 'flex';
             return isOwner;
@@ -722,6 +737,10 @@
         }
 
         async function authRequest(payload) {
+            if (USE_FIREBASE_AUTH) {
+                throw new Error('Legacy auth is disabled because Firebase auth is active.');
+            }
+
             const response = await fetch('/.netlify/functions/auth', {
                 method: 'POST',
                 headers: {
@@ -780,7 +799,7 @@
                         <span class="status ${escapeHtml(status.className)}">${escapeHtml(status.label)}</span>
                         <span class="status-help">${escapeHtml(status.help)}</span>
                         <div class="row-actions">
-                            <button class="ghost-button" type="button" data-person="${safeId}" onclick="resetPassword(this.dataset.person)">Create Reset Link</button>
+                            <button class="ghost-button" type="button" data-person="${safeId}" onclick="resetPassword(this.dataset.person)">${USE_FIREBASE_AUTH ? 'Send Reset Email' : 'Create Reset Link'}</button>
                             <button class="ghost-button ${isDisabled ? '' : 'danger-button'}" type="button" data-person="${safeId}" data-disabled="${!isDisabled}" onclick="toggleDisabled(this.dataset.person, this.dataset.disabled === 'true')">${isDisabled ? 'Enable User' : 'Disable User'}</button>
                         </div>
                     </td>
@@ -830,6 +849,13 @@
         }
 
         async function loadUsers() {
+            if (USE_FIREBASE_AUTH) {
+                STAFF = await listHubUsers();
+                renderStaff();
+                document.getElementById('saveState').textContent = 'Staff permissions loaded from Firestore.';
+                return;
+            }
+
             const data = await authRequest({ action: 'users:list' });
             STAFF = data.users;
             renderStaff();
@@ -854,9 +880,15 @@
             button.textContent = 'Creating...';
 
             try {
-                const data = await authRequest({ action: 'users:invite', name, email, title, profile });
-                renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
-                document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
+                if (USE_FIREBASE_AUTH) {
+                    const data = await saveHubInvite({ name, email, title, profile });
+                    renderGeneratedLink('Hub access', data.name, data.inviteUrl);
+                    document.getElementById('adminMessage').textContent = 'Access profile saved. Send them the Hub link; they can sign in with Google, Apple, or email.';
+                } else {
+                    const data = await authRequest({ action: 'users:invite', name, email, title, profile });
+                    renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
+                    document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
+                }
                 document.getElementById('inviteName').value = '';
                 document.getElementById('inviteEmail').value = '';
                 document.getElementById('inviteTitle').value = '';
@@ -872,7 +904,12 @@
         async function updateProfile(event) {
             const personId = event.target.dataset.person;
             const nextProfile = event.target.value;
-            await authRequest({ action: 'users:update', id: personId, profile: nextProfile });
+            const person = STAFF.find(item => item.id === personId);
+            if (USE_FIREBASE_AUTH) {
+                await updateHubUser(person, nextProfile);
+            } else {
+                await authRequest({ action: 'users:update', id: personId, profile: nextProfile });
+            }
             document.getElementById(`access-${personId}`).innerHTML = accessTags(nextProfile);
             document.getElementById('saveState').textContent = 'Profile updated.';
             await loadUsers();
@@ -883,22 +920,55 @@
             output.style.display = 'none';
             document.getElementById('adminMessage').textContent = 'Creating reset link...';
             try {
-                const data = await authRequest({ action: 'users:reset', id: personId });
-                renderGeneratedLink('Password reset', data.user.name, data.resetUrl);
-                document.getElementById('adminMessage').textContent = 'Reset link created. Use Copy Link, then send it to the person.';
+                const person = STAFF.find(item => item.id === personId);
+                if (USE_FIREBASE_AUTH) {
+                    await sendResetEmail(person.email);
+                    document.getElementById('adminMessage').textContent = `Firebase sent a password reset email to ${person.email}.`;
+                } else {
+                    const data = await authRequest({ action: 'users:reset', id: personId });
+                    renderGeneratedLink('Password reset', data.user.name, data.resetUrl);
+                    document.getElementById('adminMessage').textContent = 'Reset link created. Use Copy Link, then send it to the person.';
+                }
                 await loadUsers();
             } catch (error) {
-                document.getElementById('adminMessage').textContent = error.message;
+                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
             }
         }
 
         async function toggleDisabled(personId, disabled) {
-            await authRequest({ action: 'users:disable', id: personId, disabled });
+            const person = STAFF.find(item => item.id === personId);
+            if (USE_FIREBASE_AUTH) {
+                await setHubUserDisabled(person, disabled);
+            } else {
+                await authRequest({ action: 'users:disable', id: personId, disabled });
+            }
             document.getElementById('saveState').textContent = disabled ? 'User disabled.' : 'User enabled.';
             await loadUsers();
         }
 
         (async function initPermissions() {
+            if (USE_FIREBASE_AUTH) {
+                onHubAuthChange((role, error) => {
+                    if (role) {
+                        localStorage.setItem('fratello-role', JSON.stringify(role));
+                        if (requireOwner()) {
+                            renderProfiles();
+                            loadUsers().catch(loadError => {
+                                document.getElementById('saveState').textContent = loadError.message;
+                            });
+                        }
+                        return;
+                    }
+
+                    localStorage.removeItem('fratello-role');
+                    requireOwner();
+                    if (error) {
+                        document.getElementById('saveState').textContent = friendlyAuthError(error);
+                    }
+                });
+                return;
+            }
+
             let isOwner = requireOwner();
             if (!isOwner) {
                 isOwner = await refreshOwnerSession();
@@ -912,6 +982,12 @@
                 });
             }
         })();
+
+        window.inviteUser = inviteUser;
+        window.updateProfile = updateProfile;
+        window.resetPassword = resetPassword;
+        window.toggleDisabled = toggleDisabled;
+        window.copyGeneratedLink = copyGeneratedLink;
     </script>
 </body>
 </html>
