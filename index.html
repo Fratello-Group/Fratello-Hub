@@ -64,7 +64,7 @@
 
         .login-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
             padding: 0 32px;
             text-align: center;
         }
@@ -79,7 +79,7 @@
 
         .login-input-wrap {
             position: relative;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .login-input {
@@ -156,33 +156,76 @@
         .login-btn:active { transform: scale(0.99); }
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .login-divider {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            margin: 18px 0;
+            color: rgba(255, 255, 255, 0.38);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.13);
+        }
+
+        .login-divider.visible { display: flex; }
+
         .provider-grid {
             display: none;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
-            margin: 18px 0 0;
+            margin: 0 0 18px;
         }
 
         .provider-grid.visible { display: grid; }
 
         .provider-btn {
-            min-height: 46px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 54px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.20);
             border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--white);
-            font-size: 11px;
+            background: #FFFFFF;
+            color: #2E2E2E;
+            font-size: 13px;
             font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            letter-spacing: 0;
+            text-transform: none;
             cursor: pointer;
-            transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+            transition: border-color 0.25s ease, background 0.25s ease, transform 0.1s ease;
         }
 
         .provider-btn:hover {
             border-color: var(--teal);
-            color: var(--teal);
-            background: rgba(54, 179, 175, 0.08);
+            color: #1A1A1A;
+            background: #F6F1E9;
+        }
+
+        .provider-btn:active { transform: scale(0.99); }
+
+        .provider-btn.google {
+            color: #2E2E2E;
+        }
+
+        .provider-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
         }
 
         .provider-btn:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -625,6 +668,9 @@
             .masthead-right { gap: 16px; }
             .masthead-role { display: none; }
 
+            .login-container { max-width: 420px; padding: 0 26px; }
+            .login-logo { margin-bottom: 48px; }
+
             .main {
                 padding: 40px 24px 64px;
             }
@@ -671,6 +717,21 @@
     <div class="login-container">
         <img src="assets/Fratello_Logo_White.png" alt="Fratello" class="login-logo">
         <form onsubmit="event.preventDefault(); handleLogin();">
+            <div class="provider-grid" id="providerGrid">
+                <button class="provider-btn google" id="googleProviderBtn" type="button" onclick="handleProviderLogin('google')" aria-label="Sign in with Google">
+                    <span class="provider-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 4 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z"/>
+                        </svg>
+                    </span>
+                    <span>Sign in with Google</span>
+                </button>
+                <button class="provider-btn" id="appleProviderBtn" type="button" onclick="handleProviderLogin('apple')">Sign in with Apple</button>
+            </div>
+            <div class="login-divider" id="loginDivider">or</div>
             <div class="login-input-wrap">
                 <input
                     type="email"
@@ -701,10 +762,6 @@
             </div>
             <div class="login-error" id="loginError">Invalid login</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
-            <div class="provider-grid" id="providerGrid">
-                <button class="provider-btn" id="googleProviderBtn" type="button" onclick="handleProviderLogin('google')">Google</button>
-                <button class="provider-btn" id="appleProviderBtn" type="button" onclick="handleProviderLogin('apple')">Apple</button>
-            </div>
             <div class="login-helper" id="loginHelper">Use the email and password from your HUB invite.</div>
             <div class="login-actions">
                 <button class="setup-toggle" type="button" onclick="toggleResetPanel()">Forgot password?</button>
@@ -908,6 +965,7 @@ function setupAuthModeUi() {
 
     const providers = window.FRATELLO_AUTH_PROVIDERS || {};
     document.getElementById('providerGrid').classList.add('visible');
+    document.getElementById('loginDivider').classList.add('visible');
     document.getElementById('googleProviderBtn').style.display = providers.google === false ? 'none' : '';
     document.getElementById('appleProviderBtn').style.display = providers.apple === true ? '' : 'none';
     document.getElementById('createAccountToggle').classList.add('visible');
