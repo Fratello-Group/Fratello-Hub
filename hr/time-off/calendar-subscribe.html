@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Calendar Subscriptions</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../system/design-tokens/tokens.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--warm-gray-100);
+            color: var(--bean-black);
+            font-family: var(--font-primary);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        button, input { font: inherit; }
+        button { cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: 0.62; }
+
+        .masthead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            min-height: var(--header-height);
+            padding: var(--space-md) var(--space-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-lg);
+            background: var(--bean-black);
+            border-bottom: 1px solid var(--bean-black-soft);
+        }
+
+        .masthead-logo {
+            display: block;
+            width: auto;
+            height: 30px;
+        }
+
+        .masthead-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .nav-link,
+        .button,
+        .tab {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid color-mix(in srgb, var(--warm-gray-300) 24%, transparent);
+            border-radius: var(--radius-sm);
+            padding: 0 14px;
+            background: transparent;
+            color: var(--warm-gray-200);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .button:hover,
+        .tab:hover {
+            border-color: var(--brewing-blue);
+            color: var(--fratello-white);
+        }
+
+        .button.primary {
+            border-color: var(--brewing-blue);
+            background: var(--brewing-blue);
+            color: var(--bean-black);
+        }
+
+        .button.primary:hover {
+            border-color: var(--brewing-blue-light);
+            background: var(--brewing-blue-light);
+            color: var(--bean-black);
+        }
+
+        main {
+            width: min(1120px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: var(--space-2xl) 0 var(--space-3xl);
+        }
+
+        .page-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+            gap: var(--space-xl);
+            align-items: end;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--warm-gray-200);
+        }
+
+        .eyebrow {
+            margin-bottom: var(--space-md);
+            color: var(--brewing-blue-dark);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            color: var(--bean-black);
+            font-size: clamp(34px, 5vw, 56px);
+            font-weight: 800;
+            line-height: 1.04;
+            letter-spacing: 0;
+        }
+
+        .lede {
+            max-width: 760px;
+            margin-top: var(--space-md);
+            color: var(--warm-gray-600);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .status-card,
+        .panel,
+        .feed-card {
+            border: 1px solid var(--warm-gray-200);
+            border-radius: var(--radius-md);
+            background: var(--fratello-white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-card {
+            padding: var(--space-lg);
+            border-left: 4px solid var(--brewing-blue);
+        }
+
+        .status-label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--warm-gray-500);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            display: block;
+            color: var(--bean-black);
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .tabs {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-top: var(--space-xl);
+        }
+
+        .tab {
+            color: var(--warm-gray-700);
+            border-color: var(--warm-gray-300);
+            background: var(--fratello-white);
+        }
+
+        .tab.active {
+            border-color: var(--brewing-blue);
+            background: var(--brewing-blue-subtle);
+            color: var(--brewing-blue-dark);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+            align-items: start;
+        }
+
+        .panel {
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--warm-gray-200);
+        }
+
+        .panel-title {
+            color: var(--bean-black);
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .panel-note {
+            margin-top: var(--space-sm);
+            color: var(--warm-gray-600);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .steps {
+            display: grid;
+            gap: 1px;
+            background: var(--warm-gray-200);
+            counter-reset: step;
+        }
+
+        .step {
+            min-height: 76px;
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--fratello-white);
+            color: var(--warm-gray-700);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            background: var(--brewing-blue-subtle);
+            color: var(--brewing-blue-dark);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .feed-list {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        .feed-card {
+            padding: var(--space-lg);
+        }
+
+        .feed-title {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-md);
+            color: var(--bean-black);
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .feed-copy {
+            margin-top: var(--space-sm);
+            color: var(--warm-gray-600);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .copy-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .copy-input {
+            min-width: 0;
+            height: 42px;
+            border: 1px solid var(--warm-gray-300);
+            border-radius: var(--radius-sm);
+            padding: 0 var(--space-md);
+            background: var(--warm-gray-50);
+            color: var(--bean-black);
+            font-size: 12px;
+        }
+
+        .copy-row .button {
+            color: var(--bean-black);
+            border-color: var(--warm-gray-300);
+            background: var(--fratello-white);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            border: 1px solid color-mix(in srgb, var(--brewing-blue) 38%, transparent);
+            border-radius: var(--radius-sm);
+            padding: 0 var(--space-sm);
+            background: var(--brewing-blue-subtle);
+            color: var(--brewing-blue-dark);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .message {
+            display: none;
+            margin-top: var(--space-md);
+            border: 1px solid color-mix(in srgb, var(--brewing-blue) 40%, transparent);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            background: var(--brewing-blue-subtle);
+            color: var(--bean-black);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .message.visible { display: block; }
+        .access-state { margin-top: var(--space-xl); max-width: 760px; }
+
+        @media (max-width: 820px) {
+            .masthead {
+                padding: var(--space-md) 22px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .masthead-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            main {
+                width: min(100% - 32px, 1120px);
+                padding-top: var(--space-xl);
+            }
+
+            .page-intro,
+            .layout,
+            .copy-row {
+                grid-template-columns: 1fr;
+            }
+
+            .copy-row .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="masthead">
+        <a href="../../index.html" aria-label="Back to Fratello Hub">
+            <img class="masthead-logo" src="../../assets/Fratello_Logo_White.png" alt="Fratello">
+        </a>
+        <div class="masthead-actions">
+            <a class="nav-link" href="../../index.html">Back to Hub</a>
+            <a class="nav-link" href="vacation-tracker.html?view=my-requests">My Time Off</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-intro">
+            <div>
+                <div class="eyebrow">Calendar Subscriptions</div>
+                <h1>Keep time off visible in your calendar.</h1>
+                <p class="lede">Copy a private feed link into Outlook, Google Calendar, or Apple Calendar. Team feeds show vacations only; sick day feeds are private to Owner and Controller access.</p>
+            </div>
+            <aside class="status-card" aria-live="polite">
+                <span class="status-label">Feed Status</span>
+                <span class="status-value" id="connectionStatus">Checking Hub session...</span>
+            </aside>
+        </section>
+
+        <section class="access-state panel" id="accessState" hidden>
+            <div class="panel-header">
+                <h2 class="panel-title">Sign in required</h2>
+                <p class="panel-note">Open the Hub and sign in before copying calendar subscription links.</p>
+            </div>
+            <div class="feed-card">
+                <a class="button primary" href="../../index.html">Go to Hub Login</a>
+            </div>
+        </section>
+
+        <div id="calendarContent" hidden>
+            <nav class="tabs" aria-label="Calendar app instructions">
+                <button class="tab active" type="button" data-tab="outlook">Outlook</button>
+                <button class="tab" type="button" data-tab="google">Google Calendar</button>
+                <button class="tab" type="button" data-tab="apple">Apple Calendar</button>
+            </nav>
+
+            <section class="layout">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title" id="instructionTitle">Outlook</h2>
+                        <p class="panel-note" id="instructionNote">Use the web or desktop calendar subscription option and paste one of the feed URLs.</p>
+                    </div>
+                    <div class="steps" id="instructionSteps"></div>
+                </article>
+
+                <aside class="feed-list" id="feedList"></aside>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        const ADMIN_KEYS = new Set(['owner', 'controller']);
+        const tabs = {
+            outlook: {
+                title: 'Outlook',
+                note: 'Use the web or desktop calendar subscription option and paste one of the feed URLs.',
+                steps: [
+                    'Open Outlook Calendar and look for Add calendar in the left calendar area.',
+                    'Choose Subscribe from web or From internet calendar, depending on your Outlook version.',
+                    'Paste the Fratello feed URL, name the calendar clearly, and choose a color.',
+                    'Save the subscription. Outlook will refresh it automatically on its own schedule.',
+                    'Repeat with the My Time Off feed if you want a separate personal calendar.'
+                ]
+            },
+            google: {
+                title: 'Google Calendar',
+                note: 'Google Calendar adds these as subscribed calendars under Other calendars.',
+                steps: [
+                    'Open Google Calendar in a browser and find Other calendars in the left sidebar.',
+                    'Click the plus button, then choose From URL.',
+                    'Paste the Fratello feed URL. Leave public access unchecked.',
+                    'Click Add calendar, then rename it from the calendar settings if needed.',
+                    'Google refreshes subscribed calendars periodically, so updates may not appear instantly.'
+                ]
+            },
+            apple: {
+                title: 'Apple Calendar',
+                note: 'Apple Calendar can subscribe from macOS, iPhone, or iPad with the same URL.',
+                steps: [
+                    'Open Apple Calendar and choose File, then New Calendar Subscription on macOS.',
+                    'On iPhone or iPad, open Calendar settings and choose Add Subscription Calendar.',
+                    'Paste the Fratello feed URL and continue.',
+                    'Name the calendar, keep alerts optional, and set auto-refresh if your device offers it.',
+                    'Save the subscription and repeat for any other Fratello feed you need.'
+                ]
+            }
+        };
+
+        let activeTab = 'outlook';
+        let firestoreClient = null;
+        let feeds = {};
+
+        const els = {
+            connectionStatus: document.getElementById('connectionStatus'),
+            accessState: document.getElementById('accessState'),
+            calendarContent: document.getElementById('calendarContent'),
+            instructionTitle: document.getElementById('instructionTitle'),
+            instructionNote: document.getElementById('instructionNote'),
+            instructionSteps: document.getElementById('instructionSteps'),
+            feedList: document.getElementById('feedList')
+        };
+
+        function readRole() {
+            try {
+                return JSON.parse(localStorage.getItem('fratello-role') || 'null');
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function roleKey(role) {
+            return String(role?.key || role?.label || '').trim().toLowerCase();
+        }
+
+        function userEmail(role) {
+            return role?.user?.email || role?.email || '';
+        }
+
+        function defaultOrigin() {
+            return window.location.origin && window.location.origin !== 'null'
+                ? window.location.origin
+                : 'https://fratello-hub.netlify.app';
+        }
+
+        function fallbackFeed(type, role) {
+            const url = new URL('/api/calendar.ics', defaultOrigin());
+            url.searchParams.set('token', 'firestore-token-required');
+            url.searchParams.set('feed', type);
+            if (userEmail(role)) url.searchParams.set('user', userEmail(role));
+            return url.href;
+        }
+
+        async function loadFirestoreClient() {
+            try {
+                firestoreClient = await import('../../system/api/firestore-client.js');
+                return firestoreClient;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function callFirst(client, names, ...args) {
+            if (!client) return null;
+            for (const name of names) {
+                if (typeof client[name] === 'function') {
+                    return client[name](...args);
+                }
+            }
+            return null;
+        }
+
+        async function loadFeeds(role) {
+            const client = await loadFirestoreClient();
+            if (!client) {
+                els.connectionStatus.textContent = 'Prototype mode - Firestore client not found';
+                return {
+                    team: fallbackFeed('team', role),
+                    personal: fallbackFeed('personal', role),
+                    sick: fallbackFeed('sick', role)
+                };
+            }
+
+            try {
+                const result = await callFirst(client, ['getCalendarSubscriptions', 'getCalendarFeeds', 'getCalendarTokens'], role);
+                els.connectionStatus.textContent = result
+                    ? 'Connected to Firestore client'
+                    : 'Firestore client loaded - feed functions not exposed yet';
+                return {
+                    team: result?.team || result?.teamVacation || fallbackFeed('team', role),
+                    personal: result?.personal || result?.myTimeOff || fallbackFeed('personal', role),
+                    sick: result?.sick || result?.sickDays || fallbackFeed('sick', role)
+                };
+            } catch (error) {
+                els.connectionStatus.textContent = 'Calendar feed lookup failed';
+                return {
+                    team: fallbackFeed('team', role),
+                    personal: fallbackFeed('personal', role),
+                    sick: fallbackFeed('sick', role)
+                };
+            }
+        }
+
+        function feedDefinitions(role) {
+            const items = [
+                {
+                    key: 'team',
+                    title: 'Team Vacation Calendar',
+                    badge: 'Vacation',
+                    copy: 'Shows approved team vacation and stat holidays. Sick day records are never included in this team feed.'
+                },
+                {
+                    key: 'personal',
+                    title: 'My Time Off',
+                    badge: 'Personal',
+                    copy: 'Shows your own approved vacation and sick time, plus stat holidays.'
+                }
+            ];
+
+            if (ADMIN_KEYS.has(roleKey(role))) {
+                items.push({
+                    key: 'sick',
+                    title: 'Sick Day Calendar',
+                    badge: 'Private',
+                    copy: 'Owner and Controller private feed. Entries stay minimal and do not include reason details.'
+                });
+            }
+
+            return items;
+        }
+
+        function renderInstructions() {
+            const tab = tabs[activeTab];
+            els.instructionTitle.textContent = tab.title;
+            els.instructionNote.textContent = tab.note;
+            els.instructionSteps.innerHTML = tab.steps.map(step => `<div class="step">${escapeHtml(step)}</div>`).join('');
+            document.querySelectorAll('.tab').forEach(button => {
+                button.classList.toggle('active', button.dataset.tab === activeTab);
+            });
+        }
+
+        function renderFeeds(role) {
+            els.feedList.innerHTML = feedDefinitions(role).map(feed => `
+                <article class="feed-card">
+                    <div class="feed-title">
+                        <span>${escapeHtml(feed.title)}</span>
+                        <span class="badge">${escapeHtml(feed.badge)}</span>
+                    </div>
+                    <p class="feed-copy">${escapeHtml(feed.copy)}</p>
+                    <div class="copy-row">
+                        <input class="copy-input" id="feed-${feed.key}" type="text" readonly value="${escapeHtml(feeds[feed.key] || fallbackFeed(feed.key, role))}">
+                        <button class="button" type="button" data-copy="${feed.key}">Copy</button>
+                    </div>
+                </article>
+            `).join('') + `
+                <article class="feed-card">
+                    <div class="feed-title">
+                        <span>Regenerate my token</span>
+                        <span class="badge">Security</span>
+                    </div>
+                    <p class="feed-copy">Use this if a link was shared by mistake. Once connected, Firestore will invalidate the old token and create new feed URLs.</p>
+                    <button class="button primary" type="button" id="regenerateButton">Regenerate Token</button>
+                    <div class="message" id="tokenMessage"></div>
+                </article>
+            `;
+
+            document.querySelectorAll('[data-copy]').forEach(button => {
+                button.addEventListener('click', () => copyFeed(button.dataset.copy));
+            });
+            document.getElementById('regenerateButton').addEventListener('click', () => regenerateToken(role));
+        }
+
+        async function copyFeed(key) {
+            const input = document.getElementById(`feed-${key}`);
+            input.focus();
+            input.select();
+
+            try {
+                await navigator.clipboard.writeText(input.value);
+            } catch (error) {
+                document.execCommand('copy');
+            }
+
+            els.connectionStatus.textContent = 'Feed URL copied';
+        }
+
+        async function regenerateToken(role) {
+            const button = document.getElementById('regenerateButton');
+            const message = document.getElementById('tokenMessage');
+            button.disabled = true;
+            message.classList.remove('visible');
+
+            try {
+                const client = firestoreClient || await loadFirestoreClient();
+                const result = await callFirst(client, ['regenerateCalendarToken', 'regenerateMyCalendarToken'], role);
+                if (result) {
+                    feeds = {
+                        team: result.team || result.teamVacation || feeds.team,
+                        personal: result.personal || result.myTimeOff || feeds.personal,
+                        sick: result.sick || result.sickDays || feeds.sick
+                    };
+                    renderFeeds(role);
+                    showTokenMessage('Token regenerated and feed URLs refreshed.');
+                    logActivity('calendar_token_regenerated');
+                } else {
+                    showTokenMessage('Prototype mode only. Connect a Firestore token regeneration function to make this live.');
+                }
+            } catch (error) {
+                showTokenMessage(error.message || 'Could not regenerate the token yet.');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function showTokenMessage(text) {
+            const message = document.getElementById('tokenMessage');
+            message.textContent = text;
+            message.classList.add('visible');
+        }
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function logActivity(action) {
+            const payload = {
+                event_type: 'data_edit',
+                tool_name: 'Calendar Subscriptions',
+                details: { action },
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const body = JSON.stringify(payload);
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon('/.netlify/functions/log-activity', new Blob([body], { type: 'application/json' }));
+                    return;
+                }
+                fetch('/.netlify/functions/log-activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true });
+            } catch (error) {
+                // Activity logging is best-effort from this static page.
+            }
+        }
+
+        async function init() {
+            const role = readRole();
+            if (!role) {
+                els.connectionStatus.textContent = 'Sign in required';
+                els.accessState.hidden = false;
+                return;
+            }
+
+            feeds = await loadFeeds(role);
+            renderInstructions();
+            renderFeeds(role);
+            els.calendarContent.hidden = false;
+        }
+
+        document.querySelectorAll('.tab').forEach(button => {
+            button.addEventListener('click', () => {
+                activeTab = button.dataset.tab;
+                renderInstructions();
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>

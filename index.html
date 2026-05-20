@@ -891,6 +891,7 @@
     <div class="footer">
         Fratello Group Inc. &nbsp;·&nbsp; 4021 9 St SE &nbsp;·&nbsp; Calgary AB
         <span class="footer-accent">Serving exceptional coffee with style — since 1974</span>
+        <span class="footer-accent">Hub usage is logged for analytics and security.</span>
     </div>
 </div>
 
@@ -985,6 +986,23 @@ const SECTIONS = {
         ]
     },
 
+    'time-off': {
+        group: 'Employee Resources',
+        label: 'Time Off',
+        access: 'Everyone, with manager and admin views by role',
+        cards: [
+            { title: 'Submit Vacation Request', desc: 'Request vacation time and send it to the right approver.', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off' },
+            { title: 'Log Sick Day', desc: 'Record a sick day quickly from the Hub.', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off' },
+            { title: 'My Time Off', desc: 'Review your vacation requests, approvals, and past time-off records.', href: 'hr/time-off/vacation-tracker.html?view=my-requests', badge: 'Time Off' },
+            { title: 'Calendar Subscriptions', desc: 'Copy Outlook, Google Calendar, and Apple Calendar feed links.', href: 'hr/time-off/calendar-subscribe.html', badge: 'Calendar' },
+            { title: 'Approvals Queue', desc: 'Review pending vacation requests from your team.', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] },
+            { title: 'Team Calendar', desc: 'See approved and pending vacation coverage across the team.', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] },
+            { title: 'Sick Day Report', desc: 'Private sick-day reporting for Owner and Controller access only.', href: 'hr/time-off/sick-day-report.html', badge: 'Private', roles: ['owner', 'controller'] },
+            { title: 'User Management', desc: 'Manage time-off users, role tiers, departments, and active status.', href: 'system/admin/users.html', badge: 'Admin', roles: ['owner', 'controller'] },
+            { title: 'Hub Activity', desc: 'Review Hub usage events, tool opens, and approval actions.', href: 'system/admin/activity-log.html', badge: 'Admin', roles: ['owner'] }
+        ]
+    },
+
     // ── HR & People (Hiring access excludes Sales) ──
 
     'hr-people': {
@@ -1019,12 +1037,12 @@ const SECTIONS = {
 };
 
 const ROLE_SECTION_MAP = {
-    owner: ['finance', 'production', 'sales', 'marketing', 'hr-people', 'employee-resources', 'owner-admin'],
-    controller: ['finance', 'production', 'sales', 'hr-people', 'employee-resources'],
-    marketing: ['marketing', 'hr-people', 'employee-resources'],
-    production: ['production', 'hr-people', 'employee-resources'],
-    sales: ['sales', 'marketing', 'employee-resources'],
-    staff: ['employee-resources']
+    owner: ['finance', 'production', 'sales', 'marketing', 'hr-people', 'employee-resources', 'time-off', 'owner-admin'],
+    controller: ['finance', 'production', 'sales', 'hr-people', 'employee-resources', 'time-off'],
+    marketing: ['marketing', 'hr-people', 'employee-resources', 'time-off'],
+    production: ['production', 'hr-people', 'employee-resources', 'time-off'],
+    sales: ['sales', 'marketing', 'employee-resources', 'time-off'],
+    staff: ['employee-resources', 'time-off']
 };
 
 function normalizeRole(role) {
@@ -1337,6 +1355,7 @@ function createToolLink(card, sectionLabel) {
 }
 
 function showDashboard(role) {
+    role = normalizeRole(role);
     document.getElementById('loginScreen').classList.add('hidden');
 
     const dashboard = document.getElementById('dashboard');

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Sick Day Report</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../system/design-tokens/tokens.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100vh; background: var(--warm-gray-100); color: var(--bean-black); font-family: var(--font-primary); }
+        button, input, select { font: inherit; }
+        .masthead { position: sticky; top: 0; z-index: 20; min-height: var(--header-height); padding: var(--space-md) var(--space-xl); display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); background: var(--bean-black); }
+        .masthead img { height: 30px; width: auto; display: block; }
+        .masthead-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+        .nav-link, .btn { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 14px; background: var(--fratello-white); color: var(--bean-black); text-decoration: none; font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; cursor: pointer; }
+        .masthead .nav-link { border-color: rgba(255,255,255,.2); background: transparent; color: var(--warm-gray-200); }
+        .btn.primary { border-color: var(--brewing-blue); background: var(--brewing-blue); color: var(--bean-black); }
+        main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: var(--space-2xl) 0 var(--space-3xl); }
+        .intro { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--space-xl); align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--warm-gray-200); }
+        .eyebrow { margin-bottom: var(--space-md); color: var(--brewing-blue-dark); font-size: 12px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; }
+        h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.04; }
+        .lede { max-width: 760px; margin-top: var(--space-md); color: var(--warm-gray-600); font-size: 15px; line-height: 1.7; }
+        .panel, .status-card, .metric { border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); background: var(--fratello-white); box-shadow: var(--shadow-sm); }
+        .status-card { padding: var(--space-lg); border-left: 4px solid var(--brewing-blue); }
+        .label { display: block; margin-bottom: var(--space-xs); color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+        .value { display: block; font-size: 16px; font-weight: 800; line-height: 1.35; }
+        .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-md); margin-top: var(--space-xl); }
+        .metric { padding: var(--space-lg); }
+        .metric-number { display: block; font-size: 34px; font-weight: 800; line-height: 1; }
+        .metric-label { display: block; margin-top: var(--space-sm); color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+        .panel { margin-top: var(--space-lg); overflow: hidden; }
+        .panel-header { display: flex; justify-content: space-between; gap: var(--space-md); align-items: start; padding: var(--space-lg); border-bottom: 1px solid var(--warm-gray-200); }
+        .panel-title { font-size: 21px; font-weight: 800; }
+        .panel-note { margin-top: var(--space-sm); color: var(--warm-gray-600); font-size: 13px; line-height: 1.6; }
+        .filters { display: grid; grid-template-columns: minmax(200px, 1fr) 170px 170px 170px; gap: var(--space-sm); padding: var(--space-lg); border-bottom: 1px solid var(--warm-gray-200); }
+        input, select { width: 100%; min-height: 42px; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 var(--space-md); background: var(--warm-gray-50); color: var(--bean-black); outline: none; font-size: 14px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; min-width: 860px; border-collapse: collapse; }
+        th { padding: var(--space-md); border-bottom: 1px solid var(--warm-gray-200); color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 3px; text-align: left; text-transform: uppercase; white-space: nowrap; }
+        td { padding: var(--space-md); border-bottom: 1px solid var(--warm-gray-200); color: var(--warm-gray-700); font-size: 13px; line-height: 1.5; vertical-align: top; }
+        .person { display: block; color: var(--bean-black); font-weight: 800; }
+        .badge { display: inline-flex; min-height: 28px; align-items: center; border: 1px solid color-mix(in srgb, var(--brewing-blue) 38%, transparent); border-radius: var(--radius-sm); padding: 0 var(--space-sm); background: var(--brewing-blue-subtle); color: var(--brewing-blue-dark); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
+        .access-state { margin-top: var(--space-xl); max-width: 760px; }
+        @media (max-width: 860px) {
+            .masthead { align-items: flex-start; flex-direction: column; padding: var(--space-md) 22px; }
+            main { width: min(100% - 32px, 1180px); padding-top: var(--space-xl); }
+            .intro, .metrics, .filters { grid-template-columns: 1fr; }
+            .panel-header { display: grid; }
+        }
+    </style>
+</head>
+<body>
+    <header class="masthead">
+        <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_White.png" alt="Fratello"></a>
+        <div class="masthead-actions">
+            <a class="nav-link" href="../../index.html">Back to Hub</a>
+            <a class="nav-link" href="sick-day-logger.html">Log Sick Day</a>
+        </div>
+    </header>
+    <main>
+        <section class="intro">
+            <div>
+                <div class="eyebrow">Private Report</div>
+                <h1>Sick day reporting.</h1>
+                <p class="lede">Owner and Controller view only. This report uses broad categories and never includes medical files or symptom details.</p>
+            </div>
+            <aside class="status-card">
+                <span class="label">Access</span>
+                <span class="value" id="connectionStatus">Checking role...</span>
+            </aside>
+        </section>
+
+        <section class="access-state panel" id="accessState" hidden>
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Owner or Controller only</h2>
+                    <p class="panel-note">Sick day reports are private and are not available to department managers.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="reportContent" hidden>
+            <section class="metrics">
+                <div class="metric"><span class="metric-number" id="totalDays">0</span><span class="metric-label">Current Quarter</span></div>
+                <div class="metric"><span class="metric-number" id="departmentTotal">0</span><span class="metric-label">Departments</span></div>
+                <div class="metric"><span class="metric-number" id="trendCount">0</span><span class="metric-label">3+ in 30 Days</span></div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">All sick-day records</h2>
+                        <p class="panel-note">Filter by employee, department, date range, or category. Export includes the visible filtered detail.</p>
+                    </div>
+                    <button class="btn primary" type="button" id="exportCsv">Export CSV</button>
+                </div>
+                <div class="filters">
+                    <input id="employeeFilter" type="search" placeholder="Search employee">
+                    <select id="departmentFilter"><option value="">All departments</option></select>
+                    <select id="categoryFilter"><option value="">All categories</option><option>Illness</option><option>Medical Appointment</option><option>Family Care</option><option>Other</option></select>
+                    <input id="startFilter" type="date">
+                    <input id="endFilter" type="date">
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Employee</th><th>Date</th><th>Department</th><th>Category</th><th>Status</th><th>Note</th></tr></thead>
+                        <tbody id="reportRows"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script type="module">
+        const ADMIN_KEYS = new Set(['owner', 'controller']);
+        let role = null;
+        let client = null;
+        let users = [];
+        let records = [];
+        const els = {
+            connectionStatus: document.getElementById('connectionStatus'),
+            accessState: document.getElementById('accessState'),
+            reportContent: document.getElementById('reportContent'),
+            totalDays: document.getElementById('totalDays'),
+            departmentTotal: document.getElementById('departmentTotal'),
+            trendCount: document.getElementById('trendCount'),
+            employeeFilter: document.getElementById('employeeFilter'),
+            departmentFilter: document.getElementById('departmentFilter'),
+            categoryFilter: document.getElementById('categoryFilter'),
+            startFilter: document.getElementById('startFilter'),
+            endFilter: document.getElementById('endFilter'),
+            reportRows: document.getElementById('reportRows')
+        };
+        function readRole() { try { return JSON.parse(localStorage.getItem('fratello-role') || 'null'); } catch { return null; } }
+        function roleKey() { return String(role?.key || role?.label || '').toLowerCase(); }
+        function iso(value) {
+            if (!value) return '';
+            if (typeof value?.toDate === 'function') value = value.toDate();
+            const date = value instanceof Date ? value : new Date(value);
+            return Number.isNaN(date.getTime()) ? String(value).slice(0, 10) : date.toISOString().slice(0, 10);
+        }
+        function fmt(value) {
+            const clean = iso(value);
+            return clean ? new Date(`${clean}T00:00:00Z`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '';
+        }
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+        }
+        function userFor(id) { return users.find(user => user.id === id || user.email === id) || {}; }
+        function userName(id) { return userFor(id).name || id || 'Team member'; }
+        function department(id) { return userFor(id).department || 'Unknown'; }
+        async function loadClient() {
+            try { client = await import('../../system/api/firestore-client.js'); return client; }
+            catch { return null; }
+        }
+        async function call(name, ...args) {
+            if (!client || typeof client[name] !== 'function') return null;
+            return client[name](...args);
+        }
+        function currentQuarterRange() {
+            const now = new Date();
+            const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+            const start = new Date(now.getFullYear(), quarterStartMonth, 1).toISOString().slice(0, 10);
+            const end = new Date(now.getFullYear(), quarterStartMonth + 3, 0).toISOString().slice(0, 10);
+            return { start, end };
+        }
+        async function loadData() {
+            await loadClient();
+            try {
+                users = await call('getActiveUsers') || [];
+                records = await call('getSickDays', { include_sick: true }) || [];
+                els.connectionStatus.textContent = client ? 'Private Firestore view' : 'Prototype mode';
+            } catch (error) {
+                users = [];
+                records = [];
+                els.connectionStatus.textContent = error.message || 'Private report pending';
+            }
+        }
+        function filtered() {
+            const employee = els.employeeFilter.value.trim().toLowerCase();
+            const departmentValue = els.departmentFilter.value;
+            const category = els.categoryFilter.value;
+            const start = els.startFilter.value;
+            const end = els.endFilter.value;
+            return records
+                .filter(item => item.type === 'sick')
+                .filter(item => !employee || userName(item.user_id).toLowerCase().includes(employee))
+                .filter(item => !departmentValue || department(item.user_id) === departmentValue)
+                .filter(item => !category || item.reason_category === category)
+                .filter(item => !start || iso(item.start_date) >= start)
+                .filter(item => !end || iso(item.start_date) <= end)
+                .sort((a, b) => iso(b.start_date).localeCompare(iso(a.start_date)));
+        }
+        function renderFilters() {
+            const departments = [...new Set(users.map(user => user.department).filter(Boolean))].sort();
+            els.departmentFilter.innerHTML = '<option value="">All departments</option>' + departments.map(item => `<option>${escapeHtml(item)}</option>`).join('');
+            const range = currentQuarterRange();
+            els.startFilter.value = range.start;
+            els.endFilter.value = range.end;
+        }
+        function renderMetrics(list) {
+            const range = currentQuarterRange();
+            const quarter = records.filter(item => iso(item.start_date) >= range.start && iso(item.start_date) <= range.end && item.status !== 'cancelled');
+            els.totalDays.textContent = quarter.length;
+            els.departmentTotal.textContent = new Set(quarter.map(item => department(item.user_id))).size;
+            const thirtyAgo = new Date();
+            thirtyAgo.setDate(thirtyAgo.getDate() - 30);
+            const recent = records.filter(item => new Date(iso(item.start_date)) >= thirtyAgo);
+            const counts = recent.reduce((map, item) => map.set(item.user_id, (map.get(item.user_id) || 0) + 1), new Map());
+            els.trendCount.textContent = [...counts.values()].filter(count => count >= 3).length;
+        }
+        function renderTable() {
+            const list = filtered();
+            renderMetrics(list);
+            els.reportRows.innerHTML = list.length ? list.map(item => `
+                <tr>
+                    <td><span class="person">${escapeHtml(userName(item.user_id))}</span></td>
+                    <td>${fmt(item.start_date)}</td>
+                    <td>${escapeHtml(department(item.user_id))}</td>
+                    <td>${escapeHtml(item.reason_category || 'Other')}</td>
+                    <td><span class="badge">${escapeHtml(item.status || 'approved')}</span></td>
+                    <td>${escapeHtml(item.notes || '')}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="6">No sick-day records match these filters.</td></tr>';
+        }
+        function csvValue(value) { return `"${String(value || '').replace(/"/g, '""')}"`; }
+        function exportCsv() {
+            const rows = [['Employee','Date','Department','Category','Status','Note']].concat(filtered().map(item => [
+                userName(item.user_id), iso(item.start_date), department(item.user_id), item.reason_category || 'Other', item.status || 'approved', item.notes || ''
+            ]));
+            const csv = rows.map(row => row.map(csvValue).join(',')).join('\n');
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+            link.download = `Fratello-Sick-Day-Report-${new Date().toISOString().slice(0, 10)}.csv`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        }
+        async function init() {
+            role = readRole();
+            if (!role || !ADMIN_KEYS.has(roleKey())) {
+                els.connectionStatus.textContent = role ? 'Access denied' : 'Sign in required';
+                els.accessState.hidden = false;
+                return;
+            }
+            await loadData();
+            renderFilters();
+            renderTable();
+            els.reportContent.hidden = false;
+        }
+        [els.employeeFilter, els.departmentFilter, els.categoryFilter, els.startFilter, els.endFilter].forEach(input => {
+            input.addEventListener('input', renderTable);
+            input.addEventListener('change', renderTable);
+        });
+        document.getElementById('exportCsv').addEventListener('click', exportCsv);
+        init();
+    </script>
+</body>
+</html>

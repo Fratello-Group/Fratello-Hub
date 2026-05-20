@@ -33,6 +33,100 @@ service cloud.firestore {
         && get(profilePath(request.auth.uid)).data.status == 'active';
     }
 
+    function isController() {
+      return signedIn()
+        && exists(profilePath(request.auth.uid))
+        && get(profilePath(request.auth.uid)).data.profile == 'controller'
+        && get(profilePath(request.auth.uid)).data.status == 'active';
+    }
+
+    function isOwnerOrController() {
+      return isOwner() || isController();
+    }
+
+    function userPath(userId) {
+      return /databases/$(database)/documents/users/$(userId);
+    }
+
+    function isSelfUserId(userId) {
+      return signedIn()
+        && exists(userPath(userId))
+        && get(userPath(userId)).data.email == signedInEmail()
+        && get(userPath(userId)).data.active == true;
+    }
+
+    function isSelfUserRecord(data) {
+      return signedIn()
+        && data.email == signedInEmail()
+        && data.active == true;
+    }
+
+    function isVacation(data) {
+      return data.type == 'vacation';
+    }
+
+    function isSickDay(data) {
+      return data.type == 'sick';
+    }
+
+    function isKnownTimeOffType(data) {
+      return data.type in ['vacation', 'sick'];
+    }
+
+    function isRequester(data) {
+      return data.user_id != null && isSelfUserId(data.user_id);
+    }
+
+    function isVacationApprover(data) {
+      return isVacation(data)
+        && data.approver_id != null
+        && isSelfUserId(data.approver_id);
+    }
+
+    function canReadTimeOffRequest(data) {
+      return isOwnerOrController()
+        || isRequester(data)
+        || (isVacation(data) && isVacationApprover(data));
+    }
+
+    function validUserTimeOffCreate(data) {
+      return isKnownTimeOffType(data)
+        && isRequester(data)
+        && data.created_via == 'hub'
+        && (
+          (
+            isVacation(data)
+            && data.status in ['pending', 'approved']
+            && (data.status == 'pending' || isOwner())
+          )
+          || (
+            isSickDay(data)
+            && data.status == 'approved'
+            && data.approver_id == null
+          )
+        );
+    }
+
+    function validUserTimeOffUpdate(before, after) {
+      return isRequester(before)
+        && before.user_id == after.user_id
+        && before.type == after.type
+        && before.created_via == after.created_via
+        && (
+          (
+            isVacation(before)
+            && before.status == 'pending'
+            && after.status in ['pending', 'cancelled']
+          )
+          || (
+            isSickDay(before)
+            && before.edit_locked_at != null
+            && request.time <= before.edit_locked_at
+            && after.status in ['approved', 'cancelled']
+          )
+        );
+    }
+
     function selfProfileFieldsDoNotEscalate(uid) {
       return request.auth.uid == uid
         && resource.data.email == signedInEmail()
@@ -67,6 +161,51 @@ service cloud.firestore {
 
     match /hubInvites/{email} {
       allow read: if isOwner() || (signedIn() && email == signedInEmail());
+      allow create, update: if isOwner();
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwnerOrController() || isSelfUserRecord(resource.data);
+      allow list: if isOwnerOrController();
+      allow create, update: if isOwnerOrController();
+      allow delete: if false;
+    }
+
+    match /time_off_requests/{requestId} {
+      allow get, list: if canReadTimeOffRequest(resource.data);
+      allow create: if isOwnerOrController() || validUserTimeOffCreate(request.resource.data);
+      allow update: if isOwnerOrController() || validUserTimeOffUpdate(resource.data, request.resource.data);
+      allow delete: if false;
+    }
+
+    match /approvals/{approvalId} {
+      allow read: if isOwnerOrController()
+        || (
+          resource.data.approver_id != null
+          && isSelfUserId(resource.data.approver_id)
+        );
+      allow write: if false;
+    }
+
+    match /activity_log/{activityId} {
+      allow read: if isOwner();
+      allow write: if false;
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isOwner();
+      allow write: if false;
+    }
+
+    match /holidays/{holidayId} {
+      allow read: if signedIn();
+      allow create, update: if isOwner();
+      allow delete: if false;
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
       allow create, update: if isOwner();
       allow delete: if false;
     }

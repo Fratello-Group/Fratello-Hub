@@ -2,7 +2,12 @@
   "name": "fratello-hub",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "seed:firestore": "node scripts/seed-firestore.js",
+    "test:firestore-rules": "node firestore-rules.test.js"
+  },
   "dependencies": {
-    "@netlify/blobs": "^10.0.0"
+    "@netlify/blobs": "^10.0.0",
+    "firebase-admin": "^12.7.0"
   }
 }

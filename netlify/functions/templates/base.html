@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{subject}}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f1ec;
+            color: #1f2d36;
+            font-family: Montserrat, Arial, sans-serif;
+        }
+        .wrap {
+            width: 100%;
+            padding: 28px 0;
+        }
+        .email {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e3ded5;
+        }
+        .header {
+            background: #0f3a4a;
+            padding: 22px 28px;
+        }
+        .logo {
+            display: block;
+            width: 156px;
+            max-width: 50%;
+            height: auto;
+        }
+        .content {
+            padding: 28px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        h1 {
+            margin: 0 0 16px;
+            color: #0f3a4a;
+            font-size: 22px;
+            line-height: 1.3;
+        }
+        p {
+            margin: 0 0 14px;
+        }
+        .details {
+            margin: 18px 0;
+            padding: 16px;
+            background: #f7f5f1;
+            border-left: 4px solid #0f3a4a;
+        }
+        .label {
+            display: block;
+            margin-top: 10px;
+            color: #59656d;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .label:first-child {
+            margin-top: 0;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 18px;
+            background: #0f3a4a;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .footer {
+            padding: 18px 28px 24px;
+            color: #6e777c;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="email">
+            <div class="header">
+                <img class="logo" src="{{logo_url}}" alt="Fratello Coffee Roasters">
+            </div>
+            <div class="content">
+                {{body}}
+            </div>
+            <div class="footer">
+                Sent by the Fratello Ops Hub.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

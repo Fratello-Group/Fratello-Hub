@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Vacation Tracker</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../system/design-tokens/tokens.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100vh; background: var(--warm-gray-100); color: var(--bean-black); font-family: var(--font-primary); }
+        button, input, textarea { font: inherit; }
+        button { cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: .55; }
+        .masthead { position: sticky; top: 0; z-index: 20; min-height: var(--header-height); padding: var(--space-md) var(--space-xl); display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); background: var(--bean-black); }
+        .masthead img { height: 30px; width: auto; display: block; }
+        .masthead-actions { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+        .nav-link, .btn, .tab { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 14px; background: var(--fratello-white); color: var(--bean-black); text-decoration: none; font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; }
+        .masthead .nav-link { border-color: rgba(255,255,255,.2); background: transparent; color: var(--warm-gray-200); }
+        .btn.primary, .tab.active { border-color: var(--brewing-blue); background: var(--brewing-blue); color: var(--bean-black); }
+        main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: var(--space-2xl) 0 var(--space-3xl); }
+        .intro { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--space-xl); align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--warm-gray-200); }
+        .eyebrow { margin-bottom: var(--space-md); color: var(--brewing-blue-dark); font-size: 12px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; }
+        h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.04; letter-spacing: 0; }
+        .lede { max-width: 760px; margin-top: var(--space-md); color: var(--warm-gray-600); font-size: 15px; line-height: 1.7; }
+        .status-card, .panel, .summary-card { border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); background: var(--fratello-white); box-shadow: var(--shadow-sm); }
+        .status-card { padding: var(--space-lg); border-left: 4px solid var(--brewing-blue); }
+        .label { display: block; margin-bottom: var(--space-xs); color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+        .value { display: block; font-size: 16px; font-weight: 800; line-height: 1.35; }
+        .tabs { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-xl); }
+        .view { display: none; margin-top: var(--space-lg); }
+        .view.active { display: block; }
+        .grid { display: grid; gap: var(--space-lg); }
+        .two-col { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+        .panel-header { padding: var(--space-lg); border-bottom: 1px solid var(--warm-gray-200); }
+        .panel-title { font-size: 21px; font-weight: 800; }
+        .panel-note { margin-top: var(--space-sm); color: var(--warm-gray-600); font-size: 13px; line-height: 1.6; }
+        form, .panel-body { padding: var(--space-lg); }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
+        .field { display: grid; gap: var(--space-sm); }
+        .field.full { grid-column: 1 / -1; }
+        .field label { color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; min-height: 44px; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 var(--space-md); background: var(--warm-gray-50); color: var(--bean-black); outline: none; font-size: 14px; }
+        textarea { min-height: 92px; padding-top: var(--space-md); resize: vertical; }
+        input:focus, textarea:focus, select:focus { border-color: var(--brewing-blue); box-shadow: 0 0 0 3px var(--brewing-blue-subtle); }
+        .check-row { display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center; color: var(--warm-gray-700); font-size: 13px; font-weight: 700; }
+        .check-row input { width: auto; min-height: auto; }
+        .message { display: none; margin-top: var(--space-md); padding: var(--space-md); border: 1px solid color-mix(in srgb, var(--brewing-blue) 40%, transparent); border-radius: var(--radius-md); background: var(--brewing-blue-subtle); color: var(--bean-black); font-size: 13px; font-weight: 700; line-height: 1.55; }
+        .message.visible { display: block; }
+        .summary-card { padding: var(--space-lg); }
+        .summary-list { display: grid; gap: var(--space-md); margin-top: var(--space-md); }
+        .summary-row { display: flex; justify-content: space-between; gap: var(--space-md); border-bottom: 1px solid var(--warm-gray-200); padding-bottom: var(--space-sm); color: var(--warm-gray-700); font-size: 13px; }
+        .summary-row strong { color: var(--bean-black); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-md); }
+        .calendar { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); overflow: auto; background: var(--warm-gray-200); }
+        .day-head, .day { min-height: 112px; padding: var(--space-sm); background: var(--fratello-white); border: 1px solid var(--warm-gray-200); }
+        .day-head { min-height: 38px; color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+        .day.muted { background: var(--warm-gray-50); color: var(--warm-gray-400); }
+        .date-num { font-size: 12px; font-weight: 800; }
+        .holiday { display: block; margin-top: 4px; color: var(--brewing-blue-dark); font-size: 10px; font-weight: 800; }
+        .chip { display: block; margin-top: 6px; border-radius: var(--radius-sm); padding: 5px 6px; background: var(--brewing-blue-subtle); color: var(--bean-black); font-size: 10px; font-weight: 800; line-height: 1.25; }
+        .chip.pending { background: repeating-linear-gradient(45deg, rgba(54,179,175,.2), rgba(54,179,175,.2) 6px, rgba(255,255,255,.75) 6px, rgba(255,255,255,.75) 12px); }
+        .timeline { overflow-x: auto; border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); background: var(--fratello-white); }
+        .timeline-row { display: grid; grid-template-columns: 180px repeat(30, 36px); min-width: 1260px; border-bottom: 1px solid var(--warm-gray-200); }
+        .timeline-row:last-child { border-bottom: none; }
+        .timeline-name { position: sticky; left: 0; z-index: 1; background: var(--fratello-white); padding: var(--space-md); font-size: 12px; font-weight: 800; border-right: 1px solid var(--warm-gray-200); }
+        .timeline-cell { min-height: 44px; border-right: 1px solid var(--warm-gray-200); padding: 4px; }
+        .timeline-bar { height: 100%; border-radius: var(--radius-sm); background: var(--brewing-blue); }
+        .cards { display: grid; gap: var(--space-md); }
+        .request-card { border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); padding: var(--space-lg); background: var(--fratello-white); }
+        .card-top { display: flex; justify-content: space-between; gap: var(--space-md); align-items: start; }
+        .card-title { font-weight: 800; line-height: 1.35; }
+        .card-meta { margin-top: var(--space-sm); color: var(--warm-gray-600); font-size: 13px; line-height: 1.55; }
+        .badge { display: inline-flex; min-height: 28px; align-items: center; border: 1px solid color-mix(in srgb, var(--brewing-blue) 38%, transparent); border-radius: var(--radius-sm); padding: 0 var(--space-sm); background: var(--brewing-blue-subtle); color: var(--brewing-blue-dark); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
+        .empty { padding: var(--space-lg); color: var(--warm-gray-600); font-size: 14px; line-height: 1.6; }
+        .access-state { margin-top: var(--space-xl); max-width: 760px; }
+        @media (max-width: 840px) {
+            .masthead { align-items: flex-start; flex-direction: column; padding: var(--space-md) 22px; }
+            main { width: min(100% - 32px, 1180px); padding-top: var(--space-xl); }
+            .intro, .two-col, .form-grid { grid-template-columns: 1fr; }
+            .field.full { grid-column: auto; }
+            .calendar { grid-template-columns: repeat(7, minmax(84px, 1fr)); }
+            .day { min-height: 96px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="masthead">
+        <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_White.png" alt="Fratello"></a>
+        <div class="masthead-actions">
+            <a class="nav-link" href="../../index.html">Back to Hub</a>
+            <a class="nav-link" href="calendar-subscribe.html">Calendar Feeds</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="intro">
+            <div>
+                <div class="eyebrow">Time Off</div>
+                <h1>Vacation requests and team coverage.</h1>
+                <p class="lede">Request vacation, review your own history, and see team vacation coverage. Sick days are intentionally excluded from these planning views.</p>
+            </div>
+            <aside class="status-card">
+                <span class="label">Connection</span>
+                <span class="value" id="connectionStatus">Checking Hub session...</span>
+            </aside>
+        </section>
+
+        <section class="access-state panel" id="accessState" hidden>
+            <div class="panel-header">
+                <h2 class="panel-title">Sign in required</h2>
+                <p class="panel-note">Open the Hub and sign in before using the vacation tracker.</p>
+            </div>
+            <div class="panel-body"><a class="btn primary" href="../../index.html">Go to Hub Login</a></div>
+        </section>
+
+        <div id="appContent" hidden>
+            <nav class="tabs" aria-label="Vacation tracker tabs">
+                <button class="tab" type="button" data-view="submit">Submit Request</button>
+                <button class="tab" type="button" data-view="calendar">Month Calendar</button>
+                <button class="tab" type="button" data-view="timeline">Team Timeline</button>
+                <button class="tab" type="button" data-view="my-requests">My Requests</button>
+                <button class="tab manager-only" type="button" data-view="approvals">Approvals Queue</button>
+            </nav>
+
+            <section class="view" id="view-submit">
+                <div class="grid two-col">
+                    <article class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Submit vacation request</h2>
+                            <p class="panel-note">Owners auto-approve. Everyone else routes to the manager saved in Firestore.</p>
+                        </div>
+                        <form id="requestForm">
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="startDate">Start Date</label>
+                                    <input id="startDate" type="date" required>
+                                </div>
+                                <div class="field">
+                                    <label for="endDate">End Date</label>
+                                    <input id="endDate" type="date" required>
+                                </div>
+                                <label class="check-row"><input id="halfStart" type="checkbox"> Half-day first day</label>
+                                <label class="check-row"><input id="halfEnd" type="checkbox"> Half-day last day</label>
+                                <div class="field full">
+                                    <label for="notes">Notes</label>
+                                    <textarea id="notes" maxlength="240" placeholder="Optional short note for the approver"></textarea>
+                                </div>
+                            </div>
+                            <div class="message" id="requestMessage"></div>
+                            <div style="margin-top: var(--space-md);"><button class="btn primary" type="submit" id="submitButton">Submit Request</button></div>
+                        </form>
+                    </article>
+                    <aside class="summary-card">
+                        <span class="label">Live Preview</span>
+                        <span class="value" id="previewTitle">Choose dates</span>
+                        <div class="summary-list" id="previewList"></div>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="view" id="view-calendar">
+                <div class="toolbar">
+                    <button class="btn" type="button" id="prevMonth">Previous</button>
+                    <h2 class="panel-title" id="monthTitle"></h2>
+                    <button class="btn" type="button" id="nextMonth">Next</button>
+                </div>
+                <div class="calendar" id="calendarGrid"></div>
+            </section>
+
+            <section class="view" id="view-timeline">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Next 30 days</h2>
+                        <p class="panel-note">Vacation bars only. Pending requests use the same list but remain marked pending in the cards.</p>
+                    </div>
+                    <div class="timeline" id="timeline"></div>
+                </div>
+            </section>
+
+            <section class="view" id="view-my-requests">
+                <div class="cards" id="myRequests"></div>
+            </section>
+
+            <section class="view" id="view-approvals">
+                <div class="cards" id="approvalRequests"></div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        const MANAGER_KEYS = new Set(['owner', 'controller', 'production', 'marketing', 'sales']);
+        const ADMIN_KEYS = new Set(['owner', 'controller']);
+        const todayIso = new Date().toISOString().slice(0, 10);
+        let activeView = new URLSearchParams(location.search).get('view') || 'submit';
+        let monthCursor = new Date();
+        let role = null;
+        let currentUser = null;
+        let users = [];
+        let requests = [];
+        let myRequests = [];
+        let approvals = [];
+        let holidays = [];
+        let client = null;
+
+        const els = {
+            connectionStatus: document.getElementById('connectionStatus'),
+            accessState: document.getElementById('accessState'),
+            appContent: document.getElementById('appContent'),
+            requestForm: document.getElementById('requestForm'),
+            requestMessage: document.getElementById('requestMessage'),
+            previewTitle: document.getElementById('previewTitle'),
+            previewList: document.getElementById('previewList'),
+            calendarGrid: document.getElementById('calendarGrid'),
+            monthTitle: document.getElementById('monthTitle'),
+            timeline: document.getElementById('timeline'),
+            myRequests: document.getElementById('myRequests'),
+            approvalRequests: document.getElementById('approvalRequests')
+        };
+
+        function readRole() {
+            try { return JSON.parse(localStorage.getItem('fratello-role') || 'null'); }
+            catch { return null; }
+        }
+        function roleKey() { return String(role?.key || role?.label || '').toLowerCase(); }
+        function isManager() { return MANAGER_KEYS.has(roleKey()); }
+        function isAdmin() { return ADMIN_KEYS.has(roleKey()); }
+        function iso(value) {
+            if (!value) return '';
+            if (typeof value?.toDate === 'function') value = value.toDate();
+            const date = value instanceof Date ? value : new Date(value);
+            return Number.isNaN(date.getTime()) ? String(value).slice(0, 10) : date.toISOString().slice(0, 10);
+        }
+        function fmt(value) {
+            const clean = iso(value);
+            if (!clean) return 'Not set';
+            return new Date(`${clean}T00:00:00Z`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+        }
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+        }
+        function userName(id) { return users.find(user => user.id === id || user.email === id)?.name || id || 'Team member'; }
+        function department(id) { return users.find(user => user.id === id || user.email === id)?.department || 'Team'; }
+        function overlaps(a, b) { return iso(a.start_date) <= iso(b.end_date) && iso(b.start_date) <= iso(a.end_date); }
+        function businessDays(start, end, halfStart, halfEnd) {
+            let date = new Date(`${start}T00:00:00Z`);
+            const stop = new Date(`${end}T00:00:00Z`);
+            let days = 0;
+            while (date <= stop) {
+                const d = date.getUTCDay();
+                if (d !== 0 && d !== 6) days += 1;
+                date.setUTCDate(date.getUTCDate() + 1);
+            }
+            if (halfStart) days -= .5;
+            if (halfEnd && end !== start) days -= .5;
+            return Math.max(days, .5);
+        }
+        function showMessage(text, ok = true) {
+            els.requestMessage.textContent = text;
+            els.requestMessage.style.borderColor = ok ? '' : '#c94f3d';
+            els.requestMessage.classList.add('visible');
+        }
+        async function loadClient() {
+            try {
+                client = await import('../../system/api/firestore-client.js');
+                return client;
+            } catch { return null; }
+        }
+        async function call(name, ...args) {
+            if (!client || typeof client[name] !== 'function') return null;
+            return client[name](...args);
+        }
+        function fallbackUser() {
+            return { id: role?.user?.email || 'prototype-user', email: role?.user?.email || '', name: role?.user?.name || 'Signed-in user', role_tier: roleKey() === 'owner' ? 'Owner' : roleKey() === 'controller' ? 'Controller' : isManager() ? 'Manager' : 'Staff', department: role?.label || 'Team', manager_id: '' };
+        }
+        async function loadData() {
+            await loadClient();
+            try {
+                currentUser = await call('getCurrentUser') || fallbackUser();
+                users = await call('getActiveUsers') || [currentUser];
+                myRequests = await call('getMyRequests') || [];
+                requests = await call('getTeamRequests', { include_sick: false }) || myRequests;
+                approvals = isManager() ? (await call('getRequestsForApproval', { status: 'pending' }) || []) : [];
+                holidays = await call('getHolidays') || [];
+                els.connectionStatus.textContent = client ? 'Connected to Firestore' : 'Prototype mode';
+            } catch (error) {
+                currentUser = fallbackUser();
+                users = [currentUser];
+                requests = [];
+                myRequests = [];
+                approvals = [];
+                holidays = [];
+                els.connectionStatus.textContent = error.message || 'Prototype mode';
+            }
+        }
+        function renderTabs() {
+            document.querySelectorAll('.manager-only').forEach(tab => { tab.hidden = !isManager(); });
+            if (activeView === 'approvals' && !isManager()) activeView = 'submit';
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.view === activeView);
+            });
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.toggle('active', view.id === `view-${activeView}`);
+            });
+        }
+        function renderPreview() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value || start;
+            const halfStart = document.getElementById('halfStart').checked;
+            const halfEnd = document.getElementById('halfEnd').checked;
+            if (!start || !end) {
+                els.previewTitle.textContent = 'Choose dates';
+                els.previewList.innerHTML = '';
+                return;
+            }
+            const days = businessDays(start, end, halfStart, halfEnd);
+            const draft = { start_date: start, end_date: end };
+            const overlapping = requests.filter(req => req.type === 'vacation' && ['approved', 'pending'].includes(req.status) && overlaps(req, draft));
+            const sameDepartment = overlapping.filter(req => department(req.user_id) === currentUser.department);
+            const ownOverlap = myRequests.filter(req => req.type === 'vacation' && req.status !== 'cancelled' && overlaps(req, draft));
+            els.previewTitle.textContent = `${days} business day${days === 1 ? '' : 's'}`;
+            els.previewList.innerHTML = `
+                <div class="summary-row"><span>Dates</span><strong>${fmt(start)} to ${fmt(end)}</strong></div>
+                <div class="summary-row"><span>Approver</span><strong>${userName(currentUser.manager_id) || (isAdmin() ? 'Auto-approved' : 'Manager')}</strong></div>
+                <div class="summary-row"><span>Department overlap</span><strong>${sameDepartment.length ? sameDepartment.map(r => userName(r.user_id)).join(', ') : 'None found'}</strong></div>
+                <div class="summary-row"><span>Own overlap</span><strong>${ownOverlap.length ? 'Check dates' : 'Clear'}</strong></div>
+            `;
+        }
+        async function submitRequest(event) {
+            event.preventDefault();
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value || start;
+            if (!start || !end) return showMessage('Choose a start and end date.', false);
+            if (end < start) return showMessage('End date must be after the start date.', false);
+            if (!isAdmin() && start < todayIso) return showMessage('Past dates need Owner or Controller access.', false);
+            const draft = { start_date: start, end_date: end };
+            if (myRequests.some(req => req.type === 'vacation' && req.status !== 'cancelled' && overlaps(req, draft))) {
+                return showMessage('These dates overlap one of your existing requests.', false);
+            }
+            document.getElementById('submitButton').disabled = true;
+            try {
+                const saved = await call('submitTimeOffRequest', {
+                    type: 'vacation',
+                    start_date: start,
+                    end_date: end,
+                    half_day_start: document.getElementById('halfStart').checked,
+                    half_day_end: document.getElementById('halfEnd').checked,
+                    notes: document.getElementById('notes').value
+                });
+                if (saved) {
+                    showMessage(saved.notification_error ? `Saved, but email needs setup: ${saved.notification_error}` : 'Vacation request submitted.');
+                } else {
+                    const local = { id: `local-${Date.now()}`, user_id: currentUser.id, type: 'vacation', start_date: start, end_date: end, status: isAdmin() ? 'approved' : 'pending', notes: document.getElementById('notes').value };
+                    myRequests.unshift(local);
+                    requests.unshift(local);
+                    showMessage('Prototype request added on this screen. Firestore will save once connected.');
+                }
+                event.target.reset();
+                document.getElementById('startDate').value = todayIso;
+                document.getElementById('endDate').value = todayIso;
+                await refresh();
+            } catch (error) {
+                showMessage(error.message || 'Could not submit request.', false);
+            } finally {
+                document.getElementById('submitButton').disabled = false;
+            }
+        }
+        function renderCalendar() {
+            const year = monthCursor.getFullYear();
+            const month = monthCursor.getMonth();
+            const first = new Date(Date.UTC(year, month, 1));
+            const start = new Date(first);
+            start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+            els.monthTitle.textContent = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+            const heads = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day => `<div class="day-head">${day}</div>`);
+            const cells = [];
+            for (let i = 0; i < 42; i += 1) {
+                const d = new Date(start);
+                d.setUTCDate(start.getUTCDate() + i);
+                const dayIso = d.toISOString().slice(0, 10);
+                const muted = d.getUTCMonth() !== month;
+                const holiday = holidays.find(item => iso(item.observed_date || item.date) === dayIso);
+                const dayRequests = requests.filter(req => req.type === 'vacation' && req.status !== 'cancelled' && iso(req.start_date) <= dayIso && dayIso <= iso(req.end_date));
+                cells.push(`<div class="day ${muted ? 'muted' : ''}">
+                    <span class="date-num">${d.getUTCDate()}</span>
+                    ${holiday ? `<span class="holiday">${escapeHtml(holiday.name)}</span>` : ''}
+                    ${dayRequests.map(req => `<span class="chip ${req.status === 'pending' ? 'pending' : ''}" title="${escapeHtml(userName(req.user_id))}">${escapeHtml(userName(req.user_id))}</span>`).join('')}
+                </div>`);
+            }
+            els.calendarGrid.innerHTML = heads.concat(cells).join('');
+        }
+        function renderTimeline() {
+            const days = Array.from({ length: 30 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                return date.toISOString().slice(0, 10);
+            });
+            const visibleUsers = users.filter(user => requests.some(req => req.type === 'vacation' && req.status !== 'cancelled' && req.user_id === user.id));
+            els.timeline.innerHTML = [
+                `<div class="timeline-row"><div class="timeline-name">Team</div>${days.map(d => `<div class="timeline-cell"><span style="font-size:10px;font-weight:800;color:var(--warm-gray-500)">${d.slice(5)}</span></div>`).join('')}</div>`,
+                ...(visibleUsers.length ? visibleUsers : users).map(user => `<div class="timeline-row">
+                    <div class="timeline-name">${escapeHtml(user.name)}</div>
+                    ${days.map(day => {
+                        const has = requests.some(req => req.type === 'vacation' && req.status !== 'cancelled' && req.user_id === user.id && iso(req.start_date) <= day && day <= iso(req.end_date));
+                        return `<div class="timeline-cell">${has ? '<div class="timeline-bar"></div>' : ''}</div>`;
+                    }).join('')}
+                </div>`)
+            ].join('');
+        }
+        function requestCard(req, approval = false) {
+            return `<article class="request-card">
+                <div class="card-top">
+                    <div>
+                        <div class="card-title">${escapeHtml(approval ? userName(req.user_id) : `${fmt(req.start_date)} to ${fmt(req.end_date || req.start_date)}`)}</div>
+                        <div class="card-meta">${approval ? `${fmt(req.start_date)} to ${fmt(req.end_date || req.start_date)}` : escapeHtml(req.notes || 'No notes')}</div>
+                    </div>
+                    <span class="badge">${escapeHtml(req.status || 'pending')}</span>
+                </div>
+                ${approval ? `<div class="card-meta">${escapeHtml(req.notes || 'No notes')}</div><div style="margin-top:var(--space-md);display:flex;gap:var(--space-sm);flex-wrap:wrap"><button class="btn primary" data-approve="${req.id}">Approve</button><button class="btn" data-deny="${req.id}">Deny</button></div>` : ''}
+            </article>`;
+        }
+        function renderLists() {
+            els.myRequests.innerHTML = myRequests.length ? myRequests.map(req => requestCard(req)).join('') : '<div class="empty panel">No vacation requests yet.</div>';
+            els.approvalRequests.innerHTML = approvals.length ? approvals.map(req => requestCard(req, true)).join('') : '<div class="empty panel">No pending approvals assigned to you.</div>';
+            document.querySelectorAll('[data-approve]').forEach(btn => btn.onclick = () => approvalAction(btn.dataset.approve, 'approveRequest'));
+            document.querySelectorAll('[data-deny]').forEach(btn => btn.onclick = () => approvalAction(btn.dataset.deny, 'denyRequest'));
+        }
+        async function approvalAction(id, fn) {
+            try {
+                await call(fn, id, '');
+                await refresh();
+            } catch (error) {
+                alert(error.message || 'Could not complete approval.');
+            }
+        }
+        async function refresh() {
+            await loadData();
+            renderPreview();
+            renderCalendar();
+            renderTimeline();
+            renderLists();
+        }
+        async function init() {
+            role = readRole();
+            if (!role) {
+                els.connectionStatus.textContent = 'Sign in required';
+                els.accessState.hidden = false;
+                return;
+            }
+            document.getElementById('startDate').value = todayIso;
+            document.getElementById('endDate').value = todayIso;
+            await refresh();
+            renderTabs();
+            els.appContent.hidden = false;
+        }
+        document.querySelectorAll('.tab').forEach(tab => tab.onclick = () => {
+            activeView = tab.dataset.view;
+            history.replaceState(null, '', `?view=${activeView}`);
+            renderTabs();
+        });
+        ['startDate','endDate','halfStart','halfEnd'].forEach(id => document.getElementById(id).addEventListener('change', renderPreview));
+        els.requestForm.addEventListener('submit', submitRequest);
+        document.getElementById('prevMonth').onclick = () => { monthCursor.setMonth(monthCursor.getMonth() - 1); renderCalendar(); };
+        document.getElementById('nextMonth').onclick = () => { monthCursor.setMonth(monthCursor.getMonth() + 1); renderCalendar(); };
+        init();
+    </script>
+</body>
+</html>

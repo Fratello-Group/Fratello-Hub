@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - User Management</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../design-tokens/tokens.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--warm-gray-100);
+            color: var(--bean-black);
+            font-family: var(--font-primary);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        button, input, select { font: inherit; }
+        button { cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: 0.62; }
+
+        .masthead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            min-height: var(--header-height);
+            padding: var(--space-md) var(--space-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-lg);
+            background: var(--bean-black);
+            border-bottom: 1px solid var(--bean-black-soft);
+        }
+
+        .masthead-logo {
+            display: block;
+            width: auto;
+            height: 30px;
+        }
+
+        .masthead-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .nav-link,
+        .button {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid color-mix(in srgb, var(--warm-gray-300) 24%, transparent);
+            border-radius: var(--radius-sm);
+            padding: 0 14px;
+            background: transparent;
+            color: var(--warm-gray-200);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .button:hover {
+            border-color: var(--brewing-blue);
+            color: var(--fratello-white);
+        }
+
+        .button.primary {
+            border-color: var(--brewing-blue);
+            background: var(--brewing-blue);
+            color: var(--bean-black);
+        }
+
+        .button.primary:hover {
+            border-color: var(--brewing-blue-light);
+            background: var(--brewing-blue-light);
+            color: var(--bean-black);
+        }
+
+        main {
+            width: min(1180px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: var(--space-2xl) 0 var(--space-3xl);
+        }
+
+        .page-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+            gap: var(--space-xl);
+            align-items: end;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--warm-gray-200);
+        }
+
+        .eyebrow {
+            margin-bottom: var(--space-md);
+            color: var(--brewing-blue-dark);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            color: var(--bean-black);
+            font-size: clamp(34px, 5vw, 56px);
+            font-weight: 800;
+            line-height: 1.04;
+            letter-spacing: 0;
+        }
+
+        .lede {
+            max-width: 760px;
+            margin-top: var(--space-md);
+            color: var(--warm-gray-600);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .status-card,
+        .panel,
+        .metric {
+            border: 1px solid var(--warm-gray-200);
+            border-radius: var(--radius-md);
+            background: var(--fratello-white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-card {
+            padding: var(--space-lg);
+            border-left: 4px solid var(--brewing-blue);
+        }
+
+        .status-label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--warm-gray-500);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            display: block;
+            color: var(--bean-black);
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+        }
+
+        .metric {
+            padding: var(--space-lg);
+        }
+
+        .metric-number {
+            display: block;
+            color: var(--bean-black);
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .metric-label {
+            display: block;
+            margin-top: var(--space-sm);
+            color: var(--warm-gray-500);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+            align-items: start;
+        }
+
+        .panel {
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--warm-gray-200);
+        }
+
+        .panel-title {
+            color: var(--bean-black);
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .panel-note {
+            margin-top: var(--space-sm);
+            color: var(--warm-gray-600);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+        }
+
+        .field {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .field label {
+            color: var(--warm-gray-500);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid var(--warm-gray-300);
+            border-radius: var(--radius-sm);
+            padding: 0 var(--space-md);
+            background: var(--fratello-white);
+            color: var(--bean-black);
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--brewing-blue);
+            box-shadow: 0 0 0 3px var(--brewing-blue-subtle);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .form-actions .button,
+        .table-actions .button {
+            color: var(--bean-black);
+            border-color: var(--warm-gray-300);
+            background: var(--fratello-white);
+        }
+
+        .form-actions .button.primary {
+            border-color: var(--brewing-blue);
+            background: var(--brewing-blue);
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) 170px 170px;
+            gap: var(--space-sm);
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--warm-gray-200);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 840px;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--warm-gray-200);
+            color: var(--warm-gray-500);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--warm-gray-200);
+            color: var(--warm-gray-700);
+            font-size: 13px;
+            line-height: 1.5;
+            vertical-align: top;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .person-name {
+            display: block;
+            color: var(--bean-black);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .person-email {
+            display: block;
+            margin-top: var(--space-xs);
+            color: var(--warm-gray-500);
+            font-size: 12px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            border: 1px solid color-mix(in srgb, var(--brewing-blue) 38%, transparent);
+            border-radius: var(--radius-sm);
+            padding: 0 var(--space-sm);
+            background: var(--brewing-blue-subtle);
+            color: var(--brewing-blue-dark);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge.inactive {
+            border-color: var(--warm-gray-300);
+            background: var(--warm-gray-100);
+            color: var(--warm-gray-500);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .message {
+            display: none;
+            border: 1px solid color-mix(in srgb, var(--brewing-blue) 40%, transparent);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            background: var(--brewing-blue-subtle);
+            color: var(--bean-black);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .message.visible { display: block; }
+        .access-state { margin-top: var(--space-xl); max-width: 760px; }
+
+        @media (max-width: 900px) {
+            .masthead {
+                padding: var(--space-md) 22px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .masthead-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            main {
+                width: min(100% - 32px, 1180px);
+                padding-top: var(--space-xl);
+            }
+
+            .page-intro,
+            .layout,
+            .metrics,
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="masthead">
+        <a href="../../index.html" aria-label="Back to Fratello Hub">
+            <img class="masthead-logo" src="../../assets/Fratello_Logo_White.png" alt="Fratello">
+        </a>
+        <div class="masthead-actions">
+            <a class="nav-link" href="../../index.html">Back to Hub</a>
+            <a class="nav-link" href="activity-log.html">Activity Log</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-intro">
+            <div>
+                <div class="eyebrow">Admin</div>
+                <h1>Manage Hub users for time off.</h1>
+                <p class="lede">Add team members, assign role tiers and managers, and preserve historical records by toggling active status instead of deleting people.</p>
+            </div>
+            <aside class="status-card" aria-live="polite">
+                <span class="status-label">Data Source</span>
+                <span class="status-value" id="connectionStatus">Checking Hub session...</span>
+            </aside>
+        </section>
+
+        <section class="access-state panel" id="accessState" hidden>
+            <div class="panel-header">
+                <h2 class="panel-title">Access denied</h2>
+                <p class="panel-note">User management is available to Owner and Controller access only.</p>
+            </div>
+            <div class="form-grid">
+                <a class="button primary" href="../../index.html">Back to Hub</a>
+            </div>
+        </section>
+
+        <div id="adminContent" hidden>
+            <section class="metrics" aria-label="User summary">
+                <div class="metric">
+                    <span class="metric-number" id="activeCount">0</span>
+                    <span class="metric-label">Active Users</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-number" id="managerCount">0</span>
+                    <span class="metric-label">Manager Plus</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-number" id="departmentCount">0</span>
+                    <span class="metric-label">Departments</span>
+                </div>
+            </section>
+
+            <section class="layout">
+                <aside class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title" id="formTitle">Add team member</h2>
+                        <p class="panel-note">Changes are saved locally until the Firestore user functions are available.</p>
+                    </div>
+                    <form class="form-grid" id="userForm">
+                        <div class="field">
+                            <label for="name">Name</label>
+                            <input id="name" name="name" autocomplete="name" required>
+                        </div>
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input id="email" name="email" type="email" autocomplete="email" required>
+                        </div>
+                        <div class="field">
+                            <label for="department">Department</label>
+                            <select id="department" name="department" required>
+                                <option value="Production">Production</option>
+                                <option value="Sales">Sales</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Owner">Owner</option>
+                                <option value="Controller">Controller</option>
+                                <option value="HR">HR</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="role_tier">Role Tier</label>
+                            <select id="role_tier" name="role_tier" required>
+                                <option value="Staff">Staff</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Controller">Controller</option>
+                                <option value="Owner">Owner</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="manager_id">Manager</label>
+                            <select id="manager_id" name="manager_id"></select>
+                        </div>
+                        <div class="field">
+                            <label for="hire_date">Hire Date</label>
+                            <input id="hire_date" name="hire_date" type="date">
+                        </div>
+                        <div class="field">
+                            <label for="active">Status</label>
+                            <select id="active" name="active">
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button class="button primary" type="submit" id="saveButton">Save User</button>
+                            <button class="button" type="button" id="resetButton">Clear</button>
+                        </div>
+                        <div class="field">
+                            <label for="csvImport">Bulk CSV Import</label>
+                            <input id="csvImport" type="file" accept=".csv,text/csv">
+                        </div>
+                        <div class="message" id="formMessage"></div>
+                    </form>
+                </aside>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Users collection</h2>
+                        <p class="panel-note">Use active status to remove access while keeping the person available for historical time-off records.</p>
+                    </div>
+                    <div class="filters">
+                        <input id="search" type="search" placeholder="Search name or email">
+                        <select id="tierFilter">
+                            <option value="">All tiers</option>
+                            <option value="Owner">Owner</option>
+                            <option value="Controller">Controller</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Staff">Staff</option>
+                        </select>
+                        <select id="departmentFilter">
+                            <option value="">All departments</option>
+                        </select>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Person</th>
+                                    <th>Department</th>
+                                    <th>Tier</th>
+                                    <th>Manager</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTable"></tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        const ADMIN_KEYS = new Set(['owner', 'controller']);
+        const MANAGER_TIERS = new Set(['Manager', 'Controller', 'Owner']);
+        const SEED_USERS = [
+            ['Chris Prefontaine', 'prefontainech@gmail.com', 'Owner', 'Owner', ''],
+            ['Russ Prefontaine', 'russ@fratellocoffee.com', 'Owner', 'Owner', ''],
+            ['Chris McGhee', 'controller@fratellocoffee.com', 'Controller', 'Controller', 'Chris Prefontaine'],
+            ['Kyle Park', 'kyle@fratellocoffee.com', 'Production', 'Manager', 'Chris Prefontaine'],
+            ['Mateo Corredor', 'mateo@fratellocoffee.com', 'Marketing', 'Manager', 'Chris Prefontaine'],
+            ['Joel May', 'joel.may@fratellocoffee.com', 'Sales', 'Manager', 'Russ Prefontaine'],
+            ["D'arcy Watsham", 'darcy.watsham@fratellocoffee.com', 'Sales', 'Staff', 'Russ Prefontaine'],
+            ['Allana Contois', 'allana.contois@fratellocoffee.com', 'Production', 'Manager', 'Kyle Park'],
+            ['Jaleisy Quintero', 'jaleisy.quintero@fratellocoffee.com', 'Production', 'Manager', 'Kyle Park'],
+            ['Nancy Gibb', 'nancy.gibb@fratellocoffee.com', 'Controller', 'Staff', 'Chris McGhee'],
+            ['Luke Prefontaine', 'luke.prefontaine@fratellocoffee.com', 'Production', 'Staff', 'Allana Contois'],
+            ['Sandra Mestre', 'sandra.mestre@fratellocoffee.com', 'Production', 'Staff', 'Allana Contois'],
+            ['Monica Banman', 'monica.banman@fratellocoffee.com', 'Production', 'Staff', 'Allana Contois'],
+            ['Oleksandr Svyrydov', 'oleksandr.svyrydov@fratellocoffee.com', 'Production', 'Staff', 'Kyle Park'],
+            ['Sungjoo Hong', 'sungjoo.hong@fratellocoffee.com', 'Production', 'Staff', 'Kyle Park'],
+            ['Tatum Olsen', 'tatum.olsen@fratellocoffee.com', 'Production', 'Staff', 'Kyle Park'],
+            ['Olena Zaitseva', 'olena.zaitseva@fratellocoffee.com', 'Production', 'Staff', 'Jaleisy Quintero'],
+            ['Yerly Camacho', 'yerly.camacho@fratellocoffee.com', 'Production', 'Staff', 'Jaleisy Quintero']
+        ];
+
+        let firestoreClient = null;
+        let users = seedUsers();
+        let editingId = null;
+
+        const els = {
+            connectionStatus: document.getElementById('connectionStatus'),
+            accessState: document.getElementById('accessState'),
+            adminContent: document.getElementById('adminContent'),
+            activeCount: document.getElementById('activeCount'),
+            managerCount: document.getElementById('managerCount'),
+            departmentCount: document.getElementById('departmentCount'),
+            userForm: document.getElementById('userForm'),
+            formTitle: document.getElementById('formTitle'),
+            formMessage: document.getElementById('formMessage'),
+            saveButton: document.getElementById('saveButton'),
+            resetButton: document.getElementById('resetButton'),
+            csvImport: document.getElementById('csvImport'),
+            managerSelect: document.getElementById('manager_id'),
+            userTable: document.getElementById('userTable'),
+            search: document.getElementById('search'),
+            tierFilter: document.getElementById('tierFilter'),
+            departmentFilter: document.getElementById('departmentFilter')
+        };
+
+        function seedUsers() {
+            const byName = new Map();
+            const records = SEED_USERS.map(([name, email, department, role_tier, managerName]) => {
+                const user = {
+                    id: sanitizeEmail(email),
+                    email,
+                    name,
+                    department,
+                    role_tier,
+                    managerName,
+                    manager_id: '',
+                    hire_date: '',
+                    active: true,
+                    vacation_days_allotted: null,
+                    vacation_days_used: null
+                };
+                byName.set(name, user);
+                return user;
+            });
+
+            records.forEach(user => {
+                user.manager_id = byName.get(user.managerName)?.id || '';
+            });
+
+            return records;
+        }
+
+        function readRole() {
+            try {
+                return JSON.parse(localStorage.getItem('fratello-role') || 'null');
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function roleKey(role) {
+            return String(role?.key || role?.label || '').trim().toLowerCase();
+        }
+
+        function sanitizeEmail(email) {
+            return String(email || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '');
+        }
+
+        function managerName(id) {
+            return users.find(user => user.id === id)?.name || 'None';
+        }
+
+        async function loadFirestoreClient() {
+            try {
+                firestoreClient = await import('../api/firestore-client.js');
+                return firestoreClient;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function callFirst(client, names, ...args) {
+            if (!client) return null;
+            for (const name of names) {
+                if (typeof client[name] === 'function') {
+                    return client[name](...args);
+                }
+            }
+            return null;
+        }
+
+        async function loadUsers() {
+            const client = await loadFirestoreClient();
+            if (!client) {
+                els.connectionStatus.textContent = 'Prototype mode - Firestore client not found';
+                return;
+            }
+
+            try {
+                const result = await callFirst(client, ['getUsers', 'listUsers', 'getAllUsers']);
+                if (Array.isArray(result)) {
+                    users = result.map(normalizeUser);
+                    els.connectionStatus.textContent = 'Connected to Firestore client';
+                    return;
+                }
+                els.connectionStatus.textContent = 'Firestore client loaded - user listing not exposed yet';
+            } catch (error) {
+                els.connectionStatus.textContent = 'Firestore user lookup failed';
+            }
+        }
+
+        function normalizeUser(user) {
+            return {
+                id: user.id || sanitizeEmail(user.email),
+                email: user.email || '',
+                name: user.name || 'Team member',
+                department: user.department || 'Production',
+                role_tier: user.role_tier || user.roleTier || 'Staff',
+                manager_id: user.manager_id || user.managerId || '',
+                hire_date: user.hire_date || user.hireDate || '',
+                active: user.active !== false,
+                vacation_days_allotted: user.vacation_days_allotted ?? null,
+                vacation_days_used: user.vacation_days_used ?? null
+            };
+        }
+
+        function render() {
+            renderManagerOptions();
+            renderDepartmentFilter();
+            renderMetrics();
+            renderTable();
+        }
+
+        function renderManagerOptions() {
+            const currentValue = els.managerSelect.value;
+            const options = ['<option value="">None</option>']
+                .concat(users
+                    .filter(user => MANAGER_TIERS.has(user.role_tier) && user.active)
+                    .map(user => `<option value="${escapeHtml(user.id)}">${escapeHtml(user.name)}</option>`));
+            els.managerSelect.innerHTML = options.join('');
+            els.managerSelect.value = currentValue;
+        }
+
+        function renderDepartmentFilter() {
+            const currentValue = els.departmentFilter.value;
+            const departments = [...new Set(users.map(user => user.department).filter(Boolean))].sort();
+            els.departmentFilter.innerHTML = '<option value="">All departments</option>' +
+                departments.map(department => `<option value="${escapeHtml(department)}">${escapeHtml(department)}</option>`).join('');
+            els.departmentFilter.value = departments.includes(currentValue) ? currentValue : '';
+        }
+
+        function renderMetrics() {
+            const activeUsers = users.filter(user => user.active);
+            els.activeCount.textContent = activeUsers.length;
+            els.managerCount.textContent = activeUsers.filter(user => MANAGER_TIERS.has(user.role_tier)).length;
+            els.departmentCount.textContent = new Set(activeUsers.map(user => user.department)).size;
+        }
+
+        function filteredUsers() {
+            const search = els.search.value.trim().toLowerCase();
+            const tier = els.tierFilter.value;
+            const department = els.departmentFilter.value;
+
+            return users
+                .filter(user => !search || `${user.name} ${user.email}`.toLowerCase().includes(search))
+                .filter(user => !tier || user.role_tier === tier)
+                .filter(user => !department || user.department === department)
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        function renderTable() {
+            const records = filteredUsers();
+            els.userTable.innerHTML = records.map(user => `
+                <tr>
+                    <td>
+                        <span class="person-name">${escapeHtml(user.name)}</span>
+                        <span class="person-email">${escapeHtml(user.email)}</span>
+                    </td>
+                    <td>${escapeHtml(user.department)}</td>
+                    <td><span class="badge">${escapeHtml(user.role_tier)}</span></td>
+                    <td>${escapeHtml(managerName(user.manager_id))}</td>
+                    <td><span class="badge ${user.active ? '' : 'inactive'}">${user.active ? 'Active' : 'Inactive'}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="button" type="button" data-edit="${escapeHtml(user.id)}">Edit</button>
+                            <button class="button" type="button" data-toggle="${escapeHtml(user.id)}">${user.active ? 'Deactivate' : 'Activate'}</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.querySelectorAll('[data-edit]').forEach(button => {
+                button.addEventListener('click', () => editUser(button.dataset.edit));
+            });
+            document.querySelectorAll('[data-toggle]').forEach(button => {
+                button.addEventListener('click', () => toggleUser(button.dataset.toggle));
+            });
+        }
+
+        function formData() {
+            return normalizeUser({
+                id: editingId || sanitizeEmail(document.getElementById('email').value),
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim().toLowerCase(),
+                department: document.getElementById('department').value,
+                role_tier: document.getElementById('role_tier').value,
+                manager_id: document.getElementById('manager_id').value,
+                hire_date: document.getElementById('hire_date').value,
+                active: document.getElementById('active').value === 'true'
+            });
+        }
+
+        async function saveUser(event) {
+            event.preventDefault();
+            const user = formData();
+            if (!user.name || !user.email) {
+                showMessage('Name and email are required.');
+                return;
+            }
+
+            els.saveButton.disabled = true;
+            try {
+                const client = firestoreClient || await loadFirestoreClient();
+                const result = await callFirst(client, ['upsertUser', 'saveUser', 'createUser', 'updateUser'], user);
+                const index = users.findIndex(item => item.id === user.id);
+                if (index >= 0) users[index] = user;
+                else users.push(user);
+                showMessage(result ? 'User saved to Firestore.' : 'Prototype save complete. Connect Firestore user functions to persist this change.');
+                logActivity('user_saved', { user_id: user.id });
+                resetForm();
+                render();
+            } catch (error) {
+                showMessage(error.message || 'Could not save this user yet.');
+            } finally {
+                els.saveButton.disabled = false;
+            }
+        }
+
+        function editUser(id) {
+            const user = users.find(item => item.id === id);
+            if (!user) return;
+            editingId = user.id;
+            els.formTitle.textContent = `Edit ${user.name}`;
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            document.getElementById('department').value = user.department;
+            document.getElementById('role_tier').value = user.role_tier;
+            document.getElementById('manager_id').value = user.manager_id || '';
+            document.getElementById('hire_date').value = typeof user.hire_date === 'string' ? user.hire_date.slice(0, 10) : '';
+            document.getElementById('active').value = String(user.active);
+        }
+
+        async function toggleUser(id) {
+            const user = users.find(item => item.id === id);
+            if (!user) return;
+            user.active = !user.active;
+
+            try {
+                const client = firestoreClient || await loadFirestoreClient();
+                await callFirst(client, ['updateUser', 'setUserActive', 'toggleUserActive'], user.id, { active: user.active });
+                showMessage(`${user.name} is now ${user.active ? 'active' : 'inactive'}.`);
+                logActivity('user_status_changed', { user_id: user.id, active: user.active });
+            } catch (error) {
+                showMessage(error.message || 'Prototype status change complete.');
+            }
+
+            render();
+        }
+
+        function resetForm() {
+            editingId = null;
+            els.formTitle.textContent = 'Add team member';
+            els.userForm.reset();
+            document.getElementById('active').value = 'true';
+        }
+
+        function showMessage(text) {
+            els.formMessage.textContent = text;
+            els.formMessage.classList.add('visible');
+        }
+
+        function parseCsv(text) {
+            const lines = text.split(/\r?\n/).filter(line => line.trim());
+            if (lines.length < 2) return [];
+            const headers = splitCsvLine(lines[0]).map(header => header.trim().toLowerCase());
+            return lines.slice(1).map(line => {
+                const cells = splitCsvLine(line);
+                const record = {};
+                headers.forEach((header, index) => {
+                    record[header] = cells[index] || '';
+                });
+                return normalizeUser({
+                    name: record.name,
+                    email: record.email,
+                    department: record.department || 'Production',
+                    role_tier: record.role_tier || record.tier || 'Staff',
+                    manager_id: record.manager_id || '',
+                    hire_date: record.hire_date || '',
+                    active: record.active ? record.active.toLowerCase() !== 'false' : true
+                });
+            }).filter(user => user.name && user.email);
+        }
+
+        function splitCsvLine(line) {
+            const cells = [];
+            let value = '';
+            let quoted = false;
+
+            for (let index = 0; index < line.length; index += 1) {
+                const char = line[index];
+                const next = line[index + 1];
+                if (char === '"' && quoted && next === '"') {
+                    value += '"';
+                    index += 1;
+                } else if (char === '"') {
+                    quoted = !quoted;
+                } else if (char === ',' && !quoted) {
+                    cells.push(value.trim());
+                    value = '';
+                } else {
+                    value += char;
+                }
+            }
+
+            cells.push(value.trim());
+            return cells;
+        }
+
+        function importCsv(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const imported = parseCsv(String(reader.result || ''));
+                imported.forEach(user => {
+                    const index = users.findIndex(item => item.id === user.id);
+                    if (index >= 0) users[index] = user;
+                    else users.push(user);
+                });
+                showMessage(`${imported.length} CSV user${imported.length === 1 ? '' : 's'} loaded in prototype mode.`);
+                render();
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function logActivity(action, details) {
+            const payload = {
+                event_type: 'data_edit',
+                tool_name: 'User Management',
+                details: { action, ...details },
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const body = JSON.stringify(payload);
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon('/.netlify/functions/log-activity', new Blob([body], { type: 'application/json' }));
+                    return;
+                }
+                fetch('/.netlify/functions/log-activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true });
+            } catch (error) {
+                // Activity logging is best-effort from this static page.
+            }
+        }
+
+        async function init() {
+            const role = readRole();
+            if (!role || !ADMIN_KEYS.has(roleKey(role))) {
+                els.connectionStatus.textContent = role ? 'Access denied' : 'Sign in required';
+                els.accessState.hidden = false;
+                return;
+            }
+
+            await loadUsers();
+            render();
+            els.adminContent.hidden = false;
+        }
+
+        els.userForm.addEventListener('submit', saveUser);
+        els.resetButton.addEventListener('click', resetForm);
+        els.csvImport.addEventListener('change', importCsv);
+        [els.search, els.tierFilter, els.departmentFilter].forEach(input => {
+            input.addEventListener('input', renderTable);
+            input.addEventListener('change', renderTable);
+        });
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<h1>Your time-off request was {{status_label}}.</h1>
+<p>{{requester_name}}, your vacation request status has changed.</p>
+<div class="details">
+    <span class="label">Dates</span>
+    {{date_range}}
+    <span class="label">Status</span>
+    {{status_label}}
+    <span class="label">Approver comment</span>
+    {{comment}}
+</div>
+<p><a class="button" href="{{action_url}}">Open Vacation Tracker</a></p>
