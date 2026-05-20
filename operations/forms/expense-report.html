@@ -281,21 +281,40 @@
         select,
         textarea {
             width: 100%;
-            min-height: 44px;
+            height: 52px;
             border: 1px solid var(--divider-light);
             border-radius: 4px;
             background: #fbfaf7;
             color: var(--black);
-            padding: 11px 12px;
-            font-size: 14px;
+            padding: 12px 14px;
+            font-size: 15px;
+            font-weight: 500;
             outline: none;
             transition: border-color 0.2s ease, background 0.2s ease;
         }
 
+        select {
+            color: var(--black);
+        }
+
         textarea {
+            height: auto;
             min-height: 78px;
             resize: vertical;
             line-height: 1.5;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #6F6E69;
+            opacity: 1;
+        }
+
+        input:disabled,
+        select:disabled,
+        textarea:disabled {
+            color: var(--black);
+            opacity: 1;
         }
 
         input:focus,
@@ -319,9 +338,9 @@
 
         .expense-line {
             display: grid;
-            grid-template-columns: 124px minmax(150px, 1fr) 150px 114px 174px 118px 116px 38px;
+            grid-template-columns: 138px minmax(220px, 1.35fr) 150px 122px 178px 124px 134px 44px;
             gap: 10px;
-            align-items: end;
+            align-items: start;
             padding: 14px;
             border-bottom: 1px solid var(--fog);
             background: var(--white);
@@ -332,31 +351,30 @@
         }
 
         .expense-line label {
+            color: #3F3F3F;
             font-size: 9px;
             letter-spacing: 1.6px;
+            white-space: nowrap;
         }
 
         .expense-line input,
         .expense-line select,
         .expense-line textarea {
-            min-height: 40px;
+            height: 48px;
             background: #fbfaf7;
         }
 
         .expense-line textarea {
-            min-height: 64px;
+            height: auto;
+            min-height: 78px;
         }
 
         .description-field {
-            grid-column: 1 / span 5;
-        }
-
-        .receipt-field {
-            grid-column: 6 / span 2;
+            grid-column: 1 / -1;
         }
 
         .readonly-money {
-            min-height: 44px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -372,7 +390,7 @@
 
         .remove-btn {
             width: 34px;
-            height: 34px;
+            height: 48px;
             border: 1px solid var(--divider-light);
             border-radius: 4px;
             background: var(--white);
@@ -380,6 +398,7 @@
             cursor: pointer;
             font-size: 20px;
             line-height: 1;
+            margin-top: 23px;
         }
 
         .remove-btn:hover {
@@ -530,8 +549,7 @@
 
             .span-2,
             .span-4,
-            .description-field,
-            .receipt-field {
+            .description-field {
                 grid-column: span 1;
             }
 
@@ -684,9 +702,9 @@
                 <div class="panel-header">
                     <div>
                         <div class="panel-kicker">Step 03</div>
-                        <h2 id="summaryTitle">Summary</h2>
+                        <h2 id="summaryTitle">Live summary</h2>
                     </div>
-                    <p class="panel-note">Finance gets the reimbursement total, the GST total, and the category breakdown in one clean report.</p>
+                    <p class="panel-note">This is the quick recap. The downloaded report includes every expense line, all GST math, notes, and signature lines for Finance.</p>
                 </div>
                 <div class="summary-grid">
                     <div class="summary-card">
@@ -725,6 +743,12 @@
         }
 
         function applyRole(role) {
+            const employeeName = document.getElementById('employeeName');
+            const employeeEmail = document.getElementById('employeeEmail');
+            employeeName.value = '';
+            employeeEmail.value = '';
+            window.currentHubEmployee = null;
+
             if (!role || !allowed.has(role.key)) {
                 document.body.classList.add('denied');
                 return;
@@ -732,8 +756,9 @@
 
             document.body.classList.remove('denied');
             if (role.user) {
-                document.getElementById('employeeName').value = role.user.name || '';
-                document.getElementById('employeeEmail').value = role.user.email || '';
+                window.currentHubEmployee = role.user;
+                employeeName.value = role.user.name || '';
+                employeeEmail.value = role.user.email || '';
             }
         }
 
@@ -750,6 +775,7 @@
         const categories = ['Fuel', 'Meals', 'Parking', 'Equipment', 'Grocery', 'Office', 'Travel', 'Software', 'Training', 'Misc'];
         const expenseRows = document.getElementById('expenseRows');
         const DEFAULT_EMPTY_ROWS = 5;
+        const DEFAULT_GST_MODE = 'included';
 
         function todayIso() {
             return new Date().toISOString().slice(0, 10);
@@ -795,15 +821,15 @@
                     amount: total,
                     gstMode: mode,
                     gst,
-                    beforeGst: Math.max(0, total - gst),
-                    receipt: row.querySelector('[data-field="receipt"]').value.trim()
+                    beforeGst: Math.max(0, total - gst)
                 };
-            }).filter(row => row.date || row.vendor || row.description || row.amount || row.receipt);
+            }).filter(row => row.date || row.vendor || row.description || row.amount);
         }
 
         function addExpenseRow(seed = {}) {
             const line = document.createElement('div');
             line.className = 'expense-line';
+            const gstMode = seed.gstMode || DEFAULT_GST_MODE;
             line.innerHTML = `
                 <div class="field">
                     <label>Date</label>
@@ -826,9 +852,9 @@
                 <div class="field">
                     <label>GST Treatment</label>
                     <select data-field="gstMode">
-                        <option value="none"${seed.gstMode === 'none' ? ' selected' : ''}>No GST</option>
-                        <option value="included"${seed.gstMode === 'included' ? ' selected' : ''}>GST Included</option>
-                        <option value="manual"${seed.gstMode === 'manual' ? ' selected' : ''}>Manual GST</option>
+                        <option value="included"${gstMode === 'included' ? ' selected' : ''}>GST Included</option>
+                        <option value="none"${gstMode === 'none' ? ' selected' : ''}>No GST</option>
+                        <option value="manual"${gstMode === 'manual' ? ' selected' : ''}>Manual GST</option>
                     </select>
                 </div>
                 <div class="field">
@@ -843,10 +869,6 @@
                 <div class="field description-field">
                     <label>Description</label>
                     <textarea data-field="description" placeholder="What was this for?">${safeText(seed.description || '')}</textarea>
-                </div>
-                <div class="field receipt-field">
-                    <label>Receipt Note</label>
-                    <input data-field="receipt" placeholder="Attached / missing" value="${safeText(seed.receipt || '')}">
                 </div>
             `;
 
@@ -970,7 +992,6 @@
                     <td style="text-align:right;">${money(row.amount)}</td>
                     <td style="text-align:right;">${money(row.gst)}</td>
                     <td style="text-align:right;">${money(row.beforeGst)}</td>
-                    <td>${safeText(row.receipt || 'Attached separately')}</td>
                 </tr>
             `).join('');
 
@@ -1008,7 +1029,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}th{font
 <div class="card"><span class="label">Lines</span><strong>${data.rows.length}</strong></div>
 </div>
 <h2>Expenses</h2>
-<table><thead><tr><th>Date</th><th>Vendor</th><th>Description</th><th>Category</th><th>Total Paid</th><th>GST</th><th>Before GST</th><th>Receipt</th></tr></thead><tbody>${expenseRowsHtml}</tbody></table>
+<table><thead><tr><th>Date</th><th>Vendor</th><th>Description</th><th>Category</th><th>Total Paid</th><th>GST</th><th>Before GST</th></tr></thead><tbody>${expenseRowsHtml}</tbody></table>
 <h2>Category Summary</h2>
 <table><tbody>${categoryRows || '<tr><td>No category totals.</td><td style="text-align:right;">$0.00</td></tr>'}</tbody></table>
 ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><br>${safeText(data.notes).replace(/\n/g, '<br>')}</div>` : ''}
@@ -1085,7 +1106,7 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
                 return;
             }
 
-            const header = ['Date', 'Vendor', 'Description', 'Category', 'Total Paid', 'GST', 'Before GST', 'Receipt'];
+            const header = ['Date', 'Vendor', 'Description', 'Category', 'Total Paid', 'GST', 'Before GST'];
             const lines = data.rows.map(row => [
                 row.date,
                 row.vendor,
@@ -1093,8 +1114,7 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
                 row.category,
                 row.amount.toFixed(2),
                 row.gst.toFixed(2),
-                row.beforeGst.toFixed(2),
-                row.receipt
+                row.beforeGst.toFixed(2)
             ].map(csvValue).join(','));
             downloadBlob([header.map(csvValue).join(','), ...lines].join('\n'), 'text/csv', `${filenameBase(data)}.csv`);
             showMessage('CSV downloaded. This is useful if Finance wants the raw table.');
@@ -1103,8 +1123,9 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
         function clearForm(ask = true) {
             if (ask && !confirm('Clear all entered expenses? This cannot be undone.')) return;
 
-            document.getElementById('employeeName').value = '';
-            document.getElementById('employeeEmail').value = '';
+            const currentEmployee = window.currentHubEmployee || {};
+            document.getElementById('employeeName').value = currentEmployee.name || '';
+            document.getElementById('employeeEmail').value = currentEmployee.email || '';
             document.getElementById('department').value = '';
             document.getElementById('reportDate').value = todayIso();
             document.getElementById('reportNotes').value = '';
