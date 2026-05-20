@@ -162,9 +162,9 @@
         }
 
         .page {
-            max-width: 1160px;
+            max-width: 1240px;
             margin: 0 auto;
-            padding: 44px 40px 84px;
+            padding: 34px 40px 76px;
         }
 
         .hero {
@@ -172,7 +172,7 @@
             grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
             gap: 34px;
             align-items: end;
-            padding-bottom: 30px;
+            padding-bottom: 24px;
             border-bottom: 1px solid var(--divider-light);
         }
 
@@ -186,9 +186,9 @@
         }
 
         h1 {
-            font-size: clamp(34px, 5vw, 58px);
+            font-size: clamp(30px, 4vw, 46px);
             font-weight: 800;
-            line-height: 1.02;
+            line-height: 1.06;
             letter-spacing: 0;
             color: var(--black);
         }
@@ -217,11 +217,11 @@
         }
 
         .panel {
-            margin-top: 32px;
+            margin-top: 22px;
             border: 1px solid var(--divider-light);
-            border-radius: 6px;
+            border-radius: 4px;
             background: var(--white);
-            padding: 24px;
+            padding: 22px;
         }
 
         .panel-header {
@@ -270,10 +270,10 @@
         }
 
         label {
-            color: var(--grey);
+            color: var(--slate);
             font-size: 10px;
             font-weight: 800;
-            letter-spacing: 3px;
+            letter-spacing: 2.3px;
             text-transform: uppercase;
         }
 
@@ -293,7 +293,7 @@
         }
 
         textarea {
-            min-height: 86px;
+            min-height: 78px;
             resize: vertical;
             line-height: 1.5;
         }
@@ -308,58 +308,65 @@
         .span-2 { grid-column: span 2; }
         .span-4 { grid-column: span 4; }
 
-        .expense-table-wrap {
-            overflow-x: auto;
+        .expense-list {
+            display: grid;
+            gap: 0;
             border: 1px solid var(--divider-light);
-            border-radius: 6px;
+            border-radius: 4px;
+            background: var(--white);
+            overflow: hidden;
+        }
+
+        .expense-line {
+            display: grid;
+            grid-template-columns: 124px minmax(150px, 1fr) 150px 114px 174px 118px 116px 38px;
+            gap: 10px;
+            align-items: end;
+            padding: 14px;
+            border-bottom: 1px solid var(--fog);
             background: var(--white);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 980px;
-        }
-
-        th {
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--divider-light);
-            color: var(--grey);
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 2.4px;
-            text-align: left;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid var(--fog);
-            vertical-align: top;
-        }
-
-        tr:last-child td {
+        .expense-line:last-child {
             border-bottom: 0;
         }
 
-        td input,
-        td select {
-            min-height: 40px;
-            background: var(--white);
+        .expense-line label {
+            font-size: 9px;
+            letter-spacing: 1.6px;
         }
 
-        .col-date { width: 132px; }
-        .col-vendor { width: 170px; }
-        .col-category { width: 150px; }
-        .col-money { width: 120px; }
-        .col-gst-mode { width: 150px; }
-        .col-receipt { width: 130px; }
-        .col-remove { width: 48px; }
+        .expense-line input,
+        .expense-line select,
+        .expense-line textarea {
+            min-height: 40px;
+            background: #fbfaf7;
+        }
 
-        .money-cell {
-            font-weight: 700;
-            text-align: right;
+        .expense-line textarea {
+            min-height: 64px;
+        }
+
+        .description-field {
+            grid-column: 1 / span 5;
+        }
+
+        .receipt-field {
+            grid-column: 6 / span 2;
+        }
+
+        .readonly-money {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 11px 12px;
+            border: 1px solid var(--divider-light);
+            border-radius: 4px;
+            background: var(--card-bg-light);
+            color: var(--black);
+            font-size: 14px;
+            font-weight: 800;
             white-space: nowrap;
         }
 
@@ -390,14 +397,21 @@
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 12px;
+            gap: 0;
+            border: 1px solid var(--divider-light);
+            border-radius: 4px;
+            overflow: hidden;
         }
 
         .summary-card {
-            border: 1px solid var(--divider-light);
-            border-radius: 6px;
+            border-right: 1px solid var(--divider-light);
+            border-radius: 0;
             background: var(--card-bg-light);
             padding: 18px;
+        }
+
+        .summary-card:last-child {
+            border-right: 0;
         }
 
         .summary-card strong {
@@ -507,8 +521,17 @@
                 grid-template-columns: 1fr;
             }
 
+            .expense-line {
+                grid-template-columns: 1fr;
+                border: 1px solid var(--divider-light);
+                border-radius: 4px;
+                margin-bottom: 10px;
+            }
+
             .span-2,
-            .span-4 {
+            .span-4,
+            .description-field,
+            .receipt-field {
                 grid-column: span 1;
             }
 
@@ -526,6 +549,11 @@
         }
 
         @media print {
+            @page {
+                size: letter landscape;
+                margin: 0.35in;
+            }
+
             body {
                 background: var(--white);
                 color: var(--black);
@@ -549,15 +577,6 @@
                 padding: 0;
                 margin: 0 0 20px;
                 background: var(--white);
-            }
-
-            .expense-table-wrap {
-                overflow: visible;
-            }
-
-            table {
-                min-width: 0;
-                font-size: 10px;
             }
         }
     </style>
@@ -634,11 +653,7 @@
                         <label for="reportDate">Report Date</label>
                         <input id="reportDate" type="date">
                     </div>
-                    <div class="field span-2">
-                        <label for="paymentMethod">How should Finance pay you?</label>
-                        <input id="paymentMethod" placeholder="Example: payroll, EFT, cheque">
-                    </div>
-                    <div class="field span-2">
+                    <div class="field span-4">
                         <label for="reportNotes">Notes for Finance</label>
                         <textarea id="reportNotes" placeholder="Example: SCA trip, customer lunch, missing receipt explanation"></textarea>
                     </div>
@@ -654,25 +669,7 @@
                     <p class="panel-note">Enter the full amount you personally paid. If GST is included, the tool estimates the GST portion at 5/105 of the receipt total. Use Manual GST when the receipt shows a specific GST amount.</p>
                 </div>
 
-                <div class="expense-table-wrap">
-                    <table aria-label="Expense lines">
-                        <thead>
-                            <tr>
-                                <th class="col-date">Date</th>
-                                <th class="col-vendor">Vendor</th>
-                                <th>Description</th>
-                                <th class="col-category">Category</th>
-                                <th class="col-money">Paid</th>
-                                <th class="col-gst-mode">GST</th>
-                                <th class="col-money">GST Amount</th>
-                                <th class="col-money">Before GST</th>
-                                <th class="col-receipt">Receipt</th>
-                                <th class="col-remove"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="expenseRows"></tbody>
-                    </table>
-                </div>
+                <div class="expense-list" id="expenseRows" aria-label="Expense lines"></div>
 
                 <div class="toolbar">
                     <button class="button light" type="button" onclick="addExpenseRow()">Add Line</button>
@@ -740,7 +737,9 @@
             }
         }
 
-        if (firebaseConfigured()) {
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            applyRole(roleFromLocalStorage());
+        } else if (firebaseConfigured()) {
             onHubAuthChange(role => applyRole(role));
         } else {
             applyRole(roleFromLocalStorage());
@@ -750,6 +749,7 @@
     <script>
         const categories = ['Fuel', 'Meals', 'Parking', 'Equipment', 'Grocery', 'Office', 'Travel', 'Software', 'Training', 'Misc'];
         const expenseRows = document.getElementById('expenseRows');
+        const DEFAULT_EMPTY_ROWS = 5;
 
         function todayIso() {
             return new Date().toISOString().slice(0, 10);
@@ -777,7 +777,7 @@
         }
 
         function getRows() {
-            return Array.from(expenseRows.querySelectorAll('tr')).map(row => {
+            return Array.from(expenseRows.querySelectorAll('.expense-line')).map(row => {
                 const total = numberFromInput(row.querySelector('[data-field="amount"]').value);
                 const mode = row.querySelector('[data-field="gstMode"]').value;
                 const manualGst = numberFromInput(row.querySelector('[data-field="gstAmount"]').value);
@@ -802,46 +802,74 @@
         }
 
         function addExpenseRow(seed = {}) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="date" data-field="date" value="${safeText(seed.date || '')}"></td>
-                <td><input data-field="vendor" placeholder="Vendor" value="${safeText(seed.vendor || '')}"></td>
-                <td><input data-field="description" placeholder="What was this for?" value="${safeText(seed.description || '')}"></td>
-                <td>
+            const line = document.createElement('div');
+            line.className = 'expense-line';
+            line.innerHTML = `
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" data-field="date" value="${safeText(seed.date || '')}">
+                </div>
+                <div class="field">
+                    <label>Vendor</label>
+                    <input data-field="vendor" placeholder="Vendor" value="${safeText(seed.vendor || '')}">
+                </div>
+                <div class="field">
+                    <label>Category</label>
                     <select data-field="category">
                         ${categories.map(category => `<option${category === seed.category ? ' selected' : ''}>${category}</option>`).join('')}
                     </select>
-                </td>
-                <td><input data-field="amount" inputmode="decimal" placeholder="0.00" value="${safeText(seed.amount || '')}"></td>
-                <td>
+                </div>
+                <div class="field">
+                    <label>Paid</label>
+                    <input data-field="amount" inputmode="decimal" placeholder="0.00" value="${safeText(seed.amount || '')}">
+                </div>
+                <div class="field">
+                    <label>GST Treatment</label>
                     <select data-field="gstMode">
                         <option value="none"${seed.gstMode === 'none' ? ' selected' : ''}>No GST</option>
                         <option value="included"${seed.gstMode === 'included' ? ' selected' : ''}>GST Included</option>
                         <option value="manual"${seed.gstMode === 'manual' ? ' selected' : ''}>Manual GST</option>
                     </select>
-                </td>
-                <td><input data-field="gstAmount" inputmode="decimal" placeholder="0.00" value="${safeText(seed.gstAmount || '')}"></td>
-                <td class="money-cell" data-field="beforeGst">$0.00</td>
-                <td><input data-field="receipt" placeholder="Attached / missing"></td>
-                <td><button class="remove-btn" type="button" aria-label="Remove line">&times;</button></td>
+                </div>
+                <div class="field">
+                    <label>GST Amount</label>
+                    <input data-field="gstAmount" inputmode="decimal" placeholder="0.00" value="${safeText(seed.gstAmount || '')}">
+                </div>
+                <div class="field">
+                    <label>Before GST</label>
+                    <div class="readonly-money" data-field="beforeGst">$0.00</div>
+                </div>
+                <button class="remove-btn" type="button" aria-label="Remove line">&times;</button>
+                <div class="field description-field">
+                    <label>Description</label>
+                    <textarea data-field="description" placeholder="What was this for?">${safeText(seed.description || '')}</textarea>
+                </div>
+                <div class="field receipt-field">
+                    <label>Receipt Note</label>
+                    <input data-field="receipt" placeholder="Attached / missing" value="${safeText(seed.receipt || '')}">
+                </div>
             `;
 
-            tr.querySelectorAll('input, select').forEach(input => {
+            line.querySelectorAll('input, select, textarea').forEach(input => {
                 input.addEventListener('input', updateSummary);
                 input.addEventListener('change', updateSummary);
             });
-            tr.querySelector('.remove-btn').addEventListener('click', () => {
-                tr.remove();
-                if (!expenseRows.children.length) addExpenseRow();
+            line.querySelector('.remove-btn').addEventListener('click', () => {
+                line.remove();
+                if (!expenseRows.children.length) addExpenseRows(DEFAULT_EMPTY_ROWS);
                 updateSummary();
             });
 
-            expenseRows.appendChild(tr);
+            expenseRows.appendChild(line);
             updateSummary();
         }
 
+        function addExpenseRows(count) {
+            for (let i = 0; i < count; i += 1) addExpenseRow();
+        }
+
         function updateSummary() {
-            Array.from(expenseRows.querySelectorAll('tr')).forEach(row => {
+            Array.from(expenseRows.querySelectorAll('.expense-line')).forEach(row => {
                 const total = numberFromInput(row.querySelector('[data-field="amount"]').value);
                 const mode = row.querySelector('[data-field="gstMode"]').value;
                 const gstInput = row.querySelector('[data-field="gstAmount"]');
@@ -903,7 +931,6 @@
                 employeeEmail: document.getElementById('employeeEmail').value.trim(),
                 department: document.getElementById('department').value,
                 reportDate: document.getElementById('reportDate').value,
-                paymentMethod: document.getElementById('paymentMethod').value.trim(),
                 notes: document.getElementById('reportNotes').value.trim(),
                 rows,
                 totals
@@ -953,14 +980,17 @@
 <meta charset="UTF-8">
 <title>${safeText(filenameBase(data))}</title>
 <style>
-body{font-family:Montserrat,Helvetica,Arial,sans-serif;color:#1A1A1A;margin:40px;line-height:1.45}
+@page{size:letter landscape;margin:0.35in}
+body{font-family:Montserrat,Helvetica,Arial,sans-serif;color:#1A1A1A;margin:28px;line-height:1.35}
 .top{display:flex;justify-content:space-between;gap:24px;border-bottom:3px solid #36B3AF;padding-bottom:18px;margin-bottom:22px}
 .brand{font-size:30px;font-weight:800;letter-spacing:2px}.label{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#908F8A}
-h1{font-size:24px;margin:4px 0 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+h1{font-size:24px;margin:4px 0 0}h2{font-size:15px;margin:18px 0 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:18px 0;border:1px solid #E0E0E0}
 .card{border:1px solid #E0E0E0;padding:12px}.card strong{display:block;font-size:20px;margin-top:4px}
-table{width:100%;border-collapse:collapse;margin-top:18px;font-size:12px}th{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#908F8A;text-align:left;border-bottom:1px solid #E0E0E0;padding:8px}td{border-bottom:1px solid #E8E4DE;padding:8px;vertical-align:top}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}th{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:#908F8A;text-align:left;border-bottom:1px solid #E0E0E0;padding:7px 6px}td{border-bottom:1px solid #E8E4DE;padding:7px 6px;vertical-align:top}
 .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;font-size:13px}.notes{margin-top:18px;padding:12px;border-left:3px solid #36B3AF;background:#F5F0E8}
-@media print{body{margin:24px}.no-print{display:none}}
+.signature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:34px}
+.signature-line{border-top:1px solid #1A1A1A;padding-top:8px;font-size:11px;color:#4A4A4A}
+@media print{body{margin:0}.no-print{display:none}}
 </style>
 </head>
 <body>
@@ -969,7 +999,7 @@ table{width:100%;border-collapse:collapse;margin-top:18px;font-size:12px}th{font
 <div><span class="label">Employee</span><br>${safeText(data.employeeName)}</div>
 <div><span class="label">Email</span><br>${safeText(data.employeeEmail)}</div>
 <div><span class="label">Department</span><br>${safeText(data.department || 'Not specified')}</div>
-<div><span class="label">Payment</span><br>${safeText(data.paymentMethod || 'Not specified')}</div>
+<div><span class="label">Prepared</span><br>${safeText(new Date().toLocaleDateString('en-CA'))}</div>
 </div>
 <div class="grid">
 <div class="card"><span class="label">Total to Reimburse</span><strong>${money(data.totals.amount)}</strong></div>
@@ -983,6 +1013,11 @@ table{width:100%;border-collapse:collapse;margin-top:18px;font-size:12px}th{font
 <table><tbody>${categoryRows || '<tr><td>No category totals.</td><td style="text-align:right;">$0.00</td></tr>'}</tbody></table>
 ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><br>${safeText(data.notes).replace(/\n/g, '<br>')}</div>` : ''}
 <p style="margin-top:22px;font-size:11px;color:#908F8A;">Receipt images/PDFs should be attached to the same email as this report.</p>
+<div class="signature-grid">
+<div class="signature-line">Employee Signature</div>
+<div class="signature-line">Date</div>
+<div class="signature-line">Finance Approval</div>
+</div>
 </body>
 </html>`;
         }
@@ -1072,15 +1107,14 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
             document.getElementById('employeeEmail').value = '';
             document.getElementById('department').value = '';
             document.getElementById('reportDate').value = todayIso();
-            document.getElementById('paymentMethod').value = '';
             document.getElementById('reportNotes').value = '';
             expenseRows.innerHTML = '';
-            addExpenseRow();
+            addExpenseRows(DEFAULT_EMPTY_ROWS);
             document.getElementById('message').classList.remove('visible');
         }
 
         document.getElementById('reportDate').value = todayIso();
-        addExpenseRow();
+        addExpenseRows(DEFAULT_EMPTY_ROWS);
     </script>
 </body>
 </html>
