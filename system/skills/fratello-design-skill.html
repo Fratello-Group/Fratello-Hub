@@ -33,14 +33,19 @@
         }
 
         .masthead {
-            max-width: 1120px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            max-width: none;
             width: 100%;
-            margin: 0 auto;
-            padding: 34px 40px 0;
+            margin: 0;
+            padding: 16px 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 24px;
+            background: rgba(26, 26, 26, 0.98);
+            border-bottom: 1px solid var(--divider-dark);
         }
 
         .masthead-logo {
