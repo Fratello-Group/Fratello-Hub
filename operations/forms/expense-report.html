@@ -327,70 +327,121 @@
         .span-2 { grid-column: span 2; }
         .span-4 { grid-column: span 4; }
 
-        .expense-list {
+        .entry-grid {
             display: grid;
-            gap: 0;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .entry-card {
+            border: 1px solid var(--divider-light);
+            border-radius: 4px;
+            background: #fbfaf7;
+            padding: 18px;
+        }
+
+        .entry-total {
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 12px 14px;
+            border: 1px solid var(--divider-light);
+            border-radius: 4px;
+            background: var(--card-bg-light);
+            color: var(--black);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .compiled-expenses {
+            margin-top: 22px;
             border: 1px solid var(--divider-light);
             border-radius: 4px;
             background: var(--white);
             overflow: hidden;
         }
 
-        .expense-line {
-            display: grid;
-            grid-template-columns: 138px minmax(220px, 1.35fr) 150px 122px 178px 124px 134px 44px;
-            gap: 10px;
-            align-items: start;
-            padding: 14px;
-            border-bottom: 1px solid var(--fog);
-            background: var(--white);
-        }
-
-        .expense-line:last-child {
-            border-bottom: 0;
-        }
-
-        .expense-line label {
-            color: #3F3F3F;
-            font-size: 9px;
-            letter-spacing: 1.6px;
-            white-space: nowrap;
-        }
-
-        .expense-line input,
-        .expense-line select,
-        .expense-line textarea {
-            height: 48px;
-            background: #fbfaf7;
-        }
-
-        .expense-line textarea {
-            height: auto;
-            min-height: 78px;
-        }
-
-        .description-field {
-            grid-column: 1 / -1;
-        }
-
-        .readonly-money {
-            height: 48px;
+        .compiled-title {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding: 11px 12px;
-            border: 1px solid var(--divider-light);
-            border-radius: 4px;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--fog);
             background: var(--card-bg-light);
+        }
+
+        .compiled-title strong {
+            color: var(--black);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .compiled-title span {
+            color: var(--slate);
+            font-size: 12px;
+        }
+
+        .register-header,
+        .expense-row {
+            display: grid;
+            grid-template-columns: 100px minmax(120px, 1fr) minmax(180px, 1.6fr) 116px 108px 96px 108px 34px;
+            gap: 10px;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .register-header {
+            color: #3F3F3F;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+        }
+
+        .expense-row {
+            border-top: 1px solid var(--fog);
+            color: var(--slate);
+            font-size: 13px;
+        }
+
+        .expense-cell {
+            min-width: 0;
+        }
+
+        .expense-cell strong {
+            display: block;
             color: var(--black);
             font-size: 14px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .cell-label {
+            display: none;
+            margin-bottom: 4px;
+            color: var(--grey);
+            font-size: 9px;
             font-weight: 800;
-            white-space: nowrap;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            padding: 18px 16px;
+            border-top: 1px solid var(--fog);
+            color: var(--slate);
+            font-size: 13px;
+        }
+
+        .empty-state.hidden {
+            display: none;
         }
 
         .remove-btn {
             width: 34px;
-            height: 48px;
+            height: 34px;
             border: 1px solid var(--divider-light);
             border-radius: 4px;
             background: var(--white);
@@ -398,7 +449,6 @@
             cursor: pointer;
             font-size: 20px;
             line-height: 1;
-            margin-top: 23px;
         }
 
         .remove-btn:hover {
@@ -535,21 +585,47 @@
 
             .hero,
             .field-grid,
+            .entry-grid,
             .summary-grid,
             .category-list {
                 grid-template-columns: 1fr;
             }
 
-            .expense-line {
-                grid-template-columns: 1fr;
+            .register-header {
+                display: none;
+            }
+
+            .compiled-expenses {
+                border: 0;
+                background: transparent;
+                overflow: visible;
+            }
+
+            .compiled-title {
                 border: 1px solid var(--divider-light);
                 border-radius: 4px;
                 margin-bottom: 10px;
             }
 
+            .expense-row {
+                grid-template-columns: 1fr;
+                border: 1px solid var(--divider-light);
+                border-radius: 4px;
+                margin-bottom: 10px;
+                padding: 14px;
+                background: var(--white);
+            }
+
+            .cell-label {
+                display: block;
+            }
+
+            .description-cell {
+                grid-column: span 1;
+            }
+
             .span-2,
-            .span-4,
-            .description-field {
+            .span-4 {
                 grid-column: span 1;
             }
 
@@ -682,18 +758,80 @@
                 <div class="panel-header">
                     <div>
                         <div class="panel-kicker">Step 02</div>
-                        <h2 id="expensesTitle">Expense lines</h2>
+                        <h2 id="expensesTitle">Add an expense</h2>
                     </div>
-                    <p class="panel-note">Enter the full amount you personally paid. If GST is included, the tool estimates the GST portion at 5/105 of the receipt total. Use Manual GST when the receipt shows a specific GST amount.</p>
+                    <p class="panel-note">Enter one receipt at a time. GST is included by default; switch it off when a receipt has no GST.</p>
                 </div>
 
-                <div class="expense-list" id="expenseRows" aria-label="Expense lines"></div>
+                <form class="entry-card" id="expenseEntryForm">
+                    <div class="entry-grid">
+                        <div class="field">
+                            <label for="expenseDate">Date</label>
+                            <input id="expenseDate" type="date">
+                        </div>
+                        <div class="field">
+                            <label for="expenseVendor">Vendor</label>
+                            <input id="expenseVendor" placeholder="Vendor">
+                        </div>
+                        <div class="field">
+                            <label for="expenseCategory">Category</label>
+                            <select id="expenseCategory"></select>
+                        </div>
+                        <div class="field">
+                            <label for="expenseAmount">Paid</label>
+                            <input id="expenseAmount" inputmode="decimal" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="expenseGstMode">GST Treatment</label>
+                            <select id="expenseGstMode">
+                                <option value="included">GST Included</option>
+                                <option value="none">No GST</option>
+                                <option value="manual">Manual GST</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="expenseGstAmount">GST Amount</label>
+                            <input id="expenseGstAmount" inputmode="decimal" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label>Before GST</label>
+                            <div class="entry-total" id="entryBeforeGst">$0.00</div>
+                        </div>
+                        <div class="field span-4">
+                            <label for="expenseDescription">Description</label>
+                            <textarea id="expenseDescription" placeholder="What was this for?"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <button class="button primary" type="submit">Add Expense</button>
+                        <button class="button light" id="clearEntryButton" type="button">Clear Entry</button>
+                    </div>
+                </form>
+
+                <div class="compiled-expenses" aria-label="Added expenses">
+                    <div class="compiled-title">
+                        <strong>Added expenses</strong>
+                        <span id="compiledCount">0 items</span>
+                    </div>
+                    <div class="register-header" aria-hidden="true">
+                        <span>Date</span>
+                        <span>Vendor</span>
+                        <span>Description</span>
+                        <span>Category</span>
+                        <span>Total Paid</span>
+                        <span>GST</span>
+                        <span>Before GST</span>
+                        <span></span>
+                    </div>
+                    <div id="expenseRows"></div>
+                    <div class="empty-state" id="emptyExpenses">No expenses added yet. Enter one above and click Add Expense.</div>
+                </div>
 
                 <div class="toolbar">
-                    <button class="button light" type="button" onclick="addExpenseRow()">Add Line</button>
                     <button class="button light" type="button" onclick="downloadReport()">Download Report</button>
-                    <button class="button light" type="button" onclick="downloadCsv()">Download CSV</button>
-                    <button class="button danger" type="button" onclick="clearForm()">Clear Form</button>
+                    <button class="button light" type="button" onclick="downloadCsv()">Download Spreadsheet</button>
+                    <button class="button danger" type="button" onclick="clearForm()">Clear Report</button>
                 </div>
                 <div class="message" id="message"></div>
             </section>
@@ -774,8 +912,11 @@
     <script>
         const categories = ['Fuel', 'Meals', 'Parking', 'Equipment', 'Grocery', 'Office', 'Travel', 'Software', 'Training', 'Misc'];
         const expenseRows = document.getElementById('expenseRows');
-        const DEFAULT_EMPTY_ROWS = 5;
+        const emptyExpenses = document.getElementById('emptyExpenses');
+        const compiledCount = document.getElementById('compiledCount');
         const DEFAULT_GST_MODE = 'included';
+        let expenseItems = [];
+        let nextExpenseId = 1;
 
         function todayIso() {
             return new Date().toISOString().slice(0, 10);
@@ -802,117 +943,142 @@
             }[char]));
         }
 
-        function getRows() {
-            return Array.from(expenseRows.querySelectorAll('.expense-line')).map(row => {
-                const total = numberFromInput(row.querySelector('[data-field="amount"]').value);
-                const mode = row.querySelector('[data-field="gstMode"]').value;
-                const manualGst = numberFromInput(row.querySelector('[data-field="gstAmount"]').value);
-                const gst = mode === 'included'
-                    ? Math.round((total * 5 / 105) * 100) / 100
-                    : mode === 'manual'
-                        ? Math.min(total, Math.max(0, manualGst))
-                        : 0;
-
-                return {
-                    date: row.querySelector('[data-field="date"]').value,
-                    vendor: row.querySelector('[data-field="vendor"]').value.trim(),
-                    description: row.querySelector('[data-field="description"]').value.trim(),
-                    category: row.querySelector('[data-field="category"]').value,
-                    amount: total,
-                    gstMode: mode,
-                    gst,
-                    beforeGst: Math.max(0, total - gst)
-                };
-            }).filter(row => row.date || row.vendor || row.description || row.amount);
+        function entryFields() {
+            return {
+                date: document.getElementById('expenseDate'),
+                vendor: document.getElementById('expenseVendor'),
+                category: document.getElementById('expenseCategory'),
+                amount: document.getElementById('expenseAmount'),
+                gstMode: document.getElementById('expenseGstMode'),
+                gstAmount: document.getElementById('expenseGstAmount'),
+                beforeGst: document.getElementById('entryBeforeGst'),
+                description: document.getElementById('expenseDescription')
+            };
         }
 
-        function addExpenseRow(seed = {}) {
-            const line = document.createElement('div');
-            line.className = 'expense-line';
-            const gstMode = seed.gstMode || DEFAULT_GST_MODE;
-            line.innerHTML = `
-                <div class="field">
-                    <label>Date</label>
-                    <input type="date" data-field="date" value="${safeText(seed.date || '')}">
-                </div>
-                <div class="field">
-                    <label>Vendor</label>
-                    <input data-field="vendor" placeholder="Vendor" value="${safeText(seed.vendor || '')}">
-                </div>
-                <div class="field">
-                    <label>Category</label>
-                    <select data-field="category">
-                        ${categories.map(category => `<option${category === seed.category ? ' selected' : ''}>${category}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Paid</label>
-                    <input data-field="amount" inputmode="decimal" placeholder="0.00" value="${safeText(seed.amount || '')}">
-                </div>
-                <div class="field">
-                    <label>GST Treatment</label>
-                    <select data-field="gstMode">
-                        <option value="included"${gstMode === 'included' ? ' selected' : ''}>GST Included</option>
-                        <option value="none"${gstMode === 'none' ? ' selected' : ''}>No GST</option>
-                        <option value="manual"${gstMode === 'manual' ? ' selected' : ''}>Manual GST</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>GST Amount</label>
-                    <input data-field="gstAmount" inputmode="decimal" placeholder="0.00" value="${safeText(seed.gstAmount || '')}">
-                </div>
-                <div class="field">
-                    <label>Before GST</label>
-                    <div class="readonly-money" data-field="beforeGst">$0.00</div>
-                </div>
-                <button class="remove-btn" type="button" aria-label="Remove line">&times;</button>
-                <div class="field description-field">
-                    <label>Description</label>
-                    <textarea data-field="description" placeholder="What was this for?">${safeText(seed.description || '')}</textarea>
-                </div>
-            `;
+        function gstValues(total, mode, manualGst) {
+            const gst = mode === 'included'
+                ? Math.round((total * 5 / 105) * 100) / 100
+                : mode === 'manual'
+                    ? Math.min(total, Math.max(0, manualGst))
+                    : 0;
 
-            line.querySelectorAll('input, select, textarea').forEach(input => {
-                input.addEventListener('input', updateSummary);
-                input.addEventListener('change', updateSummary);
-            });
-            line.querySelector('.remove-btn').addEventListener('click', () => {
-                line.remove();
-                if (!expenseRows.children.length) addExpenseRows(DEFAULT_EMPTY_ROWS);
-                updateSummary();
+            return {
+                gst,
+                beforeGst: Math.max(0, total - gst)
+            };
+        }
+
+        function updateEntryMath() {
+            const fields = entryFields();
+            const total = numberFromInput(fields.amount.value);
+            const mode = fields.gstMode.value;
+            const manualGst = numberFromInput(fields.gstAmount.value);
+            const values = gstValues(total, mode, manualGst);
+
+            if (mode === 'included') {
+                fields.gstAmount.value = total ? values.gst.toFixed(2) : '';
+                fields.gstAmount.disabled = true;
+            } else if (mode === 'manual') {
+                fields.gstAmount.disabled = false;
+            } else {
+                fields.gstAmount.value = '';
+                fields.gstAmount.disabled = true;
+            }
+
+            fields.beforeGst.textContent = money(values.beforeGst);
+            return values;
+        }
+
+        function readEntry() {
+            const fields = entryFields();
+            const amount = numberFromInput(fields.amount.value);
+            const values = gstValues(amount, fields.gstMode.value, numberFromInput(fields.gstAmount.value));
+
+            return {
+                id: nextExpenseId++,
+                date: fields.date.value,
+                vendor: fields.vendor.value.trim(),
+                description: fields.description.value.trim(),
+                category: fields.category.value,
+                amount,
+                gstMode: fields.gstMode.value,
+                gst: values.gst,
+                beforeGst: values.beforeGst
+            };
+        }
+
+        function getRows() {
+            return expenseItems.map(({ id, ...row }) => row);
+        }
+
+        function resetExpenseEntry() {
+            const fields = entryFields();
+            fields.date.value = todayIso();
+            fields.vendor.value = '';
+            fields.category.value = categories[0];
+            fields.amount.value = '';
+            fields.gstMode.value = DEFAULT_GST_MODE;
+            fields.gstAmount.value = '';
+            fields.description.value = '';
+            updateEntryMath();
+        }
+
+        function addExpenseFromEntry(event) {
+            if (event) event.preventDefault();
+            updateEntryMath();
+            const row = readEntry();
+
+            if (!row.date) {
+                showMessage('Add a date before adding this expense.');
+                return;
+            }
+
+            if (!row.vendor && !row.description) {
+                showMessage('Add a vendor or description before adding this expense.');
+                return;
+            }
+
+            if (!row.amount) {
+                showMessage('Add the amount paid before adding this expense.');
+                return;
+            }
+
+            expenseItems.push(row);
+            renderExpenseList();
+            resetExpenseEntry();
+            showMessage('Expense added to the report.');
+        }
+
+        function removeExpense(id) {
+            expenseItems = expenseItems.filter(row => row.id !== id);
+            renderExpenseList();
+        }
+
+        function renderExpenseList() {
+            expenseRows.innerHTML = expenseItems.map(row => `
+                <div class="expense-row">
+                    <div class="expense-cell"><span class="cell-label">Date</span><strong>${safeText(row.date)}</strong></div>
+                    <div class="expense-cell"><span class="cell-label">Vendor</span><strong>${safeText(row.vendor || 'Not specified')}</strong></div>
+                    <div class="expense-cell description-cell"><span class="cell-label">Description</span><strong>${safeText(row.description || 'Not specified')}</strong></div>
+                    <div class="expense-cell"><span class="cell-label">Category</span><strong>${safeText(row.category)}</strong></div>
+                    <div class="expense-cell"><span class="cell-label">Total Paid</span><strong>${money(row.amount)}</strong></div>
+                    <div class="expense-cell"><span class="cell-label">GST</span><strong>${money(row.gst)}</strong></div>
+                    <div class="expense-cell"><span class="cell-label">Before GST</span><strong>${money(row.beforeGst)}</strong></div>
+                    <button class="remove-btn" type="button" data-remove-id="${row.id}" aria-label="Remove expense">&times;</button>
+                </div>
+            `).join('');
+
+            expenseRows.querySelectorAll('[data-remove-id]').forEach(button => {
+                button.addEventListener('click', () => removeExpense(Number(button.dataset.removeId)));
             });
 
-            expenseRows.appendChild(line);
+            emptyExpenses.classList.toggle('hidden', expenseItems.length > 0);
+            compiledCount.textContent = `${expenseItems.length} ${expenseItems.length === 1 ? 'item' : 'items'}`;
             updateSummary();
         }
 
-        function addExpenseRows(count) {
-            for (let i = 0; i < count; i += 1) addExpenseRow();
-        }
-
         function updateSummary() {
-            Array.from(expenseRows.querySelectorAll('.expense-line')).forEach(row => {
-                const total = numberFromInput(row.querySelector('[data-field="amount"]').value);
-                const mode = row.querySelector('[data-field="gstMode"]').value;
-                const gstInput = row.querySelector('[data-field="gstAmount"]');
-                const beforeGst = row.querySelector('[data-field="beforeGst"]');
-
-                if (mode === 'included') {
-                    const estimated = Math.round((total * 5 / 105) * 100) / 100;
-                    gstInput.value = total ? estimated.toFixed(2) : '';
-                    gstInput.disabled = true;
-                    beforeGst.textContent = money(total - estimated);
-                } else if (mode === 'manual') {
-                    gstInput.disabled = false;
-                    const gst = Math.min(total, Math.max(0, numberFromInput(gstInput.value)));
-                    beforeGst.textContent = money(Math.max(0, total - gst));
-                } else {
-                    gstInput.value = '';
-                    gstInput.disabled = true;
-                    beforeGst.textContent = money(total);
-                }
-            });
-
             const rows = getRows();
             const totals = rows.reduce((acc, row) => {
                 acc.amount += row.amount;
@@ -1129,13 +1295,26 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
             document.getElementById('department').value = '';
             document.getElementById('reportDate').value = todayIso();
             document.getElementById('reportNotes').value = '';
-            expenseRows.innerHTML = '';
-            addExpenseRows(DEFAULT_EMPTY_ROWS);
+            expenseItems = [];
+            renderExpenseList();
+            resetExpenseEntry();
             document.getElementById('message').classList.remove('visible');
         }
 
+        document.getElementById('expenseCategory').innerHTML = categories
+            .map(category => `<option>${category}</option>`)
+            .join('');
+        document.getElementById('expenseEntryForm').addEventListener('submit', addExpenseFromEntry);
+        document.getElementById('clearEntryButton').addEventListener('click', resetExpenseEntry);
+        ['expenseAmount', 'expenseGstMode', 'expenseGstAmount'].forEach(id => {
+            const field = document.getElementById(id);
+            field.addEventListener('input', updateEntryMath);
+            field.addEventListener('change', updateEntryMath);
+        });
+
         document.getElementById('reportDate').value = todayIso();
-        addExpenseRows(DEFAULT_EMPTY_ROWS);
+        resetExpenseEntry();
+        renderExpenseList();
     </script>
 </body>
 </html>
