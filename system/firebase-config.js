@@ -26,3 +26,7 @@ window.FRATELLO_AUTH_PROVIDERS = {
     google: true,
     apple: false
 };
+
+// This only controls the Hub screen. The real signup lock is the Firebase
+// Console setting: Authentication > Settings > User actions > disable create.
+window.FRATELLO_AUTH_ALLOW_PUBLIC_SIGNUP = false;

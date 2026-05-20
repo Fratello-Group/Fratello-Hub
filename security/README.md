@@ -36,6 +36,16 @@ python3 security/fratello_hub_security_test.py --active-signup-check
 
 If this fails, it does not mean Hub data is exposed. It means anyone can create a Firebase Auth account, which we may want to tighten once the Hub moves from prototype to real internal system.
 
+To fix that failed item in Firebase:
+
+1. Open Firebase Console.
+2. Go to Authentication.
+3. Open Settings.
+4. Open User actions.
+5. Disable end-user account creation.
+
+After that, owners need to create/invite accounts intentionally instead of letting anyone self-create one from the public login screen.
+
 ## Test A Different URL
 
 ```bash

@@ -970,10 +970,11 @@ function setupAuthModeUi() {
     document.getElementById('loginDivider').classList.add('visible');
     document.getElementById('googleProviderBtn').style.display = providers.google === false ? 'none' : '';
     document.getElementById('appleProviderBtn').style.display = providers.apple === true ? '' : 'none';
-    document.getElementById('createAccountToggle').classList.add('visible');
+    const allowPublicSignup = window.FRATELLO_AUTH_ALLOW_PUBLIC_SIGNUP === true;
+    if (allowPublicSignup) document.getElementById('createAccountToggle').classList.add('visible');
     document.getElementById('setupCodeToggle').classList.add('hidden');
     document.getElementById('loginBtn').textContent = 'Sign In';
-    document.getElementById('loginHelper').textContent = 'Use Google, Apple, or your Hub email/password.';
+    document.getElementById('loginHelper').textContent = 'Use Google or your Hub email/password after an Owner has added your account.';
     document.getElementById('resetCopy').textContent = 'Enter your email above and Firebase will email you a private password reset link.';
     document.getElementById('resetBtn').textContent = 'Email Reset Link';
 }
@@ -1064,6 +1065,10 @@ async function handleProviderLogin(provider) {
 
 async function handleCreateAccount() {
     if (!USE_FIREBASE_AUTH) return;
+    if (window.FRATELLO_AUTH_ALLOW_PUBLIC_SIGNUP !== true) {
+        setLoginError('Ask an Owner to add your Hub account first.');
+        return;
+    }
 
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;

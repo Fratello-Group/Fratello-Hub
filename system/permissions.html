@@ -883,7 +883,7 @@
                 if (USE_FIREBASE_AUTH) {
                     const data = await saveHubInvite({ name, email, title, profile });
                     renderGeneratedLink('Hub access', data.name, data.inviteUrl);
-                    document.getElementById('adminMessage').textContent = 'Access profile saved. Send them the Hub link; they can sign in with Google, Apple, or email.';
+                    document.getElementById('adminMessage').textContent = 'Access profile saved. Add this person in Firebase Authentication if they do not already have a login, then send the Hub link.';
                 } else {
                     const data = await authRequest({ action: 'users:invite', name, email, title, profile });
                     renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
