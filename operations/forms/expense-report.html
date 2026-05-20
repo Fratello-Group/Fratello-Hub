@@ -915,6 +915,9 @@
         const emptyExpenses = document.getElementById('emptyExpenses');
         const compiledCount = document.getElementById('compiledCount');
         const DEFAULT_GST_MODE = 'included';
+        const REPORT_LOGO_URL = new URL('../../assets/Fratello_Logo_Black.png', window.location.href).href;
+        let reportLogoSrc = REPORT_LOGO_URL;
+        let reportLogoPromise = null;
         let expenseItems = [];
         let nextExpenseId = 1;
 
@@ -1143,6 +1146,26 @@
             return `Fratello-Expense-Report-${name}-${data.reportDate || todayIso()}`;
         }
 
+        function ensureReportLogo() {
+            if (reportLogoSrc.startsWith('data:')) return Promise.resolve(reportLogoSrc);
+            if (reportLogoPromise) return reportLogoPromise;
+
+            reportLogoPromise = fetch(REPORT_LOGO_URL)
+                .then(response => response.ok ? response.blob() : Promise.reject(new Error('Logo not available')))
+                .then(blob => new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        reportLogoSrc = reader.result;
+                        resolve(reportLogoSrc);
+                    };
+                    reader.onerror = () => resolve(reportLogoSrc);
+                    reader.readAsDataURL(blob);
+                }))
+                .catch(() => reportLogoSrc);
+
+            return reportLogoPromise;
+        }
+
         function buildReportHtml(data) {
             const categoryRows = categories
                 .filter(category => data.totals.categories[category])
@@ -1170,7 +1193,7 @@
 @page{size:letter landscape;margin:0.35in}
 body{font-family:Montserrat,Helvetica,Arial,sans-serif;color:#1A1A1A;margin:28px;line-height:1.35}
 .top{display:flex;justify-content:space-between;gap:24px;border-bottom:3px solid #36B3AF;padding-bottom:18px;margin-bottom:22px}
-.brand{font-size:30px;font-weight:800;letter-spacing:2px}.label{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#908F8A}
+.brand-logo{display:block;width:184px;height:auto;margin-bottom:10px}.label{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#908F8A}
 h1{font-size:24px;margin:4px 0 0}h2{font-size:15px;margin:18px 0 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:18px 0;border:1px solid #E0E0E0}
 .card{border:1px solid #E0E0E0;padding:12px}.card strong{display:block;font-size:20px;margin-top:4px}
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}th{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:#908F8A;text-align:left;border-bottom:1px solid #E0E0E0;padding:7px 6px}td{border-bottom:1px solid #E8E4DE;padding:7px 6px;vertical-align:top}
@@ -1181,7 +1204,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}th{font
 </style>
 </head>
 <body>
-<div class="top"><div><div class="brand">FRATELLO</div><h1>Employee Expense Report</h1></div><div><div class="label">Report Date</div><strong>${safeText(data.reportDate)}</strong></div></div>
+<div class="top"><div><img class="brand-logo" src="${safeText(reportLogoSrc)}" alt="Fratello"><h1>Employee Expense Report</h1></div><div><div class="label">Report Date</div><strong>${safeText(data.reportDate)}</strong></div></div>
 <div class="meta">
 <div><span class="label">Employee</span><br>${safeText(data.employeeName)}</div>
 <div><span class="label">Email</span><br>${safeText(data.employeeEmail)}</div>
@@ -1227,7 +1250,7 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
             URL.revokeObjectURL(url);
         }
 
-        function downloadReport() {
+        async function downloadReport() {
             const data = reportData();
             const error = validateReport(data);
             if (error) {
@@ -1235,12 +1258,13 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
                 return;
             }
 
+            await ensureReportLogo();
             downloadBlob(buildReportHtml(data), 'text/html', `${filenameBase(data)}.html`);
             showMessage('Report downloaded. Open it, print/save as PDF, then email it to Finance with your receipts.');
             maybeClearAfterExport();
         }
 
-        function printReport() {
+        async function printReport() {
             const data = reportData();
             const error = validateReport(data);
             if (error) {
@@ -1253,6 +1277,8 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
                 showMessage('Your browser blocked the print window. Use Download Report instead.');
                 return;
             }
+
+            await ensureReportLogo();
             printWindow.document.write(buildReportHtml(data));
             printWindow.document.close();
             printWindow.focus();
