@@ -1,0 +1,50 @@
+[
+  {
+    "id": "qa_vacation",
+    "label": "Submit Vacation Request",
+    "icon": "calendar-plus",
+    "href": "/hr/time-off/vacation-tracker.html?view=submit",
+    "tiers": ["staff", "manager", "owner"],
+    "order": { "staff": 1, "manager": 1, "owner": 3 }
+  },
+  {
+    "id": "qa_sick",
+    "label": "Log Sick Day",
+    "icon": "thermometer",
+    "href": "/hr/time-off/sick-day-logger.html",
+    "tiers": ["staff", "manager", "owner"],
+    "order": { "staff": 2, "manager": 2, "owner": 4 }
+  },
+  {
+    "id": "qa_expense",
+    "label": "Expense Report",
+    "icon": "receipt",
+    "href": "/operations/forms/expense-report.html",
+    "tiers": ["staff", "manager", "owner"],
+    "order": { "staff": 3, "manager": 3, "owner": 5 }
+  },
+  {
+    "id": "qa_timeoff",
+    "label": "My Time Off",
+    "icon": "clock",
+    "href": "/hr/time-off/vacation-tracker.html?view=my-requests",
+    "tiers": ["staff", "manager", "owner"],
+    "order": { "staff": 4, "manager": 4, "owner": 6 }
+  },
+  {
+    "id": "qa_approvals",
+    "label": "Approvals Queue",
+    "icon": "check-square",
+    "href": "/hr/time-off/vacation-tracker.html?view=approvals",
+    "tiers": ["manager", "owner"],
+    "order": { "manager": 5, "owner": 1 }
+  },
+  {
+    "id": "qa_calendar",
+    "label": "Team Calendar",
+    "icon": "calendar",
+    "href": "/hr/time-off/vacation-tracker.html?view=calendar",
+    "tiers": ["owner"],
+    "order": { "owner": 2 }
+  }
+]

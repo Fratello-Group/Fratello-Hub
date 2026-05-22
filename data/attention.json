@@ -1,0 +1,29 @@
+[
+  {
+    "id": "att_001",
+    "tag": "VACATION",
+    "title": "Kyle Park - request for July 14-18",
+    "meta": "Submitted yesterday - Production coverage confirmed",
+    "timestamp": "2026-05-20T14:30:00-06:00",
+    "action": { "label": "REVIEW", "href": "/hr/time-off/vacation-tracker.html?view=approvals&id=att_001" },
+    "visibleTo": ["owner", "controller"]
+  },
+  {
+    "id": "att_002",
+    "tag": "SICK DAY",
+    "title": "Joel logged sick today",
+    "meta": "Coverage needed for Wholesale calls",
+    "timestamp": "2026-05-21T09:14:00-06:00",
+    "action": { "label": "OPEN", "href": "/hr/time-off/sick-day-report.html?id=att_002" },
+    "visibleTo": ["owner", "controller", "sales"]
+  },
+  {
+    "id": "att_003",
+    "tag": "HIRING",
+    "title": "Offer letter pending: Roastery Assistant",
+    "meta": "Prepared docs - awaiting owner review",
+    "timestamp": "2026-05-20T11:00:00-06:00",
+    "action": { "label": "OPEN", "href": "/hr/hiring/hiring-document-generator.html" },
+    "visibleTo": ["owner"]
+  }
+]

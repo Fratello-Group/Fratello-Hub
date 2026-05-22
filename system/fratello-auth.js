@@ -27,38 +27,38 @@ export const PROFILE_DEFINITIONS = {
     owner: {
         key: 'owner',
         label: 'Owner',
-        sections: ['finance', 'production', 'sales', 'marketing', 'hr-people', 'employee-resources', 'owner-admin'],
-        areas: ['Finance', 'Production', 'Sales', 'Marketing', 'HR & People', 'Shared Docs & Forms', 'Owner/Admin']
+        sections: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'],
+        areas: ['Finance', 'Roasting', 'Packaging', 'Warehouse', 'Sales', 'Marketing', 'HR & People', 'Resources', 'Time Off', 'Owner/Admin', 'Settings']
     },
     controller: {
         key: 'controller',
         label: 'Controller',
-        sections: ['finance', 'production', 'sales', 'hr-people', 'employee-resources'],
-        areas: ['Finance', 'Production', 'Sales', 'HR & People', 'Shared Docs & Forms']
+        sections: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'hr-people', 'employee-resources', 'time-off'],
+        areas: ['Finance', 'Roasting', 'Packaging', 'Warehouse', 'Sales', 'HR & People', 'Resources', 'Time Off']
     },
     production: {
         key: 'production',
         label: 'Production',
-        sections: ['production', 'hr-people', 'employee-resources'],
-        areas: ['Production', 'HR & People', 'Shared Docs & Forms']
+        sections: ['production-roasting', 'production-packaging', 'production-warehouse', 'hr-people', 'employee-resources', 'time-off'],
+        areas: ['Roasting', 'Packaging', 'Warehouse', 'HR & People', 'Resources', 'Time Off']
     },
     marketing: {
         key: 'marketing',
         label: 'Marketing',
-        sections: ['marketing', 'hr-people', 'employee-resources'],
-        areas: ['Marketing', 'HR & People', 'Shared Docs & Forms']
+        sections: ['marketing', 'hr-people', 'employee-resources', 'time-off'],
+        areas: ['Marketing', 'HR & People', 'Resources', 'Time Off']
     },
     sales: {
         key: 'sales',
         label: 'Sales',
-        sections: ['sales', 'marketing', 'employee-resources'],
-        areas: ['Sales', 'Marketing', 'Shared Docs & Forms']
+        sections: ['sales', 'marketing', 'employee-resources', 'time-off'],
+        areas: ['Sales', 'Marketing', 'Resources', 'Time Off']
     },
     staff: {
         key: 'staff',
         label: 'Staff',
-        sections: ['employee-resources'],
-        areas: ['Shared Docs & Forms']
+        sections: ['employee-resources', 'time-off'],
+        areas: ['Resources', 'Time Off']
     }
 };
 

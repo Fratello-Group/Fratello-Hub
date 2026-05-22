@@ -26,7 +26,7 @@ const TEAM_MEMBERS = [
     },
     {
         id: 'controller@fratellocoffee.com',
-        email: 'controller@fratellocoffee.com',
+        email: 'chris.mcghee@fratellocoffee.com',
         name: 'Chris McGhee',
         department: 'Controller',
         title: 'Controller',
@@ -35,7 +35,7 @@ const TEAM_MEMBERS = [
     },
     {
         id: 'kyle@fratellocoffee.com',
-        email: 'kyle@fratellocoffee.com',
+        email: 'kyle.park@fratellocoffee.com',
         name: 'Kyle Park',
         department: 'Production',
         title: 'Production & Operations Manager / Roasting Supervisor',
@@ -44,7 +44,7 @@ const TEAM_MEMBERS = [
     },
     {
         id: 'mateo@fratellocoffee.com',
-        email: 'mateo@fratellocoffee.com',
+        email: 'mateo.corredor@fratellocoffee.com',
         name: 'Mateo Corredor',
         department: 'Marketing',
         title: 'Marketing & Brand Manager',
@@ -98,7 +98,7 @@ const TEAM_MEMBERS = [
     },
     {
         id: 'luke.prefontaine@fratellocoffee.com',
-        email: 'luke.prefontaine@fratellocoffee.com',
+        email: 'luke@fratellocoffee.com',
         name: 'Luke Prefontaine',
         department: 'Production',
         title: 'Delivery Driver',

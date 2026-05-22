@@ -1,0 +1,55 @@
+{
+  "roleDefaults": {
+    "owner": {
+      "name": "Chris Prefontaine",
+      "firstName": "Chris",
+      "initials": "CP",
+      "email": "prefontainech@gmail.com"
+    },
+    "controller": {
+      "name": "Chris McGhee",
+      "firstName": "Chris",
+      "initials": "CM",
+      "email": "chris.mcghee@fratellocoffee.com"
+    },
+    "marketing": {
+      "name": "Mateo Corredor",
+      "firstName": "Mateo",
+      "initials": "MC",
+      "email": "mateo.corredor@fratellocoffee.com"
+    },
+    "production": {
+      "name": "Kyle Park",
+      "firstName": "Kyle",
+      "initials": "KP",
+      "email": "kyle.park@fratellocoffee.com"
+    },
+    "sales": {
+      "name": "Joel May",
+      "firstName": "Joel",
+      "initials": "JM",
+      "email": "joel.may@fratellocoffee.com"
+    },
+    "staff": {
+      "name": "Team Member",
+      "firstName": "Team",
+      "initials": "TM",
+      "email": null
+    }
+  },
+  "roster": [
+    { "name": "Chris Prefontaine", "firstName": "Chris", "initials": "CP", "email": "prefontainech@gmail.com", "department": "Management", "role": "owner" },
+    { "name": "Russ Prefontaine", "firstName": "Russ", "initials": "RP", "email": "russ@fratellocoffee.com", "department": "Management", "role": "owner" },
+    { "name": "Chris McGhee", "firstName": "Chris", "initials": "CM", "email": "chris.mcghee@fratellocoffee.com", "department": "Admin", "role": "controller" },
+    { "name": "Nancy Gibb", "firstName": "Nancy", "initials": "NG", "email": "nancy.gibb@fratellocoffee.com", "department": "Admin", "role": "staff" },
+    { "name": "Mateo Corredor", "firstName": "Mateo", "initials": "MC", "email": "mateo.corredor@fratellocoffee.com", "department": "Marketing", "role": "marketing" },
+    { "name": "Jaleisy Quintero", "firstName": "Jaleisy", "initials": "JQ", "email": "jaleisy.quintero@fratellocoffee.com", "department": "Packaging", "role": "staff" },
+    { "name": "Kyle Park", "firstName": "Kyle", "initials": "KP", "email": "kyle.park@fratellocoffee.com", "department": "Production", "role": "production" },
+    { "name": "Samantha Stewart", "firstName": "Samantha", "initials": "SS", "email": null, "department": "Roasting", "role": "staff" },
+    { "name": "Oleksandr Svyrydov", "firstName": "Oleksandr", "initials": "OS", "email": "oleksandr.svyrydov@fratellocoffee.com", "department": "Roasting", "role": "staff" },
+    { "name": "Joel May", "firstName": "Joel", "initials": "JM", "email": "joel.may@fratellocoffee.com", "department": "Sales", "role": "sales" },
+    { "name": "D'Arcy Watsham", "firstName": "D'Arcy", "initials": "DW", "email": "darcy.watsham@fratellocoffee.com", "department": "Sales", "role": "sales" },
+    { "name": "Allana Contois", "firstName": "Allana", "initials": "AC", "email": "allana.contois@fratellocoffee.com", "department": "Warehouse", "role": "staff" },
+    { "name": "Luke Prefontaine", "firstName": "Luke", "initials": "LP", "email": "luke@fratellocoffee.com", "department": "Warehouse", "role": "staff" }
+  ]
+}

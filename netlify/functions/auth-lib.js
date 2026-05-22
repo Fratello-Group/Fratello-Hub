@@ -21,47 +21,47 @@ const PROFILES = {
     owner: {
         key: 'owner',
         label: 'Owner',
-        sections: ['finance', 'production', 'sales', 'marketing', 'hr-people', ...EMPLOYEE_RESOURCES, 'owner-admin'],
-        areas: ['Finance', 'Production', 'Sales', 'Marketing', 'HR & People', 'Shared Docs & Forms', 'Owner/Admin']
+        sections: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'hr-people', ...EMPLOYEE_RESOURCES, 'time-off', 'owner-admin', 'settings'],
+        areas: ['Finance', 'Roasting', 'Packaging', 'Warehouse', 'Sales', 'Marketing', 'HR & People', 'Resources', 'Time Off', 'Owner/Admin', 'Settings']
     },
     controller: {
         key: 'controller',
         label: 'Controller',
-        sections: ['finance', 'production', 'sales', 'hr-people', ...EMPLOYEE_RESOURCES],
-        areas: ['Finance', 'Production', 'Sales', 'HR & People', 'Shared Docs & Forms']
+        sections: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'hr-people', ...EMPLOYEE_RESOURCES, 'time-off'],
+        areas: ['Finance', 'Roasting', 'Packaging', 'Warehouse', 'Sales', 'HR & People', 'Resources', 'Time Off']
     },
     production: {
         key: 'production',
         label: 'Production',
-        sections: ['production', 'hr-people', ...EMPLOYEE_RESOURCES],
-        areas: ['Production', 'HR & People', 'Shared Docs & Forms']
+        sections: ['production-roasting', 'production-packaging', 'production-warehouse', 'hr-people', ...EMPLOYEE_RESOURCES, 'time-off'],
+        areas: ['Roasting', 'Packaging', 'Warehouse', 'HR & People', 'Resources', 'Time Off']
     },
     marketing: {
         key: 'marketing',
         label: 'Marketing',
-        sections: ['marketing', 'hr-people', ...EMPLOYEE_RESOURCES],
-        areas: ['Marketing', 'HR & People', 'Shared Docs & Forms']
+        sections: ['marketing', 'hr-people', ...EMPLOYEE_RESOURCES, 'time-off'],
+        areas: ['Marketing', 'HR & People', 'Resources', 'Time Off']
     },
     sales: {
         key: 'sales',
         label: 'Sales',
-        sections: ['sales', 'marketing', ...EMPLOYEE_RESOURCES],
-        areas: ['Sales', 'Marketing', 'Shared Docs & Forms']
+        sections: ['sales', 'marketing', ...EMPLOYEE_RESOURCES, 'time-off'],
+        areas: ['Sales', 'Marketing', 'Resources', 'Time Off']
     },
     staff: {
         key: 'staff',
         label: 'Staff',
-        sections: EMPLOYEE_RESOURCES,
-        areas: ['Shared Docs & Forms']
+        sections: [...EMPLOYEE_RESOURCES, 'time-off'],
+        areas: ['Resources', 'Time Off']
     }
 };
 
 const DEFAULT_USERS = [
-    { id: 'chris-prefontaine', name: 'Chris Prefontaine', email: 'chris@fratellocoffee.com', title: 'CEO', profile: 'owner', status: 'invited' },
+    { id: 'chris-prefontaine', name: 'Chris Prefontaine', email: 'prefontainech@gmail.com', title: 'CEO', profile: 'owner', status: 'invited' },
     { id: 'russ-prefontaine', name: 'Russ Prefontaine', email: 'russ@fratellocoffee.com', title: 'President', profile: 'owner', status: 'invited' },
-    { id: 'chris-mcghee', name: 'Chris McGhee', email: 'controller@fratellocoffee.com', title: 'Controller', profile: 'controller', status: 'invited' },
-    { id: 'kyle-park', name: 'Kyle Park', email: 'kyle@fratellocoffee.com', title: 'Production & Operations Manager', profile: 'production', status: 'invited' },
-    { id: 'mateo-corredor', name: 'Mateo Corredor', email: 'mateo@fratellocoffee.com', title: 'Marketing & Brand Manager', profile: 'marketing', status: 'invited' }
+    { id: 'chris-mcghee', name: 'Chris McGhee', email: 'chris.mcghee@fratellocoffee.com', title: 'Controller', profile: 'controller', status: 'invited' },
+    { id: 'kyle-park', name: 'Kyle Park', email: 'kyle.park@fratellocoffee.com', title: 'Production & Operations Manager', profile: 'production', status: 'invited' },
+    { id: 'mateo-corredor', name: 'Mateo Corredor', email: 'mateo.corredor@fratellocoffee.com', title: 'Marketing & Brand Manager', profile: 'marketing', status: 'invited' }
 ];
 
 function nowIso() {

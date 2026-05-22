@@ -369,6 +369,10 @@
             margin-right: auto;
         }
 
+        .hub-nav-item {
+            position: relative;
+        }
+
         .hub-nav-btn {
             min-height: 36px;
             padding: 9px 12px;
@@ -389,6 +393,72 @@
             color: var(--cream);
             border-color: rgba(54, 179, 175, 0.42);
             background: rgba(54, 179, 175, 0.08);
+        }
+
+        .hub-nav-caret {
+            margin-left: 6px;
+            color: var(--teal);
+        }
+
+        .hub-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 250px;
+            display: none;
+            padding: 8px;
+            background: #202020;
+            border: 1px solid var(--divider-dark);
+            border-radius: 6px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            z-index: 40;
+        }
+
+        .hub-nav-item.open .hub-dropdown,
+        .hub-nav-item:focus-within .hub-dropdown {
+            display: block;
+        }
+
+        .hub-dropdown-label {
+            padding: 10px 12px 8px;
+            color: var(--grey);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 2.4px;
+            text-transform: uppercase;
+        }
+
+        .hub-dropdown-item {
+            width: 100%;
+            min-height: 38px;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--cream);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .hub-dropdown-item:hover,
+        .hub-dropdown-item.active {
+            background: rgba(54, 179, 175, 0.10);
+            color: var(--white);
+        }
+
+        .hub-dropdown-sub {
+            color: var(--grey);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .masthead-right {
@@ -488,6 +558,54 @@
             font-size: 15px;
             font-weight: 700;
             line-height: 1.45;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .panel {
+            border: 1px solid var(--divider-light);
+            border-radius: 6px;
+            background: var(--white);
+            padding: 22px;
+        }
+
+        .panel.accent {
+            border-left: 4px solid var(--teal);
+        }
+
+        .panel + .panel {
+            margin-top: 18px;
+        }
+
+        .panel-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding-bottom: 14px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--fog);
+        }
+
+        .panel-title {
+            color: var(--black);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .panel-count {
+            color: var(--grey);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
         /* ── Tool boards ── */
@@ -609,8 +727,23 @@
             gap: 14px;
         }
 
+        .section-grid.compact {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
         .section-card {
             padding: 20px;
+        }
+
+        .section-card.clickable {
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+        }
+
+        .section-card.clickable:hover {
+            border-color: rgba(54, 179, 175, 0.55);
+            background: #fbfaf7;
+            transform: translateY(-1px);
         }
 
         .section-title {
@@ -646,7 +779,7 @@
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
             gap: 16px;
-            padding: 14px 0;
+            padding: 15px 0;
             border-bottom: 1px solid var(--fog);
             text-decoration: none;
             color: var(--black);
@@ -669,8 +802,50 @@
             font-size: 14px;
         }
 
+        .tool-desc {
+            display: none;
+        }
+
         .tool.inactive .tool-status {
             color: var(--grey);
+        }
+
+        .tool-view {
+            margin-top: 28px;
+        }
+
+        .tool-view-header {
+            margin-bottom: 24px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--divider-light);
+        }
+
+        .tool-view-title {
+            color: var(--black);
+            font-size: clamp(34px, 4vw, 54px);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: 0;
+        }
+
+        .tool-view-note {
+            max-width: 680px;
+            margin-top: 12px;
+            color: var(--slate);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .tool-view-list {
+            border: 1px solid var(--divider-light);
+            border-radius: 6px;
+            background: var(--white);
+            padding: 4px 22px;
+        }
+
+        .tool-view-list .tool {
+            min-height: 58px;
+            align-items: center;
         }
 
         .empty-state {
@@ -678,6 +853,36 @@
             border-radius: 6px;
             background: var(--card-bg-light);
             padding: 22px;
+        }
+
+        .note-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .note-item {
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--fog);
+        }
+
+        .note-item:last-child {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .note-title {
+            display: block;
+            color: var(--black);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .note-copy {
+            display: block;
+            margin-top: 6px;
+            color: var(--slate);
+            font-size: 12px;
+            line-height: 1.55;
         }
 
         .footer {
@@ -720,6 +925,498 @@
         }
 
         /* ────────────────────────────────────────────
+           HUB V2 WORKBENCH
+           ──────────────────────────────────────────── */
+
+        :root {
+            --bg: #F5F5F7;
+            --surface: #FFFFFF;
+            --surface-hover: #FFFFFF;
+            --text: #1A1A1A;
+            --subtext: #5A5A5E;
+            --rule: #E5E5E7;
+            --rule-inner: #ECECEE;
+            --teal-deep: #2A8F8C;
+            --teal-mute: rgba(54, 179, 175, 0.10);
+            --track: #EEEEEF;
+            --table-header-bg: #FAFAFB;
+            --card-shadow: 0 1px 2px rgba(15, 17, 17, 0.04), 0 1px 3px rgba(15, 17, 17, 0.05);
+            --card-shadow-hover: 0 4px 12px rgba(15, 17, 17, 0.06), 0 2px 4px rgba(15, 17, 17, 0.06);
+        }
+
+        .dashboard {
+            background: var(--bg);
+            color: var(--text);
+            border-top: 3px solid var(--teal);
+        }
+
+        .masthead {
+            min-height: 84px;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--rule);
+            backdrop-filter: blur(14px);
+        }
+
+        .masthead-logo { height: 26px; }
+
+        .hub-nav-btn {
+            border-radius: 0;
+            color: var(--subtext);
+            border-width: 0 0 2px;
+            border-bottom-color: transparent;
+            background: transparent;
+        }
+
+        .hub-nav-btn:hover,
+        .hub-nav-btn.active {
+            color: var(--text);
+            border-color: transparent transparent var(--teal);
+            background: transparent;
+        }
+
+        .hub-dropdown {
+            min-width: 280px;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 0;
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .hub-dropdown-label { color: var(--subtext); }
+
+        .hub-dropdown-item {
+            border-radius: 0;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .hub-dropdown-item:hover,
+        .hub-dropdown-item.active {
+            background: var(--teal-mute);
+            color: var(--text);
+        }
+
+        .hub-dropdown-sub { color: var(--subtext); }
+
+        .masthead-role { color: var(--teal); }
+
+        .bell-btn,
+        .avatar-btn {
+            position: relative;
+            min-height: 36px;
+            border: 1px solid var(--rule);
+            border-radius: 0;
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .bell-btn {
+            width: 38px;
+        }
+
+        .bell-btn::before {
+            content: "";
+            position: absolute;
+            left: 13px;
+            top: 9px;
+            width: 12px;
+            height: 14px;
+            border: 2px solid var(--subtext);
+            border-bottom: 0;
+        }
+
+        .bell-btn::after {
+            content: "";
+            position: absolute;
+            left: 17px;
+            bottom: 8px;
+            width: 4px;
+            height: 4px;
+            background: var(--subtext);
+        }
+
+        .bell-dot {
+            position: absolute;
+            right: 9px;
+            top: 8px;
+            width: 7px;
+            height: 7px;
+            background: var(--teal);
+        }
+
+        .avatar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 4px 10px 4px 5px;
+        }
+
+        .avatar-initials {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--teal-mute);
+            border: 1px solid rgba(54, 179, 175, 0.55);
+            color: var(--teal-deep);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .avatar-name {
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .signout-btn {
+            border-color: var(--rule);
+            border-radius: 0;
+            color: var(--subtext);
+        }
+
+        .signout-btn:hover {
+            color: var(--text);
+            border-color: var(--teal);
+        }
+
+        .main {
+            max-width: 1180px;
+            padding-top: 56px;
+        }
+
+        .greeting-block {
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 40px;
+            align-items: end;
+            margin-bottom: 0;
+            padding: 0 0 44px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .dateline {
+            color: var(--teal);
+            letter-spacing: 3.6px;
+        }
+
+        .time-label {
+            color: var(--subtext);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2.4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .greeting {
+            margin-top: 30px;
+            font-size: clamp(40px, 6vw, 68px);
+            letter-spacing: -0.025em;
+            color: var(--text);
+        }
+
+        .greeting-name { color: var(--teal); }
+
+        .greeting-note {
+            max-width: 760px;
+            color: var(--subtext);
+            font-size: 19px;
+            line-height: 1.5;
+        }
+
+        .workbench-section {
+            margin-top: 40px;
+        }
+
+        .workbench-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 14px;
+        }
+
+        .workbench-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .workbench-title.with-accent::before {
+            content: "";
+            width: 28px;
+            height: 2px;
+            background: var(--teal);
+        }
+
+        .workbench-meta {
+            color: var(--subtext);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .attention-card,
+        .qa-card,
+        .tool-view-list,
+        .panel,
+        .section-card,
+        .empty-state {
+            border-radius: 0;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            box-shadow: var(--card-shadow);
+        }
+
+        .attention-card { overflow: hidden; }
+
+        .attention-row {
+            display: grid;
+            grid-template-columns: 3px 108px minmax(0, 1fr) auto auto;
+            gap: 24px;
+            align-items: center;
+            min-height: 84px;
+            padding: 20px 24px 20px 0;
+            color: var(--text);
+            text-decoration: none;
+            border-top: 1px solid var(--rule-inner);
+        }
+
+        .attention-row:first-child { border-top: 0; }
+        .attention-row:hover { background: rgba(54, 179, 175, 0.04); }
+
+        .attention-bar {
+            width: 3px;
+            height: 44px;
+            background: var(--teal);
+        }
+
+        .attention-tag {
+            color: var(--teal-deep);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+        }
+
+        .attention-title {
+            display: block;
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .attention-meta {
+            display: block;
+            margin-top: 4px;
+            color: var(--subtext);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .attention-time {
+            color: var(--subtext);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .attention-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 16px;
+            background: var(--teal);
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .qa-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--qa-columns, 6), minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .qa-card {
+            min-height: 144px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 22px 20px;
+            color: var(--text);
+            text-decoration: none;
+            transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.18s ease;
+        }
+
+        .qa-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: #DCDCE0;
+        }
+
+        .qa-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .qa-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: var(--teal);
+            color: #FFFFFF;
+            transition: transform 0.18s ease;
+        }
+
+        .qa-card:hover .qa-chip { transform: scale(1.04); }
+
+        .qa-chip svg {
+            width: 21px;
+            height: 21px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .qa-serial {
+            color: var(--teal-deep);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .qa-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 10px;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.28;
+        }
+
+        .qa-arrow {
+            color: var(--teal);
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .qa-card:hover .qa-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notes-list {
+            border-top: 1px solid var(--rule);
+        }
+
+        .company-note {
+            display: grid;
+            grid-template-columns: 110px minmax(0, 1fr) auto;
+            gap: 32px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--rule);
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .note-date {
+            display: block;
+            color: var(--subtext);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .new-pill {
+            display: inline-flex;
+            margin-top: 7px;
+            padding: 4px 7px 3px;
+            background: var(--teal);
+            color: #FFFFFF;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .company-note-title {
+            display: block;
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .company-note-dek {
+            display: block;
+            margin-top: 6px;
+            color: var(--subtext);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .company-note-author {
+            display: block;
+            margin-top: 7px;
+            color: var(--subtext);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .note-read {
+            align-self: center;
+            color: var(--teal-deep);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .dashboard-grid,
+        .panel,
+        .summary-card {
+            display: none;
+        }
+
+        .footer {
+            max-width: 1180px;
+            background: var(--bg);
+            color: var(--subtext);
+            border-top: 1px solid var(--rule);
+        }
+
+        /* ────────────────────────────────────────────
            MOBILE
            ──────────────────────────────────────────── */
 
@@ -736,9 +1433,21 @@
                 overflow-x: auto;
                 padding-bottom: 2px;
             }
+            .hub-nav-item {
+                flex: 0 0 auto;
+            }
             .hub-nav-btn {
                 flex: 0 0 auto;
                 letter-spacing: 2px;
+            }
+            .hub-dropdown {
+                position: fixed;
+                left: 22px;
+                right: 22px;
+                top: 116px;
+                min-width: 0;
+                max-height: calc(100vh - 150px);
+                overflow: auto;
             }
             .masthead-right { gap: 10px; }
             .masthead-role { font-size: 10px; letter-spacing: 2px; }
@@ -764,8 +1473,12 @@
             }
             .section-heading { font-size: 22px; }
             .section-note { margin-top: 8px; }
+            .dashboard-grid,
             .quick-grid,
             .section-grid {
+                grid-template-columns: 1fr;
+            }
+            .section-grid.compact {
                 grid-template-columns: 1fr;
             }
             .quick-card {
@@ -783,6 +1496,95 @@
 
             .footer {
                 padding: 36px 22px 44px;
+            }
+
+            .masthead {
+                min-height: 76px;
+            }
+
+            .avatar-name,
+            .masthead-role {
+                display: none;
+            }
+
+            .greeting-block {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding-bottom: 28px;
+            }
+
+            .time-label {
+                white-space: normal;
+            }
+
+            .greeting {
+                margin-top: 14px;
+                font-size: 36px;
+                letter-spacing: -0.02em;
+            }
+
+            .greeting-note {
+                font-size: 14.5px;
+            }
+
+            .workbench-section {
+                margin-top: 28px;
+            }
+
+            .attention-row {
+                grid-template-columns: 3px minmax(0, 1fr);
+                gap: 12px;
+                padding: 18px 18px 18px 0;
+            }
+
+            .attention-tag,
+            .attention-time,
+            .attention-action {
+                grid-column: 2;
+            }
+
+            .attention-time {
+                margin-top: -6px;
+            }
+
+            .attention-action {
+                justify-self: start;
+                margin-top: -2px;
+            }
+
+            .attention-bar {
+                grid-row: 1 / span 4;
+                height: 100%;
+                min-height: 78px;
+            }
+
+            .qa-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .qa-card {
+                min-height: 124px;
+                padding: 16px 14px;
+            }
+
+            .qa-chip {
+                width: 38px;
+                height: 38px;
+            }
+
+            .qa-label {
+                font-size: 13.5px;
+            }
+
+            .qa-arrow {
+                display: none;
+            }
+
+            .company-note {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 18px 0;
             }
         }
 
@@ -871,15 +1673,30 @@
 
 <div class="dashboard" id="dashboard">
     <div class="masthead">
-        <img src="assets/Fratello_Logo_White.png" alt="Fratello" class="masthead-logo">
+        <img src="assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
         <nav class="hub-nav" aria-label="Hub sections">
-            <button class="hub-nav-btn active" type="button" data-view="all">Hub</button>
-            <button class="hub-nav-btn" type="button" data-view="departments">Departments</button>
-            <button class="hub-nav-btn" type="button" data-view="resources">Resources</button>
-            <button class="hub-nav-btn" type="button" data-view="admin">Admin</button>
+            <button class="hub-nav-btn active" type="button" data-view="dashboard">Dashboard</button>
+            <div class="hub-nav-item" data-nav-item="departments">
+                <button class="hub-nav-btn" type="button" data-view="departments">Departments<span class="hub-nav-caret">▾</span></button>
+                <div class="hub-dropdown" id="departmentsMenu" aria-label="Departments menu"></div>
+            </div>
+            <div class="hub-nav-item" data-nav-item="resources">
+                <button class="hub-nav-btn" type="button" data-view="resources">Resources<span class="hub-nav-caret">▾</span></button>
+                <div class="hub-dropdown" id="resourcesMenu" aria-label="Resources menu"></div>
+            </div>
+            <div class="hub-nav-item" data-nav-item="owner-hub">
+                <button class="hub-nav-btn" type="button" data-view="owner-hub">Owner Hub<span class="hub-nav-caret">▾</span></button>
+                <div class="hub-dropdown" id="ownerHubMenu" aria-label="Owner Hub menu"></div>
+            </div>
+            <button class="hub-nav-btn" type="button" data-section="settings">Settings</button>
         </nav>
         <div class="masthead-right">
+            <button class="bell-btn" type="button" aria-label="Notifications"><span class="bell-dot"></span></button>
             <span class="masthead-role" id="roleLabel"></span>
+            <button class="avatar-btn" type="button" aria-label="Profile">
+                <span class="avatar-initials" id="avatarInitials">CP</span>
+                <span class="avatar-name" id="avatarName">Chris</span>
+            </button>
             <button class="signout-btn" onclick="signOut()">Sign Out</button>
         </div>
     </div>
@@ -929,77 +1746,96 @@ const SECTIONS = {
     finance: {
         group: 'Departments',
         label: 'Finance',
-        access: 'Owner + Controller',
+        menuParent: '',
         cards: [
-            { title: 'Financial Dashboards', desc: 'Monthly operating numbers, cash position, and KPI reporting.', href: '#', badge: 'In Preparation' },
-            { title: 'D2C Scenario Model',   desc: 'Planning model for direct-to-consumer growth decisions.', href: '#', badge: 'In Preparation' },
-            { title: 'Costing & Margins',    desc: 'Product margin review and pricing support for leadership.', href: '#', badge: 'In Preparation' }
+            { title: 'Financial Dashboards', href: '#', badge: 'Coming Soon' },
+            { title: 'Costing & Margins', href: '#', badge: 'Coming Soon' },
+            { title: 'D2C Scenario Model', href: '#', badge: 'Coming Soon' }
         ]
     },
 
-    production: {
+    'production-roasting': {
         group: 'Departments',
-        label: 'Production',
-        access: 'Owner + Controller + Production',
+        label: 'Roasting',
+        menuParent: 'Production',
         cards: [
-            { title: 'Roasting',              desc: 'Roast planning, batch records, and production notes.', href: '#', badge: 'In Preparation' },
-            { title: 'Packaging & Warehouse', desc: 'Packaging workflow, warehouse priorities, and inventory support.', href: '#', badge: 'In Preparation' },
-            { title: 'Production Planning',   desc: 'Weekly capacity planning for roasting, packaging, and fulfillment.', href: '#', badge: 'In Preparation' },
-            { title: 'Health & Safety',       desc: 'Safety documents, incident follow-up, and compliance resources.', href: '#', badge: 'In Preparation' }
+            { title: 'Roast Schedule', href: '#', badge: 'Coming Soon' },
+            { title: 'Batch Records', href: '#', badge: 'Coming Soon' },
+            { title: 'Roast Profiles', href: '#', badge: 'Coming Soon' },
+            { title: 'Quality Notes', href: '#', badge: 'Coming Soon' }
+        ]
+    },
+
+    'production-packaging': {
+        group: 'Departments',
+        label: 'Packaging',
+        menuParent: 'Production',
+        cards: [
+            { title: 'Packaging Schedule', href: '#', badge: 'Coming Soon' },
+            { title: 'Build Assemblies', href: '#', badge: 'Coming Soon' },
+            { title: 'Label & Material Checks', href: '#', badge: 'Coming Soon' },
+            { title: 'Packaging SOPs', href: '#', badge: 'Coming Soon' }
+        ]
+    },
+
+    'production-warehouse': {
+        group: 'Departments',
+        label: 'Warehouse',
+        menuParent: 'Production',
+        cards: [
+            { title: 'Order Fulfillment', href: '#', badge: 'Coming Soon' },
+            { title: 'Inventory Support', href: '#', badge: 'Coming Soon' },
+            { title: 'Delivery Planning', href: '#', badge: 'Coming Soon' },
+            { title: 'Warehouse SOPs', href: '#', badge: 'Coming Soon' }
         ]
     },
 
     sales: {
         group: 'Departments',
         label: 'Sales',
-        access: 'Owner + Controller + Sales',
+        menuParent: '',
         cards: [
-            { title: 'Wholesale Proposal Builder', desc: 'Build custom product proposals, share a proposal link, or save as PDF.', href: 'sales/proposal-builder.html', badge: 'Live' },
-            { title: 'Sales Intelligence', desc: 'Account insights, territory context, and prospecting tools.', href: '#', badge: 'In Preparation' },
-            { title: 'Sales Forecasting',  desc: 'Pipeline planning and monthly sales visibility.', href: '#', badge: 'In Preparation' }
+            { title: 'Wholesale Proposal Builder', href: 'sales/proposal-builder.html', badge: 'Live', quick: true },
+            { title: 'Sales Intelligence', href: '#', badge: 'Coming Soon' },
+            { title: 'Sales Forecasting', href: '#', badge: 'Coming Soon' }
         ]
     },
 
     marketing: {
         group: 'Departments',
         label: 'Marketing',
-        access: 'Owner + Marketing + Sales',
+        menuParent: '',
         cards: [
-            { title: 'Brand & Creative',    desc: 'Brand system files, campaign references, and creative tools.', href: '#', badge: 'In Preparation' },
-            { title: 'Product Catalogs',    desc: 'Wholesale and retail product catalog resources.', href: '#', badge: 'In Preparation' },
-            { title: 'D2C Marketing Tools', desc: 'Shopify, email, and campaign planning resources.', href: '#', badge: 'In Preparation' }
+            { title: 'Fratello Design Skill', href: 'system/skills/fratello-design-skill.html', badge: 'Brand', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], quick: true },
+            { title: 'Brand & Creative', href: '#', badge: 'Coming Soon' },
+            { title: 'Product Catalogs', href: '#', badge: 'Coming Soon' },
+            { title: 'Campaign Planning', href: '#', badge: 'Coming Soon' },
+            { title: 'D2C Marketing Tools', href: '#', badge: 'Coming Soon' }
         ]
     },
 
     'employee-resources': {
-        group: 'Employee Resources',
-        label: 'Shared Docs & Forms',
-        access: 'Everyone',
+        group: 'Resources',
+        label: 'Resources',
         cards: [
-            { title: 'Expense Reimbursement', desc: 'Enter personal business expenses, calculate GST, and download a clean report for Finance.', href: 'operations/forms/expense-report.html', badge: 'Live' },
-            { title: 'Fratello Design Skill', desc: 'Download the Claude brand skill and see simple setup instructions for on-brand Fratello content.', href: 'system/skills/fratello-design-skill.html', badge: 'Brand Resource' },
-            { title: 'Staff Forms',       desc: 'Everyday shared documents, forms, and request workflows for the team.', href: '#', badge: 'In Preparation' },
-            { title: 'SOPs & Manuals',    desc: 'Operating procedures, manuals, and shared reference material.', href: '#', badge: 'In Preparation' },
-            { title: 'Employee Handbook', desc: 'Shared team policies and employment reference material.', href: '#', badge: 'In Preparation' },
-            { title: 'Leave & Time Off',  desc: 'Vacation, absence, and time-off guidance.', href: '#', badge: 'In Preparation' },
-            { title: 'HR Forms',          desc: 'Common people forms for staff and managers.', href: '#', badge: 'In Preparation' }
+            { title: 'Expense Reimbursement', href: 'operations/forms/expense-report.html', badge: 'Live', quick: true },
+            { title: 'Staff Forms', href: '#', badge: 'Coming Soon' },
+            { title: 'SOPs & Manuals', href: '#', badge: 'Coming Soon' },
+            { title: 'Employee Handbook', href: '#', badge: 'Coming Soon' },
+            { title: 'HR Forms', href: '#', badge: 'Coming Soon' }
         ]
     },
 
     'time-off': {
-        group: 'Employee Resources',
+        group: 'Time Off',
         label: 'Time Off',
-        access: 'Everyone, with manager and admin views by role',
         cards: [
-            { title: 'Submit Vacation Request', desc: 'Request vacation time and send it to the right approver.', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off' },
-            { title: 'Log Sick Day', desc: 'Record a sick day quickly from the Hub.', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off' },
-            { title: 'My Time Off', desc: 'Review your vacation requests, approvals, and past time-off records.', href: 'hr/time-off/vacation-tracker.html?view=my-requests', badge: 'Time Off' },
-            { title: 'Calendar Subscriptions', desc: 'Copy Outlook, Google Calendar, and Apple Calendar feed links.', href: 'hr/time-off/calendar-subscribe.html', badge: 'Calendar' },
-            { title: 'Approvals Queue', desc: 'Review pending vacation requests from your team.', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] },
-            { title: 'Team Calendar', desc: 'See approved and pending vacation coverage across the team.', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] },
-            { title: 'Sick Day Report', desc: 'Private sick-day reporting for Owner and Controller access only.', href: 'hr/time-off/sick-day-report.html', badge: 'Private', roles: ['owner', 'controller'] },
-            { title: 'User Management', desc: 'Manage time-off users, role tiers, departments, and active status.', href: 'system/admin/users.html', badge: 'Admin', roles: ['owner', 'controller'] },
-            { title: 'Hub Activity', desc: 'Review Hub usage events, tool opens, and approval actions.', href: 'system/admin/activity-log.html', badge: 'Admin', roles: ['owner'] }
+            { title: 'Submit Vacation Request', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off', quick: true },
+            { title: 'Log Sick Day', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off', quick: true },
+            { title: 'My Time Off', href: 'hr/time-off/vacation-tracker.html?view=my-requests', badge: 'Time Off', quick: true },
+            { title: 'Calendar Subscriptions', href: 'hr/time-off/calendar-subscribe.html', badge: 'Calendar' },
+            { title: 'Approvals Queue', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], attention: true },
+            { title: 'Team Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] }
         ]
     },
 
@@ -1008,42 +1844,128 @@ const SECTIONS = {
     'hr-people': {
         group: 'Departments',
         label: 'HR & People',
-        access: 'Hiring: Owner + Controller + Production + Marketing',
+        menuParent: '',
         cards: [
             {
                 title: 'Hiring Document Generator',
-                desc: 'Generate offer letters, employment agreements, and job descriptions as downloadable PDFs. Includes role presets for all Fratello positions.',
                 href: 'hr/hiring/hiring-document-generator.html',
-                roles: ['owner', 'controller', 'production', 'marketing']
+                roles: ['owner', 'controller', 'production', 'marketing'],
+                badge: 'Live',
+                quick: true
             },
-            { title: 'Performance Reviews',  desc: 'Manager review records and people-performance workflows.', href: '#', badge: 'In Preparation', roles: ['owner', 'controller'] },
-            { title: 'Wages & Compensation', desc: 'Compensation planning and wage review tools.', href: '#', badge: 'In Preparation', roles: ['owner', 'controller'] },
-            { title: 'Employee Records',     desc: 'Confidential employee documentation and records.', href: '#', badge: 'In Preparation', roles: ['owner', 'controller'] }
+            { title: 'Performance Reviews', href: '#', badge: 'Coming Soon', roles: ['owner', 'controller'] },
+            { title: 'Wages & Compensation', href: '#', badge: 'Coming Soon', roles: ['owner', 'controller'] },
+            { title: 'Employee Records', href: '#', badge: 'Coming Soon', roles: ['owner', 'controller'] }
         ]
     },
 
-    // ── Owner/Admin (Owner only) ──
+    // ── Owner/Admin Dashboard (Owner only) ──
 
     'owner-admin': {
         group: 'Owner/Admin',
-        label: 'Permissions & System',
-        access: 'Owner only',
+        label: 'Owner/Admin Dashboard',
         cards: [
-            { title: 'Staff Permissions', desc: 'Owner-only access planning by person, role, and visible HUB area.', href: 'system/permissions.html' },
-            { title: 'Hub Admin',     desc: 'Portal administration and access planning.', href: '#', badge: 'In Preparation' },
-            { title: 'Integrations',  desc: 'Future Odoo, Shopify, and reporting connections.', href: '#', badge: 'In Preparation' }
+            { title: 'Vacation Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Needs Attention', attention: true },
+            { title: 'Sick Day Report', href: 'hr/time-off/sick-day-report.html', badge: 'Private', attention: true },
+            { title: 'Team Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Coverage' },
+            { title: 'Hiring Documents', href: 'hr/hiring/hiring-document-generator.html', badge: 'People' },
+            { title: 'Owner Notifications', href: '#', badge: 'Coming Soon', attention: true },
+            { title: 'Expense Review', href: '#', badge: 'Coming Soon', attention: true }
+        ]
+    },
+
+    settings: {
+        group: 'Settings',
+        label: 'Settings',
+        cards: [
+            { title: 'Staff Permissions', href: 'system/permissions.html', badge: 'Owner' },
+            { title: 'User Management', href: 'system/admin/users.html', badge: 'Owner' },
+            { title: 'Hub Activity', href: 'system/admin/activity-log.html', badge: 'Owner' },
+            { title: 'Email Notifications', href: '#', badge: 'Coming Soon' },
+            { title: 'System Status', href: '#', badge: 'Coming Soon' }
         ]
     }
 };
 
 const ROLE_SECTION_MAP = {
-    owner: ['finance', 'production', 'sales', 'marketing', 'hr-people', 'employee-resources', 'time-off', 'owner-admin'],
-    controller: ['finance', 'production', 'sales', 'hr-people', 'employee-resources', 'time-off'],
+    owner: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'],
+    controller: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'hr-people', 'employee-resources', 'time-off'],
     marketing: ['marketing', 'hr-people', 'employee-resources', 'time-off'],
-    production: ['production', 'hr-people', 'employee-resources', 'time-off'],
+    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'hr-people', 'employee-resources', 'time-off'],
     sales: ['sales', 'marketing', 'employee-resources', 'time-off'],
     staff: ['employee-resources', 'time-off']
 };
+
+const FALLBACK_HUB_DATA = {
+    attention: [
+        {
+            id: 'att_001',
+            tag: 'VACATION',
+            title: 'Kyle Park - request for July 14-18',
+            meta: 'Submitted yesterday - Production coverage confirmed',
+            timestamp: '2026-05-20T14:30:00-06:00',
+            action: { label: 'REVIEW', href: '/hr/time-off/vacation-tracker.html?view=approvals&id=att_001' },
+            visibleTo: ['owner', 'controller']
+        },
+        {
+            id: 'att_002',
+            tag: 'SICK DAY',
+            title: 'Joel logged sick today',
+            meta: 'Coverage needed for Wholesale calls',
+            timestamp: '2026-05-21T09:14:00-06:00',
+            action: { label: 'OPEN', href: '/hr/time-off/sick-day-report.html?id=att_002' },
+            visibleTo: ['owner', 'controller', 'sales']
+        },
+        {
+            id: 'att_003',
+            tag: 'HIRING',
+            title: 'Offer letter pending: Roastery Assistant',
+            meta: 'Prepared docs - awaiting owner review',
+            timestamp: '2026-05-20T11:00:00-06:00',
+            action: { label: 'OPEN', href: '/hr/hiring/hiring-document-generator.html' },
+            visibleTo: ['owner']
+        }
+    ],
+    notes: [
+        {
+            id: 'note_2026_05_20_ethiopia',
+            date: '2026-05-20',
+            title: 'New Ethiopia Shantawene G1 arrives Friday',
+            dek: 'Cup tasting in the QC lab at 10 AM. Launch materials can live in Marketing once finalized.',
+            author: 'Chris P.',
+            isNew: true
+        },
+        {
+            id: 'note_2026_05_18_victoria_day',
+            date: '2026-05-18',
+            title: 'Victoria Day closure reminder',
+            dek: 'Roastery closed all day. Wholesale order cutoff is Friday at 2 PM. Production resumes Tuesday morning.',
+            author: 'Chris P.',
+            isNew: true
+        }
+    ],
+    quickActions: [
+        { id: 'qa_vacation', label: 'Submit Vacation Request', icon: 'calendar-plus', href: '/hr/time-off/vacation-tracker.html?view=submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 1, owner: 3 } },
+        { id: 'qa_sick', label: 'Log Sick Day', icon: 'thermometer', href: '/hr/time-off/sick-day-logger.html', tiers: ['staff', 'manager', 'owner'], order: { staff: 2, manager: 2, owner: 4 } },
+        { id: 'qa_expense', label: 'Expense Report', icon: 'receipt', href: '/operations/forms/expense-report.html', tiers: ['staff', 'manager', 'owner'], order: { staff: 3, manager: 3, owner: 5 } },
+        { id: 'qa_timeoff', label: 'My Time Off', icon: 'clock', href: '/hr/time-off/vacation-tracker.html?view=my-requests', tiers: ['staff', 'manager', 'owner'], order: { staff: 4, manager: 4, owner: 6 } },
+        { id: 'qa_approvals', label: 'Approvals Queue', icon: 'check-square', href: '/hr/time-off/vacation-tracker.html?view=approvals', tiers: ['manager', 'owner'], order: { manager: 5, owner: 1 } },
+        { id: 'qa_calendar', label: 'Team Calendar', icon: 'calendar', href: '/hr/time-off/vacation-tracker.html?view=calendar', tiers: ['owner'], order: { owner: 2 } }
+    ],
+    users: {
+        roleDefaults: {
+            owner: { name: 'Chris Prefontaine', firstName: 'Chris', initials: 'CP', email: 'prefontainech@gmail.com' },
+            controller: { name: 'Chris McGhee', firstName: 'Chris', initials: 'CM', email: 'chris.mcghee@fratellocoffee.com' },
+            marketing: { name: 'Mateo Corredor', firstName: 'Mateo', initials: 'MC', email: 'mateo.corredor@fratellocoffee.com' },
+            production: { name: 'Kyle Park', firstName: 'Kyle', initials: 'KP', email: 'kyle.park@fratellocoffee.com' },
+            sales: { name: 'Joel May', firstName: 'Joel', initials: 'JM', email: 'joel.may@fratellocoffee.com' },
+            staff: { name: 'Team Member', firstName: 'Team', initials: 'TM', email: null }
+        }
+    }
+};
+
+let hubData = FALLBACK_HUB_DATA;
+let hubDataPromise = null;
 
 function normalizeRole(role) {
     if (!role || !role.label) return role;
@@ -1057,6 +1979,70 @@ function normalizeRole(role) {
         key,
         sections
     };
+}
+
+async function fetchJson(path, fallback) {
+    try {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error(`Could not load ${path}`);
+        return await response.json();
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function loadHubData() {
+    if (!hubDataPromise) {
+        hubDataPromise = Promise.all([
+            fetchJson('/data/attention.json', FALLBACK_HUB_DATA.attention),
+            fetchJson('/data/notes.json', FALLBACK_HUB_DATA.notes),
+            fetchJson('/data/quick-actions.json', FALLBACK_HUB_DATA.quickActions),
+            fetchJson('/data/users.json', FALLBACK_HUB_DATA.users)
+        ]).then(([attention, notes, quickActions, users]) => {
+            hubData = { attention, notes, quickActions, users };
+            return hubData;
+        });
+    }
+
+    return hubDataPromise;
+}
+
+function tierOf(role) {
+    const key = role?.key || role;
+    if (key === 'owner' || key === 'controller') return 'owner';
+    if (['marketing', 'production', 'sales'].includes(key)) return 'manager';
+    return 'staff';
+}
+
+function personForRole(role) {
+    const fallback = hubData.users?.roleDefaults?.[role.key] || FALLBACK_HUB_DATA.users.roleDefaults.staff;
+    const user = role.user || {};
+    const name = user.name || fallback.name;
+    const firstName = user.firstName || fallback.firstName || String(name).split(' ')[0] || 'Team';
+    const initials = user.initials || fallback.initials || String(name)
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part.charAt(0).toUpperCase())
+        .join('');
+
+    return {
+        name,
+        firstName,
+        initials: initials || 'TM',
+        email: user.email || fallback.email || ''
+    };
+}
+
+function storeRoleSession(role, person) {
+    // TODO: session expiry
+    localStorage.setItem('fratello_session', JSON.stringify({
+        role: role.key,
+        name: person.name,
+        firstName: person.firstName,
+        initials: person.initials,
+        signedInAt: new Date().toISOString()
+    }));
 }
 
 // ════════════════════════════════════════════════
@@ -1272,11 +2258,21 @@ async function handleLogin() {
 // DASHBOARD RENDERING
 // ════════════════════════════════════════════════
 
-function formatDateline() {
-    const now = new Date();
+function formatDateEyebrow(now = new Date()) {
     const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    return `${days[now.getDay()]} \u00B7 ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+    return `${days[now.getDay()]} \u00B7 ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`.toUpperCase();
+}
+
+function formatHubTime(now = new Date()) {
+    return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toUpperCase() + ' \u00B7 CALGARY';
+}
+
+function greetingWord(now = new Date()) {
+    const hour = now.getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
 }
 
 function cardIsVisible(card, role) {
@@ -1287,33 +2283,194 @@ function isActiveCard(card) {
     return Boolean(card.href && card.href !== '#');
 }
 
-function setDashboardView(view) {
-    const targetView = view || 'all';
-    document.querySelectorAll('.hub-nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === targetView);
-    });
+let activeRole = null;
 
-    document.querySelectorAll('.dashboard-section').forEach(section => {
-        section.classList.toggle('hidden', targetView !== 'all' && section.dataset.view !== targetView);
+function visibleSectionsForRole(role) {
+    return role.sections
+        .map(sectionKey => {
+            const section = SECTIONS[sectionKey];
+            if (!section) return null;
+            const cards = section.cards.filter(card => cardIsVisible(card, role));
+            return { key: sectionKey, ...section, cards };
+        })
+        .filter(section => section && section.cards.length);
+}
+
+function visibleSection(role, sectionKey) {
+    return visibleSectionsForRole(role).find(section => section.key === sectionKey);
+}
+
+function sectionIsVisible(role, sectionKey) {
+    return Boolean(visibleSection(role, sectionKey));
+}
+
+function setActiveNav(view, sectionKey = '') {
+    const section = sectionKey ? SECTIONS[sectionKey] : null;
+    document.querySelectorAll('.hub-nav-btn').forEach(btn => {
+        const isDirectView = btn.dataset.view && btn.dataset.view === view;
+        const isDepartmentSection = btn.dataset.view === 'departments' && section && section.group === 'Departments';
+        const isResourceSection = btn.dataset.view === 'resources' && section && ['Resources', 'Time Off'].includes(section.group);
+        const isOwnerHubSection = btn.dataset.view === 'owner-hub' && section && section.group === 'Owner/Admin';
+        const isSection = btn.dataset.section && btn.dataset.section === sectionKey;
+        btn.classList.toggle('active', isDirectView || isDepartmentSection || isResourceSection || isOwnerHubSection || isSection);
     });
 }
 
+function closeNavMenus() {
+    document.querySelectorAll('.hub-nav-item.open').forEach(item => item.classList.remove('open'));
+}
+
+function renderHub(role, view = 'dashboard', sectionKey = '') {
+    activeRole = role;
+    closeNavMenus();
+    setActiveNav(view, sectionKey);
+
+    if (view === 'departments') {
+        renderDepartmentsIndex(role);
+        return;
+    }
+
+    if (sectionKey) {
+        renderSectionPage(role, sectionKey);
+        return;
+    }
+
+    renderDashboardHome(role);
+}
+
 function setupHubNav(role) {
-    const visibleViews = new Set(['all']);
-    role.sections.forEach(sectionKey => {
-        const section = SECTIONS[sectionKey];
-        if (!section) return;
-        if (section.group === 'Departments') visibleViews.add('departments');
-        if (section.group === 'Employee Resources') visibleViews.add('resources');
-        if (section.group === 'Owner/Admin') visibleViews.add('admin');
+    const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
+    const departmentsItem = document.querySelector('[data-nav-item="departments"]');
+    const departmentsMenu = document.getElementById('departmentsMenu');
+    const resourcesItem = document.querySelector('[data-nav-item="resources"]');
+    const resourcesMenu = document.getElementById('resourcesMenu');
+    const ownerHubItem = document.querySelector('[data-nav-item="owner-hub"]');
+    const ownerHubMenu = document.getElementById('ownerHubMenu');
+
+    departmentsItem.hidden = !departmentSections.length;
+    departmentsMenu.innerHTML = '';
+    resourcesMenu.innerHTML = '';
+    ownerHubMenu.innerHTML = '';
+
+    if (departmentSections.length) {
+        const topDepartments = departmentSections.filter(section => !section.menuParent);
+        const productionDepartments = departmentSections.filter(section => section.menuParent === 'Production');
+
+        if (topDepartments.length) {
+            const label = document.createElement('div');
+            label.className = 'hub-dropdown-label';
+            label.textContent = 'Departments';
+            departmentsMenu.appendChild(label);
+
+            topDepartments.forEach(section => {
+                departmentsMenu.appendChild(createSectionDropdownItem(section, 'Department'));
+            });
+        }
+
+        if (productionDepartments.length) {
+            const label = document.createElement('div');
+            label.className = 'hub-dropdown-label';
+            label.textContent = 'Production';
+            departmentsMenu.appendChild(label);
+
+            productionDepartments.forEach(section => {
+                departmentsMenu.appendChild(createSectionDropdownItem(section, 'Production'));
+            });
+        }
+    }
+
+    const departmentsButton = departmentsItem.querySelector('.hub-nav-btn');
+    departmentsButton.onclick = event => {
+        event.stopPropagation();
+        const shouldOpen = !departmentsItem.classList.contains('open');
+        renderHub(role, 'departments');
+        if (shouldOpen) departmentsItem.classList.add('open');
+    };
+
+    const resourcesSections = ['time-off', 'employee-resources']
+        .map(key => visibleSection(role, key))
+        .filter(Boolean);
+    resourcesItem.hidden = !resourcesSections.length;
+    resourcesSections.forEach(section => {
+        const label = document.createElement('div');
+        label.className = 'hub-dropdown-label';
+        label.textContent = section.group === 'Time Off' ? 'Time Off' : 'Forms & Docs';
+        resourcesMenu.appendChild(label);
+        section.cards
+            .filter(card => cardIsVisible(card, role))
+            .forEach(card => resourcesMenu.appendChild(createActionDropdownItem(card, section.label)));
     });
 
-    document.querySelectorAll('.hub-nav-btn').forEach(btn => {
-        btn.hidden = !visibleViews.has(btn.dataset.view);
-        btn.onclick = () => setDashboardView(btn.dataset.view);
+    const resourcesButton = resourcesItem.querySelector('.hub-nav-btn');
+    resourcesButton.onclick = event => {
+        event.stopPropagation();
+        closeNavMenus();
+        if (!resourcesItem.hidden) resourcesItem.classList.add('open');
+    };
+
+    const ownerSection = visibleSection(role, 'owner-admin');
+    ownerHubItem.hidden = !ownerSection;
+    if (ownerSection) {
+        const label = document.createElement('div');
+        label.className = 'hub-dropdown-label';
+        label.textContent = 'Needs Attention';
+        ownerHubMenu.appendChild(label);
+        ownerSection.cards.forEach(card => ownerHubMenu.appendChild(createActionDropdownItem(card, ownerSection.label)));
+    }
+
+    const ownerButton = ownerHubItem.querySelector('.hub-nav-btn');
+    ownerButton.onclick = event => {
+        event.stopPropagation();
+        const shouldOpen = !ownerHubItem.classList.contains('open');
+        renderHub(role, 'section', 'owner-admin');
+        if (shouldOpen && !ownerHubItem.hidden) ownerHubItem.classList.add('open');
+    };
+
+    document.querySelectorAll('.hub-nav-btn[data-view="dashboard"]').forEach(btn => {
+        btn.hidden = false;
+        btn.onclick = () => renderHub(role, 'dashboard');
     });
 
-    setDashboardView('all');
+    document.querySelectorAll('.hub-nav-btn[data-section]').forEach(btn => {
+        const key = btn.dataset.section;
+        btn.hidden = !sectionIsVisible(role, key);
+        btn.onclick = () => renderHub(role, 'section', key);
+    });
+
+    if (!window.__fratelloHubNavBound) {
+        document.addEventListener('click', event => {
+            if (!event.target.closest('.hub-nav-item')) closeNavMenus();
+        });
+        window.__fratelloHubNavBound = true;
+    }
+}
+
+function createSectionDropdownItem(section, subtitle) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'hub-dropdown-item';
+    item.dataset.section = section.key;
+    item.innerHTML = `<span>${section.label}</span><span class="hub-dropdown-sub">${subtitle}</span>`;
+    item.onclick = () => renderHub(activeRole, 'section', section.key);
+    return item;
+}
+
+function createActionDropdownItem(card, subtitle) {
+    const active = isActiveCard(card);
+    const item = document.createElement('a');
+    item.className = 'hub-dropdown-item';
+    item.href = active ? card.href : '#';
+    item.innerHTML = `<span>${card.title}</span><span class="hub-dropdown-sub">${card.badge || subtitle}</span>`;
+
+    if (!active) {
+        item.addEventListener('click', event => event.preventDefault());
+        return item;
+    }
+
+    const isExternal = /^https?:\/\//.test(card.href);
+    item.target = isExternal ? '_blank' : '_self';
+    if (isExternal) item.rel = 'noopener noreferrer';
+    return item;
 }
 
 function createToolLink(card, sectionLabel) {
@@ -1354,157 +2511,335 @@ function createToolLink(card, sectionLabel) {
     return link;
 }
 
-function showDashboard(role) {
+function addGreeting(main, role, person, counts) {
+    const now = new Date();
+    const intro = greetingWord(now);
+    const greetingBlock = document.createElement('div');
+    greetingBlock.className = 'greeting-block fade-in';
+    greetingBlock.innerHTML = `
+        <div>
+            <div class="dateline">${formatDateEyebrow(now)}</div>
+            <h1 class="greeting">${intro}, <span class="greeting-name">${person.firstName}.</span></h1>
+            <p class="greeting-note">${briefing(tierOf(role), counts)}</p>
+        </div>
+        <div class="time-label">${formatHubTime(now)}</div>
+    `;
+    main.appendChild(greetingBlock);
+}
+
+function cardsForDashboard(role, predicate) {
+    const visibleSections = visibleSectionsForRole(role);
+    const activeCards = [];
+    visibleSections.forEach(section => {
+        section.cards
+            .filter(isActiveCard)
+            .filter(predicate)
+            .forEach(card => activeCards.push({ ...card, sectionLabel: section.label }));
+    });
+    return activeCards;
+}
+
+function visibleAttention(items, role) {
+    return items.filter(item => {
+        if (item.ownedBy) return item.ownedBy === role.key;
+        return (item.visibleTo || []).includes(role.key);
+    });
+}
+
+function visibleQuickActions(items, tier) {
+    return items
+        .filter(item => (item.tiers || []).includes(tier))
+        .sort((a, b) => (a.order?.[tier] || 99) - (b.order?.[tier] || 99));
+}
+
+function visibleNotes(items) {
+    return [...items]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+}
+
+function relativeTime(iso, now = new Date()) {
+    const then = new Date(iso);
+    const diffMin = Math.max(0, Math.floor((now - then) / 60000));
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDay = Math.floor(diffHr / 24);
+    if (diffDay === 1) return 'Yesterday';
+    if (diffDay < 7) return `${diffDay}d ago`;
+    return then.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatNoteDate(value) {
+    return new Date(`${value}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+}
+
+function briefing(tier, counts) {
+    const { attentionOpen, notesNew } = counts;
+
+    if (tier === 'staff') {
+        if (notesNew === 0) return 'Nothing pending. Production is humming.';
+        if (notesNew === 1) return 'One new company note. Production is humming. Nothing else needs you today.';
+        return `${notesNew} new company notes. Production is humming. Nothing else needs you today.`;
+    }
+
+    if (tier === 'manager') {
+        const attention = attentionOpen === 0 ? 'Nothing pending' : `${attentionOpen === 1 ? '1 approval' : `${attentionOpen} approvals`} waiting on you`;
+        if (notesNew === 0) return `${attention}. Production is humming.`;
+        return `${attention}. ${notesNew} note${notesNew === 1 ? '' : 's'} worth glancing at.`;
+    }
+
+    const attention = attentionOpen === 0 ? 'Nothing pending' : `${attentionOpen === 1 ? '1 approval' : `${attentionOpen} approvals`} waiting on you`;
+    return `${attention}. ${notesNew} new note${notesNew === 1 ? '' : 's'}.`;
+}
+
+function iconSvg(key) {
+    const icons = {
+        'calendar-plus': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v15H3V6a2 2 0 0 1 2-2z"/><path d="M12 14v5M9.5 16.5h5"/></svg>',
+        thermometer: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.76V5a4 4 0 0 0-8 0v9.76A6 6 0 1 0 14 14.76z"/><path d="M10 17V8"/></svg>',
+        receipt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2z"/><path d="M8 7h8M8 12h8M8 16h5"/></svg>',
+        clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+        'check-square': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m8 12 3 3 6-7"/></svg>',
+        calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v15H3V6a2 2 0 0 1 2-2z"/></svg>'
+    };
+    return icons[key] || icons.calendar;
+}
+
+function createQuickActionCard(action, index) {
+    const card = document.createElement('a');
+    card.className = 'qa-card fade-in';
+    card.href = action.href;
+    card.innerHTML = `
+        <span class="qa-top">
+            <span class="qa-chip">${iconSvg(action.icon)}</span>
+            <span class="qa-serial">${String(index + 1).padStart(2, '0')}</span>
+        </span>
+        <span class="qa-label">
+            <span>${action.label}</span>
+            <span class="qa-arrow">→</span>
+        </span>
+    `;
+    return card;
+}
+
+function createAttentionRow(item) {
+    const row = document.createElement('a');
+    row.className = 'attention-row';
+    row.href = item.action?.href || '#';
+    row.innerHTML = `
+        <span class="attention-bar" aria-hidden="true"></span>
+        <span class="attention-tag">${item.tag}</span>
+        <span>
+            <span class="attention-title">${item.title}</span>
+            ${item.meta ? `<span class="attention-meta">${item.meta}</span>` : ''}
+        </span>
+        <span class="attention-time">${relativeTime(item.timestamp).toUpperCase()}</span>
+        <span class="attention-action">${item.action?.label || 'OPEN'} →</span>
+    `;
+    return row;
+}
+
+function createCompanyNote(note) {
+    const element = document.createElement(note.href ? 'a' : 'div');
+    element.className = 'company-note';
+    if (note.href) element.href = note.href;
+    element.innerHTML = `
+        <span>
+            <span class="note-date">${formatNoteDate(note.date)}</span>
+            ${note.isNew ? '<span class="new-pill">New</span>' : ''}
+        </span>
+        <span>
+            <span class="company-note-title">${note.title}</span>
+            <span class="company-note-dek">${note.dek}</span>
+            <span class="company-note-author">${note.author}</span>
+        </span>
+        ${note.href ? '<span class="note-read">Read →</span>' : '<span></span>'}
+    `;
+    return element;
+}
+
+function createToolPanel(title, countLabel, cards, emptyText) {
+    const panel = document.createElement('section');
+    panel.className = 'panel accent fade-in';
+    panel.innerHTML = `
+        <div class="panel-title-row">
+            <h2 class="panel-title">${title}</h2>
+            <span class="panel-count">${countLabel}</span>
+        </div>
+    `;
+
+    if (cards.length) {
+        const list = document.createElement('div');
+        list.className = 'tool-list';
+        cards.forEach(card => list.appendChild(createToolLink(card, card.sectionLabel)));
+        panel.appendChild(list);
+    } else {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = `<span class="empty-title">${emptyText}</span>`;
+        panel.appendChild(empty);
+    }
+
+    return panel;
+}
+
+function renderDashboardHome(role) {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+
+    const tier = tierOf(role);
+    const person = personForRole(role);
+    const attentionItems = visibleAttention(hubData.attention || [], role);
+    const notes = visibleNotes(hubData.notes || []);
+    const quickActions = visibleQuickActions(hubData.quickActions || [], tier);
+    const newNotesCount = notes.filter(note => note.isNew).length;
+
+    addGreeting(main, role, person, {
+        attentionOpen: attentionItems.length,
+        notesNew: newNotesCount
+    });
+
+    if (tier !== 'staff' && attentionItems.length) {
+        const section = document.createElement('section');
+        section.className = 'workbench-section fade-in';
+        section.innerHTML = `
+            <div class="workbench-head">
+                <h2 class="workbench-title with-accent">Needs You</h2>
+                <span class="workbench-meta">${attentionItems.length} open</span>
+            </div>
+        `;
+        const card = document.createElement('div');
+        card.className = 'attention-card';
+        attentionItems.forEach(item => card.appendChild(createAttentionRow(item)));
+        section.appendChild(card);
+        main.appendChild(section);
+    }
+
+    const quickSection = document.createElement('section');
+    quickSection.className = 'workbench-section fade-in';
+    quickSection.innerHTML = `
+        <div class="workbench-head">
+            <h2 class="workbench-title">My Quick Actions</h2>
+            <span class="workbench-meta">Most-used</span>
+        </div>
+    `;
+    const quickGrid = document.createElement('div');
+    quickGrid.className = 'qa-grid';
+    quickGrid.style.setProperty('--qa-columns', String(Math.min(Math.max(quickActions.length, 1), 6)));
+    quickActions.forEach((action, index) => quickGrid.appendChild(createQuickActionCard(action, index)));
+    quickSection.appendChild(quickGrid);
+    main.appendChild(quickSection);
+
+    const notesSection = document.createElement('section');
+    notesSection.className = 'workbench-section fade-in';
+    const notesMeta = newNotesCount ? `${newNotesCount} new` : 'Recent';
+    notesSection.innerHTML = `
+        <div class="workbench-head">
+            <h2 class="workbench-title">Company Notes</h2>
+            <span class="workbench-meta">${notesMeta}</span>
+        </div>
+    `;
+
+    if (notes.length) {
+        const list = document.createElement('div');
+        list.className = 'notes-list';
+        notes.forEach(note => list.appendChild(createCompanyNote(note)));
+        notesSection.appendChild(list);
+    } else {
+        const empty = document.createElement('p');
+        empty.className = 'greeting-note';
+        empty.textContent = 'No company notes this week.';
+        notesSection.appendChild(empty);
+    }
+
+    main.appendChild(notesSection);
+}
+
+function renderDepartmentsIndex(role) {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+
+    const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
+    const header = document.createElement('section');
+    header.className = 'tool-view-header fade-in';
+    header.innerHTML = `
+        <div class="section-kicker">Departments</div>
+        <h1 class="tool-view-title">Choose an area.</h1>
+        <p class="tool-view-note">Departments are grouped the way the company actually works. Production is split into Roasting, Packaging, and Warehouse so each area can have its own tools.</p>
+    `;
+    main.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'section-grid compact';
+    departmentSections.forEach(section => {
+        const card = document.createElement('article');
+        card.className = 'section-card clickable fade-in';
+        card.tabIndex = 0;
+        card.innerHTML = `
+            <div class="section-card-header">
+                <span class="section-card-copy">
+                    <span class="section-title">${section.label}</span>
+                </span>
+                <span class="section-count">${section.cards.length} item${section.cards.length === 1 ? '' : 's'}</span>
+            </div>
+        `;
+        card.onclick = () => renderHub(role, 'section', section.key);
+        card.onkeydown = event => {
+            if (event.key === 'Enter' || event.key === ' ') renderHub(role, 'section', section.key);
+        };
+        grid.appendChild(card);
+    });
+    main.appendChild(grid);
+}
+
+function renderSectionPage(role, sectionKey) {
+    const section = visibleSection(role, sectionKey);
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+
+    if (!section) {
+        renderDashboardHome(role);
+        return;
+    }
+
+    const notes = {
+        'owner-admin': 'Owner dashboard for items that need attention, notifications, and day-to-day oversight.',
+        settings: 'Back-end Hub controls. These are important, but not every-day dashboard items.',
+        'time-off': 'Vacation, sick days, calendars, and manager review tools.',
+        'employee-resources': 'Shared forms and everyday resources for the team.'
+    };
+
+    const header = document.createElement('section');
+    header.className = 'tool-view-header fade-in';
+    header.innerHTML = `
+        <div class="section-kicker">${section.group}</div>
+        <h1 class="tool-view-title">${section.label}</h1>
+        <p class="tool-view-note">${notes[section.key] || 'Open a tool or resource from this area.'}</p>
+    `;
+    main.appendChild(header);
+
+    const list = document.createElement('div');
+    list.className = 'tool-view-list fade-in';
+    section.cards.forEach(card => list.appendChild(createToolLink(card, section.label)));
+    main.appendChild(list);
+}
+
+async function showDashboard(role) {
     role = normalizeRole(role);
+    await loadHubData();
+    const person = personForRole(role);
+    storeRoleSession(role, person);
+
     document.getElementById('loginScreen').classList.add('hidden');
 
     const dashboard = document.getElementById('dashboard');
     dashboard.classList.add('active');
 
     document.getElementById('roleLabel').textContent = role.label;
+    document.getElementById('avatarInitials').textContent = person.initials;
+    document.getElementById('avatarName').textContent = person.firstName;
     setupHubNav(role);
-
-    const main = document.getElementById('mainContent');
-    main.innerHTML = '';
-
-    const hour = new Date().getHours();
-    let greetWord = 'Good evening.';
-    if (hour < 12) greetWord = 'Good morning.';
-    else if (hour < 17) greetWord = 'Good afternoon.';
-
-    const greetingBlock = document.createElement('div');
-    greetingBlock.className = 'greeting-block fade-in';
-    greetingBlock.innerHTML = `
-        <div>
-            <div class="dateline">${formatDateline()}</div>
-            <h1 class="greeting">Fratello Hub.</h1>
-            <p class="greeting-note">A simple home for Fratello tools, department resources, and shared working documents. Your view is already filtered to what your profile can access.</p>
-        </div>
-        <div class="summary-card">
-            <span class="summary-label">${greetWord}</span>
-            <span class="summary-text">Signed in with ${role.label} access.</span>
-        </div>
-    `;
-    main.appendChild(greetingBlock);
-
-    const visibleSections = role.sections
-        .map(sectionKey => {
-            const section = SECTIONS[sectionKey];
-            if (!section) return null;
-            const cards = section.cards.filter(card => cardIsVisible(card, role));
-            return { key: sectionKey, ...section, cards };
-        })
-        .filter(section => section && section.cards.length);
-
-    const activeCards = [];
-    visibleSections.forEach(section => {
-        section.cards
-            .filter(isActiveCard)
-            .forEach(card => activeCards.push({ ...card, sectionLabel: section.label }));
-    });
-
-    const quickSection = document.createElement('section');
-    quickSection.className = 'dashboard-section fade-in';
-    quickSection.dataset.view = 'all';
-    quickSection.innerHTML = `
-        <div class="section-kicker">Available Now</div>
-        <div class="section-heading-row">
-            <h2 class="section-heading">Tools ready to use.</h2>
-            <p class="section-note">Live tools are pulled forward here so you do not have to open every department to find what works today.</p>
-        </div>
-    `;
-
-    if (activeCards.length) {
-        const grid = document.createElement('div');
-        grid.className = 'quick-grid';
-        activeCards.forEach(card => {
-            const quick = document.createElement('a');
-            quick.className = 'quick-card';
-            quick.href = card.href;
-            const isExternal = /^https?:\/\//.test(card.href);
-            quick.target = isExternal ? '_blank' : '_self';
-            if (isExternal) quick.rel = 'noopener noreferrer';
-            quick.innerHTML = `
-                <span class="quick-copy">
-                    <span class="quick-name">${card.title}</span>
-                    <span class="quick-desc">${card.desc || card.sectionLabel}</span>
-                </span>
-                <span class="quick-status">${card.badge || card.sectionLabel}</span>
-            `;
-            grid.appendChild(quick);
-        });
-        quickSection.appendChild(grid);
-    } else {
-        const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.innerHTML = `
-            <span class="empty-title">No live tools assigned yet.</span>
-            <span class="empty-copy">As tools are added to your access profile, they will appear here first.</span>
-        `;
-        quickSection.appendChild(empty);
-    }
-    main.appendChild(quickSection);
-
-    const groups = {};
-    visibleSections.forEach(section => {
-        if (!groups[section.group]) groups[section.group] = [];
-        groups[section.group].push(section);
-    });
-
-    Object.entries(groups).forEach(([groupName, sections]) => {
-        const view = groupName === 'Departments'
-            ? 'departments'
-            : groupName === 'Employee Resources'
-                ? 'resources'
-                : 'admin';
-
-        const sectionWrap = document.createElement('section');
-        sectionWrap.className = 'dashboard-section fade-in';
-        sectionWrap.dataset.view = view;
-
-        const note = groupName === 'Departments'
-            ? 'Department areas stay compact until the tools inside them are ready.'
-            : groupName === 'Employee Resources'
-                ? 'Shared links, forms, and brand resources for day-to-day work.'
-                : 'Owner-only setup, access, and system controls.';
-
-        sectionWrap.innerHTML = `
-            <div class="section-kicker">${groupName}</div>
-            <div class="section-heading-row">
-                <h2 class="section-heading">${groupName}</h2>
-                <p class="section-note">${note}</p>
-            </div>
-        `;
-
-        const grid = document.createElement('div');
-        grid.className = 'section-grid';
-
-        sections.forEach(section => {
-            const card = document.createElement('article');
-            card.className = 'section-card';
-            card.dataset.key = section.key;
-            card.innerHTML = `
-                <div class="section-card-header">
-                    <span class="section-card-copy">
-                        <span class="section-title">${section.label}</span>
-                    </span>
-                    <span class="section-count">${section.cards.length} item${section.cards.length === 1 ? '' : 's'}</span>
-                </div>
-            `;
-
-            const list = document.createElement('div');
-            list.className = 'tool-list';
-            section.cards.forEach(toolCard => {
-                list.appendChild(createToolLink(toolCard, section.label));
-            });
-
-            card.appendChild(list);
-            grid.appendChild(card);
-        });
-
-        sectionWrap.appendChild(grid);
-        main.appendChild(sectionWrap);
-    });
+    renderHub(role, 'dashboard');
 }
 
 // ════════════════════════════════════════════════
@@ -1517,6 +2852,8 @@ async function signOut() {
     }
     localStorage.removeItem('fratello-role');
     localStorage.removeItem('fratello-session');
+    localStorage.removeItem('fratello_session');
+    localStorage.removeItem('fratello_tone');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('dashboard').classList.remove('active');
     document.getElementById('loginEmail').value = '';
@@ -1530,6 +2867,7 @@ async function signOut() {
 // ════════════════════════════════════════════════
 
 (async function init() {
+    document.documentElement.dataset.tone = localStorage.getItem('fratello_tone') || 'offwhite';
     setupAuthModeUi();
 
     if (USE_FIREBASE_AUTH) {
@@ -1542,6 +2880,7 @@ async function signOut() {
             }
 
             localStorage.removeItem('fratello-role');
+            localStorage.removeItem('fratello_session');
             if (error) setLoginError(friendlyAuthError(error));
         });
         return;
@@ -1572,6 +2911,7 @@ async function signOut() {
     }
 
     localStorage.removeItem('fratello-role');
+    localStorage.removeItem('fratello_session');
 })();
 
 window.toggleSetupCode = toggleSetupCode;
