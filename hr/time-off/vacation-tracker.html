@@ -15,11 +15,12 @@
         button, input, textarea { font: inherit; }
         button { cursor: pointer; }
         button:disabled { cursor: not-allowed; opacity: .55; }
-        .masthead { position: sticky; top: 0; z-index: 20; min-height: var(--header-height); padding: var(--space-md) var(--space-xl); display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); background: var(--bean-black); }
+        .masthead { position: sticky; top: 0; z-index: 20; min-height: var(--header-height); padding: var(--space-md) var(--space-xl); display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); background: rgba(255, 255, 255, 0.96); border-bottom: 1px solid var(--warm-gray-200); box-shadow: var(--shadow-sm); }
         .masthead img { height: 30px; width: auto; display: block; }
         .masthead-actions { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
         .nav-link, .btn, .tab { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 14px; background: var(--fratello-white); color: var(--bean-black); text-decoration: none; font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; }
-        .masthead .nav-link { border-color: rgba(255,255,255,.2); background: transparent; color: var(--warm-gray-200); }
+        .masthead .nav-link { border-color: var(--warm-gray-300); background: transparent; color: var(--warm-gray-600); }
+        .masthead .nav-link:hover { border-color: var(--brewing-blue); color: var(--bean-black); }
         .btn.primary, .tab.active { border-color: var(--brewing-blue); background: var(--brewing-blue); color: var(--bean-black); }
         main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: var(--space-2xl) 0 var(--space-3xl); }
         .intro { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--space-xl); align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--warm-gray-200); }
@@ -89,7 +90,7 @@
 </head>
 <body>
     <header class="masthead">
-        <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_White.png" alt="Fratello"></a>
+        <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_Black.png" alt="Fratello"></a>
         <div class="masthead-actions">
             <a class="nav-link" href="../../index.html">Back to Hub</a>
             <a class="nav-link" href="calendar-subscribe.html">Calendar Feeds</a>
@@ -191,6 +192,7 @@
         </div>
     </main>
 
+    <script src="../../system/firebase-config.js"></script>
     <script type="module">
         const MANAGER_KEYS = new Set(['owner', 'controller', 'production', 'marketing', 'sales']);
         const ADMIN_KEYS = new Set(['owner', 'controller']);

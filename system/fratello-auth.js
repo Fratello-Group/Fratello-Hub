@@ -105,6 +105,50 @@ function displayNameFromEmail(email) {
         .join(' ') || 'Team Member';
 }
 
+function timeOffRoleTier(profileKey) {
+    if (profileKey === 'owner') return 'Owner';
+    if (profileKey === 'controller') return 'Controller';
+    if (['production', 'marketing', 'sales'].includes(profileKey)) return 'Manager';
+    return 'Staff';
+}
+
+function timeOffDepartment(profileKey) {
+    if (profileKey === 'owner') return 'Management';
+    if (profileKey === 'controller') return 'Admin';
+    if (profileKey === 'production') return 'Production';
+    if (profileKey === 'marketing') return 'Marketing';
+    if (profileKey === 'sales') return 'Sales';
+    return 'Staff';
+}
+
+function defaultManagerId(profileKey) {
+    if (profileKey === 'owner') return null;
+    if (profileKey === 'controller' || profileKey === 'production' || profileKey === 'marketing') {
+        return 'prefontainech@gmail.com';
+    }
+    if (profileKey === 'sales') return 'russ@fratellocoffee.com';
+    return 'prefontainech@gmail.com';
+}
+
+async function upsertTimeOffUserFromAccess({ name, email, title, profile, status = 'active' }) {
+    initFirebase();
+    const normalized = normalizeEmail(email);
+    const profileKey = PROFILE_DEFINITIONS[profile] ? profile : 'staff';
+    if (!normalized) return;
+
+    await setDoc(doc(db, 'users', normalized), {
+        email: normalized,
+        name: String(name || '').trim() || displayNameFromEmail(normalized),
+        department: timeOffDepartment(profileKey),
+        title: String(title || '').trim(),
+        role_tier: timeOffRoleTier(profileKey),
+        manager_id: defaultManagerId(profileKey),
+        backup_approver_id: null,
+        active: status !== 'disabled',
+        updated_at: serverTimestamp()
+    }, { merge: true });
+}
+
 function roleFromProfile(id, data) {
     const profileKey = data.profile || 'staff';
     const profile = PROFILE_DEFINITIONS[profileKey] || PROFILE_DEFINITIONS.staff;
@@ -302,6 +346,8 @@ export async function saveHubInvite({ name, email, title, profile }) {
         createdAt: serverTimestamp()
     }, { merge: true });
 
+    await upsertTimeOffUserFromAccess(payload);
+
     const existingProfiles = await getDocs(query(collection(db, 'hubProfiles'), where('email', '==', normalized)));
     const updates = [];
     existingProfiles.forEach(item => {
@@ -340,6 +386,14 @@ export async function updateHubUser(person, profile) {
         status: person.status === 'disabled' ? 'disabled' : 'invited',
         updatedAt: serverTimestamp()
     }, { merge: true });
+
+    await upsertTimeOffUserFromAccess({
+        name: person.name,
+        email: person.email,
+        title: person.title || '',
+        profile: profileKey,
+        status: person.status
+    });
 }
 
 export async function setHubUserDisabled(person, disabled) {
@@ -359,6 +413,14 @@ export async function setHubUserDisabled(person, disabled) {
         status: disabled ? 'disabled' : 'invited',
         updatedAt: serverTimestamp()
     }, { merge: true });
+
+    await upsertTimeOffUserFromAccess({
+        name: person.name,
+        email: person.email,
+        title: person.title || '',
+        profile: person.profile || 'staff',
+        status: disabled ? 'disabled' : 'active'
+    });
 }
 
 export function friendlyAuthError(error) {

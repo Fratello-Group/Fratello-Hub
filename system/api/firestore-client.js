@@ -11,6 +11,7 @@ import {
     updateDoc,
     where
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { initFirebase, normalizeEmail } from '../fratello-auth.js';
 
 const COLLECTIONS = {
@@ -18,7 +19,8 @@ const COLLECTIONS = {
     requests: 'time_off_requests',
     approvals: 'approvals',
     holidays: 'holidays',
-    settings: 'settings'
+    settings: 'settings',
+    profiles: 'hubProfiles'
 };
 
 const APPROVAL_ENDPOINT = '/.netlify/functions/time-off-approval-action';
@@ -34,10 +36,25 @@ function requireFirestore() {
 }
 
 function requireCurrentFirebaseUser(auth) {
-    if (!auth.currentUser) {
-        throw new Error('Please sign in before using the time-off tools.');
-    }
-    return auth.currentUser;
+    if (auth.currentUser) return Promise.resolve(auth.currentUser);
+
+    return new Promise((resolve, reject) => {
+        let unsubscribe = () => {};
+        const timer = window.setTimeout(() => {
+            unsubscribe();
+            reject(new Error('Please sign in before using the time-off tools.'));
+        }, 4000);
+
+        unsubscribe = onAuthStateChanged(auth, user => {
+            window.clearTimeout(timer);
+            unsubscribe();
+            if (user) {
+                resolve(user);
+            } else {
+                reject(new Error('Please sign in before using the time-off tools.'));
+            }
+        });
+    });
 }
 
 function docIdForEmail(email) {
@@ -94,19 +111,73 @@ function cleanOptionalText(value) {
     return String(value || '').trim();
 }
 
+function roleTierFromProfile(profileKey) {
+    if (profileKey === 'owner') return 'Owner';
+    if (profileKey === 'controller') return 'Controller';
+    if (['production', 'marketing', 'sales'].includes(profileKey)) return 'Manager';
+    return 'Staff';
+}
+
+function departmentFromProfile(profileKey) {
+    if (profileKey === 'owner') return 'Management';
+    if (profileKey === 'controller') return 'Admin';
+    if (profileKey === 'production') return 'Production';
+    if (profileKey === 'marketing') return 'Marketing';
+    if (profileKey === 'sales') return 'Sales';
+    return 'Staff';
+}
+
+function managerForProfile(profileKey) {
+    if (profileKey === 'owner') return null;
+    if (profileKey === 'sales') return 'russ@fratellocoffee.com';
+    return 'prefontainech@gmail.com';
+}
+
+async function bootstrapUserFromHubProfile(currentUser) {
+    const { db } = requireFirestore();
+    const profile = withId(await getDoc(doc(db, COLLECTIONS.profiles, currentUser.uid)));
+    if (!profile || profile.status === 'disabled') return null;
+
+    const profileKey = profile.profile || 'staff';
+    if (!['owner', 'controller'].includes(profileKey)) return null;
+
+    const email = normalizeEmail(profile.email || currentUser.email);
+    const ref = doc(db, COLLECTIONS.users, email);
+    const user = {
+        email,
+        name: cleanOptionalText(profile.name || currentUser.displayName) || email,
+        department: cleanOptionalText(profile.department || departmentFromProfile(profileKey)),
+        title: cleanOptionalText(profile.title),
+        role_tier: roleTierFromProfile(profileKey),
+        manager_id: managerForProfile(profileKey),
+        backup_approver_id: null,
+        active: true,
+        hire_date: null,
+        vacation_days_allotted: null,
+        vacation_days_used: null,
+        calendar_tokens: {},
+        updated_at: serverTimestamp()
+    };
+
+    await setDoc(ref, user, { merge: true });
+    return { id: email, ...user };
+}
+
 async function getCurrentUserRecord() {
     const { auth } = requireFirestore();
-    const currentUser = requireCurrentFirebaseUser(auth);
+    const currentUser = await requireCurrentFirebaseUser(auth);
     const user = await getUserByEmail(currentUser.email);
-    if (!user) {
-        throw new Error('Your Hub login does not have a matching Firestore user record yet.');
-    }
-    return user;
+    if (user) return user;
+
+    const bootstrapped = await bootstrapUserFromHubProfile(currentUser);
+    if (bootstrapped) return bootstrapped;
+
+    throw new Error('Your Hub login does not have a matching Firestore user record yet.');
 }
 
 async function fetchApprovalAction(action, requestId, comment = '') {
     const { auth } = requireFirestore();
-    const currentUser = requireCurrentFirebaseUser(auth);
+    const currentUser = await requireCurrentFirebaseUser(auth);
     const token = await currentUser.getIdToken();
     const response = await fetch(APPROVAL_ENDPOINT, {
         method: 'POST',
@@ -137,7 +208,7 @@ async function fetchApprovalAction(action, requestId, comment = '') {
 
 async function firebaseAuthHeader() {
     const { auth } = requireFirestore();
-    const currentUser = requireCurrentFirebaseUser(auth);
+    const currentUser = await requireCurrentFirebaseUser(auth);
     return `Bearer ${await currentUser.getIdToken()}`;
 }
 

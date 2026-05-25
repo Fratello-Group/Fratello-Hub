@@ -13,20 +13,23 @@
 
         :root {
             --black: #1A1A1A;
-            --cream: #F6F1E9;
+            --cream: #F5F5F7;
             --teal: #36B3AF;
             --teal-bright: #00D4C8;
             --grey: #908F8A;
             --grey-light: #C4C3C0;
-            --card-bg-dark: #232323;
-            --divider-dark: #2E2E2E;
+            --slate: #4A4A4A;
+            --white: #FFFFFF;
+            --card-bg-dark: #FFFFFF;
+            --divider-dark: #E5E5E7;
+            --page-bg: #F5F5F7;
             --font: 'Montserrat', Helvetica, Arial, sans-serif;
         }
 
         html, body {
             min-height: 100%;
-            background: var(--black);
-            color: var(--cream);
+            background: var(--page-bg);
+            color: var(--black);
             font-family: var(--font);
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
@@ -44,8 +47,9 @@
             align-items: center;
             justify-content: space-between;
             gap: 24px;
-            background: rgba(26, 26, 26, 0.98);
+            background: rgba(255, 255, 255, 0.96);
             border-bottom: 1px solid var(--divider-dark);
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
         }
 
         .masthead-logo {
@@ -79,7 +83,7 @@
             border: 1px solid var(--divider-dark);
             border-radius: 4px;
             padding: 10px 14px;
-            color: var(--grey-light);
+            color: var(--slate);
             background: transparent;
             text-decoration: none;
             font-size: 11px;
@@ -91,7 +95,7 @@
 
         .nav-link:hover,
         .button:hover {
-            color: var(--cream);
+            color: var(--black);
             border-color: var(--teal);
         }
 
@@ -124,7 +128,7 @@
         }
 
         h1 {
-            color: var(--cream);
+            color: var(--black);
             font-size: clamp(40px, 6vw, 72px);
             font-weight: 800;
             line-height: 1.04;
@@ -163,7 +167,7 @@
         }
 
         .panel h2 {
-            color: var(--cream);
+            color: var(--black);
             font-size: 18px;
             font-weight: 800;
             line-height: 1.25;
@@ -172,7 +176,7 @@
 
         .panel p,
         .panel li {
-            color: var(--grey-light);
+            color: var(--slate);
             font-size: 14px;
             line-height: 1.7;
         }
@@ -195,10 +199,18 @@
 
         .blocked {
             display: none;
-            min-height: 100vh;
+            min-height: calc(100vh - 74px);
             place-items: center;
             padding: 32px;
             text-align: center;
+        }
+
+        .blocked > div {
+            max-width: 620px;
+            padding: 32px;
+            background: var(--white);
+            border: 1px solid var(--divider-dark);
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
         }
 
         .blocked h1 {
@@ -206,19 +218,61 @@
             margin-bottom: 18px;
         }
 
-        body.denied .page {
+        body.denied .resource-content,
+        body.auth-checking .resource-content {
             display: none;
         }
 
-        body.denied .blocked {
+        body.denied .blocked,
+        body.auth-checking .blocked {
             display: grid;
+        }
+
+        /* Light Hub refresh */
+        :root {
+            --cream: #F5F5F7;
+            --grey: #747477;
+            --grey-light: #5A5A5E;
+            --slate: #4A4A4A;
+            --white: #FFFFFF;
+            --card-bg-dark: #FFFFFF;
+            --divider-dark: #E5E5E7;
+            --page-bg: #F5F5F7;
+        }
+
+        html,
+        body {
+            background: var(--page-bg);
+            color: var(--black);
+        }
+
+        .masthead {
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--divider-dark);
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+        }
+
+        .nav-link,
+        .button {
+            color: var(--slate);
+            border-color: var(--divider-dark);
+        }
+
+        .nav-link:hover,
+        .button:hover {
+            color: var(--black);
+            border-color: var(--teal);
+        }
+
+        .panel {
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
         }
 
         @media (max-width: 800px) {
             .masthead {
                 align-items: flex-start;
                 flex-direction: column;
-                padding: 28px 24px 0;
+                padding: 18px 22px;
             }
 
             .masthead-right {
@@ -236,17 +290,19 @@
     </style>
     <script src="../firebase-config.js"></script>
 </head>
-<body class="denied">
+<body class="auth-checking">
     <div class="page">
         <header class="masthead">
-            <img src="../../assets/Fratello_Logo_White.png" alt="Fratello" class="masthead-logo">
+            <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
             <div class="masthead-right">
                 <span class="role-pill">Brand Resource</span>
+                <a class="nav-link" href="fratello-design-skill.md" download>Download Skill</a>
+                <a class="nav-link" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Open Claude</a>
                 <a class="nav-link" href="../../index.html">Back to Hub</a>
             </div>
         </header>
 
-        <main>
+        <main class="resource-content">
             <div class="eyebrow">Claude Design Skill</div>
             <h1>Make Fratello work look like Fratello.</h1>
             <p class="lede">
@@ -284,8 +340,8 @@
 
     <section class="blocked">
         <div>
-            <h1>Hub access required.</h1>
-            <p class="lede">Sign in to the Hub before opening this brand resource.</p>
+            <h1 id="accessTitle">Checking Hub session.</h1>
+            <p class="lede" id="accessMessage">One moment while the Hub confirms your access.</p>
             <div class="action-row" style="justify-content: center;">
                 <a class="button primary" href="../../index.html">Back to Hub</a>
             </div>
@@ -296,10 +352,13 @@
         import { firebaseConfigured, onHubAuthChange } from '../fratello-auth.js';
 
         function allowAccess() {
-            document.body.classList.remove('denied');
+            document.body.classList.remove('auth-checking', 'denied');
         }
 
         function denyAccess() {
+            document.getElementById('accessTitle').textContent = 'Hub access required.';
+            document.getElementById('accessMessage').textContent = 'Sign in to the Hub before opening this brand resource.';
+            document.body.classList.remove('auth-checking');
             document.body.classList.add('denied');
         }
 

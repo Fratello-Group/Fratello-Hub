@@ -12,7 +12,7 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --black: #1A1A1A;
-            --cream: #F6F1E9;
+            --cream: #1A1A1A;
             --teal: #36B3AF;
             --teal-bright: #00D4C8;
             --white: #FFFFFF;
@@ -25,7 +25,7 @@
 
         html, body {
             min-height: 100vh;
-            background: var(--black);
+            background: var(--page-bg);
             color: var(--cream);
             font-family: var(--font);
             -webkit-font-smoothing: antialiased;
@@ -136,11 +136,57 @@
 
         .message.error { color: var(--error); }
         .success { display: none; }
+
+        /* Light Hub refresh */
+        :root {
+            --cream: #1A1A1A;
+            --grey: #747477;
+            --grey-light: #5A5A5E;
+            --divider-dark: #E5E5E7;
+            --page-bg: #F5F5F7;
+        }
+
+        html,
+        body {
+            background: var(--page-bg);
+            color: var(--black);
+        }
+
+        .panel {
+            max-width: 460px;
+            padding: 34px;
+            background: var(--white);
+            border: 1px solid var(--divider-dark);
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+        }
+
+        .logo {
+            margin-bottom: 42px;
+        }
+
+        input {
+            background: var(--white);
+            border-color: var(--divider-dark);
+            color: var(--black);
+        }
+
+        input::placeholder {
+            color: var(--grey);
+        }
+
+        input:focus {
+            background: var(--white);
+        }
+
+        button,
+        .hub-link {
+            color: var(--black);
+        }
     </style>
 </head>
 <body>
     <main class="panel">
-        <img src="../assets/Fratello_Logo_White.png" alt="Fratello" class="logo">
+        <img src="../assets/Fratello_Logo_Black.png" alt="Fratello" class="logo">
 
         <div id="formState">
             <div class="eyebrow">Hub Invite</div>

@@ -10,45 +10,71 @@ const TEAM_MEMBERS = [
         id: DEFAULT_OWNER_ID,
         email: DEFAULT_OWNER_ID,
         name: 'Chris Prefontaine',
-        department: 'Owner',
+        department: 'Management',
         title: 'CEO',
         role_tier: 'Owner',
+        profile: 'owner',
+        manager_id: null,
+        seed_invite: false
+    },
+    {
+        id: 'chris@fratellocoffee.com',
+        email: 'chris@fratellocoffee.com',
+        name: 'Chris Prefontaine',
+        department: 'Management',
+        title: 'CEO',
+        role_tier: 'Owner',
+        profile: 'owner',
         manager_id: null
     },
     {
         id: 'russ@fratellocoffee.com',
         email: 'russ@fratellocoffee.com',
         name: 'Russ Prefontaine',
-        department: 'Owner',
+        department: 'Management',
         title: 'President',
         role_tier: 'Owner',
+        profile: 'owner',
         manager_id: null
     },
     {
-        id: 'controller@fratellocoffee.com',
+        id: 'chris.mcghee@fratellocoffee.com',
         email: 'chris.mcghee@fratellocoffee.com',
         name: 'Chris McGhee',
-        department: 'Controller',
+        department: 'Admin',
         title: 'Controller',
         role_tier: 'Controller',
+        profile: 'controller',
         manager_id: DEFAULT_OWNER_ID
     },
     {
-        id: 'kyle@fratellocoffee.com',
+        id: 'nancy.gibb@fratellocoffee.com',
+        email: 'nancy.gibb@fratellocoffee.com',
+        name: 'Nancy Gibb',
+        department: 'Admin',
+        title: 'Bookkeeper & Customer Service Coordinator',
+        role_tier: 'Staff',
+        profile: 'staff',
+        manager_id: 'chris.mcghee@fratellocoffee.com'
+    },
+    {
+        id: 'kyle.park@fratellocoffee.com',
         email: 'kyle.park@fratellocoffee.com',
         name: 'Kyle Park',
         department: 'Production',
         title: 'Production & Operations Manager / Roasting Supervisor',
         role_tier: 'Manager',
+        profile: 'production',
         manager_id: DEFAULT_OWNER_ID
     },
     {
-        id: 'mateo@fratellocoffee.com',
+        id: 'mateo.corredor@fratellocoffee.com',
         email: 'mateo.corredor@fratellocoffee.com',
         name: 'Mateo Corredor',
         department: 'Marketing',
         title: 'Marketing & Brand Manager',
         role_tier: 'Manager',
+        profile: 'marketing',
         manager_id: DEFAULT_OWNER_ID
     },
     {
@@ -58,6 +84,7 @@ const TEAM_MEMBERS = [
         department: 'Sales',
         title: 'Key Account Manager',
         role_tier: 'Manager',
+        profile: 'sales',
         manager_id: 'russ@fratellocoffee.com'
     },
     {
@@ -66,109 +93,121 @@ const TEAM_MEMBERS = [
         name: "D'arcy Watsham",
         department: 'Sales',
         title: 'Customer Care Specialist',
-        role_tier: 'Staff',
+        role_tier: 'Manager',
+        profile: 'sales',
         manager_id: 'russ@fratellocoffee.com'
     },
     {
         id: 'allana.contois@fratellocoffee.com',
         email: 'allana.contois@fratellocoffee.com',
         name: 'Allana Contois',
-        department: 'Production',
+        department: 'Warehouse',
         title: 'Warehouse Supervisor',
         role_tier: 'Manager',
-        manager_id: 'kyle@fratellocoffee.com'
+        profile: 'production',
+        manager_id: 'kyle.park@fratellocoffee.com'
     },
     {
         id: 'jaleisy.quintero@fratellocoffee.com',
         email: 'jaleisy.quintero@fratellocoffee.com',
         name: 'Jaleisy Quintero',
-        department: 'Production',
+        department: 'Packaging',
         title: 'Packaging Supervisor',
         role_tier: 'Manager',
-        manager_id: 'kyle@fratellocoffee.com'
+        profile: 'production',
+        manager_id: 'kyle.park@fratellocoffee.com'
     },
     {
-        id: 'nancy.gibb@fratellocoffee.com',
-        email: 'nancy.gibb@fratellocoffee.com',
-        name: 'Nancy Gibb',
-        department: 'Controller',
-        title: 'Bookkeeper & Customer Service Coordinator',
-        role_tier: 'Staff',
-        manager_id: 'controller@fratellocoffee.com'
-    },
-    {
-        id: 'luke.prefontaine@fratellocoffee.com',
+        id: 'luke@fratellocoffee.com',
         email: 'luke@fratellocoffee.com',
         name: 'Luke Prefontaine',
-        department: 'Production',
+        department: 'Warehouse',
         title: 'Delivery Driver',
         role_tier: 'Staff',
-        manager_id: 'allana.contois@fratellocoffee.com'
-    },
-    {
-        id: 'sandra.mestre@fratellocoffee.com',
-        email: 'sandra.mestre@fratellocoffee.com',
-        name: 'Sandra Mestre',
-        department: 'Production',
-        title: 'Warehouse Team Member',
-        role_tier: 'Staff',
-        manager_id: 'allana.contois@fratellocoffee.com'
-    },
-    {
-        id: 'monica.banman@fratellocoffee.com',
-        email: 'monica.banman@fratellocoffee.com',
-        name: 'Monica Banman',
-        department: 'Production',
-        title: 'Warehouse Team Member',
-        role_tier: 'Staff',
+        profile: 'staff',
         manager_id: 'allana.contois@fratellocoffee.com'
     },
     {
         id: 'oleksandr.svyrydov@fratellocoffee.com',
         email: 'oleksandr.svyrydov@fratellocoffee.com',
         name: 'Oleksandr Svyrydov',
-        department: 'Production',
+        department: 'Roasting',
         title: 'Coffee Roaster',
         role_tier: 'Staff',
-        manager_id: 'kyle@fratellocoffee.com'
+        profile: 'staff',
+        manager_id: 'kyle.park@fratellocoffee.com'
     },
     {
-        id: 'sungjoo.hong@fratellocoffee.com',
-        email: 'sungjoo.hong@fratellocoffee.com',
-        name: 'Sungjoo Hong',
-        department: 'Production',
-        title: 'Coffee Roaster',
+        id: 'samantha-stewart',
+        email: '',
+        name: 'Samantha Stewart',
+        department: 'Roasting',
+        title: 'Roasting Team Member',
         role_tier: 'Staff',
-        manager_id: 'kyle@fratellocoffee.com'
-    },
-    {
-        id: 'tatum.olsen@fratellocoffee.com',
-        email: 'tatum.olsen@fratellocoffee.com',
-        name: 'Tatum Olsen',
-        department: 'Production',
-        title: 'Roasting Assistant',
-        role_tier: 'Staff',
-        manager_id: 'kyle@fratellocoffee.com'
-    },
-    {
-        id: 'olena.zaitseva@fratellocoffee.com',
-        email: 'olena.zaitseva@fratellocoffee.com',
-        name: 'Olena Zaitseva',
-        department: 'Production',
-        title: 'Packaging Team Member',
-        role_tier: 'Staff',
-        manager_id: 'jaleisy.quintero@fratellocoffee.com'
-    },
-    {
-        id: 'yerly.camacho@fratellocoffee.com',
-        email: 'yerly.camacho@fratellocoffee.com',
-        name: 'Yerly Camacho',
-        department: 'Production',
-        title: 'Packaging Team Member',
-        role_tier: 'Staff',
-        manager_id: 'jaleisy.quintero@fratellocoffee.com'
+        profile: 'staff',
+        manager_id: 'kyle.park@fratellocoffee.com',
+        seed_user: false,
+        seed_invite: false,
+        note: 'Email not set up yet in EmployeeContacts.xlsx'
     }
 ];
+
+function seedableUsers() {
+    return TEAM_MEMBERS.filter(member => member.seed_user !== false && member.email);
+}
+
+function seedableInvites() {
+    return TEAM_MEMBERS.filter(member => member.seed_invite !== false && member.email);
+}
+
+function profileFor(member) {
+    if (member.profile) return member.profile;
+    if (member.role_tier === 'Owner') return 'owner';
+    if (member.role_tier === 'Controller') return 'controller';
+    if (member.department === 'Sales') return 'sales';
+    if (member.department === 'Marketing') return 'marketing';
+    if (['Production', 'Roasting', 'Packaging', 'Warehouse'].includes(member.department)) return 'production';
+    return 'staff';
+}
+
+function userPayload(member, stamp) {
+    return {
+        email: member.email.toLowerCase(),
+        name: member.name,
+        department: member.department,
+        title: member.title,
+        role_tier: member.role_tier,
+        manager_id: member.manager_id,
+        backup_approver_id: backupApproverFor(member),
+        active: true,
+        hire_date: null,
+        vacation_days_allotted: null,
+        vacation_days_used: null,
+        calendar_tokens: {
+            team: crypto.randomBytes(24).toString('base64url'),
+            personal: crypto.randomBytes(24).toString('base64url'),
+            admin: ['Owner', 'Controller'].includes(member.role_tier)
+                ? crypto.randomBytes(24).toString('base64url')
+                : ''
+        },
+        created_at: stamp,
+        updated_at: stamp
+    };
+}
+
+function invitePayload(member, stamp) {
+    return {
+        email: member.email.toLowerCase(),
+        name: member.name,
+        title: member.title,
+        profile: profileFor(member),
+        status: 'invited',
+        department: member.department,
+        role_tier: member.role_tier,
+        createdAt: stamp,
+        updatedAt: stamp
+    };
+}
 
 function two(value) {
     return String(value).padStart(2, '0');
@@ -298,10 +337,23 @@ function loadServiceAccount() {
 
 async function main() {
     const dryRun = process.argv.includes('--dry-run');
+    const usersToSeed = seedableUsers();
+    const invitesToSeed = seedableInvites();
+    const skipped = TEAM_MEMBERS.filter(member => member.seed_user === false || !member.email);
     const holidays = [2026, 2027, 2028].flatMap(holidaysForYear);
 
     if (dryRun) {
-        console.log(`Dry run: ${TEAM_MEMBERS.length} users, ${holidays.length} holidays, 1 settings document.`);
+        console.log(`Dry run: ${usersToSeed.length} time-off users, ${invitesToSeed.length} Hub invites, ${holidays.length} holidays, 1 settings document.`);
+        console.table(invitesToSeed.map(member => ({
+            name: member.name,
+            email: member.email.toLowerCase(),
+            profile: profileFor(member),
+            department: member.department,
+            manager_id: member.manager_id || ''
+        })));
+        if (skipped.length) {
+            console.log('Skipped until email is ready:', skipped.map(member => member.name).join(', '));
+        }
         console.log('Sample holiday:', holidays.find(item => item.id.includes('boxing-day')));
         return;
     }
@@ -332,30 +384,14 @@ async function main() {
     const batch = db.batch();
     const stamp = admin.firestore.FieldValue.serverTimestamp();
 
-    for (const member of TEAM_MEMBERS) {
+    for (const member of usersToSeed) {
         const ref = db.collection('users').doc(member.id);
-        batch.set(ref, {
-            email: member.email,
-            name: member.name,
-            department: member.department,
-            title: member.title,
-            role_tier: member.role_tier,
-            manager_id: member.manager_id,
-            backup_approver_id: backupApproverFor(member),
-            active: true,
-            hire_date: null,
-            vacation_days_allotted: null,
-            vacation_days_used: null,
-            calendar_tokens: {
-                team: crypto.randomBytes(24).toString('base64url'),
-                personal: crypto.randomBytes(24).toString('base64url'),
-                admin: ['Owner', 'Controller'].includes(member.role_tier)
-                    ? crypto.randomBytes(24).toString('base64url')
-                    : ''
-            },
-            created_at: stamp,
-            updated_at: stamp
-        }, { merge: true });
+        batch.set(ref, userPayload(member, stamp), { merge: true });
+    }
+
+    for (const member of invitesToSeed) {
+        const ref = db.collection('hubInvites').doc(member.email.toLowerCase());
+        batch.set(ref, invitePayload(member, stamp), { merge: true });
     }
 
     for (const holiday of holidays) {
@@ -383,8 +419,10 @@ async function main() {
 
     await batch.commit();
 
-    console.log(`Seeded ${TEAM_MEMBERS.length} users, ${holidays.length} holidays, and settings/global into ${projectId}.`);
-    console.log('Review assumed staff email addresses before relying on login matching in production.');
+    console.log(`Seeded ${usersToSeed.length} time-off users, ${invitesToSeed.length} Hub invites, ${holidays.length} holidays, and settings/global into ${projectId}.`);
+    if (skipped.length) {
+        console.log(`Skipped ${skipped.length} person without a ready email: ${skipped.map(member => member.name).join(', ')}.`);
+    }
 }
 
 main().catch(error => {

@@ -419,14 +419,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   --teal: #36B3AF;
   --teal-bright: #00D4C8;
   --gold: #36B3AF;
-  --cream: #F6F1E9;
+  --cream: #F5F5F7;
   --brown: #1A1A1A;
   --amber: #36B3AF;
   --slate: #4A4A4A;
-  --fog: #E8E4DE;
+  --fog: #ECECEE;
   --sage: #36B3AF;
   --border: #E0E0E0;
-  --page-bg: #F7F7F5;
+  --page-bg: #F5F5F7;
   --card-bg: #FFFFFF;
   --muted: #908F8A;
   --critical: #9B3225;
@@ -610,7 +610,7 @@ main.content {
   gap: 12px;
   padding: 16px 24px;
   border-bottom: 1px solid var(--fog);
-  background: #FAFAF9;
+  background: #FAFAFB;
 }
 
 .section-num {
@@ -903,6 +903,45 @@ select {
 }
 
 /* ============================================================
+   ACCESS CHECK
+   ============================================================ */
+.access-blocked {
+  display: none;
+  min-height: 56vh;
+  place-items: center;
+  padding: 32px;
+  text-align: center;
+}
+.access-blocked-inner {
+  max-width: 540px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 34px;
+}
+.access-blocked h1 {
+  font-size: 30px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  color: var(--black);
+}
+.access-blocked p {
+  color: var(--slate);
+  line-height: 1.55;
+  margin-bottom: 24px;
+}
+body.auth-checking main.content,
+body.denied main.content,
+body.auth-checking .action-bar,
+body.denied .action-bar {
+  display: none;
+}
+body.auth-checking .access-blocked,
+body.denied .access-blocked {
+  display: grid;
+}
+
+/* ============================================================
    JD NOTICE
    ============================================================ */
 .jd-notice {
@@ -950,7 +989,7 @@ select {
 }
 </style>
 </head>
-<body>
+<body class="auth-checking">
 <script src="../../system/firebase-config.js"></script>
 <script type="module">
 import {
@@ -967,14 +1006,24 @@ import {
     return role && allowed.includes(role.key);
   }
 
+  function showUnlocked(role) {
+    localStorage.setItem('fratello-role', JSON.stringify(role));
+    document.body.classList.remove('auth-checking', 'denied');
+  }
+
   function showLocked(message = 'This hiring tool is available to Owner, Controller, Production, and Marketing access.') {
-    document.body.innerHTML = `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;font-family:Montserrat,Arial,sans-serif;text-align:center;background:#1A1A1A;color:#F6F1E9;"><div><h1 style="font-size:30px;margin-bottom:12px;">Access required.</h1><p style="color:#C4C3C0;margin-bottom:24px;">${message}</p><a style="color:#36B3AF;text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:700;" href="/">Back to Hub</a></div></main>`;
+    const title = document.getElementById('accessTitle');
+    const copy = document.getElementById('accessMessage');
+    if (title) title.textContent = 'Access required.';
+    if (copy) copy.textContent = message;
+    document.body.classList.remove('auth-checking');
+    document.body.classList.add('denied');
   }
 
   if (useFirebaseAuth) {
     onHubAuthChange((role, error) => {
       if (isAllowed(role)) {
-        localStorage.setItem('fratello-role', JSON.stringify(role));
+        showUnlocked(role);
         return;
       }
       showLocked(error ? friendlyAuthError(error) : undefined);
@@ -995,8 +1044,10 @@ import {
       });
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('fratello-role', JSON.stringify(data.role));
-        if (isAllowed(data.role)) return;
+        if (isAllowed(data.role)) {
+          showUnlocked(data.role);
+          return;
+        }
       }
     } catch (e) {
       localStorage.removeItem('fratello-session');
@@ -1023,6 +1074,14 @@ import {
     </div>
   </div>
 </header>
+
+<section class="access-blocked" aria-live="polite">
+  <div class="access-blocked-inner">
+    <h1 id="accessTitle">Checking Hub session.</h1>
+    <p id="accessMessage">One moment while the Hub confirms your access.</p>
+    <a style="color:#36B3AF;text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:700;" href="/">Back to Hub</a>
+  </div>
+</section>
 
 <!-- ============== MAIN CONTENT ============== -->
 <main class="content">

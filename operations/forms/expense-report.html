@@ -13,17 +13,17 @@
 
         :root {
             --black: #1A1A1A;
-            --cream: #F6F1E9;
+            --cream: #F5F5F7;
             --teal: #36B3AF;
             --teal-bright: #00D4C8;
             --white: #FFFFFF;
             --slate: #4A4A4A;
             --grey: #908F8A;
             --grey-light: #C4C3C0;
-            --card-bg-light: #F5F0E8;
+            --card-bg-light: #FAFAFB;
             --divider-dark: #2E2E2E;
             --divider-light: #E0E0E0;
-            --fog: #E8E4DE;
+            --fog: #ECECEE;
             --error: #D9533D;
             --font: 'Montserrat', Helvetica, Arial, sans-serif;
         }
@@ -284,7 +284,7 @@
             height: 52px;
             border: 1px solid var(--divider-light);
             border-radius: 4px;
-            background: #fbfaf7;
+            background: var(--white);
             color: var(--black);
             padding: 12px 14px;
             font-size: 15px;
@@ -336,7 +336,7 @@
         .entry-card {
             border: 1px solid var(--divider-light);
             border-radius: 4px;
-            background: #fbfaf7;
+            background: var(--white);
             padding: 18px;
         }
 
@@ -534,7 +534,7 @@
             place-items: center;
             padding: 32px;
             text-align: center;
-            background: var(--black);
+            background: var(--cream);
             color: var(--cream);
         }
 
@@ -553,8 +553,61 @@
             margin-bottom: 24px;
         }
 
-        body.denied .page { display: none; }
-        body.denied .blocked { display: grid; }
+        body.denied .page,
+        body.auth-checking .page { display: none; }
+
+        body.denied .blocked,
+        body.auth-checking .blocked { display: grid; }
+
+        /* Light Hub refresh */
+        .hub-bar {
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--divider-light);
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+        }
+
+        .context {
+            border-left-color: var(--divider-light);
+        }
+
+        .title {
+            color: var(--black);
+        }
+
+        .button {
+            color: var(--slate);
+            border-color: var(--divider-light);
+        }
+
+        .button:hover {
+            color: var(--black);
+            border-color: var(--teal);
+        }
+
+        .button.primary {
+            color: var(--black);
+        }
+
+        input,
+        select,
+        textarea,
+        .entry-card {
+            background: var(--white);
+        }
+
+        .blocked {
+            background: var(--cream);
+            color: var(--black);
+        }
+
+        .blocked h1 {
+            color: var(--black);
+        }
+
+        .blocked p {
+            color: var(--slate);
+        }
+
 
         @media (max-width: 860px) {
             .hub-bar {
@@ -676,11 +729,11 @@
     </style>
     <script src="../../system/firebase-config.js"></script>
 </head>
-<body class="denied">
+<body class="auth-checking">
     <div class="shell">
         <header class="hub-bar">
             <div class="brand">
-                <img src="../../assets/Fratello_Logo_White.png" alt="Fratello">
+                <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello">
                 <div class="context">
                     <div class="eyebrow">Employee Resources</div>
                     <div class="title">Expense Reimbursement</div>
@@ -888,11 +941,12 @@
             window.currentHubEmployee = null;
 
             if (!role || !allowed.has(role.key)) {
+                document.body.classList.remove('auth-checking');
                 document.body.classList.add('denied');
                 return;
             }
 
-            document.body.classList.remove('denied');
+            document.body.classList.remove('auth-checking', 'denied');
             if (role.user) {
                 window.currentHubEmployee = role.user;
                 employeeName.value = role.user.name || '';
@@ -1197,7 +1251,7 @@ body{font-family:Montserrat,Helvetica,Arial,sans-serif;color:#1A1A1A;margin:28px
 h1{font-size:24px;margin:4px 0 0}h2{font-size:15px;margin:18px 0 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:18px 0;border:1px solid #E0E0E0}
 .card{border:1px solid #E0E0E0;padding:12px}.card strong{display:block;font-size:20px;margin-top:4px}
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}th{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:#908F8A;text-align:left;border-bottom:1px solid #E0E0E0;padding:7px 6px}td{border-bottom:1px solid #E8E4DE;padding:7px 6px;vertical-align:top}
-.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;font-size:13px}.notes{margin-top:18px;padding:12px;border-left:3px solid #36B3AF;background:#F5F0E8}
+.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;font-size:13px}.notes{margin-top:18px;padding:12px;border-left:3px solid #36B3AF;background:#FAFAFB}
 .signature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:34px}
 .signature-line{border-top:1px solid #1A1A1A;padding-top:8px;font-size:11px;color:#4A4A4A}
 @media print{body{margin:0}.no-print{display:none}}

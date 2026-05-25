@@ -15,7 +15,7 @@
 
         :root {
             --black: #1A1A1A;
-            --cream: #F6F1E9;
+            --cream: #F5F5F7;
             --teal: #36B3AF;
             --teal-bright: #00D4C8;
             --white: #FFFFFF;
@@ -23,7 +23,7 @@
             --grey: #908F8A;
             --grey-light: #C4C3C0;
             --card-bg-dark: #232323;
-            --card-bg-light: #F5F0E8;
+            --card-bg-light: #FAFAFB;
             --divider-dark: #2E2E2E;
             --divider-light: #E0E0E0;
             --fog: #E8E4DE;
@@ -32,7 +32,7 @@
         }
 
         html, body {
-            background: var(--black);
+            background: #F5F5F7;
             color: var(--cream);
             font-family: var(--font);
             font-weight: 400;
@@ -51,7 +51,7 @@
         .login-screen {
             position: fixed;
             inset: 0;
-            background: var(--black);
+            background: #F5F5F7;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -213,7 +213,7 @@
         .provider-btn:hover {
             border-color: var(--teal);
             color: #1A1A1A;
-            background: #F6F1E9;
+            background: #FAFAFB;
         }
 
         .provider-btn:active { transform: scale(0.99); }
@@ -319,6 +319,90 @@
         .reset-message a {
             color: var(--teal);
             font-weight: 700;
+        }
+
+        /* Light Hub refresh for sign-in */
+        .login-screen {
+            background: #F5F5F7;
+        }
+
+        body.auth-checking .login-container {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.auth-checking .login-screen::after {
+            content: 'Checking Hub session...';
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--grey);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        body.auth-checking .login-screen.hidden::after {
+            display: none;
+        }
+
+        .login-container {
+            max-width: 470px;
+            padding: 34px;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E7;
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+        }
+
+        .login-logo {
+            margin-bottom: 42px;
+        }
+
+        .login-input {
+            background: #FFFFFF;
+            border-color: #E5E5E7;
+            color: var(--black);
+        }
+
+        .login-input::placeholder {
+            color: var(--grey);
+        }
+
+        .login-input:focus {
+            background: #FFFFFF;
+        }
+
+        .login-divider,
+        .login-helper,
+        .setup-toggle,
+        .login-footer,
+        .reset-copy,
+        .reset-message {
+            color: var(--grey);
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            background: #E5E5E7;
+        }
+
+        .provider-btn {
+            border-color: #E5E5E7;
+        }
+
+        .provider-btn:hover {
+            background: #FAFAFB;
+        }
+
+        .reset-panel {
+            background: #FAFAFB;
+            border-color: rgba(54, 179, 175, 0.35);
+        }
+
+        .reset-btn {
+            color: var(--black);
         }
 
         .legacy-only.hidden,
@@ -676,7 +760,7 @@
 
         .quick-card:hover {
             border-color: rgba(54, 179, 175, 0.55);
-            background: #fbfaf7;
+            background: #FAFAFB;
             transform: translateY(-1px);
         }
 
@@ -742,7 +826,7 @@
 
         .section-card.clickable:hover {
             border-color: rgba(54, 179, 175, 0.55);
-            background: #fbfaf7;
+            background: #FAFAFB;
             transform: translateY(-1px);
         }
 
@@ -1596,7 +1680,7 @@
         }
     </style>
 </head>
-<body>
+<body class="auth-checking">
 
 <!-- ═══════════════════════════════════════════════
      LOGIN
@@ -1604,7 +1688,7 @@
 
 <div class="login-screen" id="loginScreen">
     <div class="login-container">
-        <img src="assets/Fratello_Logo_White.png" alt="Fratello" class="login-logo">
+        <img src="assets/Fratello_Logo_Black.png" alt="Fratello" class="login-logo">
         <form onsubmit="event.preventDefault(); handleLogin();">
             <div class="provider-grid" id="providerGrid">
                 <button class="provider-btn google" id="googleProviderBtn" type="button" onclick="handleProviderLogin('google')" aria-label="Sign in with Google">
@@ -2050,6 +2134,10 @@ function storeRoleSession(role, person) {
 // ════════════════════════════════════════════════
 
 const USE_FIREBASE_AUTH = firebaseConfigured();
+
+function finishAuthCheck() {
+    document.body.classList.remove('auth-checking');
+}
 
 function setLoginError(message) {
     const error = document.getElementById('loginError');
@@ -2875,13 +2963,14 @@ async function signOut() {
             if (role) {
                 localStorage.setItem('fratello-role', JSON.stringify(role));
                 localStorage.removeItem('fratello-session');
-                showDashboard(role);
+                showDashboard(role).finally(finishAuthCheck);
                 return;
             }
 
             localStorage.removeItem('fratello-role');
             localStorage.removeItem('fratello_session');
             if (error) setLoginError(friendlyAuthError(error));
+            finishAuthCheck();
         });
         return;
     }
@@ -2901,7 +2990,8 @@ async function signOut() {
                 const data = await response.json();
                 const role = normalizeRole(data.role);
                 localStorage.setItem('fratello-role', JSON.stringify(role));
-                showDashboard(role);
+                await showDashboard(role);
+                finishAuthCheck();
                 return;
             }
         } catch (e) {
@@ -2912,6 +3002,7 @@ async function signOut() {
 
     localStorage.removeItem('fratello-role');
     localStorage.removeItem('fratello_session');
+    finishAuthCheck();
 })();
 
 window.toggleSetupCode = toggleSetupCode;

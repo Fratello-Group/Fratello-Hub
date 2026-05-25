@@ -13,7 +13,7 @@
 
         :root {
             --black: #1A1A1A;
-            --cream: #F6F1E9;
+            --cream: #1A1A1A;
             --teal: #36B3AF;
             --teal-bright: #00D4C8;
             --white: #FFFFFF;
@@ -27,7 +27,7 @@
         }
 
         html, body {
-            background: var(--black);
+            background: var(--page-bg);
             color: var(--cream);
             font-family: var(--font);
             min-height: 100vh;
@@ -504,6 +504,64 @@
             margin-bottom: 24px;
         }
 
+        /* Light Hub refresh */
+        :root {
+            --cream: #1A1A1A;
+            --grey: #747477;
+            --grey-light: #5A5A5E;
+            --card-bg-dark: #FFFFFF;
+            --divider-dark: #E5E5E7;
+            --page-bg: #F5F5F7;
+            --teal-soft: rgba(54, 179, 175, 0.10);
+        }
+
+        html,
+        body {
+            background: var(--page-bg);
+            color: var(--black);
+        }
+
+        .masthead {
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--divider-dark);
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+        }
+
+        .nav-link,
+        .ghost-button {
+            color: var(--slate);
+            border-color: var(--divider-dark);
+        }
+
+        .nav-link:hover,
+        .ghost-button:hover {
+            color: var(--black);
+            border-color: var(--teal);
+        }
+
+        .access-profile,
+        .admin-panel,
+        .test-note,
+        .future-item {
+            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
+        }
+
+        .tag,
+        .status {
+            background: rgba(54, 179, 175, 0.06);
+        }
+
+        select,
+        .text-input {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .link-output {
+            background: var(--teal-soft);
+            color: var(--slate);
+        }
+
         @media (max-width: 860px) {
             .masthead {
                 padding: 28px 24px 0;
@@ -528,7 +586,7 @@
 <body>
     <div class="locked" id="lockedState">
         <div class="locked-box">
-            <img src="../assets/Fratello_Logo_White.png" alt="Fratello">
+            <img src="../assets/Fratello_Logo_Black.png" alt="Fratello">
             <h1>Owner access only.</h1>
             <p>This page is reserved for the Owner/Admin area of the HUB.</p>
             <a href="/" class="nav-link">Back to Hub</a>
@@ -537,7 +595,7 @@
 
     <div class="page-shell" id="pageShell">
         <header class="masthead">
-            <img src="../assets/Fratello_Logo_White.png" alt="Fratello" class="masthead-logo">
+            <img src="../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
             <div class="masthead-right">
                 <span class="role-pill">Owner/Admin</span>
                 <a class="nav-link" href="/">Back to Hub</a>
