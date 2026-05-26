@@ -282,9 +282,14 @@
             await loadClient();
             try {
                 currentUser = await call('getCurrentUser') || fallbackUser();
-                users = await call('getActiveUsers') || [currentUser];
+                users = [currentUser];
+                if (isAdmin()) {
+                    users = await call('getActiveUsers') || [currentUser];
+                }
                 myRequests = await call('getMyRequests') || [];
-                requests = await call('getTeamRequests', { include_sick: false }) || myRequests;
+                requests = isAdmin()
+                    ? (await call('getTeamRequests', { include_sick: false }) || myRequests)
+                    : (isManager() ? (await call('getRequestsForApproval') || myRequests) : myRequests);
                 approvals = isManager() ? (await call('getRequestsForApproval', { status: 'pending' }) || []) : [];
                 holidays = await call('getHolidays') || [];
                 els.connectionStatus.textContent = client ? 'Connected to Firestore' : 'Prototype mode';

@@ -27,10 +27,13 @@ service cloud.firestore {
     }
 
     function isOwner() {
-      return signedIn()
-        && exists(profilePath(request.auth.uid))
-        && get(profilePath(request.auth.uid)).data.profile == 'owner'
-        && get(profilePath(request.auth.uid)).data.status == 'active';
+      return isBootstrapOwner()
+        || (
+          signedIn()
+          && exists(profilePath(request.auth.uid))
+          && get(profilePath(request.auth.uid)).data.profile == 'owner'
+          && get(profilePath(request.auth.uid)).data.status == 'active'
+        );
     }
 
     function isController() {

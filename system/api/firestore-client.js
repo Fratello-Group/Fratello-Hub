@@ -133,21 +133,26 @@ function managerForProfile(profileKey) {
     return 'prefontainech@gmail.com';
 }
 
+function ownerEmails() {
+    return (window.FRATELLO_OWNER_EMAILS || []).map(normalizeEmail);
+}
+
 async function bootstrapUserFromHubProfile(currentUser) {
     const { db } = requireFirestore();
     const profile = withId(await getDoc(doc(db, COLLECTIONS.profiles, currentUser.uid)));
-    if (!profile || profile.status === 'disabled') return null;
+    const email = normalizeEmail(profile?.email || currentUser.email);
+    const bootstrapOwner = ownerEmails().includes(email);
+    if ((!profile && !bootstrapOwner) || profile?.status === 'disabled') return null;
 
-    const profileKey = profile.profile || 'staff';
+    const profileKey = profile?.profile || (bootstrapOwner ? 'owner' : 'staff');
     if (!['owner', 'controller'].includes(profileKey)) return null;
 
-    const email = normalizeEmail(profile.email || currentUser.email);
     const ref = doc(db, COLLECTIONS.users, email);
     const user = {
         email,
-        name: cleanOptionalText(profile.name || currentUser.displayName) || email,
-        department: cleanOptionalText(profile.department || departmentFromProfile(profileKey)),
-        title: cleanOptionalText(profile.title),
+        name: cleanOptionalText(profile?.name || currentUser.displayName) || email,
+        department: cleanOptionalText(profile?.department || departmentFromProfile(profileKey)),
+        title: cleanOptionalText(profile?.title),
         role_tier: roleTierFromProfile(profileKey),
         manager_id: managerForProfile(profileKey),
         backup_approver_id: null,

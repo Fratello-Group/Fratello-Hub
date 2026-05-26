@@ -80,7 +80,11 @@ function profileFor(requestAuth) {
 
 function isOwner(requestAuth) {
     const profile = profileFor(requestAuth);
-    return Boolean(profile && profile.profile === 'owner' && profile.status === 'active');
+    return isBootstrapOwner(requestAuth) || Boolean(profile && profile.profile === 'owner' && profile.status === 'active');
+}
+
+function isBootstrapOwner(requestAuth) {
+    return Boolean(requestAuth && ['prefontainech@gmail.com', 'russ@fratellocoffee.com'].includes(requestAuth.email));
 }
 
 function isController(requestAuth) {
@@ -202,6 +206,7 @@ function run() {
     assert.equal(canListUsers(auth('owner')), true);
     assert.equal(canListUsers(auth('controller')), true);
     assert.equal(canListUsers(auth('kyle')), false);
+    assert.equal(canListUsers({ uid: 'new-chris-uid', email: 'prefontainech@gmail.com' }), true);
 
     assert.equal(canReadTimeOff(auth('owner'), sungjooSickDay), true);
     assert.equal(canReadTimeOff(auth('controller'), sungjooSickDay), true);
