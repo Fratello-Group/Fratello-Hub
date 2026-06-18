@@ -294,8 +294,14 @@
 
         table {
             width: 100%;
-            min-width: 840px;
+            min-width: 960px;
             border-collapse: collapse;
+        }
+
+        th:last-child,
+        td:last-child {
+            width: 150px;
+            min-width: 150px;
         }
 
         th {
@@ -360,7 +366,15 @@
         .table-actions {
             display: flex;
             gap: var(--space-sm);
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .table-actions .button {
+            width: 100%;
+            min-width: 112px;
+            padding: 0 12px;
+            white-space: nowrap;
         }
 
         .message {

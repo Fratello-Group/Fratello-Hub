@@ -714,6 +714,7 @@
             firebaseConfigured,
             friendlyAuthError,
             listHubUsers,
+            normalizeEmail,
             onHubAuthChange,
             sendHubInviteEmail,
             sendResetEmail,
@@ -792,6 +793,45 @@
 
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+        }
+
+        function personScore(person) {
+            let score = 0;
+            if (person.source === 'profile') score += 10;
+            if (person.status === 'active') score += 6;
+            if (person.uid) score += 3;
+            if (person.title) score += 1;
+            return score;
+        }
+
+        function mergePersonRecord(existing, next) {
+            const preferred = personScore(next) >= personScore(existing) ? next : existing;
+            const fallback = preferred === next ? existing : next;
+            return {
+                ...fallback,
+                ...preferred,
+                id: preferred.id || fallback.id,
+                email: normalizeEmail(preferred.email || fallback.email),
+                name: preferred.name || fallback.name,
+                title: preferred.title || fallback.title,
+                profile: preferred.profile || fallback.profile || 'staff',
+                areas: preferred.areas || fallback.areas,
+                status: preferred.status === 'active' || fallback.status === 'active'
+                    ? 'active'
+                    : preferred.status || fallback.status || 'invited'
+            };
+        }
+
+        function dedupeStaff(records = []) {
+            const byEmail = new Map();
+            records.forEach(person => {
+                const email = normalizeEmail(person.email);
+                if (!email) return;
+                const next = { ...person, email };
+                const existing = byEmail.get(email);
+                byEmail.set(email, existing ? mergePersonRecord(existing, next) : next);
+            });
+            return Array.from(byEmail.values()).sort((a, b) => a.name.localeCompare(b.name));
         }
 
         function fieldContainer(id) {
@@ -913,7 +953,7 @@
                         <span class="status ${escapeHtml(status.className)}">${escapeHtml(status.label)}</span>
                         <span class="status-help">${escapeHtml(status.help)}</span>
                         <div class="row-actions">
-                            ${needsInvite ? `<button class="ghost-button primary-button" type="button" data-person="${safeId}" onclick="sendInviteForPerson(this.dataset.person)">Send Invite Email</button>` : ''}
+                            ${needsInvite ? `<button class="ghost-button primary-button" type="button" data-person="${safeId}" onclick="sendInviteForPerson(this.dataset.person, this)">Send Invite Email</button>` : ''}
                             <button class="ghost-button" type="button" data-person="${safeId}" onclick="resetPassword(this.dataset.person)">${USE_FIREBASE_AUTH ? 'Send Reset Email' : 'Create Reset Link'}</button>
                             <button class="ghost-button ${isDisabled ? '' : 'danger-button'}" type="button" data-person="${safeId}" data-disabled="${!isDisabled}" onclick="toggleDisabled(this.dataset.person, this.dataset.disabled === 'true')">${isDisabled ? 'Enable User' : 'Disable User'}</button>
                         </div>
@@ -928,7 +968,7 @@
             LAST_COPY_LABEL = kind === 'Password reset' ? 'Copy Reset Link' : 'Copy Invite Link';
             LAST_GENERATED_LINK = url;
             const emailText = options.emailSent
-                ? `Email sent to ${escapeHtml(options.email || userName)}. You can also copy the setup link below.`
+                ? `Email sent to ${escapeHtml(options.email || userName)}. The Hub also logged the send attempt.`
                 : options.emailError
                     ? `Email was not sent: ${escapeHtml(options.emailError)}. Copy this setup link and send it manually.`
                     : 'Copy this link and send it to the person. It is ready to use now.';
@@ -942,6 +982,20 @@
                 </div>
             `;
             output.style.display = 'block';
+        }
+
+        function renderInviteFailure(error) {
+            const output = document.getElementById('inviteOutput');
+            const message = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+            LAST_GENERATED_LINK = '';
+            output.classList.add('warning');
+            output.innerHTML = `
+                <strong>Email was not sent</strong>
+                <span>${escapeHtml(message)}</span>
+                <span>Sign out and sign back in, then try again. If this keeps happening, the Firebase or email settings need to be checked in Netlify.</span>
+            `;
+            output.style.display = 'block';
+            document.getElementById('adminMessage').textContent = 'Invite email was not sent. See the message below.';
         }
 
         async function copyGeneratedLink() {
@@ -971,14 +1025,14 @@
 
         async function loadUsers() {
             if (USE_FIREBASE_AUTH) {
-                STAFF = await listHubUsers();
+                STAFF = dedupeStaff(await listHubUsers());
                 renderStaff();
                 document.getElementById('saveState').textContent = 'Staff permissions loaded from Firestore.';
                 return;
             }
 
             const data = await authRequest({ action: 'users:list' });
-            STAFF = data.users;
+            STAFF = dedupeStaff(data.users);
             renderStaff();
             document.getElementById('saveState').textContent = 'Staff permissions loaded from the HUB.';
         }
@@ -1031,19 +1085,24 @@
                 document.getElementById('inviteTitle').value = '';
                 await loadUsers();
             } catch (error) {
-                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+                renderInviteFailure(error);
             } finally {
                 button.disabled = false;
                 button.textContent = 'Add & Send Invite';
             }
         }
 
-        async function sendInviteForPerson(personId) {
+        async function sendInviteForPerson(personId, button) {
             const output = document.getElementById('inviteOutput');
             const person = personById(personId);
             if (!person) return;
+            const originalLabel = button ? button.textContent : '';
             output.style.display = 'none';
             document.getElementById('adminMessage').textContent = `Sending invite to ${person.email}...`;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Sending...';
+            }
 
             try {
                 if (USE_FIREBASE_AUTH) {
@@ -1068,7 +1127,12 @@
                 }
                 await loadUsers();
             } catch (error) {
-                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+                renderInviteFailure(error);
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = originalLabel || 'Send Invite Email';
+                }
             }
         }
 

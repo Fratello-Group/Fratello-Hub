@@ -69,7 +69,7 @@ let auth;
 let db;
 
 export function normalizeEmail(email) {
-    return String(email || '').trim().toLowerCase();
+    return String(email || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toLowerCase();
 }
 
 export function firebaseConfigured() {
@@ -279,7 +279,7 @@ export async function sendResetEmail(email) {
 export async function currentIdToken() {
     initFirebase();
     if (!auth.currentUser) throw new Error('Sign in again before making this change.');
-    return auth.currentUser.getIdToken();
+    return auth.currentUser.getIdToken(true);
 }
 
 export async function sendHubInviteEmail({ name, email, title, profile }) {
