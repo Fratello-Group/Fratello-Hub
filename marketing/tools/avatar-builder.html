@@ -9,18 +9,18 @@
 </head>
 <body class="auth-checking" data-tool-name="Avatar Builder">
   <header class="hub-bar">
-    <div class="hub-brand">
+    <a class="hub-brand" href="../../index.html" aria-label="Fratello Hub dashboard">
       <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello">
-      <div class="hub-context">
-        <div class="hub-eyebrow">Marketing Tool</div>
-        <div class="hub-title">Avatar Builder</div>
-      </div>
-    </div>
+    </a>
+    <nav class="hub-nav" aria-label="Hub navigation">
+      <a href="../../index.html#dashboard">Dashboard</a>
+      <a href="../../index.html#departments">Departments</a>
+      <a href="../../index.html#resources">Resources</a>
+      <a href="../../index.html#owner-admin" data-owner-nav hidden>Owner Hub</a>
+      <a href="../../index.html#settings" data-owner-nav hidden>Settings</a>
+    </nav>
     <div class="hub-actions">
-      <a class="hub-button" href="../../index.html">Back to Hub</a>
-      <a class="hub-button" href="#view-bank" onclick="if(window.showView){showView('bank');}">Avatar Log</a>
-      <a class="hub-button" href="#view-training" onclick="if(window.showView){showView('training');}">Training</a>
-      <button class="hub-button primary" type="button" onclick="if(window.copyBrief){copyBrief();}">Copy Brief</button>
+      <button class="hub-button" type="button" onclick="window.signOutFromTool && window.signOutFromTool()">Sign Out</button>
     </div>
   </header>
   <section class="blocked">
@@ -32,9 +32,9 @@
   </section>
 <div id="app">
   <header class="topbar">
-    <div class="brand">
-      <img class="logo" src="../../assets/Fratello_Logo_Black.png" alt="Fratello Coffee Roasters">
+    <div class="brand tool-brand">
       <span class="labtag">Marketing Tool</span>
+      <strong class="tool-title">Avatar Builder</strong>
     </div>
     <nav class="tabs">
       <button id="tab-build" class="tab active" onclick="showView('build')">Avatar Builder</button>
@@ -651,8 +651,27 @@
     catch (error) { return null; }
   }
 
+  async function signOutFromTool() {
+    try {
+      const authModule = await import('../../system/fratello-auth.js');
+      if (authModule.firebaseConfigured()) await authModule.signOutHub();
+    } catch (error) {
+      console.warn('Hub sign out fell back to local cleanup.', error);
+    }
+    localStorage.removeItem('fratello-role');
+    localStorage.removeItem('fratello-session');
+    localStorage.removeItem('fratello_session');
+    localStorage.removeItem('fratello_tone');
+    window.location.href = '../../index.html';
+  }
+
+  window.signOutFromTool = signOutFromTool;
+
   function allowPage(role) {
     window.fratelloAvatarRole = role || null;
+    document.querySelectorAll('[data-owner-nav]').forEach(link => {
+      link.hidden = role?.key !== 'owner';
+    });
     document.body.classList.remove('auth-checking', 'denied');
   }
 
@@ -1426,7 +1445,7 @@ async function renderBank(){
       </div>
       <textarea class="bresult" placeholder="Result / notes for future-you \u2014 which hook pulled, CPA, what you&rsquo;d change\u2026" onchange="updField('${r.id}','result',this.value)">${esc(r.result||'')}</textarea>
       <div class="batchfoot">
-        <button class="mini" onclick="copyOne('${r.id}')">Copy brief</button>
+        <button class="mini copy-brief" onclick="copyOne('${r.id}')">Copy brief</button>
         <button class="mini del" onclick="delOne('${r.id}')">Delete</button>
       </div>`;
     list.appendChild(card);
@@ -1577,22 +1596,26 @@ recompute();
   body { margin: 0; background: #F5F5F7; color: #1A1A1A; font-family: 'Montserrat', Helvetica, Arial, sans-serif; }
   body.auth-checking #app, body.denied #app { display: none; }
   body.auth-checking .blocked, body.denied .blocked { display: grid; }
-  .hub-bar { position: sticky; top: 0; z-index: 60; min-height: 72px; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: rgba(255,255,255,.96); border-bottom: 1px solid #E2E2E4; box-shadow: 0 1px 2px rgba(15,17,17,.05); }
-  .hub-brand { display: flex; align-items: center; gap: 18px; min-width: 0; }
-  .hub-brand img { width: 164px; height: auto; display: block; }
-  .hub-context { min-width: 0; padding-left: 18px; border-left: 1px solid #E2E2E4; }
-  .hub-eyebrow { color: #36B3AF; font-size: 10px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 4px; }
-  .hub-title { font-size: 15px; font-weight: 800; line-height: 1.25; }
+  .hub-bar { position: sticky; top: 0; z-index: 60; min-height: 84px; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: rgba(255,255,255,.96); border-bottom: 1px solid #E2E2E4; box-shadow: 0 1px 2px rgba(15,17,17,.05); backdrop-filter: blur(14px); }
+  .hub-brand { display: flex; align-items: center; min-width: 0; text-decoration: none; }
+  .hub-brand img { width: 198px; height: auto; display: block; }
+  .hub-nav { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+  .hub-nav a { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; padding: 13px 18px; border-bottom: 2px solid transparent; color: #5A5A5E; text-decoration: none; font-size: 12px; font-weight: 800; letter-spacing: 3.2px; text-transform: uppercase; }
+  .hub-nav a[hidden] { display: none; }
+  .hub-nav a:hover { color: #1A1A1A; border-bottom-color: #36B3AF; }
   .hub-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
-  .hub-button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 10px 14px; border: 1px solid #E2E2E4; border-radius: 6px; background: transparent; color: #5A5A5E; text-decoration: none; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  .hub-button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 11px 16px; border: 1px solid #E2E2E4; border-radius: 0; background: transparent; color: #5A5A5E; text-decoration: none; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
   .hub-button:hover { color: #1A1A1A; border-color: #36B3AF; }
   .hub-button.primary { background: #36B3AF; border-color: #36B3AF; color: #1A1A1A; }
-  .blocked { min-height: calc(100vh - 72px); display: none; place-items: center; padding: 32px; text-align: center; }
+  .blocked { min-height: calc(100vh - 84px); display: none; place-items: center; padding: 32px; text-align: center; }
   .blocked-card { max-width: 620px; }
   .blocked h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.05; margin-bottom: 18px; }
   .blocked p { color: #5A5A5E; font-size: 15px; line-height: 1.7; margin-bottom: 26px; }
-  #app { --bg: #F5F5F7; --surface: #FFFFFF; --surface2: #FAFAFA; --ink: #1A1A1A; --ink2: #343437; --muted: #5A5A5E; --line: #E2E2E4; --line2: #EEEEF0; --paper: #F0F0F1; --sand: #D8D8DC; --ink-soft: #F0F0F1; --accent: #36B3AF; --accent-soft: rgba(54, 179, 175, .12); --shadow: 0 1px 2px rgba(15,17,17,.05), 0 10px 30px rgba(15,17,17,.06); min-height: calc(100vh - 72px); }
-  #app .topbar { top: 72px; background: rgba(255,255,255,.96); border-top: 0; border-bottom: 1px solid #E2E2E4; }
+  #app { --bg: #F5F5F7; --surface: #FFFFFF; --surface2: #FAFAFA; --ink: #1A1A1A; --ink2: #343437; --muted: #5A5A5E; --line: #E2E2E4; --line2: #EEEEF0; --paper: #F0F0F1; --sand: #D8D8DC; --ink-soft: #F0F0F1; --accent: #36B3AF; --accent-soft: rgba(54, 179, 175, .12); --shadow: 0 1px 2px rgba(15,17,17,.05), 0 10px 30px rgba(15,17,17,.06); min-height: calc(100vh - 84px); }
+  #app .topbar { top: 84px; background: rgba(255,255,255,.96); border-top: 0; border-bottom: 1px solid #E2E2E4; }
+  #app .tool-brand { gap: 12px; }
+  #app .topbar .labtag { padding-left: 0; border-left: 0; color: #36B3AF; font-weight: 800; }
+  #app .tool-title { font-size: 17px; font-weight: 800; letter-spacing: 0; line-height: 1.1; }
   #app .tabs { border-color: #E2E2E4; border-radius: 8px; }
   #app .tab { border-right-color: #E2E2E4; }
   #app .tab.active, #app .save, #app .step, #app .corenum, #app .ctag, #app .bno { background: #1A1A1A; color: #fff; }
@@ -1603,11 +1626,13 @@ recompute();
   #app .st-Live { background: rgba(54, 179, 175, .14); }
   #app .st-Worked { background: #1A1A1A; color: #fff; }
   #app .st-Flopped { background: #F3E1DE; }
+  #app .mini.copy-brief { background: #36B3AF; border-color: #36B3AF; color: #1A1A1A; font-size: 13.5px; font-weight: 900; padding: 9px 16px; }
+  #app .mini.copy-brief:hover { background: #43C8C4; border-color: #43C8C4; }
   @media (max-width: 720px) {
     .hub-bar { align-items: flex-start; flex-direction: column; padding: 18px; }
-    .hub-brand { align-items: flex-start; flex-direction: column; gap: 12px; }
-    .hub-brand img { width: 145px; }
-    .hub-context { padding-left: 0; border-left: 0; }
+    .hub-brand img { width: 164px; }
+    .hub-nav { width: 100%; overflow-x: auto; gap: 4px; }
+    .hub-nav a { flex: 0 0 auto; padding: 11px 12px; font-size: 10px; letter-spacing: 2px; }
     .hub-actions { width: 100%; justify-content: flex-start; }
     .hub-button { width: 100%; }
     #app .topbar { top: 0; }

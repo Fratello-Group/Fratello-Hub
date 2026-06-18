@@ -1041,14 +1041,23 @@
             backdrop-filter: blur(14px);
         }
 
-        .masthead-logo { height: 26px; }
+        .masthead-logo { height: 32px; }
+
+        .hub-nav {
+            gap: 10px;
+        }
 
         .hub-nav-btn {
+            min-height: 46px;
+            padding: 13px 18px;
             border-radius: 0;
             color: var(--subtext);
             border-width: 0 0 2px;
             border-bottom-color: transparent;
             background: transparent;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 3.2px;
         }
 
         .hub-nav-btn:hover,
@@ -1082,58 +1091,16 @@
 
         .hub-dropdown-sub { color: var(--subtext); }
 
-        .masthead-role { color: var(--teal); }
-
-        .bell-btn,
-        .avatar-btn {
-            position: relative;
-            min-height: 36px;
+        .profile-chip {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 12px 5px 5px;
             border: 1px solid var(--rule);
             border-radius: 0;
             background: var(--surface);
             color: var(--text);
-            cursor: pointer;
-        }
-
-        .bell-btn {
-            width: 38px;
-        }
-
-        .bell-btn::before {
-            content: "";
-            position: absolute;
-            left: 13px;
-            top: 9px;
-            width: 12px;
-            height: 14px;
-            border: 2px solid var(--subtext);
-            border-bottom: 0;
-        }
-
-        .bell-btn::after {
-            content: "";
-            position: absolute;
-            left: 17px;
-            bottom: 8px;
-            width: 4px;
-            height: 4px;
-            background: var(--subtext);
-        }
-
-        .bell-dot {
-            position: absolute;
-            right: 9px;
-            top: 8px;
-            width: 7px;
-            height: 7px;
-            background: var(--teal);
-        }
-
-        .avatar-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            padding: 4px 10px 4px 5px;
         }
 
         .avatar-initials {
@@ -1150,11 +1117,28 @@
             letter-spacing: 1px;
         }
 
+        .profile-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 0;
+        }
+
         .avatar-name {
             color: var(--text);
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 800;
             letter-spacing: 0;
+            line-height: 1.1;
+        }
+
+        .profile-role {
+            color: var(--teal-deep);
+            font-size: 8.5px;
+            font-weight: 800;
+            letter-spacing: 1.6px;
+            line-height: 1.1;
+            text-transform: uppercase;
         }
 
         .signout-btn {
@@ -1534,7 +1518,8 @@
                 overflow: auto;
             }
             .masthead-right { gap: 10px; }
-            .masthead-role { font-size: 10px; letter-spacing: 2px; }
+            .profile-chip { min-height: 38px; }
+            .profile-role { display: none; }
             .signout-btn { padding: 9px 10px; font-size: 10px; letter-spacing: 2px; }
 
             .login-container { max-width: 420px; padding: 0 26px; }
@@ -1586,8 +1571,7 @@
                 min-height: 76px;
             }
 
-            .avatar-name,
-            .masthead-role {
+            .profile-copy {
                 display: none;
             }
 
@@ -1775,12 +1759,13 @@
             <button class="hub-nav-btn" type="button" data-section="settings">Settings</button>
         </nav>
         <div class="masthead-right">
-            <button class="bell-btn" type="button" aria-label="Notifications"><span class="bell-dot"></span></button>
-            <span class="masthead-role" id="roleLabel"></span>
-            <button class="avatar-btn" type="button" aria-label="Profile">
+            <div class="profile-chip" aria-label="Signed in user">
                 <span class="avatar-initials" id="avatarInitials">CP</span>
-                <span class="avatar-name" id="avatarName">Chris</span>
-            </button>
+                <span class="profile-copy">
+                    <span class="avatar-name" id="avatarName">Chris</span>
+                    <span class="profile-role" id="roleLabel">Owner access</span>
+                </span>
+            </div>
             <button class="signout-btn" onclick="signOut()">Sign Out</button>
         </div>
     </div>
@@ -1982,53 +1967,8 @@ const ROLE_SECTION_MAP = {
 };
 
 const FALLBACK_HUB_DATA = {
-    attention: [
-        {
-            id: 'att_001',
-            tag: 'VACATION',
-            title: 'Kyle Park - request for July 14-18',
-            meta: 'Submitted yesterday - Production coverage confirmed',
-            timestamp: '2026-05-20T14:30:00-06:00',
-            action: { label: 'REVIEW', href: '/hr/time-off/vacation-tracker.html?view=approvals&id=att_001' },
-            visibleTo: ['owner', 'controller']
-        },
-        {
-            id: 'att_002',
-            tag: 'SICK DAY',
-            title: 'Joel logged sick today',
-            meta: 'Coverage needed for Wholesale calls',
-            timestamp: '2026-05-21T09:14:00-06:00',
-            action: { label: 'OPEN', href: '/hr/time-off/sick-day-report.html?id=att_002' },
-            visibleTo: ['owner', 'controller', 'sales']
-        },
-        {
-            id: 'att_003',
-            tag: 'HIRING',
-            title: 'Offer letter pending: Roastery Assistant',
-            meta: 'Prepared docs - awaiting owner review',
-            timestamp: '2026-05-20T11:00:00-06:00',
-            action: { label: 'OPEN', href: '/hr/hiring/hiring-document-generator.html' },
-            visibleTo: ['owner']
-        }
-    ],
-    notes: [
-        {
-            id: 'note_2026_05_20_ethiopia',
-            date: '2026-05-20',
-            title: 'New Ethiopia Shantawene G1 arrives Friday',
-            dek: 'Cup tasting in the QC lab at 10 AM. Launch materials can live in Marketing once finalized.',
-            author: 'Chris P.',
-            isNew: true
-        },
-        {
-            id: 'note_2026_05_18_victoria_day',
-            date: '2026-05-18',
-            title: 'Victoria Day closure reminder',
-            dek: 'Roastery closed all day. Wholesale order cutoff is Friday at 2 PM. Production resumes Tuesday morning.',
-            author: 'Chris P.',
-            isNew: true
-        }
-    ],
+    attention: [],
+    notes: [],
     quickActions: [
         { id: 'qa_vacation', label: 'Submit Vacation Request', icon: 'calendar-plus', href: '/hr/time-off/vacation-tracker.html?view=submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 1, owner: 3 } },
         { id: 'qa_sick', label: 'Log Sick Day', icon: 'thermometer', href: '/hr/time-off/sick-day-logger.html', tiers: ['staff', 'manager', 'owner'], order: { staff: 2, manager: 2, owner: 4 } },
@@ -2421,6 +2361,10 @@ function renderHub(role, view = 'dashboard', sectionKey = '') {
     activeRole = role;
     closeNavMenus();
     setActiveNav(view, sectionKey);
+    const hashTarget = sectionKey || view;
+    if (hashTarget && location.hash !== `#${hashTarget}`) {
+        history.replaceState(null, '', `#${hashTarget}`);
+    }
 
     if (view === 'departments') {
         renderDepartmentsIndex(role);
@@ -2433,6 +2377,23 @@ function renderHub(role, view = 'dashboard', sectionKey = '') {
     }
 
     renderDashboardHome(role);
+}
+
+function initialHubRoute(role) {
+    const hash = decodeURIComponent((location.hash || '').replace(/^#/, '')).trim();
+    if (!hash || hash === 'dashboard') return { view: 'dashboard', sectionKey: '' };
+    if (hash === 'departments') return { view: 'departments', sectionKey: '' };
+
+    const sectionAliases = {
+        resources: 'employee-resources',
+        'owner-hub': 'owner-admin'
+    };
+    const sectionKey = sectionAliases[hash] || hash;
+    if (sectionIsVisible(role, sectionKey)) {
+        return { view: 'section', sectionKey };
+    }
+
+    return { view: 'dashboard', sectionKey: '' };
 }
 
 function setupHubNav(role) {
@@ -2675,19 +2636,20 @@ function briefing(tier, counts) {
     const { attentionOpen, notesNew } = counts;
 
     if (tier === 'staff') {
-        if (notesNew === 0) return 'Nothing pending. Production is humming.';
-        if (notesNew === 1) return 'One new company note. Production is humming. Nothing else needs you today.';
-        return `${notesNew} new company notes. Production is humming. Nothing else needs you today.`;
+        if (notesNew === 0) return 'Your quick actions are ready. No company notes have been posted yet.';
+        if (notesNew === 1) return 'One company note is posted. Your quick actions are ready.';
+        return `${notesNew} company notes are posted. Your quick actions are ready.`;
     }
 
     if (tier === 'manager') {
-        const attention = attentionOpen === 0 ? 'Nothing pending' : `${attentionOpen === 1 ? '1 approval' : `${attentionOpen} approvals`} waiting on you`;
-        if (notesNew === 0) return `${attention}. Production is humming.`;
-        return `${attention}. ${notesNew} note${notesNew === 1 ? '' : 's'} worth glancing at.`;
+        const attention = attentionOpen === 0 ? 'No live alerts need your attention right now' : `${attentionOpen === 1 ? '1 item' : `${attentionOpen} items`} need your attention`;
+        if (notesNew === 0) return `${attention}. No company notes have been posted yet.`;
+        return `${attention}. ${notesNew} company note${notesNew === 1 ? '' : 's'} posted.`;
     }
 
-    const attention = attentionOpen === 0 ? 'Nothing pending' : `${attentionOpen === 1 ? '1 approval' : `${attentionOpen} approvals`} waiting on you`;
-    return `${attention}. ${notesNew} new note${notesNew === 1 ? '' : 's'}.`;
+    const attention = attentionOpen === 0 ? 'No live alerts need your attention right now' : `${attentionOpen === 1 ? '1 item' : `${attentionOpen} items`} need your attention`;
+    const notes = notesNew === 0 ? 'No company notes have been posted yet' : `${notesNew} company note${notesNew === 1 ? '' : 's'} posted`;
+    return `${attention}. ${notes}.`;
 }
 
 function iconSvg(key) {
@@ -2829,7 +2791,7 @@ function renderDashboardHome(role) {
 
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
-    const notesMeta = newNotesCount ? `${newNotesCount} new` : 'Recent';
+    const notesMeta = newNotesCount ? `${newNotesCount} posted` : 'None posted';
     notesSection.innerHTML = `
         <div class="workbench-head">
             <h2 class="workbench-title">Company Notes</h2>
@@ -2845,7 +2807,7 @@ function renderDashboardHome(role) {
     } else {
         const empty = document.createElement('p');
         empty.className = 'greeting-note';
-        empty.textContent = 'No company notes this week.';
+        empty.textContent = 'No company notes have been posted yet.';
         notesSection.appendChild(empty);
     }
 
@@ -2932,11 +2894,12 @@ async function showDashboard(role) {
     const dashboard = document.getElementById('dashboard');
     dashboard.classList.add('active');
 
-    document.getElementById('roleLabel').textContent = role.label;
+    document.getElementById('roleLabel').textContent = `${role.label} access`;
     document.getElementById('avatarInitials').textContent = person.initials;
     document.getElementById('avatarName').textContent = person.firstName;
     setupHubNav(role);
-    renderHub(role, 'dashboard');
+    const route = initialHubRoute(role);
+    renderHub(role, route.view, route.sectionKey);
 }
 
 // ════════════════════════════════════════════════
