@@ -1662,6 +1662,88 @@
                 background: var(--white);
             }
         }
+
+        /* Final header sizing: keep navigation consistent and usable at narrow widths. */
+        .masthead {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            column-gap: clamp(18px, 3vw, 36px);
+            row-gap: 12px;
+            padding: 18px clamp(22px, 3vw, 46px);
+            overflow: visible;
+        }
+
+        .masthead-logo {
+            width: clamp(210px, 19vw, 300px);
+            height: auto;
+            max-width: 100%;
+        }
+
+        .hub-nav {
+            min-width: 0;
+            margin-right: 0;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scrollbar-width: thin;
+            padding-bottom: 3px;
+        }
+
+        .hub-nav::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .hub-nav::-webkit-scrollbar-thumb {
+            background: var(--rule);
+        }
+
+        .hub-nav-btn {
+            white-space: nowrap;
+        }
+
+        .masthead-right {
+            min-width: 0;
+            justify-self: end;
+        }
+
+        @media (max-width: 1260px) {
+            .masthead {
+                grid-template-columns: auto auto;
+            }
+
+            .hub-nav {
+                grid-column: 1 / -1;
+                order: 3;
+                width: 100%;
+            }
+
+            .masthead-right {
+                justify-self: end;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .masthead {
+                grid-template-columns: 1fr;
+                padding: 16px 20px;
+            }
+
+            .masthead-logo {
+                width: min(190px, 70vw);
+            }
+
+            .hub-nav {
+                order: 2;
+            }
+
+            .masthead-right {
+                order: 3;
+                width: 100%;
+                justify-self: start;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 <body class="auth-checking">

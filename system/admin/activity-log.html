@@ -15,7 +15,7 @@
         button, input, select { font: inherit; }
         .masthead { position: sticky; top: 0; z-index: 20; min-height: var(--header-height); padding: var(--space-md) var(--space-xl); display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); background: rgba(255, 255, 255, 0.96); border-bottom: 1px solid var(--warm-gray-200); box-shadow: var(--shadow-sm); }
         .masthead img { height: 30px; width: auto; display: block; }
-        .masthead-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+        .masthead-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; min-width: 0; }
         .nav-link, .btn { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 14px; background: var(--fratello-white); color: var(--bean-black); text-decoration: none; font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; cursor: pointer; }
         .masthead .nav-link { border-color: var(--warm-gray-300); background: transparent; color: var(--warm-gray-600); }
         .masthead .nav-link:hover { border-color: var(--brewing-blue); color: var(--bean-black); }
@@ -57,8 +57,11 @@
     <header class="masthead">
         <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_Black.png" alt="Fratello"></a>
         <div class="masthead-actions">
-            <a class="nav-link" href="../../index.html">Back to Hub</a>
-            <a class="nav-link" href="users.html">User Management</a>
+            <a class="nav-link" href="../../index.html#dashboard">Dashboard</a>
+            <a class="nav-link" href="../../index.html#departments">Departments</a>
+            <a class="nav-link" href="../../index.html#resources">Resources</a>
+            <a class="nav-link" href="../../index.html#owner-hub">Owner Hub</a>
+            <a class="nav-link" href="../../index.html#settings">Settings</a>
         </div>
     </header>
     <main>

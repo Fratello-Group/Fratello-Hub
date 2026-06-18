@@ -19,6 +19,7 @@ import {
     query,
     serverTimestamp,
     setDoc,
+    Timestamp,
     updateDoc,
     where
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -113,8 +114,8 @@ function timeOffRoleTier(profileKey) {
 }
 
 function timeOffDepartment(profileKey) {
-    if (profileKey === 'owner') return 'Management';
-    if (profileKey === 'controller') return 'Admin';
+    if (profileKey === 'owner') return 'Leadership';
+    if (profileKey === 'controller') return 'Finance';
     if (profileKey === 'production') return 'Production';
     if (profileKey === 'marketing') return 'Marketing';
     if (profileKey === 'sales') return 'Sales';
@@ -130,7 +131,23 @@ function defaultManagerId(profileKey) {
     return 'prefontainech@gmail.com';
 }
 
-async function upsertTimeOffUserFromAccess({ name, email, title, profile, status = 'active' }) {
+function dateToInputValue(value) {
+    if (!value) return '';
+    if (typeof value.toDate === 'function') return value.toDate().toISOString().slice(0, 10);
+    if (typeof value === 'string') {
+        const match = value.match(/\d{4}-\d{2}-\d{2}/);
+        return match ? match[0] : '';
+    }
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isFinite(date.getTime()) ? date.toISOString().slice(0, 10) : '';
+}
+
+function dateToTimestamp(value) {
+    const clean = dateToInputValue(value);
+    return clean ? Timestamp.fromDate(new Date(`${clean}T00:00:00.000Z`)) : null;
+}
+
+async function upsertTimeOffUserFromAccess({ name, email, title, profile, status = 'active', department, role_tier, manager_id, hire_date, active }) {
     initFirebase();
     const normalized = normalizeEmail(email);
     const profileKey = PROFILE_DEFINITIONS[profile] ? profile : 'staff';
@@ -139,12 +156,13 @@ async function upsertTimeOffUserFromAccess({ name, email, title, profile, status
     await setDoc(doc(db, 'users', normalized), {
         email: normalized,
         name: String(name || '').trim() || displayNameFromEmail(normalized),
-        department: timeOffDepartment(profileKey),
+        department: String(department || '').trim() || timeOffDepartment(profileKey),
         title: String(title || '').trim(),
-        role_tier: timeOffRoleTier(profileKey),
-        manager_id: defaultManagerId(profileKey),
+        role_tier: String(role_tier || '').trim() || timeOffRoleTier(profileKey),
+        manager_id: normalizeEmail(manager_id || defaultManagerId(profileKey) || ''),
         backup_approver_id: null,
-        active: status !== 'disabled',
+        active: active !== undefined ? Boolean(active) : status !== 'disabled',
+        hire_date: dateToTimestamp(hire_date),
         updated_at: serverTimestamp()
     }, { merge: true });
 }
@@ -179,6 +197,11 @@ function publicUserFromProfile(id, data) {
         profile: profile.key,
         profileLabel: profile.label,
         areas: profile.areas,
+        department: data.department || '',
+        role_tier: data.role_tier || '',
+        manager_id: data.manager_id || '',
+        hire_date: dateToInputValue(data.hire_date),
+        active: data.active !== false,
         status: data.status || 'active',
         lastLoginAt: data.lastLoginAt || '',
         passwordChangedAt: '',
@@ -207,9 +230,13 @@ async function profileForUser(user) {
         const ownerProfile = {
             name: user.displayName || displayNameFromEmail(email),
             email,
-            title: email === 'prefontainech@gmail.com' ? 'CEO' : 'Owner',
-            profile: 'owner',
-            status: 'active',
+        title: email === 'prefontainech@gmail.com' ? 'CEO' : 'Owner',
+        profile: 'owner',
+        department: 'Leadership',
+        role_tier: 'Owner',
+        manager_id: '',
+        active: true,
+        status: 'active',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),
@@ -233,6 +260,11 @@ async function profileForUser(user) {
         email,
         title: invite.title || '',
         profile: invite.profile || 'staff',
+        department: invite.department || timeOffDepartment(invite.profile || 'staff'),
+        role_tier: invite.role_tier || timeOffRoleTier(invite.profile || 'staff'),
+        manager_id: normalizeEmail(invite.manager_id || defaultManagerId(invite.profile || 'staff') || ''),
+        hire_date: dateToInputValue(invite.hire_date) || null,
+        active: invite.active !== false,
         status: 'active',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -282,7 +314,7 @@ export async function currentIdToken() {
     return auth.currentUser.getIdToken(true);
 }
 
-export async function sendHubInviteEmail({ name, email, title, profile }) {
+export async function sendHubInviteEmail(payload = {}) {
     const token = await currentIdToken();
     const response = await fetch('/.netlify/functions/hub-invite', {
         method: 'POST',
@@ -290,7 +322,7 @@ export async function sendHubInviteEmail({ name, email, title, profile }) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ name, email, title, profile })
+        body: JSON.stringify(payload)
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'Could not send invite.');
@@ -331,11 +363,26 @@ export async function currentHubRole() {
 
 export async function listHubUsers() {
     initFirebase();
+    const rosterByEmail = new Map();
+    const userSnap = await getDocs(collection(db, 'users')).catch(() => ({ forEach: () => {} }));
+    userSnap.forEach(item => {
+        const data = item.data();
+        const email = normalizeEmail(data.email || item.id);
+        if (!email) return;
+        rosterByEmail.set(email, {
+            department: data.department || '',
+            role_tier: data.role_tier || '',
+            manager_id: normalizeEmail(data.manager_id || ''),
+            hire_date: dateToInputValue(data.hire_date),
+            active: data.active !== false
+        });
+    });
+
     const profiles = new Map();
     const profileSnap = await getDocs(collection(db, 'hubProfiles'));
     profileSnap.forEach(item => {
         const email = normalizeEmail(item.data().email);
-        if (email) profiles.set(email, publicUserFromProfile(item.id, { ...item.data(), uid: item.id, email }));
+        if (email) profiles.set(email, publicUserFromProfile(item.id, { ...item.data(), ...rosterByEmail.get(email), uid: item.id, email }));
     });
 
     const inviteSnap = await getDocs(collection(db, 'hubInvites'));
@@ -343,7 +390,19 @@ export async function listHubUsers() {
         const invite = item.data();
         const email = normalizeEmail(invite.email || item.id);
         if (email && !profiles.has(email)) {
-            profiles.set(email, publicUserFromProfile(item.id, { ...invite, email, status: invite.status || 'invited' }));
+            profiles.set(email, publicUserFromProfile(item.id, { ...invite, ...rosterByEmail.get(email), email, status: invite.status || 'invited' }));
+        }
+    });
+
+    rosterByEmail.forEach((roster, email) => {
+        if (!profiles.has(email)) {
+            profiles.set(email, publicUserFromProfile(email, {
+                ...roster,
+                email,
+                name: displayNameFromEmail(email),
+                profile: 'staff',
+                status: roster.active ? 'invited' : 'disabled'
+            }));
         }
     });
 
@@ -360,7 +419,7 @@ export async function listHubUsers() {
     return Array.from(deduped.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function saveHubInvite({ name, email, title, profile }) {
+export async function saveHubInvite({ name, email, title, profile, department, role_tier, manager_id, hire_date, active = true }) {
     initFirebase();
     const normalized = normalizeEmail(email);
     const profileKey = PROFILE_DEFINITIONS[profile] ? profile : 'staff';
@@ -369,6 +428,11 @@ export async function saveHubInvite({ name, email, title, profile }) {
         email: normalized,
         title: String(title || '').trim(),
         profile: profileKey,
+        department: String(department || '').trim() || timeOffDepartment(profileKey),
+        role_tier: String(role_tier || '').trim() || timeOffRoleTier(profileKey),
+        manager_id: normalizeEmail(manager_id || defaultManagerId(profileKey) || ''),
+        hire_date: dateToInputValue(hire_date),
+        active: active !== false,
         status: 'invited',
         updatedAt: serverTimestamp()
     };
@@ -387,6 +451,10 @@ export async function saveHubInvite({ name, email, title, profile }) {
             name: payload.name,
             title: payload.title,
             profile: profileKey,
+            department: payload.department,
+            role_tier: payload.role_tier,
+            manager_id: payload.manager_id,
+            hire_date: payload.hire_date || null,
             status: 'active',
             updatedAt: serverTimestamp()
         }));
@@ -407,6 +475,11 @@ export async function updateHubUser(person, profile) {
     if (person.uid && person.source === 'profile') {
         await updateDoc(doc(db, 'hubProfiles', person.uid), {
             profile: profileKey,
+            department: person.department || timeOffDepartment(profileKey),
+            role_tier: person.role_tier || timeOffRoleTier(profileKey),
+            manager_id: normalizeEmail(person.manager_id || defaultManagerId(profileKey) || ''),
+            hire_date: dateToInputValue(person.hire_date) || null,
+            active: person.active !== false,
             updatedAt: serverTimestamp()
         });
     }
@@ -415,6 +488,11 @@ export async function updateHubUser(person, profile) {
         email: normalizeEmail(person.email),
         title: person.title || '',
         profile: profileKey,
+        department: person.department || timeOffDepartment(profileKey),
+        role_tier: person.role_tier || timeOffRoleTier(profileKey),
+        manager_id: normalizeEmail(person.manager_id || defaultManagerId(profileKey) || ''),
+        hire_date: dateToInputValue(person.hire_date) || null,
+        active: person.active !== false,
         status: person.status === 'disabled' ? 'disabled' : 'invited',
         updatedAt: serverTimestamp()
     }, { merge: true });
@@ -424,6 +502,11 @@ export async function updateHubUser(person, profile) {
         email: person.email,
         title: person.title || '',
         profile: profileKey,
+        department: person.department,
+        role_tier: person.role_tier,
+        manager_id: person.manager_id,
+        hire_date: person.hire_date,
+        active: person.active !== false,
         status: person.status
     });
 }
@@ -451,6 +534,10 @@ export async function setHubUserDisabled(person, disabled) {
         email: person.email,
         title: person.title || '',
         profile: person.profile || 'staff',
+        department: person.department,
+        role_tier: person.role_tier,
+        manager_id: person.manager_id,
+        hire_date: person.hire_date,
         status: disabled ? 'disabled' : 'active'
     });
 }

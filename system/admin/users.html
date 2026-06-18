@@ -52,6 +52,7 @@
             justify-content: flex-end;
             gap: var(--space-sm);
             flex-wrap: wrap;
+            min-width: 0;
         }
 
         .nav-link,
@@ -201,6 +202,10 @@
             align-items: start;
         }
 
+        .layout > * {
+            min-width: 0;
+        }
+
         .panel {
             overflow: hidden;
         }
@@ -294,14 +299,14 @@
 
         table {
             width: 100%;
-            min-width: 960px;
+            min-width: 820px;
             border-collapse: collapse;
         }
 
         th:last-child,
         td:last-child {
-            width: 150px;
-            min-width: 150px;
+            width: 128px;
+            min-width: 128px;
         }
 
         th {
@@ -424,8 +429,11 @@
             <img class="masthead-logo" src="../../assets/Fratello_Logo_Black.png" alt="Fratello">
         </a>
         <div class="masthead-actions">
-            <a class="nav-link" href="../../index.html">Back to Hub</a>
-            <a class="nav-link" href="activity-log.html">Activity Log</a>
+            <a class="nav-link" href="../../index.html#dashboard">Dashboard</a>
+            <a class="nav-link" href="../../index.html#departments">Departments</a>
+            <a class="nav-link" href="../../index.html#resources">Resources</a>
+            <a class="nav-link" href="../../index.html#owner-hub">Owner Hub</a>
+            <a class="nav-link" href="../../index.html#settings">Settings</a>
         </div>
     </header>
 
@@ -433,8 +441,8 @@
         <section class="page-intro">
             <div>
                 <div class="eyebrow">Admin</div>
-                <h1>Manage Hub users for time off.</h1>
-                <p class="lede">Add team members, assign role tiers and managers, and preserve historical records by toggling active status instead of deleting people.</p>
+                <h1>Time-off roster settings.</h1>
+                <p class="lede">Use this screen for time-off details only: department, role tier, manager, hire date, and active status. Add or invite people from Staff Access first.</p>
             </div>
             <aside class="status-card" aria-live="polite">
                 <span class="status-label">Data Source</span>
@@ -471,8 +479,8 @@
             <section class="layout">
                 <aside class="panel">
                     <div class="panel-header">
-                        <h2 class="panel-title" id="formTitle">Add team member</h2>
-                        <p class="panel-note">Changes are saved locally until the Firestore user functions are available.</p>
+                        <h2 class="panel-title" id="formTitle">Roster detail</h2>
+                        <p class="panel-note">Edit the time-off roster details after a person exists in Staff Access. This page does not send invite emails.</p>
                     </div>
                     <form class="form-grid" id="userForm">
                         <div class="field">
@@ -486,13 +494,17 @@
                         <div class="field">
                             <label for="department">Department</label>
                             <select id="department" name="department" required>
+                                <option value="Leadership">Leadership</option>
+                                <option value="Finance">Finance</option>
                                 <option value="Production">Production</option>
+                                <option value="Roasting">Roasting</option>
+                                <option value="Packaging">Packaging</option>
+                                <option value="Warehouse">Warehouse</option>
                                 <option value="Sales">Sales</option>
                                 <option value="Marketing">Marketing</option>
                                 <option value="Operations">Operations</option>
-                                <option value="Owner">Owner</option>
-                                <option value="Controller">Controller</option>
                                 <option value="HR">HR</option>
+                                <option value="Staff">Staff</option>
                             </select>
                         </div>
                         <div class="field">
@@ -520,7 +532,7 @@
                             </select>
                         </div>
                         <div class="form-actions">
-                            <button class="button primary" type="submit" id="saveButton">Save User</button>
+                            <button class="button primary" type="submit" id="saveButton">Save Roster Detail</button>
                             <button class="button" type="button" id="resetButton">Clear</button>
                         </div>
                         <div class="field">
@@ -533,7 +545,7 @@
 
                 <article class="panel">
                     <div class="panel-header">
-                        <h2 class="panel-title">Users collection</h2>
+                        <h2 class="panel-title">Time-off roster</h2>
                         <p class="panel-note">Use active status to remove access while keeping the person available for historical time-off records.</p>
                     </div>
                     <div class="filters">
@@ -574,9 +586,9 @@
         const ADMIN_KEYS = new Set(['owner', 'controller']);
         const MANAGER_TIERS = new Set(['Manager', 'Controller', 'Owner']);
         const SEED_USERS = [
-            ['Chris Prefontaine', 'prefontainech@gmail.com', 'Owner', 'Owner', ''],
-            ['Russ Prefontaine', 'russ@fratellocoffee.com', 'Owner', 'Owner', ''],
-            ['Chris McGhee', 'controller@fratellocoffee.com', 'Controller', 'Controller', 'Chris Prefontaine'],
+            ['Chris Prefontaine', 'prefontainech@gmail.com', 'Leadership', 'Owner', ''],
+            ['Russ Prefontaine', 'russ@fratellocoffee.com', 'Leadership', 'Owner', ''],
+            ['Chris McGhee', 'controller@fratellocoffee.com', 'Finance', 'Controller', 'Chris Prefontaine'],
             ['Kyle Park', 'kyle@fratellocoffee.com', 'Production', 'Manager', 'Chris Prefontaine'],
             ['Mateo Corredor', 'mateo@fratellocoffee.com', 'Marketing', 'Manager', 'Chris Prefontaine'],
             ['Joel May', 'joel.may@fratellocoffee.com', 'Sales', 'Manager', 'Russ Prefontaine'],
@@ -709,7 +721,7 @@
                 id: user.id || sanitizeEmail(user.email),
                 email: user.email || '',
                 name: user.name || 'Team member',
-                department: user.department || 'Production',
+                department: normalizeDepartment(user.department),
                 role_tier: user.role_tier || user.roleTier || 'Staff',
                 manager_id: user.manager_id || user.managerId || '',
                 hire_date: user.hire_date || user.hireDate || '',
@@ -717,6 +729,14 @@
                 vacation_days_allotted: user.vacation_days_allotted ?? null,
                 vacation_days_used: user.vacation_days_used ?? null
             };
+        }
+
+        function normalizeDepartment(department) {
+            const value = String(department || '').trim();
+            if (!value) return 'Production';
+            if (value === 'Owner' || value === 'Management') return 'Leadership';
+            if (value === 'Controller' || value === 'Admin') return 'Finance';
+            return value;
         }
 
         function render() {
@@ -820,7 +840,7 @@
                 const index = users.findIndex(item => item.id === user.id);
                 if (index >= 0) users[index] = user;
                 else users.push(user);
-                showMessage(result ? 'User saved to Firestore.' : 'Prototype save complete. Connect Firestore user functions to persist this change.');
+                showMessage(result ? 'Roster detail saved to Firestore.' : 'Prototype save complete. Connect Firestore user functions to persist this change.');
                 logActivity('user_saved', { user_id: user.id });
                 resetForm();
                 render();
@@ -864,7 +884,7 @@
 
         function resetForm() {
             editingId = null;
-            els.formTitle.textContent = 'Add team member';
+            els.formTitle.textContent = 'Roster detail';
             els.userForm.reset();
             document.getElementById('active').value = 'true';
         }

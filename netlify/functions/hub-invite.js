@@ -24,6 +24,16 @@ function normalizeEmail(value) {
     return clean(value).toLowerCase();
 }
 
+function validDateOnly(value) {
+    const cleanValue = clean(value);
+    return /^\d{4}-\d{2}-\d{2}$/.test(cleanValue) ? cleanValue : '';
+}
+
+function normalizeActive(value) {
+    if (value === false || value === 'false' || value === 'inactive' || value === 'disabled') return false;
+    return true;
+}
+
 function displayNameFromEmail(email) {
     return clean(email).split('@')[0]
         .replace(/[._-]+/g, ' ')
@@ -46,10 +56,10 @@ function timeOffDepartment(profileKey) {
 }
 
 function timeOffRoleTier(profileKey) {
-    if (profileKey === 'owner') return 'owner';
-    if (profileKey === 'controller') return 'controller';
-    if (profileKey === 'production' || profileKey === 'marketing' || profileKey === 'sales') return 'manager';
-    return 'staff';
+    if (profileKey === 'owner') return 'Owner';
+    if (profileKey === 'controller') return 'Controller';
+    if (profileKey === 'production' || profileKey === 'marketing' || profileKey === 'sales') return 'Manager';
+    return 'Staff';
 }
 
 function isOwner(session) {
@@ -85,16 +95,22 @@ function inviteHtml({ name, setupUrl, hubUrl }) {
     `;
 }
 
-async function upsertInviteDocs({ name, email, title, profile, ownerEmail }) {
+async function upsertInviteDocs({ name, email, title, profile, department, roleTier, managerId, hireDate, active, ownerEmail }) {
     const { getFirestore, FieldValue } = require('firebase-admin/firestore');
     const db = getFirestore(adminApp());
     const stamp = FieldValue.serverTimestamp();
+    const hireDateValue = validDateOnly(hireDate);
 
     await db.collection('hubInvites').doc(email).set({
         name,
         email,
         title,
         profile,
+        department,
+        role_tier: roleTier,
+        manager_id: managerId,
+        hire_date: hireDateValue || null,
+        active,
         status: 'invited',
         invitedBy: ownerEmail || '',
         invitedAt: stamp,
@@ -104,12 +120,13 @@ async function upsertInviteDocs({ name, email, title, profile, ownerEmail }) {
     await db.collection('users').doc(email).set({
         email,
         name,
-        department: timeOffDepartment(profile),
+        department,
         title,
-        role_tier: timeOffRoleTier(profile),
-        manager_id: defaultManagerId(profile),
+        role_tier: roleTier,
+        manager_id: managerId,
         backup_approver_id: null,
-        active: true,
+        active,
+        hire_date: hireDateValue ? new Date(`${hireDateValue}T00:00:00.000Z`) : null,
         updated_at: stamp
     }, { merge: true });
 
@@ -122,6 +139,10 @@ async function upsertInviteDocs({ name, email, title, profile, ownerEmail }) {
             title,
             profile,
             status: 'active',
+            department,
+            role_tier: roleTier,
+            manager_id: managerId,
+            hire_date: hireDateValue || null,
             updatedAt: stamp
         }, { merge: true }));
     });
@@ -166,6 +187,11 @@ exports.handler = async (event) => {
         const name = clean(body.name) || displayNameFromEmail(email);
         const title = clean(body.title);
         const profile = PROFILE_KEYS.has(body.profile) ? body.profile : 'staff';
+        const department = clean(body.department) || timeOffDepartment(profile);
+        const roleTier = clean(body.roleTier || body.role_tier) || timeOffRoleTier(profile);
+        const managerId = normalizeEmail(body.managerId || body.manager_id) || defaultManagerId(profile) || '';
+        const hireDate = validDateOnly(body.hireDate || body.hire_date);
+        const active = normalizeActive(body.active);
 
         if (!email || !email.includes('@')) return json(400, { error: 'Add a valid email before sending an invite.' });
         if (!name) return json(400, { error: 'Add the person’s full name before sending an invite.' });
@@ -175,6 +201,11 @@ exports.handler = async (event) => {
             email,
             title,
             profile,
+            department,
+            roleTier,
+            managerId,
+            hireDate,
+            active,
             ownerEmail: session.user && session.user.email
         });
 
@@ -210,6 +241,11 @@ exports.handler = async (event) => {
                 email,
                 title,
                 profile,
+                department,
+                roleTier,
+                managerId,
+                hireDate,
+                active,
                 status: 'invited'
             },
             setupUrl,

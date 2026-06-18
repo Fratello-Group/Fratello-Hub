@@ -74,6 +74,14 @@
             justify-content: flex-end;
         }
 
+        .hub-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
         .role-pill {
             font-size: 11px;
             font-weight: 700;
@@ -263,6 +271,14 @@
             color: var(--grey-light);
             font-size: 12px;
             line-height: 1.5;
+        }
+
+        .person-meta {
+            display: block;
+            margin-top: 7px;
+            color: var(--grey);
+            font-size: 11px;
+            line-height: 1.45;
         }
 
         select,
@@ -587,12 +603,24 @@
 
         @media (max-width: 860px) {
             .masthead {
-                padding: 28px 24px 0;
+                padding: 18px 24px;
                 align-items: flex-start;
+                flex-direction: column;
             }
 
             .masthead-logo { height: 28px; }
-            .masthead-right { gap: 12px; }
+            .masthead-right {
+                width: 100%;
+                gap: 12px;
+                justify-content: flex-start;
+                overflow-x: auto;
+            }
+            .hub-nav {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                min-width: max-content;
+                padding-bottom: 2px;
+            }
             .role-pill { display: none; }
 
             main { padding: 40px 24px 64px; }
@@ -620,21 +648,26 @@
         <header class="masthead">
             <img src="../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
             <div class="masthead-right">
-                <span class="role-pill">Owner/Admin</span>
-                <a class="nav-link" href="/">Back to Hub</a>
+                <nav class="hub-nav" aria-label="Hub sections">
+                    <a class="nav-link" href="/#dashboard">Dashboard</a>
+                    <a class="nav-link" href="/#departments">Departments</a>
+                    <a class="nav-link" href="/#resources">Resources</a>
+                    <a class="nav-link" href="/#owner-hub">Owner Hub</a>
+                    <a class="nav-link" href="/#settings">Settings</a>
+                </nav>
             </div>
         </header>
 
         <main>
             <div class="eyebrow">Permissions</div>
             <h1>Staff access by person, role, and department.</h1>
-            <p class="lede">Add a person, choose what they can access, and send their setup email from here. They set their own password, but they do not choose what they can see.</p>
+            <p class="lede">Add the person once, choose their roster details and Hub access, then send their setup email from here. They set their own password, but they do not choose what they can see.</p>
 
             <div class="access-grid" id="profileGrid"></div>
 
             <div class="admin-panel">
-                <div class="admin-panel-title">Invite a staff member</div>
-                <p class="admin-panel-copy">Enter the person once. The Hub will save their access, create or find their login, and send the setup email.</p>
+                <div class="admin-panel-title">Add staff member and invite</div>
+                <p class="admin-panel-copy">This is the main place to add a person to the Hub. It saves the roster details, access level, and setup invite together.</p>
                 <div class="form-grid">
                     <div class="field" id="fieldInviteName">
                         <label for="inviteName">Full name</label>
@@ -653,6 +686,29 @@
                     <div class="field">
                         <label for="inviteProfile">Access profile</label>
                         <select id="inviteProfile"></select>
+                    </div>
+                    <div class="field">
+                        <label for="inviteDepartment">Department</label>
+                        <select id="inviteDepartment"></select>
+                    </div>
+                    <div class="field">
+                        <label for="inviteRoleTier">Role tier</label>
+                        <select id="inviteRoleTier"></select>
+                    </div>
+                    <div class="field">
+                        <label for="inviteManager">Manager</label>
+                        <select id="inviteManager"></select>
+                    </div>
+                    <div class="field">
+                        <label for="inviteHireDate">Hire date</label>
+                        <input class="text-input" id="inviteHireDate" type="date">
+                    </div>
+                    <div class="field">
+                        <label for="inviteActive">Status</label>
+                        <select id="inviteActive">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
                     </div>
                 </div>
                 <div class="actions">
@@ -751,6 +807,17 @@
             }
         };
 
+        const DEPARTMENTS = ['Leadership', 'Finance', 'Production', 'Roasting', 'Packaging', 'Warehouse', 'Sales', 'Marketing', 'Operations', 'HR', 'Staff'];
+        const ROLE_TIERS = ['Owner', 'Controller', 'Manager', 'Staff'];
+        const PROFILE_DEFAULTS = {
+            owner: { department: 'Leadership', role_tier: 'Owner', manager_id: '' },
+            controller: { department: 'Finance', role_tier: 'Controller', manager_id: 'prefontainech@gmail.com' },
+            production: { department: 'Production', role_tier: 'Manager', manager_id: 'prefontainech@gmail.com' },
+            marketing: { department: 'Marketing', role_tier: 'Manager', manager_id: 'prefontainech@gmail.com' },
+            sales: { department: 'Sales', role_tier: 'Manager', manager_id: 'russ@fratellocoffee.com' },
+            staff: { department: 'Staff', role_tier: 'Staff', manager_id: 'prefontainech@gmail.com' }
+        };
+
         let STAFF = [];
         let LAST_GENERATED_LINK = '';
         let LAST_COPY_LABEL = 'Copy Link';
@@ -795,6 +862,123 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
         }
 
+        function emailKey(email) {
+            return normalizeEmail(email).replace(/[^\x21-\x7E]/g, '');
+        }
+
+        function profileDefaults(profileKey) {
+            return PROFILE_DEFAULTS[profileKey] || PROFILE_DEFAULTS.staff;
+        }
+
+        function managerName(id) {
+            const key = emailKey(id);
+            if (!key) return 'None';
+            const manager = STAFF.find(person => emailKey(person.email) === key || emailKey(person.id) === key);
+            return manager ? manager.name : id;
+        }
+
+        function personDepartment(person = {}) {
+            return person.department || profileDefaults(person.profile || 'staff').department;
+        }
+
+        function personRoleTier(person = {}) {
+            return person.role_tier || profileDefaults(person.profile || 'staff').role_tier;
+        }
+
+        function personManagerId(person = {}) {
+            return emailKey(person.manager_id || profileDefaults(person.profile || 'staff').manager_id || '');
+        }
+
+        function optionList(values, selectedValue = '') {
+            const selected = String(selectedValue || '');
+            return values.map(value => `
+                <option value="${escapeHtml(value)}" ${value === selected ? 'selected' : ''}>${escapeHtml(value)}</option>
+            `).join('');
+        }
+
+        function managerOptions(selectedValue = '') {
+            const selected = emailKey(selectedValue);
+            const managers = new Map();
+
+            Object.values(PROFILE_DEFAULTS).forEach(defaults => {
+                const id = emailKey(defaults.manager_id);
+                if (id) managers.set(id, managerName(id));
+            });
+
+            STAFF
+                .filter(person => person.active !== false)
+                .filter(person => ['Owner', 'Controller', 'Manager'].includes(personRoleTier(person)))
+                .forEach(person => {
+                    const id = emailKey(person.email || person.id);
+                    if (id) managers.set(id, person.name || id);
+                });
+
+            if (selected && !managers.has(selected)) {
+                managers.set(selected, managerName(selected));
+            }
+
+            const options = Array.from(managers.entries())
+                .sort((a, b) => a[1].localeCompare(b[1]))
+                .map(([id, label]) => `
+                    <option value="${escapeHtml(id)}" ${id === selected ? 'selected' : ''}>${escapeHtml(label)}</option>
+                `).join('');
+
+            return `<option value="" ${selected ? '' : 'selected'}>None</option>${options}`;
+        }
+
+        function refreshRosterSelects() {
+            const department = document.getElementById('inviteDepartment');
+            const roleTier = document.getElementById('inviteRoleTier');
+            const manager = document.getElementById('inviteManager');
+            if (!department || !roleTier || !manager) return;
+
+            const currentDepartment = department.value || profileDefaults(document.getElementById('inviteProfile').value).department;
+            const currentRoleTier = roleTier.value || profileDefaults(document.getElementById('inviteProfile').value).role_tier;
+            const currentManager = manager.value || profileDefaults(document.getElementById('inviteProfile').value).manager_id;
+
+            department.innerHTML = optionList(DEPARTMENTS, currentDepartment);
+            roleTier.innerHTML = optionList(ROLE_TIERS, currentRoleTier);
+            manager.innerHTML = managerOptions(currentManager);
+        }
+
+        function applyProfileDefaults(force = false) {
+            const profile = document.getElementById('inviteProfile').value || 'staff';
+            const defaults = profileDefaults(profile);
+            const department = document.getElementById('inviteDepartment');
+            const roleTier = document.getElementById('inviteRoleTier');
+            const manager = document.getElementById('inviteManager');
+            if (!department || !roleTier || !manager) return;
+
+            if (force || !department.value) department.value = defaults.department;
+            if (force || !roleTier.value) roleTier.value = defaults.role_tier;
+            refreshRosterSelects();
+            if (force || !manager.value) manager.value = emailKey(defaults.manager_id);
+        }
+
+        function invitePayloadFromForm() {
+            const profile = document.getElementById('inviteProfile').value;
+            return {
+                name: document.getElementById('inviteName').value.trim(),
+                email: document.getElementById('inviteEmail').value.trim(),
+                title: document.getElementById('inviteTitle').value.trim(),
+                profile,
+                department: document.getElementById('inviteDepartment').value,
+                roleTier: document.getElementById('inviteRoleTier').value,
+                managerId: document.getElementById('inviteManager').value,
+                hireDate: document.getElementById('inviteHireDate').value,
+                active: document.getElementById('inviteActive').value === 'true'
+            };
+        }
+
+        function clearInviteForm() {
+            document.getElementById('inviteName').value = '';
+            document.getElementById('inviteEmail').value = '';
+            document.getElementById('inviteTitle').value = '';
+            document.getElementById('inviteHireDate').value = '';
+            document.getElementById('inviteActive').value = 'true';
+            applyProfileDefaults(true);
+        }
+
         function personScore(person) {
             let score = 0;
             if (person.source === 'profile') score += 10;
@@ -807,16 +991,24 @@
         function mergePersonRecord(existing, next) {
             const preferred = personScore(next) >= personScore(existing) ? next : existing;
             const fallback = preferred === next ? existing : next;
+            const disabled = preferred.status === 'disabled' || fallback.status === 'disabled' || preferred.active === false || fallback.active === false;
             return {
                 ...fallback,
                 ...preferred,
                 id: preferred.id || fallback.id,
-                email: normalizeEmail(preferred.email || fallback.email),
+                email: emailKey(preferred.email || fallback.email),
                 name: preferred.name || fallback.name,
                 title: preferred.title || fallback.title,
                 profile: preferred.profile || fallback.profile || 'staff',
                 areas: preferred.areas || fallback.areas,
-                status: preferred.status === 'active' || fallback.status === 'active'
+                department: preferred.department || fallback.department || profileDefaults(preferred.profile || fallback.profile || 'staff').department,
+                role_tier: preferred.role_tier || fallback.role_tier || profileDefaults(preferred.profile || fallback.profile || 'staff').role_tier,
+                manager_id: preferred.manager_id || fallback.manager_id || profileDefaults(preferred.profile || fallback.profile || 'staff').manager_id,
+                hire_date: preferred.hire_date || fallback.hire_date || '',
+                active: !disabled,
+                status: disabled
+                    ? 'disabled'
+                    : preferred.status === 'active' || fallback.status === 'active'
                     ? 'active'
                     : preferred.status || fallback.status || 'invited'
             };
@@ -825,7 +1017,7 @@
         function dedupeStaff(records = []) {
             const byEmail = new Map();
             records.forEach(person => {
-                const email = normalizeEmail(person.email);
+                const email = emailKey(person.email);
                 if (!email) return;
                 const next = { ...person, email };
                 const existing = byEmail.get(email);
@@ -924,6 +1116,8 @@
             document.getElementById('inviteProfile').innerHTML = Object.entries(PROFILES).map(([key, profile]) => `
                 <option value="${escapeHtml(key)}">${escapeHtml(profile.label)}</option>
             `).join('');
+            refreshRosterSelects();
+            applyProfileDefaults();
         }
 
         function renderStaff() {
@@ -933,11 +1127,16 @@
                 const isDisabled = person.status === 'disabled';
                 const safeId = escapeHtml(person.id);
                 const needsInvite = USE_FIREBASE_AUTH && person.status !== 'active';
+                const department = personDepartment(person);
+                const tier = personRoleTier(person);
+                const manager = managerName(personManagerId(person));
+                const hireDate = person.hire_date ? ` · Hire date: ${person.hire_date}` : '';
                 return `
                 <tr>
                     <td>
                         <span class="person-name">${escapeHtml(person.name)}</span>
                         <span class="person-title">${escapeHtml(person.title || 'No title listed')}<br>${escapeHtml(person.email)}</span>
+                        <span class="person-meta">${escapeHtml(department)} · ${escapeHtml(tier)} · Manager: ${escapeHtml(manager)}${escapeHtml(hireDate)}</span>
                     </td>
                     <td>
                         <select data-person="${safeId}" onchange="updateProfile(event)">
@@ -1026,6 +1225,7 @@
         async function loadUsers() {
             if (USE_FIREBASE_AUTH) {
                 STAFF = dedupeStaff(await listHubUsers());
+                refreshRosterSelects();
                 renderStaff();
                 document.getElementById('saveState').textContent = 'Staff permissions loaded from Firestore.';
                 return;
@@ -1033,6 +1233,7 @@
 
             const data = await authRequest({ action: 'users:list' });
             STAFF = dedupeStaff(data.users);
+            refreshRosterSelects();
             renderStaff();
             document.getElementById('saveState').textContent = 'Staff permissions loaded from the HUB.';
         }
@@ -1041,10 +1242,8 @@
             clearInviteErrors();
             const output = document.getElementById('inviteOutput');
             const button = document.getElementById('inviteButton');
-            const name = document.getElementById('inviteName').value.trim();
-            const email = document.getElementById('inviteEmail').value.trim();
-            const title = document.getElementById('inviteTitle').value.trim();
-            const profile = document.getElementById('inviteProfile').value;
+            const payload = invitePayloadFromForm();
+            const { name, email, profile } = payload;
 
             if (!name) {
                 setFieldError('InviteName', 'Full name is required.');
@@ -1066,7 +1265,7 @@
 
             try {
                 if (USE_FIREBASE_AUTH) {
-                    const data = await sendHubInviteEmail({ name, email, title, profile });
+                    const data = await sendHubInviteEmail(payload);
                     renderGeneratedLink('Invite', data.user.name, data.setupUrl || data.inviteUrl, {
                         email: data.user.email,
                         emailSent: data.emailSent,
@@ -1076,13 +1275,11 @@
                         ? `Invite email sent to ${data.user.email}.`
                         : 'Access saved. Copy the setup link below and send it manually.';
                 } else {
-                    const data = await authRequest({ action: 'users:invite', name, email, title, profile });
+                    const data = await authRequest({ action: 'users:invite', ...payload });
                     renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
                     document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
                 }
-                document.getElementById('inviteName').value = '';
-                document.getElementById('inviteEmail').value = '';
-                document.getElementById('inviteTitle').value = '';
+                clearInviteForm();
                 await loadUsers();
             } catch (error) {
                 renderInviteFailure(error);
@@ -1110,7 +1307,12 @@
                         name: person.name,
                         email: person.email,
                         title: person.title || '',
-                        profile: person.profile || 'staff'
+                        profile: person.profile || 'staff',
+                        department: personDepartment(person),
+                        roleTier: personRoleTier(person),
+                        managerId: personManagerId(person),
+                        hireDate: person.hire_date || '',
+                        active: person.active !== false
                     });
                     renderGeneratedLink('Invite', data.user.name, data.setupUrl || data.inviteUrl, {
                         email: data.user.email,
@@ -1121,7 +1323,18 @@
                         ? `Invite email sent to ${data.user.email}.`
                         : 'Access saved. Copy the setup link below and send it manually.';
                 } else {
-                    const data = await authRequest({ action: 'users:invite', name: person.name, email: person.email, title: person.title || '', profile: person.profile || 'staff' });
+                    const data = await authRequest({
+                        action: 'users:invite',
+                        name: person.name,
+                        email: person.email,
+                        title: person.title || '',
+                        profile: person.profile || 'staff',
+                        department: personDepartment(person),
+                        roleTier: personRoleTier(person),
+                        managerId: personManagerId(person),
+                        hireDate: person.hire_date || '',
+                        active: person.active !== false
+                    });
                     renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
                     document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
                 }
@@ -1184,6 +1397,7 @@
         (async function initPermissions() {
             document.getElementById('inviteName').addEventListener('input', () => setFieldError('InviteName', ''));
             document.getElementById('inviteEmail').addEventListener('input', () => setFieldError('InviteEmail', ''));
+            document.getElementById('inviteProfile').addEventListener('change', () => applyProfileDefaults(true));
 
             if (USE_FIREBASE_AUTH) {
                 onHubAuthChange((role, error) => {

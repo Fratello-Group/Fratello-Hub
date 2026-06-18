@@ -4,9 +4,15 @@ const https = require('https');
 const path = require('path');
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const FIREBASE_ACCOUNT_LOOKUP_URL = 'https://identitytoolkit.googleapis.com/v1/accounts:lookup';
 const FIRESTORE_SCOPE = 'https://www.googleapis.com/auth/datastore';
 const RESEND_EMAIL_URL = 'https://api.resend.com/emails';
 const DEFAULT_SITE_URL = 'https://fratello-hub.netlify.app';
+const FIREBASE_WEB_API_KEY =
+    process.env.FIREBASE_WEB_API_KEY ||
+    process.env.FIREBASE_API_KEY ||
+    process.env.VITE_FIREBASE_API_KEY ||
+    'AIzaSyDBZSpwGy2MifMmoKzIz_HYbVEceo2qK7Q';
 
 let cachedServiceAccount;
 let cachedToken;
@@ -206,6 +212,33 @@ async function googleAccessToken() {
         expiresAt: Date.now() + ((response.body.expires_in || 3600) * 1000)
     };
     return cachedToken.value;
+}
+
+async function verifyFirebaseTokenWithRest(token) {
+    if (!FIREBASE_WEB_API_KEY) {
+        throw new Error('FIREBASE_WEB_API_KEY is not configured.');
+    }
+
+    const response = await request('POST', `${FIREBASE_ACCOUNT_LOOKUP_URL}?key=${encodeURIComponent(FIREBASE_WEB_API_KEY)}`, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: {
+            idToken: token
+        }
+    });
+
+    const account = response.body && Array.isArray(response.body.users) ? response.body.users[0] : null;
+    if (!account || !account.email) {
+        throw new Error('Firebase token lookup did not return a user.');
+    }
+
+    return {
+        uid: account.localId || '',
+        email: account.email || '',
+        name: account.displayName || account.email || '',
+        email_verified: account.emailVerified === true
+    };
 }
 
 async function firestoreFetch(resourcePath, options = {}) {
@@ -544,7 +577,25 @@ async function authenticateRequest(event) {
             return { user, auth_type: 'firebase', decoded };
         } catch (error) {
             if (token.includes('.')) {
-                throw new Error('Firebase session could not be verified. Sign out and sign in again.');
+                try {
+                    const decoded = await verifyFirebaseTokenWithRest(token);
+                    const email = decoded.email || '';
+                    const users = await listDocuments('users').catch(() => []);
+                    const user = findUser(users, email) || {
+                        id: email,
+                        email,
+                        name: decoded.name || email,
+                        role_tier: '',
+                        active: true
+                    };
+                    return { user, auth_type: 'firebase-rest', decoded };
+                } catch (restError) {
+                    console.error('Firebase token verification failed', {
+                        adminError: error.message,
+                        restError: restError.message
+                    });
+                    throw new Error('Firebase session could not be verified. Sign out and sign in again.');
+                }
             }
         }
 
