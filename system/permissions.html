@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fratello Hub - Staff Permissions</title>
+    <title>Fratello Hub - Manage People</title>
     <link rel="icon" type="image/png" href="../assets/Fratello_Favicon_Blue.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -659,8 +659,8 @@
         </header>
 
         <main>
-            <div class="eyebrow">Permissions</div>
-            <h1>Staff access by person, role, and department.</h1>
+            <div class="eyebrow">Manage People</div>
+            <h1>Add people, set access and roles, and remove accounts.</h1>
             <p class="lede">Add the person once, choose their roster details and Hub access, then send their setup email from here. They set their own password, but they do not choose what they can see.</p>
 
             <div class="access-grid" id="profileGrid"></div>
@@ -767,6 +767,7 @@
     <script src="firebase-config.js"></script>
     <script type="module">
         import {
+            deleteHubUser,
             firebaseConfigured,
             friendlyAuthError,
             listHubUsers,
@@ -1155,6 +1156,7 @@
                             ${needsInvite ? `<button class="ghost-button primary-button" type="button" data-person="${safeId}" onclick="sendInviteForPerson(this.dataset.person, this)">Send Invite Email</button>` : ''}
                             <button class="ghost-button" type="button" data-person="${safeId}" onclick="resetPassword(this.dataset.person)">${USE_FIREBASE_AUTH ? 'Send Reset Email' : 'Create Reset Link'}</button>
                             <button class="ghost-button ${isDisabled ? '' : 'danger-button'}" type="button" data-person="${safeId}" data-disabled="${!isDisabled}" onclick="toggleDisabled(this.dataset.person, this.dataset.disabled === 'true')">${isDisabled ? 'Enable User' : 'Disable User'}</button>
+                            <button class="ghost-button danger-button" type="button" data-person="${safeId}" onclick="deleteUser(this.dataset.person, this)">Delete User</button>
                         </div>
                     </td>
                 </tr>
@@ -1394,6 +1396,40 @@
             await loadUsers();
         }
 
+        async function deleteUser(personId, button) {
+            const person = STAFF.find(item => item.id === personId);
+            if (!person) return;
+
+            const confirmed = window.confirm(
+                `Permanently delete ${person.name} (${person.email})?\n\n` +
+                `This removes their Hub access and records. This cannot be undone.`
+            );
+            if (!confirmed) return;
+
+            const originalLabel = button ? button.textContent : '';
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Deleting...';
+            }
+
+            try {
+                if (USE_FIREBASE_AUTH) {
+                    await deleteHubUser(person);
+                } else {
+                    await authRequest({ action: 'users:delete', id: personId });
+                }
+                document.getElementById('saveState').textContent = `${person.name} was deleted.`;
+                document.getElementById('adminMessage').textContent = `${person.name} was removed from the Hub.`;
+                await loadUsers();
+            } catch (error) {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = originalLabel || 'Delete User';
+                }
+                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+            }
+        }
+
         (async function initPermissions() {
             document.getElementById('inviteName').addEventListener('input', () => setFieldError('InviteName', ''));
             document.getElementById('inviteEmail').addEventListener('input', () => setFieldError('InviteEmail', ''));
@@ -1440,6 +1476,7 @@
         window.updateProfile = updateProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;
+        window.deleteUser = deleteUser;
         window.copyGeneratedLink = copyGeneratedLink;
     </script>
 </body>

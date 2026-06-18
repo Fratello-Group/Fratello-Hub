@@ -13,6 +13,7 @@ import {
 import {
     getFirestore,
     collection,
+    deleteDoc,
     doc,
     getDoc,
     getDocs,
@@ -540,6 +541,29 @@ export async function setHubUserDisabled(person, disabled) {
         hire_date: person.hire_date,
         status: disabled ? 'disabled' : 'active'
     });
+}
+
+export async function deleteHubUser(person) {
+    initFirebase();
+    const email = normalizeEmail(person.email);
+
+    // Collect every hubProfiles doc tied to this person (by uid and by email).
+    const profileIds = new Set();
+    if (person.uid) profileIds.add(person.uid);
+    if (email) {
+        const matches = await getDocs(query(collection(db, 'hubProfiles'), where('email', '==', email)));
+        matches.forEach(item => profileIds.add(item.id));
+    }
+
+    const tasks = [];
+    profileIds.forEach(id => tasks.push(deleteDoc(doc(db, 'hubProfiles', id))));
+    if (email) {
+        tasks.push(deleteDoc(doc(db, 'hubInvites', email)));
+        tasks.push(deleteDoc(doc(db, 'users', email)));
+    }
+    await Promise.all(tasks);
+    // Note: the person's Firebase sign-in account (if any) is not removed here;
+    // without their Hub profile/invite they can no longer access the Hub.
 }
 
 export function friendlyAuthError(error) {

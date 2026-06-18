@@ -186,20 +186,20 @@ service cloud.firestore {
         );
 
       allow update: if isOwner() || selfProfileFieldsDoNotEscalate(uid);
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     match /hubInvites/{email} {
       allow read: if isOwner() || (signedIn() && email == signedInEmail());
       allow create, update: if isOwner();
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     match /users/{userId} {
       allow get: if isOwnerOrController() || isSelfUserRecord(resource.data);
       allow list: if isOwnerOrController();
       allow create, update: if isOwnerOrController();
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     match /time_off_requests/{requestId} {
