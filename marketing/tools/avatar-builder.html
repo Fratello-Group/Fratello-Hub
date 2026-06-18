@@ -200,7 +200,7 @@
 
         <div class="saverow">
           <button class="save" onclick="saveBatch()">Save to Avatar Log</button>
-          <button class="ghost" onclick="copyBrief()">Copy Brief</button>
+          <button class="ghost" onclick="copyBrief(this)">Copy Brief</button>
           <button class="ghost" onclick="clearForm()">Clear</button>
         </div>
         <div id="savemsg" class="savemsg"></div>
@@ -216,8 +216,8 @@
         <p class="banksub">Every avatar the team has built. Filter it, copy the brief, and mark what is untested, live, worked, or flopped.</p>
       </div>
       <div class="bankactions">
-        <button class="save" onclick="exportAll()">Copy all briefs</button>
-        <button class="ghost" onclick="exportTable()">Copy as table</button>
+        <button class="save" onclick="exportAll(this)">Copy all briefs</button>
+        <button class="ghost" onclick="exportTable(this)">Copy as table</button>
       </div>
     </div>
     <div class="bankfilters" aria-label="Avatar log filters">
@@ -1190,11 +1190,47 @@ function buildCopyBrief(){
   L.push('Produce one ad per broad Core Avatar (cold) + one or two stacked Sub-Avatar ads (specific, retarget). Put them in run order: broad -> specific.');
   return L.join('\n');
 }
-function copyBrief(){
+async function copyTextToClipboard(text){
+  const value=String(text||'');
+  if(navigator.clipboard && window.isSecureContext){
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+  const area=document.createElement('textarea');
+  area.value=value;
+  area.setAttribute('readonly','');
+  area.style.position='fixed';
+  area.style.left='-9999px';
+  area.style.top='0';
+  document.body.appendChild(area);
+  area.focus();
+  area.select();
+  try{
+    if(!document.execCommand('copy')) throw new Error('Copy command was blocked.');
+  }finally{
+    document.body.removeChild(area);
+  }
+}
+function showCopied(button,label){
+  if(!button) return;
+  const original=button.textContent;
+  button.textContent=label||'Copied';
+  button.disabled=true;
+  setTimeout(()=>{
+    button.textContent=original;
+    button.disabled=false;
+  },1400);
+}
+async function copyBrief(button){
   const t=buildCopyBrief();
-  try{ navigator.clipboard.writeText(t); }catch(e){}
   const m=document.getElementById('savemsg');
-  m.textContent='Copywriter brief copied \u2014 paste it into your copy agent.';
+  try{
+    await copyTextToClipboard(t);
+    showCopied(button,'Copied');
+    m.textContent='Copywriter brief copied \u2014 paste it into your copy agent.';
+  }catch(e){
+    m.textContent='Copy failed. Select the text manually or try again after opening the live Hub page.';
+  }
 }
 
 function buildAngles(){
@@ -1445,7 +1481,7 @@ async function renderBank(){
       </div>
       <textarea class="bresult" placeholder="Result / notes for future-you \u2014 which hook pulled, CPA, what you&rsquo;d change\u2026" onchange="updField('${r.id}','result',this.value)">${esc(r.result||'')}</textarea>
       <div class="batchfoot">
-        <button class="mini copy-brief" onclick="copyOne('${r.id}')">Copy brief</button>
+        <button class="mini copy-brief" onclick="copyOne('${r.id}', this)">Copy brief</button>
         <button class="mini del" onclick="delOne('${r.id}')">Delete</button>
       </div>`;
     list.appendChild(card);
@@ -1506,12 +1542,17 @@ function briefFromRecord(r){
   return L.join('\n');
 }
 function anglesText(r){ return (r.angles&&r.angles.length)? r.angles.map(a=>`  \u2022 [${a.t}] ${a.x}`).join('\n') : '\u2014'; }
-async function copyOne(id){
+async function copyOne(id,button){
   const v=await sGet(id); if(!v)return; const r=JSON.parse(v);
-  navigator.clipboard.writeText(briefFromRecord(r));
+  try{
+    await copyTextToClipboard(briefFromRecord(r));
+    showCopied(button,'Copied');
+  }catch(e){
+    showCopied(button,'Copy failed');
+  }
 }
-async function exportTable(){
-  const btn=event.currentTarget; const orig=btn.textContent;
+async function exportTable(btn){
+  const orig=btn.textContent;
   const recs=await loadAll();
   if(!recs.length){ btn.textContent='No avatars yet'; setTimeout(()=>btn.textContent=orig,1400); return; }
   const cols=['Date / Status','Creator','Sub Avatar (stacked sentence)','Belief','Built from','Best hook','Ad angles','Proof / why Fratello','Guardrails','Do not say','Result / notes'];
@@ -1538,11 +1579,12 @@ async function exportTable(){
   }
   setTimeout(()=>btn.textContent=orig,1400);
 }
-async function exportAll(){
+async function exportAll(button){
   const recs=await loadAll();
   const txt=recs.map(r=>briefFromRecord(r)).join('\n\n========================================\n\n');
-  navigator.clipboard.writeText(txt||'No avatars yet.');
-  const b=event.currentTarget||event.target; const o=b.textContent; b.textContent='Copied all briefs'; setTimeout(()=>b.textContent=o,1400);
+  const b=button; const o=b.textContent; b.textContent='Copied all briefs'; setTimeout(()=>b.textContent=o,1400);
+  try{ await copyTextToClipboard(txt||'No avatars yet.'); }
+  catch(e){ b.textContent='Copy failed'; setTimeout(()=>b.textContent=o,1400); }
 }
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
