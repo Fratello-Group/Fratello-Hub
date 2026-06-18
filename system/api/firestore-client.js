@@ -20,7 +20,8 @@ const COLLECTIONS = {
     approvals: 'approvals',
     holidays: 'holidays',
     settings: 'settings',
-    profiles: 'hubProfiles'
+    profiles: 'hubProfiles',
+    avatarLogs: 'avatar_logs'
 };
 
 const APPROVAL_ENDPOINT = '/.netlify/functions/time-off-approval-action';
@@ -109,6 +110,10 @@ function isOwner(user) {
 
 function cleanOptionalText(value) {
     return String(value || '').trim();
+}
+
+function validAvatarStatus(status) {
+    return ['Untested', 'Live', 'Worked', 'Flopped'].includes(status);
 }
 
 function roleTierFromProfile(profileKey) {
@@ -533,4 +538,88 @@ export async function regenerateCalendarToken() {
     };
     await updateUser(user.id, { calendar_tokens: nextTokens });
     return getCalendarSubscriptions();
+}
+
+export async function createAvatarLog(input = {}) {
+    const { auth, db } = requireFirestore();
+    const currentUser = await requireCurrentFirebaseUser(auth);
+    const avatarName = cleanOptionalText(input.avatar_name || input.avatarName || input.name);
+    if (!avatarName) throw new Error('Avatar name is required.');
+
+    const status = validAvatarStatus(input.status) ? input.status : 'Untested';
+    const payload = {
+        avatar_name: avatarName,
+        campaign: cleanOptionalText(input.campaign),
+        status,
+        result_notes: cleanOptionalText(input.result_notes || input.result),
+        sub_avatar: cleanOptionalText(input.sub_avatar || input.subAvatar),
+        best_hook: cleanOptionalText(input.best_hook || input.bestHook),
+        belief: cleanOptionalText(input.belief),
+        brief: cleanOptionalText(input.brief),
+        fields: input.fields || {},
+        created_by_uid: currentUser.uid,
+        created_by_email: normalizeEmail(currentUser.email),
+        created_by_name: cleanOptionalText(input.created_by_name || input.createdByName || currentUser.displayName) || normalizeEmail(currentUser.email),
+        created_via: 'hub-avatar-builder',
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+    };
+
+    const ref = await addDoc(collection(db, COLLECTIONS.avatarLogs), payload);
+    return { id: ref.id, ...payload };
+}
+
+export async function getAvatarLogs(options = {}) {
+    const { db } = requireFirestore();
+    const snapshot = await getDocs(collection(db, COLLECTIONS.avatarLogs));
+    const search = cleanOptionalText(options.search).toLowerCase();
+    const creator = normalizeEmail(options.creator || options.created_by_email);
+    const status = cleanOptionalText(options.status);
+
+    return snapshot.docs
+        .map(withId)
+        .filter(Boolean)
+        .filter(item => !status || item.status === status)
+        .filter(item => !creator || normalizeEmail(item.created_by_email) === creator)
+        .filter(item => overlapsRange({
+            start_date: item.created_at,
+            end_date: item.created_at
+        }, options.start_date, options.end_date))
+        .filter(item => {
+            if (!search) return true;
+            const haystack = [
+                item.avatar_name,
+                item.campaign,
+                item.created_by_name,
+                item.created_by_email,
+                item.status,
+                item.sub_avatar,
+                item.best_hook,
+                item.belief,
+                item.brief
+            ].join(' ').toLowerCase();
+            return haystack.includes(search);
+        })
+        .sort((a, b) => timestampMillis(b.created_at) - timestampMillis(a.created_at));
+}
+
+export async function updateAvatarLog(avatarId, patch = {}) {
+    const { db } = requireFirestore();
+    if (!avatarId) throw new Error('Avatar log id is required.');
+
+    const updates = { updated_at: serverTimestamp() };
+    if (patch.status !== undefined) {
+        if (!validAvatarStatus(patch.status)) throw new Error('Unknown avatar status.');
+        updates.status = patch.status;
+    }
+    if (patch.result_notes !== undefined || patch.result !== undefined) {
+        updates.result_notes = cleanOptionalText(patch.result_notes ?? patch.result);
+    }
+    if (patch.avatar_name !== undefined || patch.avatarName !== undefined) {
+        updates.avatar_name = cleanOptionalText(patch.avatar_name ?? patch.avatarName);
+    }
+
+    const ref = doc(db, COLLECTIONS.avatarLogs, avatarId);
+    await updateDoc(ref, updates);
+    return withId(await getDoc(ref));
 }

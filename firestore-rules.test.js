@@ -96,6 +96,17 @@ function isOwnerOrController(requestAuth) {
     return isOwner(requestAuth) || isController(requestAuth);
 }
 
+function hasActiveProfile(requestAuth, profileKey) {
+    const profile = profileFor(requestAuth);
+    return Boolean(profile && profile.profile === profileKey && profile.status === 'active');
+}
+
+function canUseAvatarBuilder(requestAuth) {
+    return isOwnerOrController(requestAuth)
+        || hasActiveProfile(requestAuth, 'marketing')
+        || hasActiveProfile(requestAuth, 'sales');
+}
+
 function isSelfUserId(requestAuth, userId) {
     const user = USERS[userId];
     return Boolean(requestAuth && user && user.email === requestAuth.email && user.active === true);
@@ -174,6 +185,32 @@ function canReadNotification(requestAuth) {
     return isOwner(requestAuth);
 }
 
+function validAvatarStatus(data) {
+    return ['Untested', 'Live', 'Worked', 'Flopped'].includes(data.status);
+}
+
+function isAvatarCreator(requestAuth, data) {
+    return Boolean(requestAuth
+        && data.created_by_uid === requestAuth.uid
+        && data.created_by_email === requestAuth.email);
+}
+
+function canCreateAvatarLog(requestAuth, data) {
+    return canUseAvatarBuilder(requestAuth)
+        && isAvatarCreator(requestAuth, data)
+        && validAvatarStatus(data)
+        && data.created_via === 'hub-avatar-builder';
+}
+
+function canUpdateAvatarLog(requestAuth, before, after) {
+    return canUseAvatarBuilder(requestAuth)
+        && (isOwnerOrController(requestAuth) || isAvatarCreator(requestAuth, before))
+        && after.created_by_uid === before.created_by_uid
+        && after.created_by_email === before.created_by_email
+        && after.created_via === before.created_via
+        && validAvatarStatus(after);
+}
+
 const sungjooVacation = {
     user_id: 'sungjoo.hong@fratellocoffee.com',
     type: 'vacation',
@@ -198,6 +235,14 @@ const olenaSickDay = {
     approver_id: null,
     created_via: 'hub',
     edit_locked_at: Date.UTC(2026, 4, 20, 18)
+};
+
+const mateoAvatar = {
+    avatar_name: 'Freshness Skeptic',
+    status: 'Untested',
+    created_by_uid: 'mateo',
+    created_by_email: 'mateo@fratellocoffee.com',
+    created_via: 'hub-avatar-builder'
 };
 
 function run() {
@@ -258,6 +303,29 @@ function run() {
     assert.equal(canReadActivity(auth('controller')), false);
     assert.equal(canReadNotification(auth('owner')), true);
     assert.equal(canReadNotification(auth('controller')), false);
+
+    assert.equal(canUseAvatarBuilder(auth('owner')), true);
+    assert.equal(canUseAvatarBuilder(auth('controller')), true);
+    assert.equal(canUseAvatarBuilder(auth('mateo')), true);
+    assert.equal(canUseAvatarBuilder(auth('kyle')), false);
+    assert.equal(canUseAvatarBuilder(auth('sungjoo')), false);
+
+    assert.equal(canCreateAvatarLog(auth('mateo'), mateoAvatar), true);
+    assert.equal(canCreateAvatarLog(auth('sungjoo'), {
+        ...mateoAvatar,
+        created_by_uid: 'sungjoo',
+        created_by_email: 'sungjoo.hong@fratellocoffee.com'
+    }), false);
+    assert.equal(canCreateAvatarLog(auth('mateo'), { ...mateoAvatar, status: 'Testing' }), false);
+
+    assert.equal(canUpdateAvatarLog(auth('mateo'), mateoAvatar, { ...mateoAvatar, status: 'Worked' }), true);
+    assert.equal(canUpdateAvatarLog(auth('controller'), mateoAvatar, { ...mateoAvatar, status: 'Flopped' }), true);
+    assert.equal(canUpdateAvatarLog(auth('kyle'), mateoAvatar, { ...mateoAvatar, status: 'Live' }), false);
+    assert.equal(canUpdateAvatarLog(auth('mateo'), mateoAvatar, {
+        ...mateoAvatar,
+        created_by_email: 'someoneelse@fratellocoffee.com',
+        status: 'Worked'
+    }), false);
 }
 
 run();

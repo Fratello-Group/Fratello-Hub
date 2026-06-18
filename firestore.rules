@@ -47,6 +47,19 @@ service cloud.firestore {
       return isOwner() || isController();
     }
 
+    function hasActiveProfile(profile) {
+      return signedIn()
+        && exists(profilePath(request.auth.uid))
+        && get(profilePath(request.auth.uid)).data.profile == profile
+        && get(profilePath(request.auth.uid)).data.status == 'active';
+    }
+
+    function canUseAvatarBuilder() {
+      return isOwnerOrController()
+        || hasActiveProfile('marketing')
+        || hasActiveProfile('sales');
+    }
+
     function userPath(userId) {
       return /databases/$(database)/documents/users/$(userId);
     }
@@ -138,6 +151,16 @@ service cloud.firestore {
         && request.resource.data.status == resource.data.status;
     }
 
+    function validAvatarStatus(data) {
+      return data.status in ['Untested', 'Live', 'Worked', 'Flopped'];
+    }
+
+    function isAvatarCreator(data) {
+      return signedIn()
+        && data.created_by_uid == request.auth.uid
+        && data.created_by_email == signedInEmail();
+    }
+
     match /hubProfiles/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isOwner());
 
@@ -210,6 +233,21 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read: if true;
       allow create, update: if isOwner();
+      allow delete: if false;
+    }
+
+    match /avatar_logs/{avatarId} {
+      allow read: if canUseAvatarBuilder();
+      allow create: if canUseAvatarBuilder()
+        && isAvatarCreator(request.resource.data)
+        && validAvatarStatus(request.resource.data)
+        && request.resource.data.created_via == 'hub-avatar-builder';
+      allow update: if canUseAvatarBuilder()
+        && (isOwnerOrController() || isAvatarCreator(resource.data))
+        && request.resource.data.created_by_uid == resource.data.created_by_uid
+        && request.resource.data.created_by_email == resource.data.created_by_email
+        && request.resource.data.created_via == resource.data.created_via
+        && validAvatarStatus(request.resource.data);
       allow delete: if false;
     }
   }
