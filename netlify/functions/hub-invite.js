@@ -190,6 +190,7 @@ exports.handler = async (event) => {
     const methodError = requireMethod(event, ['POST']);
     if (methodError) return methodError;
 
+    let stage = 'authenticate';
     try {
         const session = await authenticateRequest(event);
         if (!isOwner(session)) return json(403, { error: 'Owner access required.' });
@@ -208,6 +209,7 @@ exports.handler = async (event) => {
         if (!email || !email.includes('@')) return json(400, { error: 'Add a valid email before sending an invite.' });
         if (!name) return json(400, { error: 'Add the person’s full name before sending an invite.' });
 
+        stage = 'save-records';
         await upsertInviteDocs({
             name,
             email,
@@ -221,28 +223,46 @@ exports.handler = async (event) => {
             ownerEmail: session.user && session.user.email
         });
 
+        stage = 'create-account';
         const authUser = await createOrUpdateAuthUser({ name, email });
+
+        // The records and login account exist now. If the setup-link step fails
+        // (e.g. a Firebase config issue), the person can still be added and sign
+        // in with Google, so don't throw the whole invite away over the link.
+        stage = 'generate-link';
         const { getAuth } = require('firebase-admin/auth');
         const hubUrl = absoluteUrl(event, '/');
-        const setupUrl = await getAuth(adminApp()).generatePasswordResetLink(email, {
-            url: hubUrl,
-            handleCodeInApp: false
-        });
-
-        let emailSent = false;
-        let emailError = '';
+        let setupUrl = '';
+        let setupLinkError = '';
         try {
-            await sendLoggedEmail({
-                to: email,
-                subject: 'Set up your Fratello Hub login',
-                html: inviteHtml({ name, setupUrl, hubUrl }),
-                text: inviteText({ name, setupUrl, hubUrl }),
-                templateId: 'hub-invite',
-                relatedRequestId: email
+            setupUrl = await getAuth(adminApp()).generatePasswordResetLink(email, {
+                url: hubUrl,
+                handleCodeInApp: false
             });
-            emailSent = true;
-        } catch (error) {
-            emailError = error.message || 'Invite email could not be sent.';
+        } catch (linkError) {
+            setupLinkError = linkError.message || 'Setup link could not be generated.';
+            console.error('hub-invite generate-link failed', linkError);
+        }
+
+        stage = 'send-email';
+        let emailSent = false;
+        let emailError = setupLinkError;
+        if (setupUrl) {
+            try {
+                await sendLoggedEmail({
+                    to: email,
+                    subject: 'Set up your Fratello Hub login',
+                    html: inviteHtml({ name, setupUrl, hubUrl }),
+                    text: inviteText({ name, setupUrl, hubUrl }),
+                    templateId: 'hub-invite',
+                    relatedRequestId: email
+                });
+                emailSent = true;
+            } catch (error) {
+                emailError = error.message || 'Invite email could not be sent.';
+            }
+        } else if (!emailError) {
+            emailError = 'A setup link could not be generated.';
         }
 
         return json(200, {
@@ -263,10 +283,11 @@ exports.handler = async (event) => {
             setupUrl,
             inviteUrl: setupUrl,
             emailSent,
-            emailError
+            emailError,
+            setupLinkError
         });
     } catch (error) {
-        console.error(error);
-        return json(500, { error: error.message || 'Could not send invite.' });
+        console.error(`hub-invite failed at stage: ${stage}`, error);
+        return json(500, { error: `(${stage}) ${error.message || 'Could not send invite.'}` });
     }
 };
