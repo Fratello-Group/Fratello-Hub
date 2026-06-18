@@ -248,7 +248,8 @@ service cloud.firestore {
         && request.resource.data.created_by_email == resource.data.created_by_email
         && request.resource.data.created_via == resource.data.created_via
         && validAvatarStatus(request.resource.data);
-      allow delete: if false;
+      allow delete: if canUseAvatarBuilder()
+        && (isOwnerOrController() || isAvatarCreator(resource.data));
     }
   }
 }

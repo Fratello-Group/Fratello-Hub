@@ -211,6 +211,11 @@ function canUpdateAvatarLog(requestAuth, before, after) {
         && validAvatarStatus(after);
 }
 
+function canDeleteAvatarLog(requestAuth, data) {
+    return canUseAvatarBuilder(requestAuth)
+        && (isOwnerOrController(requestAuth) || isAvatarCreator(requestAuth, data));
+}
+
 const sungjooVacation = {
     user_id: 'sungjoo.hong@fratellocoffee.com',
     type: 'vacation',
@@ -326,6 +331,9 @@ function run() {
         created_by_email: 'someoneelse@fratellocoffee.com',
         status: 'Worked'
     }), false);
+    assert.equal(canDeleteAvatarLog(auth('mateo'), mateoAvatar), true);
+    assert.equal(canDeleteAvatarLog(auth('controller'), mateoAvatar), true);
+    assert.equal(canDeleteAvatarLog(auth('kyle'), mateoAvatar), false);
 }
 
 run();

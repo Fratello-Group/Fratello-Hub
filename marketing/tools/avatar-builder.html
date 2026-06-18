@@ -1,1119 +1,1617 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fratello Hub - Avatar Builder</title>
-    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bean-black: #1A1A1A;
-            --foam: #F5F5F7;
-            --paper: #FFFFFF;
-            --warm-gray-50: #FAFAFA;
-            --warm-gray-100: #F0F0F1;
-            --warm-gray-200: #E2E2E4;
-            --warm-gray-400: #909094;
-            --warm-gray-600: #5A5A5E;
-            --teal: #36B3AF;
-            --teal-dark: #238884;
-            --red: #9F3329;
-            --shadow-sm: 0 1px 2px rgba(15, 17, 17, 0.05);
-            --shadow-md: 0 10px 30px rgba(15, 17, 17, 0.07);
-            --font: 'Montserrat', Helvetica, Arial, sans-serif;
-        }
-
-        html, body {
-            min-height: 100%;
-            background: var(--foam);
-            color: var(--bean-black);
-            font-family: var(--font);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body.auth-checking .page,
-        body.denied .page { display: none; }
-
-        .shell { min-height: 100vh; }
-
-        .hub-bar {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            min-height: 72px;
-            padding: 16px 28px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.96);
-            border-bottom: 1px solid var(--warm-gray-200);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            min-width: 0;
-        }
-
-        .brand img {
-            width: 164px;
-            height: auto;
-            display: block;
-        }
-
-        .context {
-            min-width: 0;
-            padding-left: 18px;
-            border-left: 1px solid var(--warm-gray-200);
-        }
-
-        .eyebrow {
-            color: var(--teal);
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .title {
-            font-size: 15px;
-            font-weight: 800;
-            line-height: 1.25;
-        }
-
-        .actions {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 38px;
-            padding: 10px 14px;
-            border: 1px solid var(--warm-gray-200);
-            border-radius: 6px;
-            background: transparent;
-            color: var(--warm-gray-600);
-            text-decoration: none;
-            font: inherit;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-        }
-
-        .button:hover {
-            color: var(--bean-black);
-            border-color: var(--teal);
-        }
-
-        .button.primary {
-            background: var(--teal);
-            border-color: var(--teal);
-            color: var(--bean-black);
-        }
-
-        .button.primary:hover {
-            background: #43c8c4;
-            border-color: #43c8c4;
-        }
-
-        .button.danger {
-            color: var(--red);
-            border-color: #E6C9C4;
-        }
-
-        .page {
-            max-width: 1360px;
-            margin: 0 auto;
-            padding: 34px 30px 58px;
-        }
-
-        .hero {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-            gap: 28px;
-            align-items: end;
-            margin-bottom: 28px;
-        }
-
-        .kicker {
-            color: var(--teal);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-
-        h1 {
-            font-size: clamp(38px, 6vw, 72px);
-            line-height: 0.98;
-            letter-spacing: 0;
-            max-width: 760px;
-        }
-
-        .lede {
-            color: var(--warm-gray-600);
-            font-size: 16px;
-            line-height: 1.7;
-            max-width: 640px;
-            margin-top: 18px;
-        }
-
-        .status-strip {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .stat {
-            border: 1px solid var(--warm-gray-200);
-            background: var(--paper);
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .stat span {
-            display: block;
-            color: var(--warm-gray-400);
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .stat strong {
-            display: block;
-            font-size: 24px;
-            line-height: 1;
-        }
-
-        .tool-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(380px, 0.78fr);
-            gap: 22px;
-            align-items: start;
-        }
-
-        .panel {
-            border: 1px solid var(--warm-gray-200);
-            background: var(--paper);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 20px;
-            padding-bottom: 18px;
-            border-bottom: 1px solid var(--warm-gray-200);
-        }
-
-        .panel-kicker {
-            color: var(--warm-gray-400);
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-
-        h2 {
-            font-size: 30px;
-            line-height: 1.1;
-        }
-
-        .panel-note {
-            color: var(--warm-gray-600);
-            font-size: 13px;
-            line-height: 1.6;
-            max-width: 430px;
-        }
-
-        .field-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
-
-        .field { min-width: 0; }
-
-        .field.span-2 { grid-column: span 2; }
-
-        label {
-            display: block;
-            color: var(--warm-gray-600);
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            border: 1px solid var(--warm-gray-200);
-            border-radius: 7px;
-            background: var(--warm-gray-50);
-            color: var(--bean-black);
-            font: inherit;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.5;
-            padding: 13px 14px;
-            outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-
-        input::placeholder,
-        textarea::placeholder { color: #9D9DA3; }
-
-        textarea {
-            min-height: 86px;
-            resize: vertical;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: var(--teal);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(54, 179, 175, 0.16);
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .preview {
-            position: sticky;
-            top: 96px;
-        }
-
-        .preview-box {
-            border: 1px solid var(--warm-gray-200);
-            border-radius: 8px;
-            background: var(--warm-gray-50);
-            padding: 18px;
-            margin-bottom: 14px;
-        }
-
-        .preview-box h3 {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--teal-dark);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .preview-box p,
-        .preview-box pre {
-            color: var(--bean-black);
-            font-size: 14px;
-            line-height: 1.65;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .angle-list {
-            display: grid;
-            gap: 8px;
-        }
-
-        .angle {
-            border-left: 4px solid var(--teal);
-            background: #fff;
-            border-radius: 7px;
-            padding: 10px 12px;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1.45;
-        }
-
-        .message {
-            margin-top: 14px;
-            color: var(--warm-gray-600);
-            font-size: 13px;
-            font-weight: 700;
-            min-height: 18px;
-        }
-
-        .log-panel {
-            margin-top: 24px;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: minmax(240px, 1.5fr) repeat(4, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .log-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .avatar-row {
-            display: grid;
-            grid-template-columns: minmax(220px, 0.82fr) minmax(0, 1fr) 210px;
-            gap: 18px;
-            align-items: start;
-            border-top: 1px solid var(--warm-gray-200);
-            padding: 18px 0;
-        }
-
-        .avatar-row:first-child { border-top: 0; }
-
-        .avatar-name {
-            font-size: 19px;
-            line-height: 1.25;
-            margin-bottom: 8px;
-        }
-
-        .meta {
-            color: var(--warm-gray-600);
-            font-size: 12px;
-            line-height: 1.55;
-        }
-
-        .tag-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .tag {
-            border: 1px solid rgba(54, 179, 175, 0.35);
-            border-radius: 5px;
-            color: var(--teal-dark);
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 5px 7px;
-        }
-
-        .avatar-summary {
-            color: var(--bean-black);
-            font-size: 14px;
-            line-height: 1.65;
-        }
-
-        .row-actions {
-            display: grid;
-            gap: 10px;
-        }
-
-        .notes {
-            min-height: 86px;
-            font-size: 13px;
-        }
-
-        .empty-state {
-            border: 1px dashed var(--warm-gray-200);
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            color: var(--warm-gray-600);
-            font-weight: 600;
-        }
-
-        .blocked {
-            min-height: calc(100vh - 72px);
-            display: none;
-            place-items: center;
-            padding: 32px;
-            text-align: center;
-        }
-
-        body.denied .blocked,
-        body.auth-checking .blocked { display: grid; }
-
-        .blocked-card {
-            max-width: 620px;
-        }
-
-        .blocked h1 {
-            font-size: clamp(34px, 6vw, 58px);
-            line-height: 1.05;
-            margin-bottom: 18px;
-        }
-
-        .blocked p {
-            color: var(--warm-gray-600);
-            font-size: 15px;
-            line-height: 1.7;
-            margin-bottom: 26px;
-        }
-
-        @media (max-width: 1100px) {
-            .hero,
-            .tool-grid,
-            .avatar-row {
-                grid-template-columns: 1fr;
-            }
-
-            .preview { position: static; }
-            .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-
-        @media (max-width: 720px) {
-            .hub-bar {
-                align-items: flex-start;
-                flex-direction: column;
-                padding: 18px;
-            }
-
-            .brand {
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .brand img { width: 145px; }
-
-            .context {
-                padding-left: 0;
-                border-left: 0;
-            }
-
-            .actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .page { padding: 26px 18px 44px; }
-            .panel { padding: 18px; }
-            .panel-header { display: block; }
-            .panel-note { margin-top: 10px; }
-            .field-grid,
-            .filters,
-            .status-strip { grid-template-columns: 1fr; }
-            .field.span-2 { grid-column: span 1; }
-            .toolbar { justify-content: stretch; }
-            .button { width: 100%; }
-        }
-    </style>
-    <script src="../../system/firebase-config.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fratello Hub - Avatar Builder</title>
+  <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+  <script src="../../system/firebase-config.js"></script>
 </head>
 <body class="auth-checking" data-tool-name="Avatar Builder">
-    <div class="shell">
-        <header class="hub-bar">
-            <div class="brand">
-                <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello">
-                <div class="context">
-                    <div class="eyebrow">Marketing Tool</div>
-                    <div class="title">Avatar Builder</div>
-                </div>
-            </div>
-            <div class="actions">
-                <a class="button" href="../../index.html">Back to Hub</a>
-                <a class="button" href="#avatarLog">Avatar Log</a>
-                <button class="button primary" type="button" id="copyPreviewButton">Copy Brief</button>
-            </div>
-        </header>
+  <header class="hub-bar">
+    <div class="hub-brand">
+      <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello">
+      <div class="hub-context">
+        <div class="hub-eyebrow">Marketing Tool</div>
+        <div class="hub-title">Avatar Builder</div>
+      </div>
+    </div>
+    <div class="hub-actions">
+      <a class="hub-button" href="../../index.html">Back to Hub</a>
+      <a class="hub-button" href="#view-bank" onclick="if(window.showView){showView('bank');}">Avatar Log</a>
+      <a class="hub-button" href="#view-training" onclick="if(window.showView){showView('training');}">Training</a>
+      <button class="hub-button primary" type="button" onclick="if(window.copyBrief){copyBrief();}">Copy Brief</button>
+    </div>
+  </header>
+  <section class="blocked">
+    <div class="blocked-card">
+      <h1>Marketing access required.</h1>
+      <p>This tool is available to Owner, Controller, Marketing, and Sales profiles. Sign in through the Hub first.</p>
+      <a class="hub-button primary" href="../../index.html">Back to Hub</a>
+    </div>
+  </section>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" src="../../assets/Fratello_Logo_Black.png" alt="Fratello Coffee Roasters">
+      <span class="labtag">Marketing Tool</span>
+    </div>
+    <nav class="tabs">
+      <button id="tab-build" class="tab active" onclick="showView('build')">Avatar Builder</button>
+      <button id="tab-bank" class="tab" onclick="showView('bank')">Avatar Log <span id="bankcount" class="count">0</span></button>
+      <button id="tab-training" class="tab" onclick="showView('training')">Training</button>
+    </nav>
+  </header>
 
-        <section class="blocked" id="blocked">
-            <div class="blocked-card">
-                <h1>Marketing access required.</h1>
-                <p>This tool is available to Owner, Controller, Marketing, and Sales profiles. Sign in through the Hub first.</p>
-                <a class="button primary" href="../../index.html">Back to Hub</a>
-            </div>
-        </section>
+  <!-- ===================== BUILD ===================== -->
+  <main id="view-build" class="view">
+    <div class="lawline">You target an avatar in every ad whether you mean to or not. The only job: make a stranger think <em>that&rsquo;s me.</em></div>
+    <div class="grid">
+      <section class="form">
 
-        <main class="page">
-            <section class="hero">
-                <div>
-                    <div class="kicker">Avatar Lab</div>
-                    <h1>Build sharper customer avatars.</h1>
-                    <p class="lede">Create an avatar, copy the brief, then save it to the shared Hub log so the team can track what is untested, live, worked, or flopped.</p>
-                </div>
-                <div class="status-strip">
-                    <div class="stat"><span>Total</span><strong id="statTotal">0</strong></div>
-                    <div class="stat"><span>Untested</span><strong id="statUntested">0</strong></div>
-                    <div class="stat"><span>Worked</span><strong id="statWorked">0</strong></div>
-                    <div class="stat"><span>Flopped</span><strong id="statFlopped">0</strong></div>
-                </div>
-            </section>
+        <!-- DESIRE -->
+        <div class="card" data-cat="desire">
+          <div class="cardhead">
+            <span class="step">01</span>
+            <div class="titles"><h2>Desire</h2><span class="role">what they want</span></div>
+            <button class="hint" onclick="openHelp('desire')" aria-label="Learn more about Desire">Learn&nbsp;more</button>
+          </div>
+          <p class="help">What they want or need, said as a plain &ldquo;I want&hellip;&rdquo; or &ldquo;I need&hellip;&rdquo;. This is the engine. Pick one &mdash; never stack two wants.</p>
+          <input id="f-desire" type="text" oninput="onDesireType()" placeholder="I want&hellip;">
+          <button class="menubtn" type="button" onclick="toggleMenu('desire-menu',this)">
+            <span>Not sure? Pick from the evidence-based desire menu</span><span class="chev">&#9662;</span>
+          </button>
+          <div id="desire-menu" class="picker">
+            <p class="picknote">Tap one to drop it in the box above. It turns green when it&rsquo;s the one you&rsquo;re using.</p>
+            <div id="desire-chips"></div>
+          </div>
+          <label class="sub">Core desire underneath <span class="opt">optional</span></label>
+          <select id="f-coredesire" onchange="recompute()">
+            <option value="">&mdash;</option>
+            <option>Health</option><option>Status</option><option>Belonging</option>
+            <option>Comfort</option><option>Control</option><option>Sex</option>
+          </select>
+        </div>
 
-            <section class="tool-grid">
-                <form class="panel" id="avatarForm">
-                    <div class="panel-header">
-                        <div>
-                            <div class="panel-kicker">Step 01</div>
-                            <h2>Build the avatar</h2>
-                        </div>
-                        <p class="panel-note">Start with the plain-language truth. The tool will turn it into a clean brief you can copy into Claude or another copy agent.</p>
-                    </div>
+        <!-- EXPERIENCE -->
+        <div class="card" data-cat="exp">
+          <div class="cardhead">
+            <span class="step">02</span>
+            <div class="titles"><h2>Experience</h2><span class="role">what happened to them</span></div>
+            <button class="hint" onclick="openHelp('exp')" aria-label="Learn more about Experience">Learn&nbsp;more</button>
+          </div>
+          <p class="help">Something that actually happened &mdash; a situation, or a product they tried and how it turned out. Write just the event. Save how they felt about it for the next steps.</p>
+          <input id="f-exp" type="text" oninput="recompute()" placeholder="e.g. ordered &ldquo;fresh&rdquo; coffee online &mdash; it arrived roasted 4 months ago">
+          <label class="sub">What kind of experience?</label>
+          <div class="seg" id="seg-exptype">
+            <button type="button" class="segbtn active" data-v="Situational" onclick="pickSeg(this)">A situation they&rsquo;re in</button>
+            <button type="button" class="segbtn" data-v="Product-based" onclick="pickSeg(this)">A product they tried</button>
+          </div>
+        </div>
 
-                    <div class="field-grid">
-                        <div class="field">
-                            <label for="avatarName">Avatar Name</label>
-                            <input id="avatarName" placeholder="Freshness skeptic" required>
-                        </div>
-                        <div class="field">
-                            <label for="campaign">Campaign or Product</label>
-                            <input id="campaign" placeholder="Godfather Espresso, subscriptions, decaf">
-                        </div>
-                        <div class="field span-2">
-                            <label for="desire">Desire</label>
-                            <textarea id="desire" placeholder="I want proof of when my coffee was roasted."></textarea>
-                        </div>
-                        <div class="field span-2">
-                            <label for="experience">Experience</label>
-                            <textarea id="experience" placeholder="Ordered fresh specialty coffee online and it arrived roasted months ago."></textarea>
-                        </div>
-                        <div class="field">
-                            <label for="emotion">Emotion</label>
-                            <input id="emotion" placeholder="Let down, skeptical, proud">
-                        </div>
-                        <div class="field">
-                            <label for="behavior">Behavior</label>
-                            <input id="behavior" placeholder="Checks the roast date before buying">
-                        </div>
-                        <div class="field">
-                            <label for="demographic">Demographic</label>
-                            <input id="demographic" placeholder="Optional">
-                        </div>
-                        <div class="field">
-                            <label for="proof">Proof / Why Fratello</label>
-                            <input id="proof" placeholder="Roasted to order in Calgary">
-                        </div>
-                        <div class="field span-2">
-                            <label for="bestHook">Best Hook</label>
-                            <textarea id="bestHook" placeholder="Pick or write the hook you would actually lead with."></textarea>
-                        </div>
-                        <div class="field span-2">
-                            <label for="guardrails">Guardrails</label>
-                            <textarea id="guardrails">Roast date must be current. Do not use competitor names. Keep claims specific and true.</textarea>
-                        </div>
-                    </div>
+        <!-- EMOTION -->
+        <div class="card" data-cat="emo">
+          <div class="cardhead">
+            <span class="step">03</span>
+            <div class="titles"><h2>Emotion</h2><span class="role">how they feel about it</span></div>
+            <button class="hint" onclick="openHelp('emo')" aria-label="Learn more about Emotion">Learn&nbsp;more</button>
+          </div>
+          <p class="help">Their everyday word for the feeling goes in the box. Then pick the basic emotion sitting underneath it &mdash; that&rsquo;s the part that makes an ad feel like mind-reading.</p>
+          <input id="f-emo" type="text" oninput="recompute()" placeholder="their word &mdash; let down, fed up, skeptical&hellip;">
+          <label class="sub">Basic emotion underneath</label>
+          <select id="f-emoprimary" onchange="recompute()">
+            <option value="">&mdash;</option>
+            <option>Anger</option><option>Fear</option><option>Sadness</option>
+            <option>Joy</option><option>Surprise</option><option>Disgust</option>
+            <option>Trust</option><option>Anticipation</option>
+          </select>
+          <label class="sub">Second emotion <span class="opt">optional &mdash; only if it&rsquo;s a true blend</span></label>
+          <select id="f-emoprimary2" onchange="recompute()">
+            <option value="">&mdash;</option>
+            <option>Anger</option><option>Fear</option><option>Sadness</option>
+            <option>Joy</option><option>Surprise</option><option>Disgust</option>
+            <option>Trust</option><option>Anticipation</option>
+          </select>
+          <div class="dyadhint" id="dyadhint"></div>
+        </div>
 
-                    <div class="toolbar">
-                        <button class="button" type="button" id="clearButton">Clear</button>
-                        <button class="button primary" type="submit">Save to Avatar Log</button>
-                    </div>
-                    <div class="message" id="builderMessage"></div>
-                </form>
+        <!-- BEHAVIOR -->
+        <div class="card" data-cat="beh">
+          <div class="cardhead">
+            <span class="step">04</span>
+            <div class="titles"><h2>Behavior</h2><span class="role">what they now do</span></div>
+            <button class="hint" onclick="openHelp('beh')" aria-label="Learn more about Behavior">Learn&nbsp;more</button>
+          </div>
+          <p class="help">What they do because of all this &mdash; a habit or repeated action. Even a mental habit counts (&ldquo;always overthinks the buy&rdquo;). This is usually your sharpest hook.</p>
+          <input id="f-beh" type="text" oninput="recompute()" placeholder="e.g. checks the roast date before buying">
+          <label class="sub">How often?</label>
+          <select id="f-behfreq" onchange="recompute()">
+            <option value="">&mdash;</option>
+            <option>Rarely</option><option>Sometimes</option><option>Often</option><option>Daily</option>
+          </select>
+        </div>
 
-                <aside class="panel preview" aria-label="Live avatar preview">
-                    <div class="panel-header">
-                        <div>
-                            <div class="panel-kicker">Step 02</div>
-                            <h2>Live brief</h2>
-                        </div>
-                        <p class="panel-note">This updates as you type. Saving stores this same brief in the shared log.</p>
-                    </div>
+        <!-- DEMOGRAPHIC -->
+        <div class="card" data-cat="demo">
+          <div class="cardhead">
+            <span class="step">05</span>
+            <div class="titles"><h2>Demographic</h2><span class="role">who they are on paper</span></div>
+            <button class="hint" onclick="openHelp('demo')" aria-label="Learn more about Demographic">Learn&nbsp;more</button>
+          </div>
+          <p class="help">Age, location, household, and so on. Optional, and usually skippable. Add one only if Fratello&rsquo;s coffee genuinely fits that group better.</p>
+          <input id="f-demo" type="text" oninput="onDemoType()" placeholder="(optional)">
+          <button class="menubtn" type="button" onclick="toggleMenu('demo-menu',this)">
+            <span>Pick from the segment menu</span><span class="chev">&#9662;</span>
+          </button>
+          <div id="demo-menu" class="picker">
+            <p class="picknote">Tap one to drop it in &mdash; or just type your own above.</p>
+            <div id="demo-chips"></div>
+          </div>
+        </div>
 
-                    <div class="preview-box">
-                        <h3>Sub Avatar</h3>
-                        <p id="subAvatarPreview">Start filling the fields to build the avatar.</p>
-                    </div>
-                    <div class="preview-box">
-                        <h3>Belief to Mirror</h3>
-                        <p id="beliefPreview">Add an experience, emotion, or behavior.</p>
-                    </div>
-                    <div class="preview-box">
-                        <h3>Ad Angles</h3>
-                        <div class="angle-list" id="anglePreview"></div>
-                    </div>
-                    <div class="preview-box">
-                        <h3>Copywriter Brief</h3>
-                        <pre id="briefPreview"></pre>
-                    </div>
-                </aside>
-            </section>
+      </section>
 
-            <section class="panel log-panel" id="avatarLog">
-                <div class="panel-header">
-                    <div>
-                        <div class="panel-kicker">Step 03</div>
-                        <h2>Avatar Log</h2>
-                    </div>
-                    <p class="panel-note">Filter by creator, name, date, or status. Update the result when an avatar goes live, works, or flops.</p>
-                </div>
+      <!-- LIVE PANEL -->
+      <aside class="panel">
+        <div class="roast">
+          <div class="roastlabel"><span>Roast level</span><span id="roast-name">&mdash;</span></div>
+          <div class="beans" id="beans"></div>
+          <div class="roasthint" id="roast-hint">Add categories to deepen the roast. Broad = light reach; specific = deep relatability.</div>
+        </div>
 
-                <div class="filters">
-                    <div class="field">
-                        <label for="filterSearch">Search</label>
-                        <input id="filterSearch" placeholder="Avatar name, hook, product">
-                    </div>
-                    <div class="field">
-                        <label for="filterCreator">Creator</label>
-                        <select id="filterCreator"><option value="">All</option></select>
-                    </div>
-                    <div class="field">
-                        <label for="filterStatus">Status</label>
-                        <select id="filterStatus">
-                            <option value="">All</option>
-                            <option>Untested</option>
-                            <option>Live</option>
-                            <option>Worked</option>
-                            <option>Flopped</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="filterStart">From</label>
-                        <input id="filterStart" type="date">
-                    </div>
-                    <div class="field">
-                        <label for="filterEnd">To</label>
-                        <input id="filterEnd" type="date">
-                    </div>
-                </div>
+        <div class="block">
+          <div class="blockhead">Core Avatars <span class="micro">each can anchor its own ad</span></div>
+          <p class="panelnote">Every category you fill is a standalone avatar. Run the broad ones cold; stack them into the Sub Avatar below for retargeting.</p>
+          <div id="out-cores" class="cores"><div class="empty">Fill a category to see your Core Avatars.</div></div>
+        </div>
 
-                <div class="toolbar">
-                    <button class="button" type="button" id="resetFiltersButton">Reset Filters</button>
-                    <button class="button primary" type="button" id="refreshLogButton">Refresh Log</button>
-                </div>
-                <div class="message" id="logMessage"></div>
-                <div class="log-list" id="logList"></div>
-            </section>
-        </main>
+        <div class="block">
+          <div class="blockhead">Sub Avatar <span class="micro">the stack &mdash; lead with this for retarget</span></div>
+          <textarea id="out-sub" rows="5" placeholder="Fills in as you build."></textarea>
+        </div>
+
+        <div class="block">
+          <div class="blockhead">Belief to mirror <span class="micro">what makes copy feel like mind-reading</span></div>
+          <div id="out-belief" class="belief"><div class="empty">Fill an experience (plus an emotion or behavior) to surface the belief.</div></div>
+        </div>
+
+        <div class="briefbox">
+          <div class="blockhead">Copywriter inputs <span class="micro">feed the agent &mdash; all optional</span></div>
+          <label class="sub">Proof / why Fratello answers this <span class="opt">the mechanism</span></label>
+          <input id="f-proof" type="text" oninput="recompute()" placeholder="e.g. roast date printed on every bag; roasted to order in Calgary">
+          <label class="sub">Analogy <span class="opt">&ldquo;it&rsquo;s like&hellip;&rdquo;</span></label>
+          <input id="f-analogy" type="text" oninput="recompute()" placeholder="e.g. bakery bread vs a gas-station bun">
+          <label class="sub">Guardrails <span class="opt">must-follow rules</span></label>
+          <textarea id="f-guard" rows="4" oninput="recompute()"></textarea>
+          <label class="sub">Don&rsquo;t say <span class="opt">keep copy specific</span></label>
+          <input id="f-dontsay" type="text" oninput="recompute()" placeholder="e.g. don&rsquo;t state the desire outright; no competitor names">
+        </div>
+
+        <div class="block">
+          <div class="blockhead">Ad-angle starters</div>
+          <p class="panelnote">Auto-generated from what you&rsquo;ve filled in. <strong>Tap one to flag it as your Best Hook</strong> &mdash; every angle is saved to the log either way.</p>
+          <div id="out-angles" class="angles"><div class="empty">Fill a category to generate hooks.</div></div>
+        </div>
+
+        <div class="block">
+          <div class="blockhead">Best hook <span class="micro">the one you&rsquo;d lead with</span></div>
+          <textarea id="out-besthook" rows="3" placeholder="Tap an angle above, or write your own."></textarea>
+        </div>
+
+        <div class="saverow">
+          <button class="save" onclick="saveBatch()">Save to Avatar Log</button>
+          <button class="ghost" onclick="copyBrief()">Copy Brief</button>
+          <button class="ghost" onclick="clearForm()">Clear</button>
+        </div>
+        <div id="savemsg" class="savemsg"></div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ===================== BANK ===================== -->
+  <main id="view-bank" class="view hidden">
+    <div class="bankhead">
+      <div>
+        <h2 class="bankh">Avatar Log</h2>
+        <p class="banksub">Every avatar the team has built. Filter it, copy the brief, and mark what is untested, live, worked, or flopped.</p>
+      </div>
+      <div class="bankactions">
+        <button class="save" onclick="exportAll()">Copy all briefs</button>
+        <button class="ghost" onclick="exportTable()">Copy as table</button>
+      </div>
+    </div>
+    <div class="bankfilters" aria-label="Avatar log filters">
+      <label>
+        <span>Find</span>
+        <input id="bank-filter-search" type="search" placeholder="Avatar, hook, detail">
+      </label>
+      <label>
+        <span>Creator</span>
+        <select id="bank-filter-creator">
+          <option value="">Everyone</option>
+        </select>
+      </label>
+      <label>
+        <span>Status</span>
+        <select id="bank-filter-status">
+          <option value="">All statuses</option>
+          <option>Untested</option>
+          <option>Live</option>
+          <option>Worked</option>
+          <option>Flopped</option>
+        </select>
+      </label>
+      <label>
+        <span>From</span>
+        <input id="bank-filter-start" type="date">
+      </label>
+      <label>
+        <span>To</span>
+        <input id="bank-filter-end" type="date">
+      </label>
+      <button class="ghost" type="button" onclick="clearBankFilters()">Reset</button>
+    </div>
+    <div id="banklist" class="banklist"></div>
+  </main>
+
+  <!-- ===================== TRAINING ===================== -->
+  <main id="view-training" class="view hidden">
+    <div class="refhero">
+      <div class="eyebrow">The framework, so it sticks</div>
+      <h1 class="refh1">The Core 5</h1>
+      <p class="reflead">The whole avatar framework, each piece given a picture you won&rsquo;t forget. Reload it before you write.</p>
     </div>
 
-    <script type="module">
-        import { firebaseConfigured, onHubAuthChange } from '../../system/fratello-auth.js';
-        import { createAvatarLog, getAvatarLogs, updateAvatarLog } from '../../system/api/firestore-client.js';
-        import { installActivityLogger, trackDataEdit, trackFormSubmit } from '../../system/api/activity-logger.js';
+    <div class="lawcards">
+      <div class="lawcard">
+        <div class="lawtag">The one law</div>
+        <p>You target an avatar in every ad whether you mean to or not. The only question is whether yours is sharp enough that a stranger thinks <em>&ldquo;that&rsquo;s exactly me.&rdquo;</em></p>
+        <p class="chain">Relatability &rarr; trust &rarr; purchase.</p>
+        <p>Everything below is just five ways to get sharper.</p>
+      </div>
+      <div class="lawcard alt">
+        <div class="lawtag">The shape of it</div>
+        <p><strong>Experience</strong> is the trunk. <strong>Desire</strong>, <strong>Emotion</strong> and <strong>Behavior</strong> are branches off it. <strong>Demographic</strong> is a small graft near the top. One real-world event grows wildly different humans depending on which branch you follow.</p>
+        <p>Name the trunk alone = <strong>broad</strong>. Stack branches on top, on purpose, after = <strong>specific</strong>. Core Avatar = one category. Sub Avatar = two-to-four stacked, where the money is.</p>
+      </div>
+    </div>
 
-        const allowed = new Set(['owner', 'controller', 'marketing', 'sales']);
-        const statuses = ['Untested', 'Live', 'Worked', 'Flopped'];
-        const state = {
-            role: null,
-            allLogs: [],
-            visibleLogs: []
-        };
+    <div class="corewrap">
 
-        const els = {
-            form: document.getElementById('avatarForm'),
-            avatarName: document.getElementById('avatarName'),
-            campaign: document.getElementById('campaign'),
-            desire: document.getElementById('desire'),
-            experience: document.getElementById('experience'),
-            emotion: document.getElementById('emotion'),
-            behavior: document.getElementById('behavior'),
-            demographic: document.getElementById('demographic'),
-            proof: document.getElementById('proof'),
-            bestHook: document.getElementById('bestHook'),
-            guardrails: document.getElementById('guardrails'),
-            subAvatarPreview: document.getElementById('subAvatarPreview'),
-            beliefPreview: document.getElementById('beliefPreview'),
-            anglePreview: document.getElementById('anglePreview'),
-            briefPreview: document.getElementById('briefPreview'),
-            builderMessage: document.getElementById('builderMessage'),
-            logMessage: document.getElementById('logMessage'),
-            logList: document.getElementById('logList'),
-            filterSearch: document.getElementById('filterSearch'),
-            filterCreator: document.getElementById('filterCreator'),
-            filterStatus: document.getElementById('filterStatus'),
-            filterStart: document.getElementById('filterStart'),
-            filterEnd: document.getElementById('filterEnd'),
-            statTotal: document.getElementById('statTotal'),
-            statUntested: document.getElementById('statUntested'),
-            statWorked: document.getElementById('statWorked'),
-            statFlopped: document.getElementById('statFlopped')
-        };
+      <article class="corecard">
+        <span class="corenum">1</span>
+        <div class="corebody">
+          <div class="coretitle"><h3>Desire</h3><span class="coletag">the engine</span></div>
+          <p class="cp"><span class="lab">The picture.</span> The current under the surface. On top is the specific want &mdash; &ldquo;I want a decaf that actually tastes like coffee.&rdquo; Underneath runs the deep current: Health, Comfort, Control, Status. Build the ad on the surface &mdash; it&rsquo;s visible and specific enough for a stranger to recognize. The deep current is real but invisible; everyone wants comfort, so naming it singles out no one.</p>
+          <p class="cp"><span class="lab">Why it&rsquo;s the engine.</span> It&rsquo;s the only category already pointed at a purchase. Experience, emotion and behavior describe a <em>state</em>; desire describes a <em>direction</em>. Start the engine here.</p>
+          <p class="cp"><span class="lab">The trap.</span> Reaching for the deep current because it feels profound. &ldquo;I want to be healthy&rdquo; is wallpaper &mdash; too broad to move anyone. And never stack two desires; two directions tear the avatar in half.</p>
+          <p class="cp cut"><span class="lab">Fratello cut.</span> &ldquo;I want proof of when my coffee was roasted&rdquo; makes a roast-date checker sit up. &ldquo;I want good coffee&rdquo; could be anyone holding a mug.</p>
+          <div class="corecheck"><span class="lab">Check &mdash;</span> can you say it as &ldquo;I want X / I need Y&rdquo;? If not, it&rsquo;s not a desire.</div>
+        </div>
+      </article>
 
-        function clean(value) {
-            return String(value || '').trim();
+      <article class="corecard">
+        <span class="corenum">2</span>
+        <div class="corebody">
+          <div class="coretitle"><h3>Experience</h3><span class="coletag">the trunk</span></div>
+          <p class="cp"><span class="lab">The picture.</span> The security-camera fact &mdash; whatever a lens pointed at the person would actually have recorded. The bag arrived four months stale. The grocery beans tasted flat. A camera can&rsquo;t film a want or a feeling, so the moment you&rsquo;re describing something the lens couldn&rsquo;t capture, you&rsquo;ve drifted into another category. &ldquo;The bag was stale&rdquo; is filmable; &ldquo;hates that the bag was stale&rdquo; is not.</p>
+          <p class="cp"><span class="lab">Why you isolate it.</span> It&rsquo;s the only category that&rsquo;s concrete <em>and</em> widely shared at once. Desires are shared but vague; emotions and behaviors are concrete but fracture people into small groups. The event itself is the widest concrete thing a whole crowd of strangers can nod at simultaneously.</p>
+          <p class="cp"><span class="lab">The trap.</span> Welding a branch on too early. &ldquo;Frustrated about the stale bag&rdquo; fuses two categories &mdash; now you only talk to the frustrated ones. Keep the trunk clean and one event forks into three humans: the betrayed, the resigned, and the one who just shrugged and went back to grocery beans. <em>Sub-trap:</em> for product experiences the outcome is part of the fact &mdash; &ldquo;tried it and it didn&rsquo;t work&rdquo; is filmable; the disappointment is a branch.</p>
+          <p class="cp cut"><span class="lab">Fratello cut.</span> &ldquo;Ordered &lsquo;fresh&rsquo; specialty online and it showed up roasted four months ago&rdquo; &mdash; one hook catches all three before you narrow.</p>
+          <div class="corecheck"><span class="lab">Check &mdash;</span> a circumstance or event, with the feeling stripped out.</div>
+        </div>
+      </article>
+
+      <article class="corecard">
+        <span class="corenum">3</span>
+        <div class="corebody">
+          <div class="coretitle"><h3>Emotion</h3><span class="coletag">the branch that bypasses logic</span></div>
+          <p class="cp"><span class="lab">The picture.</span> Smoke and fire. The smoke &mdash; the basic emotions &mdash; is universal; everyone recognizes them. But smoke alone is generic. Relatability lives in tracing it back to <em>this person&rsquo;s specific fire</em>, the trigger. Name the smoke (&ldquo;you feel frustrated&rdquo;) and it&rsquo;s wallpaper. Name the fire (&ldquo;the &lsquo;premium&rsquo; bag made you look like a sucker&rdquo;) and they feel read.</p>
+          <p class="cp"><span class="lab">Why it&rsquo;s powerful.</span> Emotion bypasses logic. It gets someone to act <em>before</em> the rational &ldquo;do I actually need this&rdquo; filter kicks in. Universal emotion, individual trigger &mdash; that gap is the gold.</p>
+          <p class="cp"><span class="lab">The trap.</span> Stopping at the secondary emotion. Skeptical, anxious, overwhelmed are labels the brain slaps on to tidy a feeling &mdash; a sign to dig, not a destination. Ask why until you hit a basic emotion plus its trigger.</p>
+          <p class="cp cut"><span class="lab">Fratello cut.</span> &ldquo;Skeptical of online coffee&rdquo; is the smoke. Dig: it&rsquo;s fear &mdash; they&rsquo;ve been burned and don&rsquo;t trust the freshness claim. Name the fear and its source, and the skeptic stops scrolling.</p>
+          <div class="corecheck"><span class="lab">Check &mdash;</span> does it describe how they feel in response to something? If it&rsquo;s secondary, ask why until you hit a primary.</div>
+        </div>
+      </article>
+
+      <article class="corecard">
+        <span class="corenum">4</span>
+        <div class="corebody">
+          <div class="coretitle"><h3>Behavior</h3><span class="coletag">the sharpest lever</span></div>
+          <p class="cp"><span class="lab">The picture.</span> The fingerprint &mdash; the visible mark desire, experience and emotion leave when they dry into a repeated action. You can&rsquo;t see someone&rsquo;s want, but you can watch them check the roast date <em>every single time</em>. The internal stuff, made visible and repeatable.</p>
+          <p class="cp"><span class="lab">Why it&rsquo;s the sharpest.</span> It&rsquo;s tied to ego &mdash; it&rsquo;s who they are, not just what they do &mdash; so naming it reads as recognition, not a pitch. &ldquo;If you grind fresh every morning&hellip;&rdquo; isn&rsquo;t selling; it&rsquo;s a mirror. And it&rsquo;s predictable: know the behavior and you can tell them their own next move.</p>
+          <p class="cp"><span class="lab">The trap.</span> Mistaking a one-off for a pattern. &ldquo;Bought specialty once&rdquo; is an experience; &ldquo;grinds fresh every morning&rdquo; is a behavior &mdash; the strength is in the frequency. And behaviors can be mental: &ldquo;constantly overthinks which bag to buy&rdquo; counts, and most people forget to hunt for the invisible ones.</p>
+          <p class="cp cut"><span class="lab">Fratello cut.</span> &ldquo;Won&rsquo;t buy beans that go oily because they&rsquo;ll clog the machine&rdquo; &mdash; that one behavior says they own a real setup, they&rsquo;ve been burned, they care. The ad that names it doesn&rsquo;t sell. It recognizes.</p>
+          <div class="corecheck"><span class="lab">Check &mdash;</span> something they do (physical or mental), and roughly how often. More often = stronger.</div>
+        </div>
+      </article>
+
+      <article class="corecard">
+        <span class="corenum">5</span>
+        <div class="corebody">
+          <div class="coretitle"><h3>Demographic</h3><span class="coletag">last, and usually skippable</span></div>
+          <p class="cp"><span class="lab">The picture.</span> The fence, not the magnet. The other four are magnets &mdash; they pull people in by relatability. A demographic only decides who&rsquo;s allowed inside and who&rsquo;s locked out. Fences don&rsquo;t make anyone <em>want</em> to come in.</p>
+          <p class="cp"><span class="lab">When it earns its place.</span> Only when the product genuinely serves that group better &mdash; then the fence turns into relatability. Decaf for the caffeine-sensitive; socks built for construction workers. Used that way, the fence itself says &ldquo;this was made for you.&rdquo;</p>
+          <p class="cp"><span class="lab">The trap.</span> Starting here &mdash; the single most common mistake there is. A 22-year-old woman and a 54-year-old man can share the same desire, experience, emotion and behavior. Lead with a demographic and you&rsquo;ve torched half your market for the variable that moves purchase intent <em>least</em>.</p>
+          <p class="cp cut"><span class="lab">Fratello cut.</span> &ldquo;Calgarians over 50&rdquo; as a starting point is weak and alienating. But target &ldquo;won&rsquo;t buy oily beans that clog my machine&rdquo; and the espresso-setup demographic rides along behind the behavior. The one place it genuinely leads for us: decaf.</p>
+          <div class="corecheck"><span class="lab">Check &mdash;</span> standard bucket (gender, age, location, employment, income)? And does the product actually serve them better? If not, skip.</div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="cvs">
+      <div class="cvscol">
+        <div class="cvslabel">Core Avatar</div>
+        <p>One category, alone. Wide reach &mdash; good for cold, top-of-funnel.</p>
+      </div>
+      <div class="cvscol hot">
+        <div class="cvslabel">Sub Avatar</div>
+        <p>Two-to-four categories stacked into one sentence. Specific, uncomfortable, that&rsquo;s-me &mdash; and where the money is.</p>
+      </div>
+    </div>
+
+    <div class="stuckband">
+      <div class="lawtag">The one move when you&rsquo;re stuck</div>
+      <p>Start at the trunk. Name a clean security-camera fact a real customer lived (&ldquo;ordered &lsquo;fresh&rsquo; coffee, it showed up months stale&rdquo;). Then walk it out the branches &mdash; what do they <strong>want</strong> underneath, how do they <strong>feel</strong>, what do they now <strong>do</strong>. You&rsquo;ll have a full avatar and three or four ad angles before your coffee&rsquo;s cold. Stack two-to-four branches into one sentence &mdash; that&rsquo;s your Sub Avatar.</p>
+    </div>
+
+    <div class="reffoot">Fratello Coffee Roasters &middot; 50 Years &middot; Calgary</div>
+  </main>
+
+  <!-- ===================== HELP MODAL ===================== -->
+  <div id="help-overlay" class="overlay" onclick="closeHelpBg(event)">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modalclose" onclick="closeHelp()" aria-label="Close">&times;</button>
+      <div class="modalstep" id="h-step">01</div>
+      <h3 id="h-title">Desire</h3>
+      <div class="hsection"><div class="hlabel">What it is</div><p id="h-what"></p></div>
+      <div class="hsection"><div class="hlabel">Why it matters</div><p id="h-why"></p></div>
+      <div class="hsection hcheck"><div class="hlabel">The 5-second check</div><p id="h-check"></p></div>
+      <div class="hsection hex"><div class="hlabel">Coffee example</div><p id="h-ex"></p></div>
+    </div>
+  </div>
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+  :root{
+    --bg:#F2EDE3; --surface:#FFFFFF; --surface2:#FBF8F2;
+    --ink:#231F20; --ink2:#3A3537; --muted:#7C736B;
+    --line:#E2DACB; --line2:#ECE5D8; --paper:#F1E9DA; --sand:#DFD5C3;
+    --ink-soft:#EFEAE1;
+    --accent:#9F3329; --accent-soft:#F4E4E0;
+    --shadow:0 1px 2px rgba(35,31,32,.05), 0 8px 24px rgba(35,31,32,.06);
+  }
+  *{box-sizing:border-box}
+  #app{
+    font-family:"Montserrat",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:var(--bg); min-height:100%; line-height:1.55;
+    -webkit-font-smoothing:antialiased; font-weight:500;
+  }
+  h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.3px}
+  /* topbar */
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:18px;
+    background:rgba(242,237,227,.9);backdrop-filter:saturate(1.1) blur(8px);
+    padding:14px 26px;flex-wrap:wrap;border-top:4px solid var(--ink);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{height:38px;width:auto;display:block}
+  .labtag{font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);
+    padding-left:14px;border-left:1.5px solid var(--line)}
+  /* tab bar — bold segmented control */
+  .tabs{display:flex;background:var(--surface);border:2px solid var(--ink);border-radius:13px;overflow:hidden}
+  .tab{min-width:132px;text-align:center;background:transparent;border:none;border-right:2px solid var(--ink);
+    color:var(--ink);padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+    letter-spacing:.1px;transition:.13s}
+  .tab:last-child{border-right:none}
+  .tab:hover{background:var(--ink-soft)}
+  .tab.active{background:var(--ink);color:#fff}
+  .count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:7px;
+    border-radius:7px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;vertical-align:middle}
+  .tab.active .count{background:#fff;color:var(--ink)}
+  .tab:not(.active) .count{background:var(--ink);color:#fff}
+  /* layout */
+  .view{padding:26px;max-width:1200px;margin:0 auto}
+  .hidden{display:none}
+  .lawline{background:var(--ink);color:#F2EDE3;border-radius:12px;padding:15px 20px;font-size:14px;
+    font-weight:600;margin-bottom:20px}
+  .lawline em{font-style:normal;font-weight:800;color:#fff}
+  .grid{display:grid;grid-template-columns:1fr 392px;gap:24px;align-items:start}
+  /* cards */
+  .form{display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .cardhead{display:flex;align-items:center;gap:13px}
+  .step{font-variant-numeric:tabular-nums;font-weight:800;font-size:13px;color:#fff;background:var(--ink);
+    width:30px;height:30px;border-radius:9px;display:grid;place-items:center}
+  .titles{flex:1;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .role{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .hint{border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);font-weight:700;font-size:12px;
+    cursor:pointer;border-radius:8px;padding:6px 12px;white-space:nowrap;transition:.13s;font-family:inherit}
+  .hint:hover{background:var(--ink);color:#fff}
+  .help{margin:11px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.5;font-weight:500}
+  input[type=text],select,textarea{width:100%;margin-top:12px;padding:12px 14px;border:1.5px solid var(--line);
+    border-radius:10px;background:var(--surface);font:inherit;font-size:14px;font-weight:600;color:var(--ink);transition:.12s}
+  input::placeholder,textarea::placeholder{color:#aaa49a;font-weight:500}
+  input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px var(--ink-soft)}
+  input.fromMenu{border-color:var(--ink);background:var(--surface2)}
+  .sub{display:block;margin-top:14px;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+  .opt{font-weight:600;text-transform:none;letter-spacing:0;color:#a59e92;font-size:11px}
+  .dyadhint{margin-top:9px;font-size:12.5px;color:var(--ink);font-weight:600;min-height:14px}
+  .seg{display:flex;gap:8px;margin-top:10px}
+  .segbtn{flex:1;padding:10px;border:1.5px solid var(--line);background:var(--surface);border-radius:9px;
+    font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;transition:.12s}
+  .segbtn:hover{border-color:var(--ink)}
+  .segbtn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* picker menus */
+  .menubtn{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:10px;padding:11px 14px;
+    border:1.5px dashed #c3b69d;background:var(--surface2);border-radius:10px;color:var(--ink);font-size:13px;
+    font-weight:700;cursor:pointer;font-family:inherit;transition:.12s}
+  .menubtn:hover{background:var(--paper);border-color:var(--ink)}
+  .menubtn .chev{transition:.2s;font-size:11px}
+  .menubtn.open .chev{transform:rotate(180deg)}
+  .picker{display:none;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--bg);max-height:300px;overflow:auto}
+  .picker.open{display:block}
+  .picknote{margin:0 0 11px;font-size:12px;color:var(--muted);font-weight:600}
+  .dm-group{margin-bottom:12px}
+  .dm-group:last-child{margin-bottom:0}
+  .dm-tier{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:7px}
+  .dm-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:12.5px;background:var(--surface);border:1.5px solid var(--line);color:var(--ink);border-radius:999px;
+    padding:6px 12px;cursor:pointer;text-align:left;transition:.12s;font-family:inherit;font-weight:600}
+  .chip:hover{border-color:var(--ink)}
+  .chip.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* panel (light, branded) */
+  .panel{position:sticky;top:92px;display:flex;flex-direction:column;gap:16px;background:var(--surface);
+    border:1px solid var(--line);border-radius:18px;padding:20px;color:var(--ink);box-shadow:var(--shadow)}
+  .roast{background:var(--surface2);border:1px solid var(--line);border-radius:13px;padding:16px}
+  .roastlabel{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  #roast-name{color:var(--ink);font-weight:800}
+  .beans{display:flex;gap:7px;margin:13px 0 10px}
+  .bean{flex:1;height:11px;border-radius:6px;background:var(--sand);transition:.25s}
+  .roasthint{font-size:12px;color:var(--muted);line-height:1.5;font-weight:500}
+  .block .blockhead{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:800;
+    margin-bottom:4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .micro{font-size:10.5px;letter-spacing:.1px;color:#a59e92;text-transform:none;font-weight:600}
+  .panelnote{margin:2px 0 8px;font-size:11.5px;color:var(--muted);line-height:1.45;font-weight:500}
+  .panelnote strong{color:var(--ink);font-weight:800}
+  .panel textarea{background:var(--surface);color:var(--ink);margin-top:2px;resize:vertical;border:1.5px solid var(--line)}
+  .angles{margin-top:2px;display:flex;flex-direction:column;gap:7px}
+  .angle{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--ink);border-radius:9px;
+    padding:10px 12px;font-size:13px;color:var(--ink);cursor:pointer;transition:.12s;position:relative;font-weight:600}
+  .angle:hover{background:var(--paper)}
+  .angle .atag{display:block;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;font-weight:800}
+  .angle.stacked{border-left-width:4px}
+  .cores{display:flex;flex-direction:column;gap:8px}
+  .coreitem{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--ink);border-radius:9px;
+    padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);line-height:1.45}
+  .coreitem .ctag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    color:#fff;background:var(--ink);border-radius:5px;padding:2px 7px;margin-right:8px}
+  .coreitem.broad{border-left-color:#8a7a66}
+  .coreitem.broad .ctag{background:#8a7a66}
+  .coreitem.specific{border-left-color:var(--accent)}
+  .coreitem.specific .ctag{background:var(--accent)}
+  .belief{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:9px;
+    padding:10px 13px;font-size:13.5px;font-style:italic;color:var(--ink);line-height:1.5}
+  .briefbox{background:var(--surface2);border:1px solid var(--line);border-radius:13px;padding:14px 16px;display:flex;flex-direction:column}
+  .briefbox .sub:first-of-type{margin-top:4px}
+  .briefbox input,.briefbox textarea{margin-top:4px}
+  .save.brief{width:100%}
+  .angle.picked{background:var(--accent-soft);border-color:var(--accent);border-left-width:4px;border-left-color:var(--accent)}
+  .angle.picked::after{content:"°5 Best hook";position:absolute;top:9px;right:11px;font-size:10px;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--accent);font-weight:800}
+  .empty{font-size:12.5px;color:var(--muted);font-style:italic;font-weight:500}
+  .saverow{display:flex;gap:9px}
+  .save{flex:1;background:var(--ink);color:#fff;border:none;padding:13px;border-radius:11px;font-weight:800;font-size:14px;
+    cursor:pointer;font-family:inherit;transition:.12s}
+  .save:hover{background:#000}
+  .ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);padding:13px 16px;border-radius:11px;
+    font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;transition:.12s}
+  .ghost:hover{background:var(--ink-soft);border-color:var(--ink)}
+  .savemsg{font-size:12.5px;color:var(--ink);min-height:16px;text-align:center;font-weight:700}
+  /* bank */
+  .bankhead{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+  .bankh{font-size:27px;letter-spacing:-.5px;font-weight:800}
+  .banksub{margin:7px 0 0;font-size:13.5px;color:var(--muted);max-width:580px;font-weight:500}
+  .bankactions{display:flex;gap:9px}
+  .bankfilters{display:grid;grid-template-columns:minmax(220px,2fr) minmax(160px,1fr) minmax(140px,1fr) minmax(130px,1fr) minmax(130px,1fr) auto;gap:10px;align-items:end;margin:0 0 20px}
+  .bankfilters label{display:flex;flex-direction:column;gap:6px}
+  .bankfilters span{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .bankfilters input,.bankfilters select{height:44px;margin-top:0;padding:0 12px;border-radius:10px;font-size:13.5px;background:var(--surface);color:var(--ink);border:1px solid var(--line);font-weight:650}
+  .bankfilters .ghost{height:44px;padding:0 16px}
+  .banklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:18px}
+  .batch{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;
+    flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+  .batchtop{display:flex;align-items:center;gap:10px}
+  .bno{font-variant-numeric:tabular-nums;font-weight:800;font-size:12px;color:#fff;background:var(--ink);padding:3px 9px;border-radius:7px}
+  .bdate{font-size:11.5px;color:var(--muted);font-weight:600}
+  .bsub{font-size:14.5px;line-height:1.55;font-weight:700;color:var(--ink)}
+  .bsec{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-top:2px}
+  .bhook{font-size:13px;color:var(--ink);background:var(--paper);border-left:3px solid var(--ink);padding:9px 11px;border-radius:7px;font-weight:600}
+  .bangles{display:flex;flex-direction:column;gap:5px}
+  .bangle{font-size:12px;color:var(--ink2);background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:6px 9px;font-weight:500}
+  .bangle .bat{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-right:6px;font-weight:800}
+  .btags{display:flex;flex-wrap:wrap;gap:5px}
+  .btag2{font-size:11px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);padding:3px 8px;border-radius:6px;font-weight:600}
+  .brow{display:flex;align-items:center;gap:8px}
+  .statussel{flex:0 0 auto;font-size:12.5px;padding:7px 9px;border-radius:8px;border:1.5px solid var(--line);margin-top:0;width:auto;font-family:inherit;font-weight:700}
+  .st-Untested{background:var(--bg)}
+  .st-Live{background:#e7e0d3}
+  .st-Worked{background:var(--ink);color:#fff}
+  .st-Flopped{background:#efe2d2}
+  .bresult{width:100%;font-size:13px;min-height:56px;margin-top:0}
+  .batchfoot{display:flex;justify-content:space-between;gap:8px}
+  .mini{background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12.5px;
+    font-weight:700;cursor:pointer;color:var(--ink);font-family:inherit;transition:.12s}
+  .mini:hover{background:var(--bg)}
+  .mini.del{color:#9a3a2a;border-color:#e0c8c0}
+  .mini.del:hover{background:#f2e2dc}
+  .bankempty{grid-column:1/-1;text-align:center;padding:64px 20px;color:var(--muted);font-weight:600}
+  .bankempty .big{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+  /* modal */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(35,31,32,.55);z-index:50;align-items:center;
+    justify-content:center;padding:22px;backdrop-filter:blur(2px)}
+  .overlay.open{display:flex}
+  .modal{background:var(--surface);border-radius:18px;max-width:520px;width:100%;padding:30px;position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,.3);max-height:88vh;overflow:auto}
+  .modalclose{position:absolute;top:16px;right:18px;background:transparent;border:none;font-size:26px;line-height:1;
+    color:var(--muted);cursor:pointer;font-family:inherit}
+  .modalclose:hover{color:var(--ink)}
+  .modalstep{font-variant-numeric:tabular-nums;font-weight:800;font-size:13px;color:#fff;background:var(--ink);
+    width:32px;height:32px;border-radius:9px;display:grid;place-items:center;margin-bottom:12px}
+  .modal h3{margin:0 0 18px;font-size:24px;letter-spacing:-.4px;font-weight:800}
+  .hsection{margin-bottom:16px}
+  .hsection:last-child{margin-bottom:0}
+  .hlabel{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:5px}
+  .hsection p{margin:0;font-size:14px;line-height:1.6;color:var(--ink2);font-weight:500}
+  .hcheck{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .hcheck .hlabel{color:var(--ink)}
+  .hex{background:var(--bg);border-radius:10px;padding:13px 15px}
+  /* training / refresher */
+  .refhero{text-align:center;padding:10px 0 26px;border-bottom:1px solid var(--line);margin-bottom:26px}
+  .eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .refh1{font-size:44px;letter-spacing:-1.4px;font-weight:800;margin:10px 0 8px}
+  .reflead{font-size:15px;color:var(--ink2);max-width:560px;margin:0 auto;font-weight:500}
+  .lawcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:26px}
+  .lawcard{background:var(--ink);color:#F2EDE3;border-radius:16px;padding:20px 22px}
+  .lawcard.alt{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .lawtag{font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:800;margin-bottom:9px;color:#cbbfa8}
+  .lawcard.alt .lawtag{color:var(--muted)}
+  .lawcard p{margin:0 0 8px;font-size:14.5px;line-height:1.55;font-weight:500}
+  .lawcard p:last-child{margin-bottom:0}
+  .lawcard em{font-style:normal;font-weight:800;color:#fff}
+  .lawcard.alt em{color:var(--ink)}
+  .lawcard .chain{font-weight:800}
+  .lawcard strong{font-weight:800;color:#fff}
+  .lawcard.alt strong{color:var(--ink)}
+  .corewrap{display:flex;flex-direction:column;gap:14px;margin-bottom:26px}
+  .corecard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow);
+    display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+  .corenum{font-variant-numeric:tabular-nums;font-weight:800;font-size:19px;color:#fff;background:var(--ink);
+    width:46px;height:46px;border-radius:12px;display:grid;place-items:center}
+  .coretitle{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .corecard h3{margin:0;font-size:21px;letter-spacing:-.3px;font-weight:800}
+  .coletag{font-size:13px;color:var(--muted);font-weight:600}
+  .cp{margin:0 0 9px;font-size:14px;line-height:1.58;color:var(--ink2);font-weight:500}
+  .cp .lab{color:var(--ink);font-weight:800}
+  .cp.cut{background:var(--surface2);border-left:3px solid var(--accent);padding:9px 13px;border-radius:0 8px 8px 0}
+  .cp.cut .lab{color:var(--accent)}
+  .corecheck{margin-top:4px;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 14px;
+    font-size:13px;color:var(--ink);font-weight:600}
+  .corecheck .lab{font-weight:800}
+  .cvs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:26px}
+  .cvscol{border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--surface)}
+  .cvscol.hot{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .cvslabel{font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:800;margin-bottom:8px;color:var(--muted)}
+  .cvscol.hot .cvslabel{color:#cbbfa8}
+  .cvscol p{margin:0;font-size:14px;line-height:1.55;font-weight:500}
+  .stuckband{background:var(--ink);color:#F2EDE3;border-radius:16px;padding:24px 26px;margin-bottom:22px}
+  .stuckband .lawtag{color:#cbbfa8}
+  .stuckband p{margin:0;font-size:14.5px;line-height:1.62;font-weight:500}
+  .stuckband strong{color:#fff;font-weight:800}
+  .reffoot{text-align:center;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding:4px 0;font-weight:700}
+  /* responsive */
+  @media(max-width:880px){
+    .grid{grid-template-columns:1fr}
+    .panel{position:static}
+    .view{padding:18px}
+    .bankfilters{grid-template-columns:1fr}
+    .lawcards{grid-template-columns:1fr}
+    .cvs{grid-template-columns:1fr}
+    .refh1{font-size:34px}
+    .tab{min-width:0;flex:1;padding:11px 12px}
+    .tabs{width:100%}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+
+<script>
+(function () {
+  const allowedProfiles = new Set(['owner', 'controller', 'marketing', 'sales']);
+  const localStore = {
+    get(key) { return localStorage.getItem(key); },
+    set(key, value) { localStorage.setItem(key, value); },
+    delete(key) { localStorage.removeItem(key); },
+    list(prefix) {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (key && key.indexOf(prefix) === 0) keys.push(key);
+      }
+      return keys;
+    }
+  };
+
+  function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+  }
+
+  function localRole() {
+    try { return JSON.parse(localStorage.getItem('fratello-role') || 'null'); }
+    catch (error) { return null; }
+  }
+
+  function allowPage(role) {
+    window.fratelloAvatarRole = role || null;
+    document.body.classList.remove('auth-checking', 'denied');
+  }
+
+  function denyPage() {
+    document.body.classList.remove('auth-checking');
+    document.body.classList.add('denied');
+  }
+
+  function recFromDoc(item) {
+    const record = item.record && typeof item.record === 'object' ? { ...item.record } : {};
+    const id = record.id || item.legacy_id || ('batch:' + item.id);
+    return {
+      ...record,
+      id,
+      firestore_id: item.id,
+      no: record.no || item.batch_no || 0,
+      date: record.date || item.date_label || '',
+      sub: record.sub || item.sub_avatar || '',
+      hook: record.hook || item.best_hook || '',
+      angles: record.angles || item.angles || [],
+      fields: record.fields || item.fields || {},
+      built: record.built || item.built || [],
+      belief: record.belief || item.belief || '',
+      brief: record.brief || item.brief || '',
+      status: item.status || record.status || 'Untested',
+      result: item.result_notes || record.result || '',
+      createdByName: item.created_by_name || record.createdByName || '',
+      createdByEmail: item.created_by_email || record.createdByEmail || ''
+    };
+  }
+
+  async function firebaseStore() {
+    if (window._avatarFirebaseStore) return window._avatarFirebaseStore;
+    const authModule = await import('../../system/fratello-auth.js');
+    const firestore = await import('../../system/api/firestore-client.js');
+
+    function ensureRole() {
+      return new Promise(resolve => {
+        if (!authModule.firebaseConfigured()) {
+          const role = localRole();
+          if (role && allowedProfiles.has(role.key)) allowPage(role);
+          else denyPage();
+          resolve({ role, firebase: false });
+          return;
         }
 
-        function safeText(value) {
-            return String(value || '').replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            }[char]));
-        }
+        const timeout = window.setTimeout(() => {
+          denyPage();
+          resolve({ role: null, firebase: true });
+        }, 6500);
 
-        function roleFromLocalStorage() {
-            try {
-                return JSON.parse(localStorage.getItem('fratello-role') || 'null');
-            } catch (error) {
-                return null;
-            }
-        }
-
-        function dateFromValue(value) {
-            if (!value) return null;
-            if (typeof value.toDate === 'function') return value.toDate();
-            const date = new Date(value);
-            return Number.isNaN(date.getTime()) ? null : date;
-        }
-
-        function dateLabel(value) {
-            const date = dateFromValue(value);
-            if (!date) return 'Date pending';
-            return date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-
-        function values() {
-            return {
-                avatarName: clean(els.avatarName.value),
-                campaign: clean(els.campaign.value),
-                desire: clean(els.desire.value),
-                experience: clean(els.experience.value),
-                emotion: clean(els.emotion.value),
-                behavior: clean(els.behavior.value),
-                demographic: clean(els.demographic.value),
-                proof: clean(els.proof.value),
-                bestHook: clean(els.bestHook.value),
-                guardrails: clean(els.guardrails.value)
-            };
-        }
-
-        function lowerFirst(value) {
-            const text = clean(value);
-            return text ? text.charAt(0).toLowerCase() + text.slice(1) : '';
-        }
-
-        function stripWant(value) {
-            return clean(value)
-                .replace(/^i\s+want\s+to\s+/i, 'wants to ')
-                .replace(/^i\s+want\s+/i, 'wants ')
-                .replace(/^i\s+need\s+to\s+/i, 'needs to ')
-                .replace(/^i\s+need\s+/i, 'needs ');
-        }
-
-        function assembleSubAvatar(data = values()) {
-            const parts = [];
-            if (data.desire) parts.push(lowerFirst(stripWant(data.desire)));
-            if (data.experience) parts.push(`has ${lowerFirst(data.experience)}`);
-            if (data.emotion) parts.push(`feels ${lowerFirst(data.emotion)}`);
-            if (data.behavior) parts.push(lowerFirst(data.behavior));
-
-            if (!parts.length) return 'Start filling the fields to build the avatar.';
-
-            let sentence = `Someone who ${parts.join(', ')}`;
-            if (parts.length > 1) {
-                const index = sentence.lastIndexOf(', ');
-                sentence = `${sentence.slice(0, index)}, and ${sentence.slice(index + 2)}`;
-            }
-            if (data.demographic) sentence += ` (${data.demographic})`;
-            return `${sentence.charAt(0).toUpperCase()}${sentence.slice(1)}.`;
-        }
-
-        function beliefToMirror(data = values()) {
-            if (data.experience && data.behavior) {
-                return `${data.experience} - so now I ${lowerFirst(data.behavior)}.`;
-            }
-            if (data.experience && data.emotion) {
-                return `${data.experience}, and ${lowerFirst(data.emotion)} is what I came to expect.`;
-            }
-            if (data.experience) return data.experience;
-            if (data.behavior) return `I ${lowerFirst(data.behavior)} for a reason.`;
-            if (data.emotion) return `I feel ${lowerFirst(data.emotion)} about this, and I am not the only one.`;
-            return 'Add an experience, emotion, or behavior.';
-        }
-
-        function buildAngles(data = values()) {
-            const angles = [];
-            if (data.experience) angles.push(['Experience', `Ever ${lowerFirst(data.experience)}?`]);
-            if (data.behavior) angles.push(['Behavior', `If you ${lowerFirst(data.behavior)}, then we should talk.`]);
-            if (data.emotion) angles.push(['Emotion', `You did not get into good coffee to feel ${lowerFirst(data.emotion)}.`]);
-            if (data.desire) angles.push(['Desire', `${stripWant(data.desire).replace(/^wants/i, 'Want')}. Start here.`]);
-            if (data.behavior && data.experience) {
-                angles.push(['Stacked', `If you ${lowerFirst(data.behavior)} because ${lowerFirst(data.experience)}, you already understand the problem.`]);
-            }
-            return angles;
-        }
-
-        function buildBrief(data = values()) {
-            const subAvatar = assembleSubAvatar(data);
-            const belief = beliefToMirror(data);
-            const angles = buildAngles(data);
-            const lines = [];
-            lines.push('FRATELLO - AVATAR BRIEF');
-            lines.push('');
-            lines.push(`Avatar name: ${data.avatarName || '(name this avatar)'}`);
-            if (data.campaign) lines.push(`Campaign/Product: ${data.campaign}`);
-            lines.push('');
-            lines.push('THE AVATAR');
-            lines.push(subAvatar);
-            lines.push('');
-            lines.push('WHAT IS DRIVING THE BUY');
-            if (data.desire) lines.push(`Desire: ${data.desire}`);
-            if (data.experience) lines.push(`Experience: ${data.experience}`);
-            if (data.emotion) lines.push(`Emotion: ${data.emotion}`);
-            if (data.behavior) lines.push(`Behavior: ${data.behavior}`);
-            if (data.demographic) lines.push(`Demographic: ${data.demographic}`);
-            lines.push(`Belief to mirror: "${belief}"`);
-            lines.push('');
-            lines.push('PROOF / WHY FRATELLO');
-            lines.push(data.proof || '(Add the proof that makes Fratello the answer.)');
-            lines.push('');
-            lines.push('ANGLE STARTERS');
-            if (angles.length) {
-                angles.forEach(([tag, angle]) => lines.push(`- [${tag}] ${angle}`));
-            } else {
-                lines.push('- Add more avatar details to generate angle starters.');
-            }
-            if (data.bestHook) lines.push(`Lead hook: ${data.bestHook}`);
-            lines.push('');
-            lines.push('GUARDRAILS');
-            lines.push(data.guardrails || '(No guardrails added.)');
-            return lines.join('\n');
-        }
-
-        function renderPreview() {
-            const data = values();
-            const subAvatar = assembleSubAvatar(data);
-            const belief = beliefToMirror(data);
-            const angles = buildAngles(data);
-            els.subAvatarPreview.textContent = subAvatar;
-            els.beliefPreview.textContent = belief;
-            els.briefPreview.textContent = buildBrief(data);
-            els.anglePreview.innerHTML = angles.length
-                ? angles.map(([tag, angle]) => `<div class="angle"><strong>${safeText(tag)}:</strong> ${safeText(angle)}</div>`).join('')
-                : '<div class="empty-state">Add avatar details to generate angles.</div>';
-        }
-
-        async function copyText(text, button) {
-            await navigator.clipboard.writeText(text);
-            if (!button) return;
-            const original = button.textContent;
-            button.textContent = 'Copied';
-            window.setTimeout(() => { button.textContent = original; }, 1200);
-        }
-
-        function creatorLabel(item) {
-            return item.created_by_name || item.created_by_email || 'Unknown';
-        }
-
-        function renderCreatorFilter() {
-            const current = els.filterCreator.value;
-            const creators = new Map();
-            state.allLogs.forEach(item => {
-                if (!item.created_by_email) return;
-                creators.set(item.created_by_email, creatorLabel(item));
-            });
-            els.filterCreator.innerHTML = '<option value="">All</option>' + Array.from(creators.entries())
-                .sort((a, b) => a[1].localeCompare(b[1]))
-                .map(([email, name]) => `<option value="${safeText(email)}">${safeText(name)}</option>`)
-                .join('');
-            els.filterCreator.value = current;
-        }
-
-        function renderStats() {
-            const count = status => state.allLogs.filter(item => item.status === status).length;
-            els.statTotal.textContent = String(state.allLogs.length);
-            els.statUntested.textContent = String(count('Untested'));
-            els.statWorked.textContent = String(count('Worked'));
-            els.statFlopped.textContent = String(count('Flopped'));
-        }
-
-        function renderLogs() {
-            renderStats();
-            renderCreatorFilter();
-            if (!state.visibleLogs.length) {
-                els.logList.innerHTML = '<div class="empty-state">No avatars match the current filters yet.</div>';
-                return;
-            }
-
-            els.logList.innerHTML = state.visibleLogs.map(item => {
-                const options = statuses.map(status =>
-                    `<option value="${status}" ${item.status === status ? 'selected' : ''}>${status}</option>`
-                ).join('');
-                return `
-                    <article class="avatar-row">
-                        <div>
-                            <h3 class="avatar-name">${safeText(item.avatar_name)}</h3>
-                            <div class="meta">${safeText(creatorLabel(item))}<br>${safeText(dateLabel(item.created_at))}</div>
-                            <div class="tag-row">
-                                <span class="tag">${safeText(item.status || 'Untested')}</span>
-                                ${item.campaign ? `<span class="tag">${safeText(item.campaign)}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="avatar-summary">
-                            <strong>Sub Avatar</strong><br>
-                            ${safeText(item.sub_avatar || 'No sub avatar saved.')}<br><br>
-                            <strong>Best Hook</strong><br>
-                            ${safeText(item.best_hook || 'No best hook saved.')}
-                        </div>
-                        <div class="row-actions">
-                            <select aria-label="Avatar status" onchange="window.updateAvatarStatus('${item.id}', this.value)">
-                                ${options}
-                            </select>
-                            <textarea class="notes" data-notes-id="${item.id}" placeholder="Result notes">${safeText(item.result_notes || '')}</textarea>
-                            <button class="button" type="button" onclick="window.saveAvatarNotes('${item.id}')">Save Notes</button>
-                            <button class="button primary" type="button" onclick="window.copySavedBrief('${item.id}', this)">Copy Brief</button>
-                        </div>
-                    </article>
-                `;
-            }).join('');
-        }
-
-        function currentFilters() {
-            return {
-                search: clean(els.filterSearch.value),
-                creator: clean(els.filterCreator.value),
-                status: clean(els.filterStatus.value),
-                start_date: clean(els.filterStart.value),
-                end_date: clean(els.filterEnd.value)
-            };
-        }
-
-        async function loadLogs() {
-            els.logMessage.textContent = 'Loading avatar log...';
-            try {
-                state.allLogs = await getAvatarLogs();
-                state.visibleLogs = await getAvatarLogs(currentFilters());
-                renderLogs();
-                els.logMessage.textContent = state.visibleLogs.length
-                    ? `${state.visibleLogs.length} avatar${state.visibleLogs.length === 1 ? '' : 's'} shown.`
-                    : 'No matching avatars.';
-            } catch (error) {
-                els.logMessage.textContent = error.message || 'Avatar log could not load.';
-                els.logList.innerHTML = '<div class="empty-state">The shared log is not available yet. Firestore rules may need to be published.</div>';
-            }
-        }
-
-        async function saveAvatar(event) {
-            event.preventDefault();
-            const data = values();
-            if (!data.avatarName) {
-                els.builderMessage.textContent = 'Add an avatar name before saving.';
-                els.avatarName.focus();
-                return;
-            }
-            els.builderMessage.textContent = 'Saving avatar...';
-            try {
-                await createAvatarLog({
-                    avatar_name: data.avatarName,
-                    campaign: data.campaign,
-                    status: 'Untested',
-                    sub_avatar: assembleSubAvatar(data),
-                    best_hook: data.bestHook,
-                    belief: beliefToMirror(data),
-                    brief: buildBrief(data),
-                    created_by_name: state.role?.user?.name || '',
-                    fields: {
-                        desire: data.desire,
-                        experience: data.experience,
-                        emotion: data.emotion,
-                        behavior: data.behavior,
-                        demographic: data.demographic,
-                        proof: data.proof,
-                        guardrails: data.guardrails
-                    }
-                });
-                trackFormSubmit('Avatar Builder', { avatar_name: data.avatarName });
-                els.builderMessage.textContent = 'Saved to the shared Avatar Log.';
-                await loadLogs();
-            } catch (error) {
-                els.builderMessage.textContent = error.message || 'Avatar could not be saved.';
-            }
-        }
-
-        function clearBuilder() {
-            els.form.reset();
-            els.guardrails.value = 'Roast date must be current. Do not use competitor names. Keep claims specific and true.';
-            els.builderMessage.textContent = '';
-            renderPreview();
-        }
-
-        async function applyRole(role) {
-            state.role = role;
-            if (!role || !allowed.has(role.key)) {
-                document.body.classList.remove('auth-checking');
-                document.body.classList.add('denied');
-                return;
-            }
-            document.body.classList.remove('auth-checking', 'denied');
-            installActivityLogger('Avatar Builder');
-            await loadLogs();
-        }
-
-        window.updateAvatarStatus = async (id, status) => {
-            try {
-                await updateAvatarLog(id, { status });
-                trackDataEdit('Avatar Builder', { avatar_id: id, status });
-                await loadLogs();
-            } catch (error) {
-                els.logMessage.textContent = error.message || 'Status could not be updated.';
-            }
-        };
-
-        window.saveAvatarNotes = async id => {
-            const textarea = document.querySelector(`[data-notes-id="${id}"]`);
-            try {
-                await updateAvatarLog(id, { result_notes: textarea ? textarea.value : '' });
-                trackDataEdit('Avatar Builder', { avatar_id: id, field: 'result_notes' });
-                els.logMessage.textContent = 'Notes saved.';
-                await loadLogs();
-            } catch (error) {
-                els.logMessage.textContent = error.message || 'Notes could not be saved.';
-            }
-        };
-
-        window.copySavedBrief = async (id, button) => {
-            const item = state.allLogs.find(log => log.id === id);
-            if (!item) return;
-            await copyText(item.brief || item.sub_avatar || item.avatar_name, button);
-        };
-
-        els.form.addEventListener('input', renderPreview);
-        els.form.addEventListener('submit', saveAvatar);
-        document.getElementById('clearButton').addEventListener('click', clearBuilder);
-        document.getElementById('copyPreviewButton').addEventListener('click', () => copyText(buildBrief(), document.getElementById('copyPreviewButton')));
-        document.getElementById('refreshLogButton').addEventListener('click', loadLogs);
-        document.getElementById('resetFiltersButton').addEventListener('click', () => {
-            els.filterSearch.value = '';
-            els.filterCreator.value = '';
-            els.filterStatus.value = '';
-            els.filterStart.value = '';
-            els.filterEnd.value = '';
-            loadLogs();
+        const stop = authModule.onHubAuthChange((role) => {
+          window.clearTimeout(timeout);
+          stop();
+          if (role && allowedProfiles.has(role.key)) allowPage(role);
+          else denyPage();
+          resolve({ role, firebase: true });
         });
-        [els.filterSearch, els.filterCreator, els.filterStatus, els.filterStart, els.filterEnd].forEach(input => {
-            input.addEventListener('change', loadLogs);
-            if (input === els.filterSearch) input.addEventListener('input', () => window.clearTimeout(input._timer) || (input._timer = window.setTimeout(loadLogs, 250)));
+      });
+    }
+
+    window._avatarFirebaseStore = {
+      async get(key) {
+        if (key === 'seeded_v2') return { value: '1' };
+        const authState = await ensureRole();
+        if (!authState.firebase) {
+          const value = localStore.get(key);
+          return value == null ? null : { value };
+        }
+        if (key === 'counter') {
+          const logs = await firestore.getAvatarLogs();
+          const max = logs.reduce((best, item) => Math.max(best, Number(item.batch_no || item.record?.no || 0)), 0);
+          return { value: String(max) };
+        }
+        if (!key.startsWith('batch:')) {
+          const value = localStore.get(key);
+          return value == null ? null : { value };
+        }
+        const logs = await firestore.getAvatarLogs();
+        window._avatarDocByLegacyId = window._avatarDocByLegacyId || {};
+        const found = logs.map(recFromDoc).find(item => item.id === key);
+        if (!found) return null;
+        window._avatarDocByLegacyId[key] = found.firestore_id;
+        return { value: JSON.stringify(found) };
+      },
+      async set(key, value) {
+        const authState = await ensureRole();
+        if (!authState.firebase || !key.startsWith('batch:')) {
+          localStore.set(key, value);
+          return;
+        }
+        const record = JSON.parse(value);
+        const role = window.fratelloAvatarRole || authState.role || {};
+        const user = role.user || {};
+        const logs = await firestore.getAvatarLogs();
+        window._avatarDocByLegacyId = window._avatarDocByLegacyId || {};
+        logs.forEach(item => {
+          const legacyId = item.legacy_id || item.record?.id;
+          if (legacyId) window._avatarDocByLegacyId[legacyId] = item.id;
         });
-
-        renderPreview();
-
-        if ((location.hostname === 'localhost' || location.hostname === '127.0.0.1') && !firebaseConfigured()) {
-            applyRole(roleFromLocalStorage());
-        } else if (firebaseConfigured()) {
-            onHubAuthChange(role => applyRole(role));
+        const existingId = record.firestore_id || window._avatarDocByLegacyId[key];
+        const payload = {
+          avatar_name: record.sub || record.hook || 'Untitled avatar',
+          campaign: record.fields?.proof || '',
+          status: record.status || 'Untested',
+          result_notes: record.result || '',
+          sub_avatar: record.sub || '',
+          best_hook: record.hook || '',
+          belief: record.belief || '',
+          brief: record.brief || (typeof briefFromRecord === 'function' ? briefFromRecord(record) : ''),
+          fields: record.fields || {},
+          angles: record.angles || [],
+          built: record.built || [],
+          batch_no: Number(record.no || 0),
+          date_label: record.date || '',
+          legacy_id: key,
+          record: {
+            ...record,
+            id: key,
+            createdByName: record.createdByName || user.name || '',
+            createdByEmail: record.createdByEmail || normalizeEmail(user.email || '')
+          },
+          created_by_name: record.createdByName || user.name || '',
+          created_by_email: normalizeEmail(record.createdByEmail || user.email || '')
+        };
+        if (existingId) {
+          await firestore.updateAvatarLog(existingId, {
+            status: payload.status,
+            result_notes: payload.result_notes,
+            avatar_name: payload.avatar_name,
+            best_hook: payload.best_hook,
+            sub_avatar: payload.sub_avatar,
+            belief: payload.belief,
+            brief: payload.brief,
+            fields: payload.fields,
+            angles: payload.angles,
+            built: payload.built,
+            record: payload.record
+          });
         } else {
-            applyRole(roleFromLocalStorage());
+          const saved = await firestore.createAvatarLog(payload);
+          window._avatarDocByLegacyId[key] = saved.id;
         }
-    </script>
+      },
+      async delete(key) {
+        const authState = await ensureRole();
+        if (!authState.firebase || !key.startsWith('batch:')) {
+          localStore.delete(key);
+          return;
+        }
+        const logs = await firestore.getAvatarLogs();
+        const found = logs.find(item => item.id === key || item.legacy_id === key || item.record?.id === key);
+        if (found) await firestore.deleteAvatarLog(found.id);
+      },
+      async list(prefix) {
+        const authState = await ensureRole();
+        if (!authState.firebase) return { keys: localStore.list(prefix) };
+        const logs = await firestore.getAvatarLogs();
+        window._avatarDocByLegacyId = window._avatarDocByLegacyId || {};
+        const keys = logs.map(item => {
+          const rec = recFromDoc(item);
+          window._avatarDocByLegacyId[rec.id] = item.id;
+          return rec.id;
+        }).filter(key => key.indexOf(prefix) === 0);
+        return { keys };
+      }
+    };
+    return window._avatarFirebaseStore;
+  }
+
+  if (location.protocol === 'file:') {
+    allowPage(localRole());
+  } else {
+    firebaseStore().catch(() => denyPage());
+  }
+
+  window.storage = {
+    get: async key => (await firebaseStore()).get(key),
+    set: async (key, value) => (await firebaseStore()).set(key, value),
+    delete: async key => (await firebaseStore()).delete(key),
+    list: async prefix => (await firebaseStore()).list(prefix)
+  };
+}());
+</script>
+<script>
+const ROASTS = [
+  {n:"\u2014", hint:"Add categories to deepen the roast. Broad = light reach; specific = deep relatability."},
+  {n:"Light \u00b7 very broad", hint:"One category. Big reach, but your product and offer must carry it. Good for cold top-of-funnel."},
+  {n:"Medium \u00b7 broad", hint:"Two categories stacked. Getting relatable. A solid core avatar."},
+  {n:"Medium-dark \u00b7 specific", hint:"Three categories. The sweet spot for specialty \u2014 you relate where rivals generalize."},
+  {n:"Dark \u00b7 very specific", hint:"Four+ categories. Uncomfortably specific. Strongest relatability without alienating on demographics."},
+];
+
+/* ---------- help content (re-teaches the training) ---------- */
+const HELP={
+  desire:{step:"01",title:"Desire",
+    what:"The thing they want or need, phrased simply: \u201cI want\u2026\u201d or \u201cI need\u2026\u201d. Keep it surface-level and specific \u2014 \u201cI want my cup to taste like something\u201d beats the broad \u201cI want good coffee.\u201d",
+    why:"Desire is the engine. It carries far more emotional pull than any demographic, and emotional pull is what actually drives someone to buy. Start here \u2014 not with who they are, but with what they want. (For coffee the want is often buried, so it\u2019s fine to lead from Experience or Behavior instead and let the desire surface later.)",
+    check:"Can you say it as \u201cI want X\u201d or \u201cI need Y\u201d? If you can\u2019t, it isn\u2019t a desire yet \u2014 it\u2019s probably an experience or an emotion.",
+    ex:"\u201cI want proof of when my coffee was roasted, not a vague best-before date.\u201d"},
+  exp:{step:"02",title:"Experience",
+    what:"Something that actually happened to them, or is happening now. Either a situation they\u2019re in (situational) or a product they tried and the outcome they got (product-based).",
+    why:"Shared experiences unite people \u2014 \u201cI\u2019ve been through that too.\u201d The discipline that makes this work: capture only what happened. Strip out what they wanted (that\u2019s the Desire), how they felt (Emotion), and what they did next (Behavior). You add those back as their own clean layers in the next steps \u2014 keeping the experience pure is what keeps the whole avatar sharp.",
+    check:"Does it describe a circumstance or event with the feeling removed? \u201cThe bag was stale\u201d (yes) vs \u201chates the stale bag\u201d (no \u2014 that\u2019s an emotion sneaking in).",
+    ex:"\u201cOrdered \u2018fresh\u2019 specialty coffee online and it arrived roasted four months ago.\u201d"},
+  emo:{step:"03",title:"Emotion",
+    what:"How they feel in response to the experience or desire. Put their everyday word in the box (let down, fed up, skeptical), then pick the basic emotion underneath it.",
+    why:"Emotion slips past logic and creates an instant \u201cthat\u2019s me.\u201d Everyday words like \u201cfrustrated\u201d are just signposts \u2014 dig one layer down to a basic emotion (anger, fear, sadness, joy, surprise, disgust, trust, anticipation) and name what set it off. Pinpointing the real feeling and its trigger is exactly what makes an ad feel like it read their mind.",
+    check:"Does it describe how they feel about something? If it\u2019s a surface word, keep asking \u201cwhy\u201d until you land on one of the basic emotions.",
+    ex:"Surface word \u201clet down\u201d \u2192 underneath it\u2019s sadness, triggered by a premium promise that broke."},
+  beh:{step:"04",title:"Behavior",
+    what:"What they do because of all this \u2014 a repeated action or habit. Physical (checks the roast date) or mental (always overthinks the purchase) both count.",
+    why:"Behavior is your sharpest lever because it\u2019s tied to ego \u2014 it\u2019s who they are. Calling out what someone does lands harder than describing a benefit. Bonus: behavior is predictable, so naming it lets your ad \u201ctell them the future\u201d about themselves.",
+    check:"Does it describe something they do, physical or mental? Then ask how often \u2014 the more often, the stronger and more relatable.",
+    ex:"\u201cChecks the roast date before every single purchase.\u201d"},
+  demo:{step:"05",title:"Demographic",
+    what:"The factual, on-paper traits \u2014 age, gender, generation, location, household, employment, income.",
+    why:"Last, and usually optional. Demographics drive far less purchase intent than the other four, and leading with them quietly cuts out people who share the exact same desire. Add one only when Fratello\u2019s product genuinely serves that group better, or to trim a desire so broad it needs narrowing.",
+    check:"Does it fit a standard bucket \u2014 age, gender, location, household, employment, income?",
+    ex:"\u201cOwns an expensive super-automatic machine\u201d \u2014 earns its place because it pairs with the won\u2019t-clog-my-machine desire."},
+};
+function openHelp(cat){
+  const h=HELP[cat]; if(!h) return;
+  document.getElementById('h-step').textContent=h.step;
+  document.getElementById('h-title').textContent=h.title;
+  document.getElementById('h-what').textContent=h.what;
+  document.getElementById('h-why').textContent=h.why;
+  document.getElementById('h-check').textContent=h.check;
+  document.getElementById('h-ex').textContent=h.ex;
+  document.getElementById('help-overlay').classList.add('open');
+}
+function closeHelp(){ document.getElementById('help-overlay').classList.remove('open'); }
+function closeHelpBg(e){ if(e.target===document.getElementById('help-overlay')) closeHelp(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHelp(); });
+
+/* ---------- desire menu ---------- */
+const DESIRES = [
+  {tier:"Category master \u2014 lead here", items:[
+    {k:"Roast-date proof", v:"I want proof of when my coffee was roasted, not a vague best-before date"},
+    {k:"Never run out", v:"I need my morning coffee to never run out"},
+    {k:"A reliable daily go-to", v:"I want one reliable go-to I can drink every single day"},
+    {k:"Smooth, not bitter", v:"I want a smooth, rich cup with no bitterness or sourness"},
+    {k:"Bold & dark", v:"I want a full, dark, bold cup, not thin or sour"},
+    {k:"Forgiving at home", v:"I want beans that brew well at home without fighting my gear"},
+  ]},
+  {tier:"Strong secondary", items:[
+    {k:"Canadian & family-owned", v:"I want to support a genuinely Canadian, family-owned roaster"},
+    {k:"No snobbery", v:"I want great coffee without being made to feel dumb"},
+    {k:"Worth the price", v:"I want to feel the higher price is actually justified"},
+    {k:"Ethical & traceable", v:"I want to know where the beans came from and that growers were paid fairly"},
+    {k:"Fast = fresh", v:"I want it shipped fast so it arrives fresh"},
+    {k:"A gift that isn\u2019t cheap", v:"I want to give coffee as a gift that doesn\u2019t feel cheap"},
+  ]},
+  {tier:"Fratello-specific (from your reviews)", items:[
+    {k:"Won\u2019t clog my machine", v:"I want beans that won\u2019t go oily and clog my expensive machine"},
+    {k:"Decaf that tastes real", v:"I want a decaf that doesn\u2019t taste like decaf"},
+    {k:"Great with milk", v:"I want a bean that shines in my daily latte or Americano"},
+    {k:"Same cup every bag", v:"I want the same great cup every bag, not hit-or-miss"},
+    {k:"Right-size bag", v:"I want a bag size that matches how much I actually drink"},
+    {k:"Keep my favourite", v:"I want to keep getting the one coffee I love and can\u2019t find elsewhere"},
+    {k:"Brings back a place", v:"I want the coffee that brings back a place or time I loved"},
+  ]},
+  {tier:"Enthusiast only (small pool)", items:[
+    {k:"Always something new", v:"I want to keep discovering new and interesting coffees"},
+    {k:"Clean & well-developed", v:"I want a clean, well-developed roast that shows the bean\u2019s true character"},
+  ]},
+];
+/* ---------- demographic menu ---------- */
+const DEMOS = [
+  {tier:"Age / generation", items:[
+    {k:"Gen Z (under 28)",v:"Gen Z (under 28)"},{k:"Millennials",v:"Millennials"},
+    {k:"Gen X",v:"Gen X"},{k:"Boomers / retirees",v:"Boomers / retirees"},
+  ]},
+  {tier:"Household", items:[
+    {k:"Parents of young kids",v:"Parents of young kids"},{k:"Empty nesters",v:"Empty nesters"},
+    {k:"Lives alone",v:"Single-person household"},{k:"Couple, no kids",v:"Couple, no kids"},
+  ]},
+  {tier:"Location", items:[
+    {k:"Calgary / local",v:"Calgary / local"},{k:"Canada-wide",v:"Canada-wide"},{k:"Rural / small town",v:"Rural / small town"},
+  ]},
+  {tier:"Gear / spend", items:[
+    {k:"Premium-machine owner",v:"Owns an expensive espresso machine"},
+    {k:"Drip / pod brewer",v:"Brews with drip or pods"},
+    {k:"Budget-conscious",v:"Budget-conscious buyer"},
+    {k:"Gift buyer",v:"Buying coffee as a gift"},
+  ]},
+  {tier:"Work", items:[
+    {k:"Office / WFH",v:"Office or work-from-home"},{k:"Shift worker",v:"Shift worker"},
+    {k:"Caf\u00e9 / wholesale",v:"Caf\u00e9 owner or wholesale buyer"},
+  ]},
+];
+function renderChips(menuId,data,fillFn){
+  const m=document.getElementById(menuId); if(!m) return;
+  m.innerHTML=data.map(g=>
+    `<div class="dm-group"><div class="dm-tier">${g.tier}</div><div class="dm-chips">`+
+    g.items.map(it=>`<button type="button" class="chip" onclick="${fillFn}(this)" data-v="${it.v.replace(/"/g,'&quot;')}">${it.k}</button>`).join('')+
+    `</div></div>`).join('');
+}
+function toggleMenu(menuId,btn){
+  const m=document.getElementById(menuId);
+  const open=m.classList.toggle('open');
+  btn.classList.toggle('open',open);
+}
+function markSel(menuId,el){
+  document.getElementById(menuId).querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  if(el) el.classList.add('sel');
+}
+function fillDesire(btn){
+  const v=btn.getAttribute('data-v');
+  const inp=document.getElementById('f-desire');
+  inp.value=v; inp.classList.add('fromMenu');
+  markSel('desire-menu',btn);
+  recompute();
+}
+function onDesireType(){
+  const inp=document.getElementById('f-desire');
+  // if the typed value no longer matches the selected chip, drop the highlight
+  const sel=document.querySelector('#desire-menu .chip.sel');
+  if(!sel || sel.getAttribute('data-v')!==inp.value){ markSel('desire-menu',null); inp.classList.remove('fromMenu'); }
+  recompute();
+}
+function fillDemo(btn){
+  const v=btn.getAttribute('data-v');
+  const inp=document.getElementById('f-demo');
+  inp.value=v; inp.classList.add('fromMenu');
+  markSel('demo-menu',btn);
+  recompute();
+}
+function onDemoType(){
+  const inp=document.getElementById('f-demo');
+  const sel=document.querySelector('#demo-menu .chip.sel');
+  if(!sel || sel.getAttribute('data-v')!==inp.value){ markSel('demo-menu',null); inp.classList.remove('fromMenu'); }
+  recompute();
+}
+
+/* ---------- helpers ---------- */
+function val(id){return (document.getElementById(id).value||"").trim();}
+function setBeans(filled){
+  const wrap=document.getElementById('beans'); wrap.innerHTML='';
+  const shades=['#cabfae','#a89a83','#7c6e5a','#4d433a','#231f20'];
+  for(let i=0;i<5;i++){
+    const b=document.createElement('div'); b.className='bean';
+    if(i<filled) b.style.background=shades[i];
+    wrap.appendChild(b);
+  }
+}
+function filledCount(){
+  let n=0;
+  if(val('f-desire'))n++;
+  if(val('f-exp'))n++;
+  if(val('f-emo')||val('f-emoprimary')||val('f-emoprimary2'))n++;
+  if(val('f-beh'))n++;
+  if(val('f-demo'))n++;
+  return n;
+}
+function expType(){ const a=document.querySelector('#seg-exptype .segbtn.active'); return a?a.getAttribute('data-v'):''; }
+
+function assembleSub(){
+  const d=val('f-desire'), e=val('f-exp'), em=val('f-emo'), emp=val('f-emoprimary'),
+        emp2=val('f-emoprimary2'), b=val('f-beh'), dm=val('f-demo');
+  if(!d && !e && !b && !em && !emp && !emp2) return "";
+  const clauses=[];
+  if(d) clauses.push(lc(thirdify(stripWant(d))));
+  else if(e) clauses.push("has "+lc(e));
+  else if(b) clauses.push(lc(b));
+  else clauses.push("feels "+(em?lc(em):emoCore()));
+  if(e && d) clauses.push("has "+lc(e));
+  if((em||emp||emp2) && (d||e||b)){
+    let feel = em ? lc(em) : emoCore();
+    const core = emoCore();
+    if(em && core) feel += " ("+core+" underneath)";
+    clauses.push("feels "+feel);
+  }
+  if(b && (d||e)) clauses.push(lc(b));
+  let s = "Someone who " + clauses.join(", ");
+  if(clauses.length>1){
+    const i=s.lastIndexOf(", ");
+    s = s.slice(0,i) + ", and " + s.slice(i+2);
+  }
+  if(dm) s += " ("+dm+")";
+  return cap(s)+".";
+}
+function stripWant(t){
+  return t
+    .replace(/^i\s+want\s+to\s+/i,'wants to ')
+    .replace(/^i\s+want\s+/i,'wants ')
+    .replace(/^i\s+need\s+to\s+/i,'needs to ')
+    .replace(/^i\s+need\s+/i,'needs ');
+}
+function lc(t){return t.charAt(0).toLowerCase()+t.slice(1);}
+function cap(t){return t.charAt(0).toUpperCase()+t.slice(1);}
+function baseVerb(t){
+  t=String(t).trim();
+  const m=t.match(/^(\S+)([\s\S]*)$/); if(!m) return t;
+  let w=m[1]; const rest=m[2]; const lw=w.toLowerCase();
+  if(/[^aeiou]ies$/.test(lw)) w=w.slice(0,-3)+'y';
+  else if(/(ses|shes|ches|xes|zes|oes)$/.test(lw)) w=w.slice(0,-2);
+  else if(/ss$/.test(lw)){ /* keep */ }
+  else if(/s$/.test(lw)) w=w.slice(0,-1);
+  return w+rest;
+}
+function youify(t){ return String(t).replace(/\bmy\b/gi,'your').replace(/\bmine\b/gi,'yours'); }
+function thirdify(t){ return String(t).replace(/\bmy\b/gi,'their').replace(/\bme\b/gi,'them').replace(/\bI\b/g,'they'); }
+function emoCore(){
+  const emp=val('f-emoprimary'), emp2=val('f-emoprimary2');
+  if(emp && emp2 && emp!==emp2) return lc(emp)+" + "+lc(emp2);
+  return lc(emp||emp2);
+}
+const DYADS={
+  "Joy|Trust":"Love","Fear|Trust":"Submission","Fear|Surprise":"Awe",
+  "Sadness|Surprise":"Disapproval","Disgust|Sadness":"Remorse",
+  "Anger|Disgust":"Contempt","Anger|Anticipation":"Aggressiveness","Anticipation|Joy":"Optimism"
+};
+function updateDyadHint(){
+  const el=document.getElementById('dyadhint'); if(!el) return;
+  const a=val('f-emoprimary'), b=val('f-emoprimary2');
+  if(!b){ el.textContent=''; return; }
+  if(a===b){ el.textContent='Same emotion twice \u2014 pick a different second, or clear it.'; return; }
+  if(!a){ el.textContent=''; return; }
+  const key=[a,b].sort().join('|');
+  el.textContent = DYADS[key]
+    ? a+' + '+b+' \u2248 '+DYADS[key]+' (a clean, recognizable blend).'
+    : a+' + '+b+' \u2014 a wider blend. Make sure both are really there before stacking them.';
+}
+
+const GUARD_DEFAULT = "- Roast date on any hero bag must be current (within days of the run date).\n- Subscribe & Save = 10% off + free shipping over $45 (West). Don't imply it applies to one-time orders.\n- No real competitor brand names or logos on screen.\n- Fresh-roasted in Calgary, roasted to order. For gifting, respect ship-by dates; Calgary = same-day available.";
+
+function funnelTag(cat){
+  return ({exp:'Experience \u00b7 broad/cold',desire:'Desire \u00b7 broad/cold',
+    beh:'Behavior \u00b7 sharp',emo:'Emotion \u00b7 medium',demo:'Demographic \u00b7 last'})[cat]||'';
+}
+function buildCoreAvatars(){
+  const out=[];
+  const d=val('f-desire'), e=val('f-exp'), em=val('f-emo')||emoCore(), b=val('f-beh'), dm=val('f-demo');
+  if(e) out.push({tag:funnelTag('exp'), broad:true,  line:e});
+  if(d) out.push({tag:funnelTag('desire'), broad:true,  line:d});
+  if(b) out.push({tag:funnelTag('beh'), broad:false, line:b});
+  if(em) out.push({tag:funnelTag('emo'), broad:false, line:'feels '+lc(em)});
+  if(dm) out.push({tag:funnelTag('demo'), broad:false, line:dm});
+  return out;
+}
+function renderCores(){
+  const wrap=document.getElementById('out-cores'); if(!wrap) return;
+  const cores=buildCoreAvatars();
+  if(!cores.length){ wrap.innerHTML='<div class="empty">Fill a category to see your Core Avatars.</div>'; return; }
+  wrap.innerHTML='';
+  cores.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='coreitem '+(c.broad?'broad':'specific');
+    el.innerHTML='<span class="ctag">'+esc(c.tag)+'</span>'+esc(c.line);
+    wrap.appendChild(el);
+  });
+}
+function buildBelief(){
+  const e=val('f-exp'), b=val('f-beh'), em=val('f-emo')||emoCore();
+  if(e && b)  return cap(e)+' \u2014 so now I '+baseVerb(lc(b))+'.';
+  if(e && em) return cap(e)+', and '+lc(em)+' is what I came to expect.';
+  if(e)       return cap(e)+'.';
+  if(b)       return 'I '+lc(b)+' for a reason.';
+  if(em)      return 'I feel '+lc(em)+' about it, and I am not the only one.';
+  return '';
+}
+function renderBelief(){
+  const el=document.getElementById('out-belief'); if(!el) return;
+  const bel=buildBelief();
+  el.innerHTML = bel ? esc(bel) : '<div class="empty">Fill an experience (plus an emotion or behavior) to surface the belief.</div>';
+}
+function buildCopyBrief(){
+  const d=val('f-desire'), cd=val('f-coredesire'), emo=val('f-emo'), core=emoCore(),
+        proof=val('f-proof'), analogy=val('f-analogy'), guard=val('f-guard'), dont=val('f-dontsay');
+  const sub=val('out-sub'), hook=val('out-besthook');
+  const cores=buildCoreAvatars();
+  if(!cores.length && !sub) return 'Fill at least one category to generate a brief.';
+  const A=buildAngles();
+  const roast=document.getElementById('roast-name').textContent;
+  const L=[];
+  L.push('FRATELLO \u2014 COPYWRITER BRIEF');
+  L.push('Generated from the Avatar Lab. Pair with your own creative direction.');
+  L.push('');
+  L.push('THE AVATAR');
+  if(sub) L.push('Sub Avatar (lead with this for retarget): '+sub);
+  if(cores.length){
+    L.push('Core Avatars in play \u2014 each can anchor its own ad:');
+    cores.forEach(c=>L.push('  - ['+c.tag+'] '+c.line));
+  }
+  L.push('Roast level: '+roast+'  (more categories = more specific = warmer funnel)');
+  L.push('');
+  L.push('WHAT IS DRIVING THE BUY');
+  if(d) L.push('Surface desire: '+d);
+  if(cd) L.push('Core desire underneath: '+cd);
+  if(emo||core) L.push('Emotional job (what the ad must make them feel): '+(emo||core)+((core&&emo)?' \u2014 '+core+' underneath':''));
+  const belief=buildBelief();
+  if(belief) L.push('Belief to mirror (the mind-reading line): "'+belief+'"');
+  L.push('');
+  L.push('PROOF / WHY FRATELLO');
+  L.push(proof || '(fill this in \u2014 the mechanism that makes Fratello the answer: roast date on the bag, roasted to order in Calgary, etc.)');
+  L.push('');
+  if(analogy){
+    L.push('ANALOGY DEVICE');
+    L.push('"It is like '+analogy.replace(/^it\u2019s like\s*/i,'').replace(/^it's like\s*/i,'').replace(/^like\s*/i,'')+'"');
+    L.push('');
+  }
+  L.push('ANGLE STARTERS (hooks by entry point)');
+  if(A.length) A.forEach(a=>L.push('  - ['+a.t+'] '+a.x));
+  else L.push('  (none yet)');
+  if(hook) L.push('Lead hook: '+hook);
+  L.push('');
+  L.push('GUARDRAILS \u2014 must follow');
+  L.push(guard || '(none set)');
+  L.push('');
+  L.push('DO NOT SAY');
+  L.push(dont || '(the implied desire/emotion you stripped from the experience \u2014 keep it out of the open so copy stays specific, not generic)');
+  L.push('');
+  L.push('DELIVERABLES \u2014 ask the writer for, per ad:');
+  L.push('  - On-image copy (<=9 words)  - Primary text (2-3 sentences)  - Headline (<=6 words)  - Description (1 line)  - CTA  - Art direction (1-2 lines)');
+  L.push('Produce one ad per broad Core Avatar (cold) + one or two stacked Sub-Avatar ads (specific, retarget). Put them in run order: broad -> specific.');
+  return L.join('\n');
+}
+function copyBrief(){
+  const t=buildCopyBrief();
+  try{ navigator.clipboard.writeText(t); }catch(e){}
+  const m=document.getElementById('savemsg');
+  m.textContent='Copywriter brief copied \u2014 paste it into your copy agent.';
+}
+
+function buildAngles(){
+  const d=val('f-desire'), e=val('f-exp'), em=val('f-emo'), b=val('f-beh');
+  const A=[];
+  if(e) A.push({t:'Experience',x:`Ever ${lc(e)}?`});
+  if(b) A.push({t:'Behavior',x:`If you ${baseVerb(lc(b))}, then we should talk.`});
+  if(em) A.push({t:'Emotion',x:`You didn\u2019t get into good coffee to feel ${lc(em)}.`});
+  if(d) A.push({t:'Desire',x:`${youify(cap(stripWant(d)).replace(/^Wants to/,'Want to').replace(/^Wants/,'Want'))}? Start here.`});
+  if(b && e) A.push({t:'Stacked',x:`If you ${baseVerb(lc(b))} because ${lc(e)}, you already get why we exist.`, s:true});
+  else if(b && em) A.push({t:'Stacked',x:`If you ${baseVerb(lc(b))} and still feel ${lc(em)}, this is for you.`, s:true});
+  return A;
+}
+
+let lastAngles=[];
+function recompute(){
+  const n=filledCount();
+  setBeans(n);
+  const r=ROASTS[Math.min(n,4)] || ROASTS[0];
+  document.getElementById('roast-name').textContent=r.n;
+  document.getElementById('roast-hint').textContent=r.hint;
+
+  const subEl=document.getElementById('out-sub');
+  if(!subEl.dataset.touched){ subEl.value=assembleSub(); }
+
+  updateDyadHint();
+  renderCores();
+  renderBelief();
+
+  const wrap=document.getElementById('out-angles'); wrap.innerHTML='';
+  const A=buildAngles(); lastAngles=A;
+  if(!A.length){ wrap.innerHTML='<div class="empty">Fill a category to generate hooks.</div>'; return; }
+  const current=val('out-besthook');
+  A.forEach(a=>{
+    const d=document.createElement('div');
+    d.className='angle'+(a.s?' stacked':'')+(a.x===current?' picked':'');
+    d.innerHTML=`<span class="atag">${a.t}${a.s?' \u2605':''}</span>${esc(a.x)}`;
+    d.onclick=()=>{ document.getElementById('out-besthook').value=a.x; recompute(); };
+    wrap.appendChild(d);
+  });
+}
+document.getElementById('out-sub').addEventListener('input',function(){this.dataset.touched='1';});
+document.getElementById('out-besthook').addEventListener('input',recompute);
+
+function pickSeg(btn){
+  btn.parentElement.querySelectorAll('.segbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  recompute();
+}
+function showView(v){
+  document.getElementById('view-build').classList.toggle('hidden',v!=='build');
+  document.getElementById('view-bank').classList.toggle('hidden',v!=='bank');
+  document.getElementById('view-training').classList.toggle('hidden',v!=='training');
+  document.getElementById('tab-build').classList.toggle('active',v==='build');
+  document.getElementById('tab-bank').classList.toggle('active',v==='bank');
+  document.getElementById('tab-training').classList.toggle('active',v==='training');
+  if(v==='bank') renderBank();
+  window.scrollTo({top:0,behavior:'auto'});
+}
+function clearForm(){
+  ['f-desire','f-coredesire','f-exp','f-emo','f-emoprimary','f-emoprimary2','f-beh','f-behfreq','f-demo','f-proof','f-analogy','f-dontsay','out-sub','out-besthook']
+    .forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-guard').value=GUARD_DEFAULT;
+  document.getElementById('out-sub').dataset.touched='';
+  document.getElementById('f-desire').classList.remove('fromMenu');
+  document.getElementById('f-demo').classList.remove('fromMenu');
+  markSel('desire-menu',null); markSel('demo-menu',null);
+  // reset experience segment to first
+  const segs=document.querySelectorAll('#seg-exptype .segbtn');
+  segs.forEach((b,i)=>b.classList.toggle('active',i===0));
+  recompute();
+  document.getElementById('savemsg').textContent='';
+}
+
+/* ---------- storage ---------- */
+let MEM={};
+function hasWS(){ try{ return !!(window.storage && typeof window.storage.get==='function'); }catch(e){ return false; } }
+function hasLS(){ try{ return !!window.localStorage; }catch(e){ return false; } }
+async function sGet(k){
+  if(hasWS()){ try{ const r=await window.storage.get(k); return r?r.value:null; }catch(e){} }
+  if(hasLS()){ try{ const v=localStorage.getItem(k); return v===null?null:v; }catch(e){} }
+  return (k in MEM)?MEM[k]:null;
+}
+async function sSet(k,v){
+  if(hasWS()){ try{ await window.storage.set(k,v); return; }catch(e){} }
+  if(hasLS()){ try{ localStorage.setItem(k,v); return; }catch(e){} }
+  MEM[k]=v;
+}
+async function sDel(k){
+  if(hasWS()){ try{ await window.storage.delete(k); return; }catch(e){} }
+  if(hasLS()){ try{ localStorage.removeItem(k); return; }catch(e){} }
+  delete MEM[k];
+}
+async function sList(p){
+  if(hasWS()){ try{ const r=await window.storage.list(p); if(r&&r.keys) return r.keys; }catch(e){} }
+  if(hasLS()){ try{ const out=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf(p)===0) out.push(k); } return out; }catch(e){} }
+  return Object.keys(MEM).filter(k=>k.indexOf(p)===0);
+}
+
+async function nextNo(){
+  let c = await sGet('counter'); c = c? parseInt(c,10):0; c++;
+  await sSet('counter', String(c)); return c;
+}
+
+async function saveBatch(){
+  const sub=val('out-sub');
+  if(!sub){ flash('Add at least a desire, experience, or behavior first.'); return; }
+  const no=await nextNo();
+  const id='batch:'+Date.now();
+  // capture EVERY field
+  const fields={
+    desire:val('f-desire'), coredesire:val('f-coredesire'),
+    exp:val('f-exp'), exptype: val('f-exp')?expType():'',
+    emo:val('f-emo'), emoprimary:val('f-emoprimary'), emoprimary2:val('f-emoprimary2'),
+    beh:val('f-beh'), behfreq:val('f-beh')?val('f-behfreq'):'',
+    demo:val('f-demo'),
+    proof:val('f-proof'), analogy:val('f-analogy'), guard:val('f-guard'), dontsay:val('f-dontsay')
+  };
+  const built=[];
+  if(fields.desire)built.push('Desire: '+fields.desire+(fields.coredesire?' \u2014 '+fields.coredesire:''));
+  if(fields.exp)built.push('Experience'+(fields.exptype?' ('+fields.exptype+')':'')+': '+fields.exp);
+  if(fields.emo||fields.emoprimary||fields.emoprimary2){
+    const core=emoCore(); const surf=fields.emo;
+    built.push('Emotion: '+(surf?(surf+(core?' ('+core+')':'')):core));
+  }
+  if(fields.beh)built.push('Behavior'+(fields.behfreq?' ('+fields.behfreq+')':'')+': '+fields.beh);
+  if(fields.demo)built.push('Demographic: '+fields.demo);
+  const creator=(window.fratelloAvatarRole&&window.fratelloAvatarRole.user)?window.fratelloAvatarRole.user:{};
+  const rec={ id, no, date:new Date().toLocaleDateString(), sub,
+    hook:val('out-besthook'), angles:lastAngles.slice(), fields, built,
+    belief:buildBelief(), brief:buildCopyBrief(),
+    createdByName:creator.name||'', createdByEmail:creator.email||'',
+    status:'Untested', result:'' };
+  await sSet(id, JSON.stringify(rec));
+  flash('Saved as Avatar #'+String(no).padStart(3,'0')+' \u2014 inputs kept. Open the Avatar Log to copy the full brief; hit Clear for a fresh start.');
+  await refreshCount();
+}
+function flash(m){ const e=document.getElementById('savemsg'); e.textContent=m; }
+
+async function loadAll(){
+  const keys=await sList('batch:');
+  const recs=[];
+  for(const k of keys){ const v=await sGet(k); if(v){ try{recs.push(JSON.parse(v));}catch(e){} } }
+  recs.sort((a,b)=>b.no-a.no);
+  return recs;
+}
+async function refreshCount(){
+  const keys=await sList('batch:');
+  document.getElementById('bankcount').textContent=keys.length;
+}
+function recordCreator(r){
+  return String(r.createdByName||r.created_by_name||r.record?.createdByName||r.createdByEmail||r.created_by_email||r.record?.createdByEmail||'').trim();
+}
+function recordCreatorKey(r){
+  return String(r.createdByEmail||r.created_by_email||r.record?.createdByEmail||r.createdByName||r.created_by_name||r.record?.createdByName||'').trim().toLowerCase();
+}
+function recordDate(r){
+  const raw=r.created_at||r.updated_at||r.date||r.date_label||'';
+  const d=new Date(raw);
+  return Number.isNaN(d.getTime())?null:d;
+}
+function recordSearchText(r){
+  return [
+    r.sub,r.hook,r.belief,r.brief,r.status,r.result,recordCreator(r),
+    r.fields&&Object.values(r.fields).join(' '),
+    (r.built||[]).join(' '),
+    (r.angles||[]).map(a=>[a.t,a.x].join(' ')).join(' ')
+  ].join(' ').toLowerCase();
+}
+function populateBankCreatorFilter(recs){
+  const select=document.getElementById('bank-filter-creator');
+  if(!select) return;
+  const current=select.value;
+  const seen=new Map();
+  recs.forEach(r=>{
+    const key=recordCreatorKey(r);
+    if(!key || seen.has(key)) return;
+    seen.set(key, recordCreator(r) || key);
+  });
+  select.innerHTML='<option value="">Everyone</option>'+Array.from(seen.entries())
+    .sort((a,b)=>a[1].localeCompare(b[1]))
+    .map(([key,label])=>`<option value="${esc(key)}">${esc(label)}</option>`)
+    .join('');
+  select.value=seen.has(current)?current:'';
+}
+function filterBankRecords(recs){
+  const q=(document.getElementById('bank-filter-search')?.value||'').trim().toLowerCase();
+  const creator=(document.getElementById('bank-filter-creator')?.value||'').trim().toLowerCase();
+  const status=(document.getElementById('bank-filter-status')?.value||'').trim();
+  const start=(document.getElementById('bank-filter-start')?.value||'').trim();
+  const end=(document.getElementById('bank-filter-end')?.value||'').trim();
+  const startDate=start?new Date(start+'T00:00:00'):null;
+  const endDate=end?new Date(end+'T23:59:59'):null;
+  return recs.filter(r=>{
+    if(q && !recordSearchText(r).includes(q)) return false;
+    if(creator && recordCreatorKey(r)!==creator) return false;
+    if(status && r.status!==status) return false;
+    const d=recordDate(r);
+    if(startDate && d && d<startDate) return false;
+    if(startDate && !d) return false;
+    if(endDate && d && d>endDate) return false;
+    if(endDate && !d) return false;
+    return true;
+  });
+}
+function clearBankFilters(){
+  ['bank-filter-search','bank-filter-creator','bank-filter-status','bank-filter-start','bank-filter-end'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  renderBank();
+}
+
+async function renderBank(){
+  const list=document.getElementById('banklist');
+  const allRecs=await loadAll();
+  populateBankCreatorFilter(allRecs);
+  const recs=filterBankRecords(allRecs);
+  if(!allRecs.length){
+    list.innerHTML='<div class="bankempty"><div class="big">No avatars yet.</div>Build an avatar and save it \u2014 it&rsquo;ll persist here when you come back.</div>';
+    return;
+  }
+  if(!recs.length){
+    list.innerHTML='<div class="bankempty"><div class="big">No matching avatars.</div>Adjust the filters above to see more of the log.</div>';
+    return;
+  }
+  list.innerHTML='';
+  recs.forEach(r=>{
+    const card=document.createElement('div'); card.className='batch';
+    const tags=(r.built||[]).map(t=>`<span class="btag2">${esc(t)}</span>`).join('');
+    const angles=(r.angles&&r.angles.length)
+      ? `<div class="bsec">Ad-angle starters</div><div class="bangles">`+
+        r.angles.map(a=>`<div class="bangle"><span class="bat">${esc(a.t)}${a.s?' \u2605':''}</span>${esc(a.x)}</div>`).join('')+`</div>`
+      : '';
+    const opts=['Untested','Live','Worked','Flopped'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('');
+    card.innerHTML=`
+      <div class="batchtop">
+        <span class="bno">#${String(r.no).padStart(3,'0')}</span>
+        <span class="bdate">${esc([r.date, recordCreator(r)].filter(Boolean).join(' · '))}</span>
+      </div>
+      <div class="bsub">${esc(r.sub)}</div>
+      ${r.hook?`<div class="bsec">Best hook</div><div class="bhook">${esc(r.hook)}</div>`:''}
+      ${angles}
+      <div class="bsec">Built from</div>
+      <div class="btags">${tags}</div>
+      <div class="brow">
+        <select class="statussel st-${r.status}" onchange="updField('${r.id}','status',this.value,this)">${opts}</select>
+      </div>
+      <textarea class="bresult" placeholder="Result / notes for future-you \u2014 which hook pulled, CPA, what you&rsquo;d change\u2026" onchange="updField('${r.id}','result',this.value)">${esc(r.result||'')}</textarea>
+      <div class="batchfoot">
+        <button class="mini" onclick="copyOne('${r.id}')">Copy brief</button>
+        <button class="mini del" onclick="delOne('${r.id}')">Delete</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+async function updField(id,field,value,sel){
+  const v=await sGet(id); if(!v)return; const r=JSON.parse(v); r[field]=value; await sSet(id,JSON.stringify(r));
+  if(sel){ sel.className='statussel st-'+value; }
+}
+async function delOne(id){ await sDel(id); await refreshCount(); renderBank(); }
+function rv(r,k){ return (r.fields&&r.fields[k])?String(r.fields[k]).trim():''; }
+function briefFromRecord(r){
+  const d=rv(r,'desire'), cd=rv(r,'coredesire'), e=rv(r,'exp'),
+        emo=rv(r,'emo'), p1=rv(r,'emoprimary'), p2=rv(r,'emoprimary2'),
+        b=rv(r,'beh'), dm=rv(r,'demo'),
+        proof=rv(r,'proof'), analogy=rv(r,'analogy'), guard=rv(r,'guard'), dont=rv(r,'dontsay');
+  let core = (p1&&p2&&p1!==p2) ? (p1.toLowerCase()+' + '+p2.toLowerCase()) : (p1||p2||'').toLowerCase();
+  const cores=[];
+  if(e) cores.push(['Experience \u00b7 broad/cold', e]);
+  if(d) cores.push(['Desire \u00b7 broad/cold', d]);
+  if(b) cores.push(['Behavior \u00b7 sharp', b]);
+  if(emo||core) cores.push(['Emotion \u00b7 medium', 'feels '+(emo||core)]);
+  if(dm) cores.push(['Demographic \u00b7 last', dm]);
+  const L=[];
+  L.push('FRATELLO \u2014 COPYWRITER BRIEF');
+  L.push('Batch #'+String(r.no).padStart(3,'0')+'  \u00b7  '+(r.date||'')+'  \u00b7  '+(r.status||''));
+  L.push('Pair with your own creative direction.');
+  L.push('');
+  L.push('THE AVATAR');
+  if(r.sub) L.push('Sub Avatar (lead with this for retarget): '+r.sub);
+  if(cores.length){ L.push('Core Avatars in play \u2014 each can anchor its own ad:'); cores.forEach(c=>L.push('  - ['+c[0]+'] '+c[1])); }
+  L.push('');
+  L.push('WHAT IS DRIVING THE BUY');
+  if(d) L.push('Surface desire: '+d);
+  if(cd) L.push('Core desire underneath: '+cd);
+  if(emo||core) L.push('Emotional job: '+(emo||core)+((core&&emo)?' \u2014 '+core+' underneath':''));
+  if(r.belief) L.push('Belief to mirror (the mind-reading line): "'+r.belief+'"');
+  L.push('');
+  L.push('PROOF / WHY FRATELLO');
+  L.push(proof || '(not set \u2014 the mechanism that makes Fratello the answer)');
+  L.push('');
+  if(analogy){ L.push('ANALOGY DEVICE'); L.push('"It is like '+analogy.replace(/^it\u2019s like\s*/i,'').replace(/^it's like\s*/i,'').replace(/^like\s*/i,'')+'"'); L.push(''); }
+  L.push('ANGLE STARTERS (hooks by entry point)');
+  if(r.angles&&r.angles.length) r.angles.forEach(a=>L.push('  - ['+a.t+'] '+a.x));
+  else L.push('  (none)');
+  if(r.hook) L.push('Lead hook: '+r.hook);
+  L.push('');
+  L.push('GUARDRAILS \u2014 must follow');
+  L.push(guard || '(none set)');
+  L.push('');
+  L.push('DO NOT SAY');
+  L.push(dont || '(not set)');
+  L.push('');
+  L.push('DELIVERABLES \u2014 ask the writer for, per ad:');
+  L.push('  - On-image copy (<=9 words)  - Primary text (2-3 sentences)  - Headline (<=6 words)  - Description (1 line)  - CTA  - Art direction (1-2 lines)');
+  L.push('Produce one ad per broad Core Avatar (cold) + one or two stacked Sub-Avatar ads (specific, retarget). Run order: broad -> specific.');
+  if(r.result){ L.push(''); L.push('RESULT / NOTES: '+r.result); }
+  return L.join('\n');
+}
+function anglesText(r){ return (r.angles&&r.angles.length)? r.angles.map(a=>`  \u2022 [${a.t}] ${a.x}`).join('\n') : '\u2014'; }
+async function copyOne(id){
+  const v=await sGet(id); if(!v)return; const r=JSON.parse(v);
+  navigator.clipboard.writeText(briefFromRecord(r));
+}
+async function exportTable(){
+  const btn=event.currentTarget; const orig=btn.textContent;
+  const recs=await loadAll();
+  if(!recs.length){ btn.textContent='No avatars yet'; setTimeout(()=>btn.textContent=orig,1400); return; }
+  const cols=['Date / Status','Creator','Sub Avatar (stacked sentence)','Belief','Built from','Best hook','Ad angles','Proof / why Fratello','Guardrails','Do not say','Result / notes'];
+  const rowsArr=recs.map(r=>[ r.date+' \u2014 '+r.status, recordCreator(r)||'\u2014', r.sub, r.belief||'\u2014', (r.built||[]).join('; '),
+    r.hook||'\u2014', (r.angles||[]).map(a=>`[${a.t}] ${a.x}`).join('  |  ')||'\u2014',
+    (r.fields&&r.fields.proof)||'\u2014', (r.fields&&r.fields.guard)||'\u2014', (r.fields&&r.fields.dontsay)||'\u2014', r.result||'\u2014' ]);
+  const clean=c=>String(c).replace(/\t/g,' ').replace(/\r?\n/g,' ');
+  const tsv=[cols].concat(rowsArr).map(row=>row.map(clean).join('\t')).join('\n');
+  const esc2=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const htmlRows=[cols].concat(rowsArr).map((row,i)=>'<tr>'+row.map(c=>
+    `<${i?'td':'th'} style="border:1px solid #999;padding:6px;font-family:Arial;font-size:11pt;text-align:left;vertical-align:top">${esc2(c)}</${i?'td':'th'}>`).join('')+'</tr>').join('');
+  const html=`<table style="border-collapse:collapse">${htmlRows}</table>`;
+  try{
+    if(window.ClipboardItem){
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html':new Blob([html],{type:'text/html'}),
+        'text/plain':new Blob([tsv],{type:'text/plain'})
+      })]);
+      btn.textContent='Copied table';
+    } else { await navigator.clipboard.writeText(tsv); btn.textContent='Copied (text)'; }
+  }catch(e){
+    try{ await navigator.clipboard.writeText(tsv); btn.textContent='Copied (text)'; }
+    catch(_){ btn.textContent='Copy failed'; }
+  }
+  setTimeout(()=>btn.textContent=orig,1400);
+}
+async function exportAll(){
+  const recs=await loadAll();
+  const txt=recs.map(r=>briefFromRecord(r)).join('\n\n========================================\n\n');
+  navigator.clipboard.writeText(txt||'No avatars yet.');
+  const b=event.currentTarget||event.target; const o=b.textContent; b.textContent='Copied all briefs'; setTimeout(()=>b.textContent=o,1400);
+}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- seed one reference avatar if the log is empty ---------- */
+async function seedIfEmpty(){
+  const seeded=await sGet('seeded_v2');
+  const keys=await sList('batch:');
+  if(seeded || keys.length) { return; }
+  const rec={
+    id:'batch:seed1', no:1, date:'6/17/2026',
+    sub:'Someone who wants proof of when their coffee was roasted, has ordered \u201cfresh\u201d specialty online only for it to arrive roasted four months ago, feels let down (sadness + surprise underneath), and checks the roast date before every purchase.',
+    hook:'If you check the roast date because the last \u201cpremium\u201d bag let you down, you already get why we put it on the front.',
+    angles:[
+      {t:'Experience',x:'Ever ordered \u201cfresh\u201d coffee that turned up roasted four months ago?'},
+      {t:'Behavior',x:'If you check the roast date before you buy, then we should talk.'},
+      {t:'Emotion',x:'You didn\u2019t get into good coffee to feel let down.'},
+      {t:'Desire',x:'Want proof of when your coffee was roasted? Start here.'},
+      {t:'Stacked',x:'If you check the roast date because the last \u201cpremium\u201d bag let you down, you already get why we put it on the front.',s:true},
+    ],
+    fields:{desire:'I want proof of when my coffee was roasted',coredesire:'Control',
+      exp:'ordered \u201cfresh\u201d specialty online, it arrived roasted four months ago',exptype:'Product-based',
+      emo:'let down',emoprimary:'Sadness',emoprimary2:'Surprise',
+      beh:'checks the roast date before every purchase',behfreq:'Daily',demo:''},
+    built:[
+      'Desire: I want proof of when my coffee was roasted \u2014 Control',
+      'Experience (Product-based): ordered \u201cfresh\u201d specialty online, it arrived roasted four months ago',
+      'Emotion: let down (sadness + surprise)',
+      'Behavior (Daily): checks the roast date before every purchase'],
+    status:'Untested',
+    result:'Reference avatar from the kickoff. Build alongside it or replace it.'
+  };
+  await sSet(rec.id, JSON.stringify(rec));
+  await sSet('counter','1');
+  await sSet('seeded_v2','1');
+}
+
+/* init */
+renderChips('desire-chips',DESIRES,'fillDesire');
+renderChips('demo-chips',DEMOS,'fillDemo');
+document.getElementById('f-guard').value=GUARD_DEFAULT;
+recompute();
+['bank-filter-search','bank-filter-creator','bank-filter-status','bank-filter-start','bank-filter-end'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener(id==='bank-filter-search'?'input':'change', renderBank);
+});
+(async()=>{ await seedIfEmpty(); await refreshCount(); })();
+</script>
+
+
+<style>
+  body { margin: 0; background: #F5F5F7; color: #1A1A1A; font-family: 'Montserrat', Helvetica, Arial, sans-serif; }
+  body.auth-checking #app, body.denied #app { display: none; }
+  body.auth-checking .blocked, body.denied .blocked { display: grid; }
+  .hub-bar { position: sticky; top: 0; z-index: 60; min-height: 72px; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: rgba(255,255,255,.96); border-bottom: 1px solid #E2E2E4; box-shadow: 0 1px 2px rgba(15,17,17,.05); }
+  .hub-brand { display: flex; align-items: center; gap: 18px; min-width: 0; }
+  .hub-brand img { width: 164px; height: auto; display: block; }
+  .hub-context { min-width: 0; padding-left: 18px; border-left: 1px solid #E2E2E4; }
+  .hub-eyebrow { color: #36B3AF; font-size: 10px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 4px; }
+  .hub-title { font-size: 15px; font-weight: 800; line-height: 1.25; }
+  .hub-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+  .hub-button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 10px 14px; border: 1px solid #E2E2E4; border-radius: 6px; background: transparent; color: #5A5A5E; text-decoration: none; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  .hub-button:hover { color: #1A1A1A; border-color: #36B3AF; }
+  .hub-button.primary { background: #36B3AF; border-color: #36B3AF; color: #1A1A1A; }
+  .blocked { min-height: calc(100vh - 72px); display: none; place-items: center; padding: 32px; text-align: center; }
+  .blocked-card { max-width: 620px; }
+  .blocked h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.05; margin-bottom: 18px; }
+  .blocked p { color: #5A5A5E; font-size: 15px; line-height: 1.7; margin-bottom: 26px; }
+  #app { --bg: #F5F5F7; --surface: #FFFFFF; --surface2: #FAFAFA; --ink: #1A1A1A; --ink2: #343437; --muted: #5A5A5E; --line: #E2E2E4; --line2: #EEEEF0; --paper: #F0F0F1; --sand: #D8D8DC; --ink-soft: #F0F0F1; --accent: #36B3AF; --accent-soft: rgba(54, 179, 175, .12); --shadow: 0 1px 2px rgba(15,17,17,.05), 0 10px 30px rgba(15,17,17,.06); min-height: calc(100vh - 72px); }
+  #app .topbar { top: 72px; background: rgba(255,255,255,.96); border-top: 0; border-bottom: 1px solid #E2E2E4; }
+  #app .tabs { border-color: #E2E2E4; border-radius: 8px; }
+  #app .tab { border-right-color: #E2E2E4; }
+  #app .tab.active, #app .save, #app .step, #app .corenum, #app .ctag, #app .bno { background: #1A1A1A; color: #fff; }
+  #app .hint, #app .ghost, #app .mini { border-radius: 6px; }
+  #app .card, #app .panel, #app .batch, #app .corecard, #app .lawcard.alt, #app .cvscol { border-radius: 8px; }
+  #app .lawline, #app .lawcard, #app .stuckband { border-radius: 8px; }
+  #app .angle.picked::after { content: 'Best hook'; color: #238884; }
+  #app .st-Live { background: rgba(54, 179, 175, .14); }
+  #app .st-Worked { background: #1A1A1A; color: #fff; }
+  #app .st-Flopped { background: #F3E1DE; }
+  @media (max-width: 720px) {
+    .hub-bar { align-items: flex-start; flex-direction: column; padding: 18px; }
+    .hub-brand { align-items: flex-start; flex-direction: column; gap: 12px; }
+    .hub-brand img { width: 145px; }
+    .hub-context { padding-left: 0; border-left: 0; }
+    .hub-actions { width: 100%; justify-content: flex-start; }
+    .hub-button { width: 100%; }
+    #app .topbar { top: 0; }
+  }
+</style>
 </body>
 </html>

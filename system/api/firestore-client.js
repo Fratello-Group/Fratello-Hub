@@ -1,6 +1,7 @@
 import {
     addDoc,
     collection,
+    deleteDoc,
     doc,
     getDoc,
     getDocs,
@@ -557,6 +558,12 @@ export async function createAvatarLog(input = {}) {
         belief: cleanOptionalText(input.belief),
         brief: cleanOptionalText(input.brief),
         fields: input.fields || {},
+        angles: Array.isArray(input.angles) ? input.angles : [],
+        built: Array.isArray(input.built) ? input.built : [],
+        batch_no: Number(input.batch_no || input.batchNo || 0),
+        date_label: cleanOptionalText(input.date_label || input.dateLabel),
+        legacy_id: cleanOptionalText(input.legacy_id || input.legacyId),
+        record: input.record || null,
         created_by_uid: currentUser.uid,
         created_by_email: normalizeEmail(currentUser.email),
         created_by_name: cleanOptionalText(input.created_by_name || input.createdByName || currentUser.displayName) || normalizeEmail(currentUser.email),
@@ -618,8 +625,39 @@ export async function updateAvatarLog(avatarId, patch = {}) {
     if (patch.avatar_name !== undefined || patch.avatarName !== undefined) {
         updates.avatar_name = cleanOptionalText(patch.avatar_name ?? patch.avatarName);
     }
+    if (patch.best_hook !== undefined || patch.bestHook !== undefined) {
+        updates.best_hook = cleanOptionalText(patch.best_hook ?? patch.bestHook);
+    }
+    if (patch.sub_avatar !== undefined || patch.subAvatar !== undefined) {
+        updates.sub_avatar = cleanOptionalText(patch.sub_avatar ?? patch.subAvatar);
+    }
+    if (patch.belief !== undefined) {
+        updates.belief = cleanOptionalText(patch.belief);
+    }
+    if (patch.brief !== undefined) {
+        updates.brief = cleanOptionalText(patch.brief);
+    }
+    if (patch.fields !== undefined) {
+        updates.fields = patch.fields || {};
+    }
+    if (patch.angles !== undefined) {
+        updates.angles = Array.isArray(patch.angles) ? patch.angles : [];
+    }
+    if (patch.built !== undefined) {
+        updates.built = Array.isArray(patch.built) ? patch.built : [];
+    }
+    if (patch.record !== undefined) {
+        updates.record = patch.record || null;
+    }
 
     const ref = doc(db, COLLECTIONS.avatarLogs, avatarId);
     await updateDoc(ref, updates);
     return withId(await getDoc(ref));
+}
+
+export async function deleteAvatarLog(avatarId) {
+    const { db } = requireFirestore();
+    if (!avatarId) throw new Error('Avatar log id is required.');
+    await deleteDoc(doc(db, COLLECTIONS.avatarLogs, avatarId));
+    return true;
 }
