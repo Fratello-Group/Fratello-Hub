@@ -1192,24 +1192,52 @@ function buildCopyBrief(){
 }
 async function copyTextToClipboard(text){
   const value=String(text||'');
-  if(navigator.clipboard && window.isSecureContext){
-    await navigator.clipboard.writeText(value);
-    return;
+  // Try the async Clipboard API first whenever it exists. Don't gate on
+  // isSecureContext: it works on https and often on file:// / localhost too,
+  // and if it rejects we fall back to execCommand below.
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    try{
+      await navigator.clipboard.writeText(value);
+      return;
+    }catch(_){ /* fall through to legacy path */ }
   }
+  // Legacy fallback: temporary textarea + execCommand('copy').
+  const active=document.activeElement;
   const area=document.createElement('textarea');
   area.value=value;
   area.setAttribute('readonly','');
+  area.contentEditable='true';
   area.style.position='fixed';
-  area.style.left='-9999px';
   area.style.top='0';
+  area.style.left='0';
+  area.style.width='1px';
+  area.style.height='1px';
+  area.style.padding='0';
+  area.style.border='none';
+  area.style.outline='none';
+  area.style.boxShadow='none';
+  area.style.background='transparent';
+  area.style.opacity='0';
   document.body.appendChild(area);
-  area.focus();
-  area.select();
+  let ok=false;
   try{
-    if(!document.execCommand('copy')) throw new Error('Copy command was blocked.');
+    area.focus();
+    area.select();
+    // Some browsers (iOS Safari) need an explicit range to register a selection.
+    try{
+      const range=document.createRange();
+      range.selectNodeContents(area);
+      const sel=window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      area.setSelectionRange(0, value.length);
+    }catch(_){ /* selection API not available; rely on select() above */ }
+    ok=document.execCommand('copy');
   }finally{
     document.body.removeChild(area);
+    if(active && typeof active.focus==='function'){ try{ active.focus(); }catch(_){} }
   }
+  if(!ok) throw new Error('Copy command was blocked.');
 }
 function showCopied(button,label){
   if(!button) return;
@@ -1572,9 +1600,9 @@ async function exportTable(btn){
         'text/plain':new Blob([tsv],{type:'text/plain'})
       })]);
       btn.textContent='Copied table';
-    } else { await navigator.clipboard.writeText(tsv); btn.textContent='Copied (text)'; }
+    } else { await copyTextToClipboard(tsv); btn.textContent='Copied (text)'; }
   }catch(e){
-    try{ await navigator.clipboard.writeText(tsv); btn.textContent='Copied (text)'; }
+    try{ await copyTextToClipboard(tsv); btn.textContent='Copied (text)'; }
     catch(_){ btn.textContent='Copy failed'; }
   }
   setTimeout(()=>btn.textContent=orig,1400);
