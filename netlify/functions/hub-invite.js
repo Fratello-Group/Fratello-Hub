@@ -54,6 +54,7 @@ function timeOffRoleTier(profileKey) {
 
 function isOwner(session) {
     const user = session && session.user;
+    if (!user) return false;
     const email = normalizeEmail(user && user.email);
     return roleTier(user) === 'owner' || OWNER_EMAILS.has(email);
 }
