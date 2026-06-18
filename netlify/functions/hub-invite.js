@@ -20,6 +20,15 @@ function clean(value) {
     return String(value || '').trim();
 }
 
+function escapeHtml(value) {
+    return String(value === undefined || value === null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function normalizeEmail(value) {
     return clean(value).toLowerCase();
 }
@@ -86,11 +95,14 @@ function inviteText({ name, setupUrl, hubUrl }) {
 }
 
 function inviteHtml({ name, setupUrl, hubUrl }) {
+    const safeName = escapeHtml(name);
+    const safeSetupUrl = escapeHtml(setupUrl);
+    const safeHubUrl = escapeHtml(hubUrl);
     return `
-        <p>Hi ${name},</p>
+        <p>Hi ${safeName},</p>
         <p>You have been invited to the Fratello Ops Hub.</p>
-        <p><a href="${setupUrl}">Create your Hub password</a></p>
-        <p>After your password is set, you can sign in at <a href="${hubUrl}">${hubUrl}</a>.</p>
+        <p><a href="${safeSetupUrl}">Create your Hub password</a></p>
+        <p>After your password is set, you can sign in at <a href="${safeHubUrl}">${safeHubUrl}</a>.</p>
         <p>Fratello Group Inc.</p>
     `;
 }

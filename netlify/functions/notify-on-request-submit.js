@@ -6,6 +6,7 @@ const {
     getDocument,
     getSettings,
     humanDateRange,
+    isOwnerOrController,
     json,
     listDocuments,
     notificationEmailsEnabled,
@@ -15,7 +16,8 @@ const {
     renderHtmlTemplate,
     requestUserName,
     requireMethod,
-    sendLoggedEmail
+    sendLoggedEmail,
+    userMatchesId
 } = require('./templates/_runtime');
 
 const TEMPLATE_ID = 'vacation_request_submitted';
@@ -55,6 +57,11 @@ exports.handler = async (event) => {
                 sent: false,
                 reason: 'Only pending vacation requests trigger approver notifications.'
             });
+        }
+
+        // Only the requester (or an owner/controller) may trigger this email.
+        if (!isOwnerOrController(session.user) && !userMatchesId(session.user, request.user_id)) {
+            return json(403, { error: 'You are not allowed to trigger this notification.' });
         }
 
         const [settings, users, requests] = await Promise.all([

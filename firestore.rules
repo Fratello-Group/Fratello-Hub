@@ -145,10 +145,14 @@ service cloud.firestore {
 
     function selfProfileFieldsDoNotEscalate(uid) {
       return request.auth.uid == uid
+        && resource.data.status == 'active'
         && resource.data.email == signedInEmail()
         && request.resource.data.email == resource.data.email
         && request.resource.data.profile == resource.data.profile
-        && request.resource.data.status == resource.data.status;
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.role_tier == resource.data.role_tier
+        && request.resource.data.manager_id == resource.data.manager_id
+        && request.resource.data.department == resource.data.department;
     }
 
     function validAvatarStatus(data) {
@@ -231,7 +235,7 @@ service cloud.firestore {
     }
 
     match /settings/{settingId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow create, update: if isOwner();
       allow delete: if false;
     }

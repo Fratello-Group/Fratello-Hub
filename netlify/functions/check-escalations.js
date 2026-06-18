@@ -1,11 +1,13 @@
 const {
     absoluteUrl,
+    authenticateRequest,
     chrisOwner,
     createDocument,
     durationDays,
     findUser,
     getSettings,
     humanDateRange,
+    isOwnerOrController,
     json,
     listDocuments,
     notificationEmailsEnabled,
@@ -149,9 +151,44 @@ async function escalateRequest({ event, request, requesterName, approver, chris,
     return true;
 }
 
+// Netlify invokes scheduled functions with a body containing `next_run`.
+function isScheduledInvocation(event) {
+    try {
+        const body = JSON.parse(event.body || '{}');
+        if (body && body.next_run) return true;
+    } catch (e) {
+        // fall through to header check
+    }
+    const headers = event.headers || {};
+    return Boolean(headers['x-nf-scheduled'] || headers['X-Nf-Scheduled']);
+}
+
+// The scheduler runs this automatically; manual runs require a configured
+// secret header or an authenticated owner/controller session. Otherwise the
+// endpoint is a public trigger for escalation emails and status mutations.
+async function isAuthorizedTrigger(event) {
+    if (isScheduledInvocation(event)) return true;
+
+    const secret = process.env.ESCALATION_TRIGGER_SECRET;
+    if (secret) {
+        const headers = event.headers || {};
+        const provided = headers['x-escalation-secret'] || headers['X-Escalation-Secret'] || '';
+        if (provided && provided === secret) return true;
+    }
+
+    const session = await authenticateRequest(event).catch(() => null);
+    if (session && isOwnerOrController(session.user)) return true;
+
+    return false;
+}
+
 exports.handler = async (event) => {
     if (!['GET', 'POST'].includes(event.httpMethod)) {
         return json(405, { error: 'Method not allowed' });
+    }
+
+    if (!(await isAuthorizedTrigger(event))) {
+        return json(401, { error: 'Not authorized to run escalation checks.' });
     }
 
     try {

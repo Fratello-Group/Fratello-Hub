@@ -5,6 +5,7 @@ const {
     getDocument,
     getSettings,
     humanDateRange,
+    isOwnerOrController,
     json,
     listDocuments,
     notificationEmailsEnabled,
@@ -13,7 +14,8 @@ const {
     renderHtmlTemplate,
     requestUserName,
     requireMethod,
-    sendLoggedEmail
+    sendLoggedEmail,
+    userMatchesId
 } = require('./templates/_runtime');
 
 const TEMPLATE_ID = 'vacation_status_changed';
@@ -38,13 +40,21 @@ exports.handler = async (event) => {
 
         const request = await getDocument('time_off_requests', requestId);
         request.id = request.id || requestId;
-        const status = String(request.status || body.status || '').toLowerCase();
+        // Trust only the stored status, never a client-supplied body.status.
+        const status = String(request.status || '').toLowerCase();
 
         if (!NOTIFIABLE_STATUSES.has(status)) {
             return json(200, {
                 sent: false,
                 reason: 'Only approved, denied, or cancelled requests notify the requester.'
             });
+        }
+
+        // Only the approver, requester, or an owner/controller may trigger this email.
+        if (!isOwnerOrController(session.user)
+            && !userMatchesId(session.user, request.approver_id)
+            && !userMatchesId(session.user, request.user_id)) {
+            return json(403, { error: 'You are not allowed to trigger this notification.' });
         }
 
         const [settings, users] = await Promise.all([

@@ -555,6 +555,27 @@ function findUser(users, value) {
     return (users || []).find(user => userMatchesId(user, value)) || null;
 }
 
+function sessionFromDecodedToken(decoded, users, authType) {
+    // Reject tokens whose email is explicitly unverified (e.g. freshly
+    // self-registered accounts that never proved ownership of the address).
+    if (decoded.email_verified === false) return null;
+
+    const email = decoded.email || '';
+    const matched = findUser(users, email);
+
+    // A provisioned user that has been deactivated must not authenticate.
+    if (matched && matched.active === false) return null;
+
+    const user = matched || {
+        id: email,
+        email,
+        name: decoded.name || email,
+        role_tier: '',
+        active: true
+    };
+    return { user, auth_type: authType, decoded };
+}
+
 async function authenticateRequest(event) {
     const header = (event.headers && (event.headers.authorization || event.headers.Authorization)) || '';
     const match = String(header).match(/^Bearer\s+(.+)$/i);
@@ -565,30 +586,14 @@ async function authenticateRequest(event) {
         try {
             const { getAuth } = require('firebase-admin/auth');
             const decoded = await getAuth(adminApp()).verifyIdToken(token);
-            const email = decoded.email || '';
             const users = await listDocuments('users').catch(() => []);
-            const user = findUser(users, email) || {
-                id: email,
-                email,
-                name: decoded.name || email,
-                role_tier: '',
-                active: true
-            };
-            return { user, auth_type: 'firebase', decoded };
+            return sessionFromDecodedToken(decoded, users, 'firebase');
         } catch (error) {
             if (token.includes('.')) {
                 try {
                     const decoded = await verifyFirebaseTokenWithRest(token);
-                    const email = decoded.email || '';
                     const users = await listDocuments('users').catch(() => []);
-                    const user = findUser(users, email) || {
-                        id: email,
-                        email,
-                        name: decoded.name || email,
-                        role_tier: '',
-                        active: true
-                    };
-                    return { user, auth_type: 'firebase-rest', decoded };
+                    return sessionFromDecodedToken(decoded, users, 'firebase-rest');
                 } catch (restError) {
                     console.error('Firebase token verification failed', {
                         adminError: error.message,

@@ -5,6 +5,7 @@ const {
     getDocument,
     getSettings,
     humanDateRange,
+    isOwnerOrController,
     json,
     listDocuments,
     notificationEmailsEnabled,
@@ -14,7 +15,8 @@ const {
     renderHtmlTemplate,
     requestUserName,
     requireMethod,
-    sendLoggedEmail
+    sendLoggedEmail,
+    userMatchesId
 } = require('./templates/_runtime');
 
 const TEMPLATE_ID = 'sick_day_logged';
@@ -36,6 +38,11 @@ exports.handler = async (event) => {
 
         if (request.type !== 'sick') {
             return json(200, { sent: false, reason: 'Only sick day records trigger this notification.' });
+        }
+
+        // Only the person who logged the sick day (or an owner/controller) may trigger this email.
+        if (!isOwnerOrController(session.user) && !userMatchesId(session.user, request.user_id)) {
+            return json(403, { error: 'You are not allowed to trigger this notification.' });
         }
 
         const [settings, users] = await Promise.all([
