@@ -24,6 +24,7 @@ window.FRATELLO_OWNER_EMAILS = [
 window.FRATELLO_AUTH_PROVIDERS = {
     email: true,
     google: true,
+    microsoft: true,
     apple: false
 };
 

@@ -1768,6 +1768,17 @@
                     </span>
                     <span>Sign in with Google</span>
                 </button>
+                <button class="provider-btn microsoft" id="microsoftProviderBtn" type="button" onclick="handleProviderLogin('microsoft')" aria-label="Sign in with Microsoft">
+                    <span class="provider-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="#F25022" d="M1 1h10v10H1z"/>
+                            <path fill="#7FBA00" d="M13 1h10v10H13z"/>
+                            <path fill="#00A4EF" d="M1 13h10v10H1z"/>
+                            <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                        </svg>
+                    </span>
+                    <span>Sign in with Microsoft</span>
+                </button>
                 <button class="provider-btn" id="appleProviderBtn" type="button" onclick="handleProviderLogin('apple')">Sign in with Apple</button>
             </div>
             <div class="login-divider" id="loginDivider">or</div>
@@ -1874,6 +1885,7 @@ import {
     signInWithApple,
     signInWithEmail,
     signInWithGoogle,
+    signInWithMicrosoft,
     signOutHub
 } from './system/fratello-auth.js';
 
@@ -2185,6 +2197,7 @@ function setupAuthModeUi() {
     document.getElementById('providerGrid').classList.add('visible');
     document.getElementById('loginDivider').classList.add('visible');
     document.getElementById('googleProviderBtn').style.display = providers.google === false ? 'none' : '';
+    document.getElementById('microsoftProviderBtn').style.display = providers.microsoft === true ? '' : 'none';
     document.getElementById('appleProviderBtn').style.display = providers.apple === true ? '' : 'none';
     const allowPublicSignup = window.FRATELLO_AUTH_ALLOW_PUBLIC_SIGNUP === true;
     if (allowPublicSignup) document.getElementById('createAccountToggle').classList.add('visible');
@@ -2270,7 +2283,9 @@ async function handleProviderLogin(provider) {
     try {
         const role = provider === 'apple'
             ? await signInWithApple()
-            : await signInWithGoogle();
+            : provider === 'microsoft'
+                ? await signInWithMicrosoft()
+                : await signInWithGoogle();
         localStorage.setItem('fratello-role', JSON.stringify(role));
         localStorage.removeItem('fratello-session');
         showDashboard(role);

@@ -304,6 +304,18 @@ export async function signInWithApple() {
     return profileForUser(credential.user);
 }
 
+export async function signInWithMicrosoft() {
+    initFirebase();
+    const provider = new OAuthProvider('microsoft.com');
+    provider.addScope('email');
+    provider.addScope('openid');
+    provider.addScope('profile');
+    // To restrict sign-in to the company's Microsoft 365 tenant, set:
+    // provider.setCustomParameters({ tenant: '<your-tenant-id>' });
+    const credential = await signInWithPopup(auth, provider);
+    return profileForUser(credential.user);
+}
+
 export async function sendResetEmail(email) {
     initFirebase();
     await sendPasswordResetEmail(auth, email);
@@ -577,5 +589,7 @@ export function friendlyAuthError(error) {
     if (code === 'auth/email-already-in-use') return 'That email already has an account. Sign in instead.';
     if (code === 'auth/weak-password') return 'Use a password with at least 6 characters.';
     if (code === 'auth/unauthorized-domain') return 'This domain has not been added to Firebase authorized domains yet.';
+    if (code === 'auth/operation-not-allowed') return 'This sign-in method is not switched on in Firebase yet.';
+    if (code === 'auth/account-exists-with-different-credential') return 'This email already signs in with a different method. Use that method instead.';
     return (error && error.message) || 'Something went wrong. Please try again.';
 }
