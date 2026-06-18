@@ -2140,6 +2140,14 @@ function finishAuthCheck() {
     document.body.classList.remove('auth-checking');
 }
 
+function cachedHubRole() {
+    try {
+        return JSON.parse(localStorage.getItem('fratello-role') || 'null');
+    } catch (error) {
+        return null;
+    }
+}
+
 function setLoginError(message) {
     const error = document.getElementById('loginError');
     error.textContent = message;
@@ -2960,6 +2968,17 @@ async function signOut() {
     setupAuthModeUi();
 
     if (USE_FIREBASE_AUTH) {
+        const cachedRole = cachedHubRole();
+        let showedCachedRole = false;
+        if (cachedRole && cachedRole.key) {
+            showedCachedRole = true;
+            showDashboard(cachedRole)
+                .catch(() => {
+                    showedCachedRole = false;
+                })
+                .finally(finishAuthCheck);
+        }
+
         onHubAuthChange((role, error) => {
             if (role) {
                 localStorage.setItem('fratello-role', JSON.stringify(role));
@@ -2971,6 +2990,10 @@ async function signOut() {
             localStorage.removeItem('fratello-role');
             localStorage.removeItem('fratello_session');
             if (error) setLoginError(friendlyAuthError(error));
+            if (showedCachedRole) {
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('dashboard').classList.remove('active');
+            }
             finishAuthCheck();
         });
         return;

@@ -382,6 +382,24 @@
             text-transform: uppercase;
         }
 
+        .field-error {
+            display: none;
+            margin-top: 7px;
+            color: var(--error);
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .field.has-error .field-error {
+            display: block;
+        }
+
+        .field.has-error .text-input {
+            border-color: var(--error);
+            box-shadow: 0 0 0 2px rgba(217, 83, 61, 0.10);
+        }
+
         .form-grid .ghost-button {
             min-height: 40px;
         }
@@ -562,6 +580,11 @@
             color: var(--slate);
         }
 
+        .link-output.warning {
+            border-color: rgba(217, 83, 61, 0.35);
+            background: rgba(217, 83, 61, 0.08);
+        }
+
         @media (max-width: 860px) {
             .masthead {
                 padding: 28px 24px 0;
@@ -605,21 +628,23 @@
         <main>
             <div class="eyebrow">Permissions</div>
             <h1>Staff access by person, role, and department.</h1>
-            <p class="lede">Invite a person, assign their access profile, and send them the generated link. They set their own password, but they do not choose what they can see.</p>
+            <p class="lede">Add a person, choose what they can access, and send their setup email from here. They set their own password, but they do not choose what they can see.</p>
 
             <div class="access-grid" id="profileGrid"></div>
 
             <div class="admin-panel">
                 <div class="admin-panel-title">Invite a staff member</div>
-                <p class="admin-panel-copy">Choose what this person should see, create their setup link, then copy it into a text or email.</p>
+                <p class="admin-panel-copy">Enter the person once. The Hub will save their access, create or find their login, and send the setup email.</p>
                 <div class="form-grid">
-                    <div class="field">
+                    <div class="field" id="fieldInviteName">
                         <label for="inviteName">Full name</label>
                         <input class="text-input" id="inviteName" type="text" placeholder="Jane Smith" autocomplete="name">
+                        <div class="field-error" id="inviteNameError"></div>
                     </div>
-                    <div class="field">
+                    <div class="field" id="fieldInviteEmail">
                         <label for="inviteEmail">Email</label>
                         <input class="text-input" id="inviteEmail" type="email" placeholder="jane@fratello.ca" autocomplete="email">
+                        <div class="field-error" id="inviteEmailError"></div>
                     </div>
                     <div class="field">
                         <label for="inviteTitle">Job title</label>
@@ -632,7 +657,7 @@
                 </div>
                 <div class="actions">
                     <span class="save-state" id="adminMessage">Invites and profile changes are saved to the HUB.</span>
-                    <button class="ghost-button primary-button" id="inviteButton" type="button" onclick="inviteUser()">Create Invite Link</button>
+                    <button class="ghost-button primary-button" id="inviteButton" type="button" onclick="inviteUser()">Add & Send Invite</button>
                 </div>
                 <div class="link-output" id="inviteOutput"></div>
             </div>
@@ -665,11 +690,11 @@
             <div class="future-list">
                 <div class="future-item ready">
                     <div class="future-title">Working now</div>
-                    <div class="future-note">Owner invite links, user passwords, profile changes, resets, and disabled users.</div>
+                    <div class="future-note">Owner invites, setup emails, user passwords, profile changes, resets, and disabled users.</div>
                 </div>
-                <div class="future-item">
+                <div class="future-item ready">
                     <div class="future-title">Email delivery</div>
-                    <div class="future-note">Send invite and reset links automatically instead of copying the link.</div>
+                    <div class="future-note">Send invite and reset links automatically, with copy-link fallback when email delivery is unavailable.</div>
                 </div>
                 <div class="future-item">
                     <div class="future-title">Database upgrade</div>
@@ -690,7 +715,7 @@
             friendlyAuthError,
             listHubUsers,
             onHubAuthChange,
-            saveHubInvite,
+            sendHubInviteEmail,
             sendResetEmail,
             setHubUserDisabled,
             updateHubUser
@@ -763,6 +788,31 @@
                 help: 'Needs attention',
                 className: 'invited'
             };
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+        }
+
+        function fieldContainer(id) {
+            return document.getElementById(`field${id}`);
+        }
+
+        function setFieldError(id, message) {
+            const field = fieldContainer(id);
+            const error = document.getElementById(`${id.charAt(0).toLowerCase()}${id.slice(1)}Error`);
+            if (field) field.classList.toggle('has-error', Boolean(message));
+            if (error) error.textContent = message || '';
+        }
+
+        function clearInviteErrors() {
+            setFieldError('InviteName', '');
+            setFieldError('InviteEmail', '');
+            document.getElementById('inviteOutput').classList.remove('warning');
+        }
+
+        function personById(personId) {
+            return STAFF.find(item => item.id === personId);
         }
 
         function currentRole() {
@@ -842,6 +892,7 @@
                 const status = statusMeta(person.status);
                 const isDisabled = person.status === 'disabled';
                 const safeId = escapeHtml(person.id);
+                const needsInvite = USE_FIREBASE_AUTH && person.status !== 'active';
                 return `
                 <tr>
                     <td>
@@ -862,6 +913,7 @@
                         <span class="status ${escapeHtml(status.className)}">${escapeHtml(status.label)}</span>
                         <span class="status-help">${escapeHtml(status.help)}</span>
                         <div class="row-actions">
+                            ${needsInvite ? `<button class="ghost-button primary-button" type="button" data-person="${safeId}" onclick="sendInviteForPerson(this.dataset.person)">Send Invite Email</button>` : ''}
                             <button class="ghost-button" type="button" data-person="${safeId}" onclick="resetPassword(this.dataset.person)">${USE_FIREBASE_AUTH ? 'Send Reset Email' : 'Create Reset Link'}</button>
                             <button class="ghost-button ${isDisabled ? '' : 'danger-button'}" type="button" data-person="${safeId}" data-disabled="${!isDisabled}" onclick="toggleDisabled(this.dataset.person, this.dataset.disabled === 'true')">${isDisabled ? 'Enable User' : 'Disable User'}</button>
                         </div>
@@ -871,13 +923,19 @@
             }).join('');
         }
 
-        function renderGeneratedLink(kind, userName, url) {
+        function renderGeneratedLink(kind, userName, url, options = {}) {
             const output = document.getElementById('inviteOutput');
-            LAST_COPY_LABEL = kind === 'Invite' ? 'Copy Invite Link' : 'Copy Reset Link';
+            LAST_COPY_LABEL = kind === 'Password reset' ? 'Copy Reset Link' : 'Copy Invite Link';
             LAST_GENERATED_LINK = url;
+            const emailText = options.emailSent
+                ? `Email sent to ${escapeHtml(options.email || userName)}. You can also copy the setup link below.`
+                : options.emailError
+                    ? `Email was not sent: ${escapeHtml(options.emailError)}. Copy this setup link and send it manually.`
+                    : 'Copy this link and send it to the person. It is ready to use now.';
+            output.classList.toggle('warning', Boolean(options.emailError && !options.emailSent));
             output.innerHTML = `
                 <strong>${escapeHtml(kind)} link for ${escapeHtml(userName)}</strong>
-                <span>Copy this link and send it to the person. It is ready to use now.</span>
+                <span>${emailText}</span>
                 <div class="link-copy-row">
                     <input class="text-input" id="generatedLink" type="text" value="${escapeHtml(url)}" readonly>
                     <button class="ghost-button primary-button" id="copyLinkButton" type="button" onclick="copyGeneratedLink()">${LAST_COPY_LABEL}</button>
@@ -926,6 +984,7 @@
         }
 
         async function inviteUser() {
+            clearInviteErrors();
             const output = document.getElementById('inviteOutput');
             const button = document.getElementById('inviteButton');
             const name = document.getElementById('inviteName').value.trim();
@@ -933,20 +992,35 @@
             const title = document.getElementById('inviteTitle').value.trim();
             const profile = document.getElementById('inviteProfile').value;
 
-            if (!name || !email) {
-                document.getElementById('adminMessage').textContent = 'Add a full name and email before creating an invite link.';
+            if (!name) {
+                setFieldError('InviteName', 'Full name is required.');
+                document.getElementById('inviteName').focus();
+                document.getElementById('adminMessage').textContent = 'Add the person’s full name before sending an invite.';
+                return;
+            }
+
+            if (!email || !isValidEmail(email)) {
+                setFieldError('InviteEmail', email ? 'Enter a valid email address.' : 'Email is required.');
+                document.getElementById('inviteEmail').focus();
+                document.getElementById('adminMessage').textContent = 'Add a valid email before sending an invite.';
                 return;
             }
 
             output.style.display = 'none';
             button.disabled = true;
-            button.textContent = 'Creating...';
+            button.textContent = 'Sending...';
 
             try {
                 if (USE_FIREBASE_AUTH) {
-                    const data = await saveHubInvite({ name, email, title, profile });
-                    renderGeneratedLink('Hub access', data.name, data.inviteUrl);
-                    document.getElementById('adminMessage').textContent = 'Access profile saved. Add this person in Firebase Authentication if they do not already have a login, then send the Hub link.';
+                    const data = await sendHubInviteEmail({ name, email, title, profile });
+                    renderGeneratedLink('Invite', data.user.name, data.setupUrl || data.inviteUrl, {
+                        email: data.user.email,
+                        emailSent: data.emailSent,
+                        emailError: data.emailError
+                    });
+                    document.getElementById('adminMessage').textContent = data.emailSent
+                        ? `Invite email sent to ${data.user.email}.`
+                        : 'Access saved. Copy the setup link below and send it manually.';
                 } else {
                     const data = await authRequest({ action: 'users:invite', name, email, title, profile });
                     renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
@@ -957,10 +1031,44 @@
                 document.getElementById('inviteTitle').value = '';
                 await loadUsers();
             } catch (error) {
-                document.getElementById('adminMessage').textContent = error.message;
+                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
             } finally {
                 button.disabled = false;
-                button.textContent = 'Create Invite Link';
+                button.textContent = 'Add & Send Invite';
+            }
+        }
+
+        async function sendInviteForPerson(personId) {
+            const output = document.getElementById('inviteOutput');
+            const person = personById(personId);
+            if (!person) return;
+            output.style.display = 'none';
+            document.getElementById('adminMessage').textContent = `Sending invite to ${person.email}...`;
+
+            try {
+                if (USE_FIREBASE_AUTH) {
+                    const data = await sendHubInviteEmail({
+                        name: person.name,
+                        email: person.email,
+                        title: person.title || '',
+                        profile: person.profile || 'staff'
+                    });
+                    renderGeneratedLink('Invite', data.user.name, data.setupUrl || data.inviteUrl, {
+                        email: data.user.email,
+                        emailSent: data.emailSent,
+                        emailError: data.emailError
+                    });
+                    document.getElementById('adminMessage').textContent = data.emailSent
+                        ? `Invite email sent to ${data.user.email}.`
+                        : 'Access saved. Copy the setup link below and send it manually.';
+                } else {
+                    const data = await authRequest({ action: 'users:invite', name: person.name, email: person.email, title: person.title || '', profile: person.profile || 'staff' });
+                    renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
+                    document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
+                }
+                await loadUsers();
+            } catch (error) {
+                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
             }
         }
 
@@ -1010,6 +1118,9 @@
         }
 
         (async function initPermissions() {
+            document.getElementById('inviteName').addEventListener('input', () => setFieldError('InviteName', ''));
+            document.getElementById('inviteEmail').addEventListener('input', () => setFieldError('InviteEmail', ''));
+
             if (USE_FIREBASE_AUTH) {
                 onHubAuthChange((role, error) => {
                     if (role) {
@@ -1047,6 +1158,7 @@
         })();
 
         window.inviteUser = inviteUser;
+        window.sendInviteForPerson = sendInviteForPerson;
         window.updateProfile = updateProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;

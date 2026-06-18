@@ -602,6 +602,7 @@ function requestUserName(request, users) {
 module.exports = {
     absoluteUrl,
     addDays,
+    adminApp,
     authenticateRequest,
     chrisOwner,
     controllerUsers,

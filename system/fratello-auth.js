@@ -276,6 +276,27 @@ export async function sendResetEmail(email) {
     await sendPasswordResetEmail(auth, email);
 }
 
+export async function currentIdToken() {
+    initFirebase();
+    if (!auth.currentUser) throw new Error('Sign in again before making this change.');
+    return auth.currentUser.getIdToken();
+}
+
+export async function sendHubInviteEmail({ name, email, title, profile }) {
+    const token = await currentIdToken();
+    const response = await fetch('/.netlify/functions/hub-invite', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, email, title, profile })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not send invite.');
+    return data;
+}
+
 export async function signOutHub() {
     initFirebase();
     await signOut(auth);
@@ -313,19 +334,30 @@ export async function listHubUsers() {
     const profiles = new Map();
     const profileSnap = await getDocs(collection(db, 'hubProfiles'));
     profileSnap.forEach(item => {
-        profiles.set(normalizeEmail(item.data().email), publicUserFromProfile(item.id, { ...item.data(), uid: item.id }));
+        const email = normalizeEmail(item.data().email);
+        if (email) profiles.set(email, publicUserFromProfile(item.id, { ...item.data(), uid: item.id, email }));
     });
 
     const inviteSnap = await getDocs(collection(db, 'hubInvites'));
     inviteSnap.forEach(item => {
         const invite = item.data();
         const email = normalizeEmail(invite.email || item.id);
-        if (!profiles.has(email)) {
+        if (email && !profiles.has(email)) {
             profiles.set(email, publicUserFromProfile(item.id, { ...invite, email, status: invite.status || 'invited' }));
         }
     });
 
-    return Array.from(profiles.values()).sort((a, b) => a.name.localeCompare(b.name));
+    const deduped = new Map();
+    Array.from(profiles.values()).forEach(person => {
+        const email = normalizeEmail(person.email);
+        if (!email) return;
+        const existing = deduped.get(email);
+        if (!existing || (person.source === 'profile' && existing.source !== 'profile')) {
+            deduped.set(email, person);
+        }
+    });
+
+    return Array.from(deduped.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function saveHubInvite({ name, email, title, profile }) {
