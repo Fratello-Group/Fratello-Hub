@@ -19,6 +19,20 @@
 
     --fratello-white: #FFFFFF;
 
+    /* ─── Accent & status (the warm "crema" accent + functional colors) ── */
+    --crema: #E8A33D;            /* warm accent — use sparingly for the one thing to feature */
+    --crema-deep: #B5780F;       /* readable crema text on light backgrounds */
+    --crema-soft: rgba(232, 163, 61, 0.12);
+    --crema-text: #8A5A12;       /* text on a crema-soft pill */
+
+    --leaf: #1F9D6B;             /* success / positive state */
+    --leaf-soft: rgba(31, 157, 107, 0.12);
+    --leaf-text: #0F6E56;
+
+    --clay: #D9533D;             /* alert / negative state */
+    --clay-soft: rgba(217, 83, 61, 0.12);
+    --clay-text: #952F1F;
+
     /* ─── Neutral Palette ──────────────────────────── */
     --warm-gray-50: #FAFAFB;
     --warm-gray-100: #F5F5F7;
