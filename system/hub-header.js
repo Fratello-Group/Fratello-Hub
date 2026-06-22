@@ -101,6 +101,12 @@
         if (mount) { mount.replaceWith(bar); }
         else { document.body.insertBefore(bar, document.body.firstChild); }
 
+        function publishHeight() {
+            try { document.documentElement.style.setProperty('--fh-bar-h', bar.offsetHeight + 'px'); } catch (error) {}
+        }
+        publishHeight();
+        window.addEventListener('resize', publishHeight);
+
         var burger = bar.querySelector('.fh-burger');
         burger.addEventListener('click', function () {
             var open = bar.classList.toggle('fh-open');
