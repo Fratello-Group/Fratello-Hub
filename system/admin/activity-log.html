@@ -192,7 +192,7 @@
             els.logRows.innerHTML = list.length ? list.map(item => `
                 <tr>
                     <td>${escapeHtml(fmt(item.timestamp))}</td>
-                    <td>${escapeHtml(item.user_id || '')}</td>
+                    <td>${escapeHtml((item.details && item.details.name) || item.user_id || '')}</td>
                     <td><span class="badge">${escapeHtml(item.event_type || '')}</span></td>
                     <td>${escapeHtml(item.tool_name || '')}</td>
                     <td>${escapeHtml(JSON.stringify(item.details || {}))}</td>

@@ -1940,6 +1940,22 @@ import {
     signInWithMicrosoft,
     signOutHub
 } from './system/fratello-auth.js';
+import { logActivity, trackLogout } from './system/api/activity-logger.js';
+
+const PROVIDER_LABELS = { google: 'Google', microsoft: 'Microsoft', apple: 'Apple' };
+
+function recordLogin(role, method) {
+    try {
+        const user = (role && role.user) || {};
+        logActivity('login', {
+            toolName: 'Hub sign-in',
+            userId: user.email || user.id || '',
+            details: { name: user.name || '', email: user.email || '', method: method || user.provider || '' }
+        });
+    } catch (error) {
+        // Logging is best-effort; never block sign-in.
+    }
+}
 
 // ════════════════════════════════════════════════
 // ROLE CONFIGURATION
@@ -2341,6 +2357,7 @@ async function handleProviderLogin(provider) {
         localStorage.setItem('fratello-role', JSON.stringify(role));
         localStorage.removeItem('fratello-session');
         showDashboard(role);
+        recordLogin(role, PROVIDER_LABELS[provider] || 'Google');
     } catch (error) {
         setLoginError(friendlyAuthError(error));
     }
@@ -2365,6 +2382,7 @@ async function handleCreateAccount() {
         localStorage.setItem('fratello-role', JSON.stringify(role));
         localStorage.removeItem('fratello-session');
         showDashboard(role);
+        recordLogin(role, 'Email & password');
     } catch (error) {
         setLoginError(friendlyAuthError(error));
     }
@@ -2387,6 +2405,7 @@ async function handleLogin() {
             localStorage.setItem('fratello-role', JSON.stringify(role));
             localStorage.removeItem('fratello-session');
             showDashboard(role);
+            recordLogin(role, 'Email & password');
         } catch (error) {
             const input = document.getElementById('loginEmail');
             input.classList.add('error');
@@ -3089,6 +3108,12 @@ function toggleProfileMenu(event) {
 }
 
 async function signOut() {
+    try {
+        const user = (activeRole && activeRole.user) || {};
+        await trackLogout('Hub sign-out', { name: user.name || '', email: user.email || '' });
+    } catch (error) {
+        // best-effort logging
+    }
     if (USE_FIREBASE_AUTH) {
         await signOutHub();
     }

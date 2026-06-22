@@ -719,6 +719,11 @@
             </div>
 
             <div class="section-label">People Access</div>
+            <div id="staffFilters" style="display:flex; flex-wrap:wrap; gap:10px; margin:0 0 14px; align-items:center;">
+                <input class="text-input" id="staffSearch" type="search" placeholder="Search name, email, or title" style="flex:1 1 220px; min-width:200px;">
+                <select id="staffProfileFilter" style="flex:0 1 200px;"><option value="">All access profiles</option></select>
+                <select id="staffAreaFilter" style="flex:0 1 200px;"><option value="">All visible areas</option></select>
+            </div>
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -1121,9 +1126,61 @@
             applyProfileDefaults();
         }
 
+        function staffFilterValues() {
+            return {
+                search: (document.getElementById('staffSearch')?.value || '').trim().toLowerCase(),
+                profile: document.getElementById('staffProfileFilter')?.value || '',
+                area: document.getElementById('staffAreaFilter')?.value || ''
+            };
+        }
+
+        function personMatchesStaffFilters(person, f) {
+            if (f.profile && person.profile !== f.profile) return false;
+            if (f.area) {
+                const areas = (PROFILES[person.profile] || PROFILES.staff).access || [];
+                if (!areas.includes(f.area)) return false;
+            }
+            if (f.search) {
+                const hay = `${person.name || ''} ${person.email || ''} ${person.title || ''}`.toLowerCase();
+                if (!hay.includes(f.search)) return false;
+            }
+            return true;
+        }
+
+        function populateStaffFilters() {
+            const profileSel = document.getElementById('staffProfileFilter');
+            const areaSel = document.getElementById('staffAreaFilter');
+            if (!profileSel || profileSel.dataset.ready) return;
+            Object.entries(PROFILES).forEach(([key, profile]) => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = profile.label;
+                profileSel.appendChild(opt);
+            });
+            Array.from(new Set(Object.values(PROFILES).flatMap(profile => profile.access))).sort().forEach(area => {
+                const opt = document.createElement('option');
+                opt.value = area;
+                opt.textContent = area;
+                areaSel.appendChild(opt);
+            });
+            ['staffSearch', 'staffProfileFilter', 'staffAreaFilter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', renderStaff);
+                    el.addEventListener('change', renderStaff);
+                }
+            });
+            profileSel.dataset.ready = '1';
+        }
+
         function renderStaff() {
             const rows = document.getElementById('staffRows');
-            rows.innerHTML = STAFF.map(person => {
+            const list = STAFF.filter(person => personMatchesStaffFilters(person, staffFilterValues()));
+            if (!list.length) {
+                rows.innerHTML = '<tr><td colspan="4">No people match these filters.</td></tr>';
+                return;
+            }
+            rows.innerHTML = list.map(person => {
                 const status = statusMeta(person.status);
                 const isDisabled = person.status === 'disabled';
                 const safeId = escapeHtml(person.id);
@@ -1431,6 +1488,7 @@
         }
 
         (async function initPermissions() {
+            populateStaffFilters();
             document.getElementById('inviteName').addEventListener('input', () => setFieldError('InviteName', ''));
             document.getElementById('inviteEmail').addEventListener('input', () => setFieldError('InviteEmail', ''));
             document.getElementById('inviteProfile').addEventListener('change', () => applyProfileDefaults(true));
