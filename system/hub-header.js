@@ -1,8 +1,8 @@
 // Shared Fratello Hub header.
 //
-// Drop this onto any page to get the standard header (logo, nav, profile
-// chip, mobile hamburger, sign out). It uses absolute paths so it works at
-// any folder depth. Usage on a page:
+// Drop this onto any page to get the standard header (logo, nav, account
+// dropdown, mobile hamburger). It uses absolute paths so it works at any
+// folder depth. Usage on a page:
 //   <div id="fratello-hub-header"></div>
 //   <script src="/system/hub-header.js"></script>
 // If the placeholder div is omitted, the header is prepended to <body>.
@@ -34,13 +34,25 @@
         ".fh-nav a{min-height:42px;display:inline-flex;align-items:center;padding:8px 14px;border-bottom:2px solid transparent;color:#5A5A5E;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;white-space:nowrap;}",
         ".fh-nav a:hover{color:#1A1A1A;border-bottom-color:#36B3AF;}",
         ".fh-right{display:flex;align-items:center;gap:12px;}",
-        ".fh-chip{display:inline-flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border:1px solid #E2E2E4;border-radius:6px;background:#fff;}",
+        ".fh-account{position:relative;}",
+        ".fh-chip{display:inline-flex;align-items:center;gap:9px;padding:5px 10px 5px 5px;border:1px solid #E2E2E4;border-radius:6px;background:#fff;cursor:pointer;font:inherit;}",
         ".fh-avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:3px;background:rgba(54,179,175,.12);border:1px solid rgba(54,179,175,.5);color:#1f7a76;font-size:11px;font-weight:800;letter-spacing:1px;}",
-        ".fh-copy{display:flex;flex-direction:column;line-height:1.15;}",
+        ".fh-copy{display:flex;flex-direction:column;line-height:1.15;text-align:left;}",
         ".fh-name{font-size:12px;font-weight:800;color:#1A1A1A;}",
         ".fh-access{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#1f7a76;}",
-        ".fh-signout{min-height:40px;padding:0 14px;border:1px solid #E2E2E4;border-radius:6px;background:transparent;color:#5A5A5E;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}",
-        ".fh-signout:hover{color:#1A1A1A;border-color:#36B3AF;}",
+        ".fh-caret{font-size:9px;color:#8a8a8a;margin-left:1px;}",
+        ".fh-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:248px;background:#fff;border:1px solid #E2E2E4;box-shadow:0 14px 34px rgba(0,0,0,.14);z-index:60;}",
+        ".fh-menu[hidden]{display:none;}",
+        ".fh-menu-head{padding:14px 16px;border-bottom:1px solid #E2E2E4;}",
+        ".fh-menu-name{display:block;font-size:14px;font-weight:800;color:#1A1A1A;}",
+        ".fh-menu-email{display:block;font-size:12px;color:#5A5A5E;margin-top:2px;word-break:break-all;}",
+        ".fh-menu-rows{padding:8px 16px;border-bottom:1px solid #E2E2E4;}",
+        ".fh-menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 0;}",
+        ".fh-menu-row span{color:#5A5A5E;text-transform:uppercase;letter-spacing:1.2px;font-size:11px;font-weight:800;}",
+        ".fh-menu-row strong{font-size:12px;color:#1A1A1A;font-weight:700;}",
+        ".fh-menu-link,.fh-menu-signout{display:block;width:100%;text-align:left;padding:12px 16px;font-size:13px;font-weight:700;background:#fff;color:#1A1A1A;border:0;border-top:1px solid #E2E2E4;cursor:pointer;text-decoration:none;}",
+        ".fh-menu-link:hover,.fh-menu-signout:hover{background:rgba(54,179,175,.1);}",
+        ".fh-menu-signout{color:#b3261e;}",
         ".fh-burger{display:none;align-items:center;justify-content:center;width:44px;height:40px;border:1px solid #E2E2E4;border-radius:6px;background:#fff;color:#5A5A5E;font-size:20px;line-height:1;cursor:pointer;}",
         "@media (max-width:860px){",
         ".fh-bar{flex-wrap:wrap;padding:14px 20px;}",
@@ -48,7 +60,9 @@
         ".fh-nav,.fh-right{display:none;width:100%;flex-direction:column;align-items:stretch;gap:6px;margin-top:10px;}",
         ".fh-bar.fh-open .fh-nav,.fh-bar.fh-open .fh-right{display:flex;}",
         ".fh-nav a{width:100%;}",
-        ".fh-chip{align-self:flex-start;}",
+        ".fh-account{width:100%;}",
+        ".fh-chip{width:100%;justify-content:flex-start;}",
+        ".fh-menu{position:static;min-width:0;margin-top:8px;box-shadow:none;}",
         "}"
     ].join('');
 
@@ -73,10 +87,28 @@
         var user = (role && role.user) || {};
         var name = user.name || user.email || '';
         var first = name ? (name.split(' ')[0] || name) : '';
+        var email = user.email || '';
+        var accessLabel = role ? String(role.label || 'Staff') : '';
 
         var style = document.createElement('style');
         style.textContent = CSS;
         document.head.appendChild(style);
+
+        var account = name
+            ? '<div class="fh-account">' +
+                  '<button class="fh-chip" type="button" aria-haspopup="true" aria-expanded="false">' +
+                      '<span class="fh-avatar">' + escapeHtml(initials(name)) + '</span>' +
+                      '<span class="fh-copy"><span class="fh-name">' + escapeHtml(first) + '</span><span class="fh-access">' + escapeHtml(accessLabel + ' access') + '</span></span>' +
+                      '<span class="fh-caret">▾</span>' +
+                  '</button>' +
+                  '<div class="fh-menu" hidden>' +
+                      '<div class="fh-menu-head"><span class="fh-menu-name">' + escapeHtml(name) + '</span><span class="fh-menu-email">' + escapeHtml(email) + '</span></div>' +
+                      '<div class="fh-menu-rows"><div class="fh-menu-row"><span>Access</span><strong>' + escapeHtml(accessLabel) + '</strong></div></div>' +
+                      (isOwner ? '<a class="fh-menu-link" href="/system/permissions.html">Manage people</a>' : '') +
+                      '<button class="fh-menu-signout" type="button">Sign out</button>' +
+                  '</div>' +
+              '</div>'
+            : '<button class="fh-menu-signout" type="button" style="border:1px solid #E2E2E4;border-radius:6px;">Sign out</button>';
 
         var bar = document.createElement('header');
         bar.className = 'fh-bar';
@@ -90,12 +122,7 @@
                 (isOwner ? '<a href="/index.html#owner-admin">Owner Hub</a>' : '') +
                 (isOwner ? '<a href="/index.html#settings">Settings</a>' : '') +
             '</nav>' +
-            '<div class="fh-right">' +
-                (name
-                    ? '<div class="fh-chip"><span class="fh-avatar">' + escapeHtml(initials(name)) + '</span><span class="fh-copy"><span class="fh-name">' + escapeHtml(first) + '</span><span class="fh-access">' + escapeHtml(String(role.label || 'Staff') + ' access') + '</span></span></div>'
-                    : '') +
-                '<button class="fh-signout" type="button">Sign out</button>' +
-            '</div>';
+            '<div class="fh-right">' + account + '</div>';
 
         var mount = document.getElementById('fratello-hub-header');
         if (mount) { mount.replaceWith(bar); }
@@ -111,8 +138,28 @@
         burger.addEventListener('click', function () {
             var open = bar.classList.toggle('fh-open');
             burger.setAttribute('aria-expanded', String(open));
+            publishHeight();
         });
-        bar.querySelector('.fh-signout').addEventListener('click', signOut);
+
+        var chip = bar.querySelector('.fh-chip');
+        var menu = bar.querySelector('.fh-menu');
+        if (chip && menu) {
+            chip.addEventListener('click', function (event) {
+                event.stopPropagation();
+                var open = menu.hidden;
+                menu.hidden = !open;
+                chip.setAttribute('aria-expanded', String(open));
+            });
+            document.addEventListener('click', function (event) {
+                if (!menu.hidden && !event.target.closest('.fh-account')) {
+                    menu.hidden = true;
+                    chip.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        var signoutBtn = bar.querySelector('.fh-menu-signout');
+        if (signoutBtn) signoutBtn.addEventListener('click', signOut);
     }
 
     if (document.readyState === 'loading') {
