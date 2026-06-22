@@ -30,7 +30,7 @@
     }
 
     var CSS = [
-        ".fh-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:14px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #E2E2E4;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Montserrat',sans-serif;box-sizing:border-box;}",
+        ".fh-bar{position:sticky;top:0;z-index:500;display:flex;align-items:center;gap:18px;padding:14px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #E2E2E4;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Montserrat',sans-serif;box-sizing:border-box;}",
         ".fh-logo{height:30px;width:auto;display:block;}",
         ".fh-nav{display:flex;align-items:center;gap:2px;margin-right:auto;flex-wrap:wrap;}",
         ".fh-nav a{min-height:42px;display:inline-flex;align-items:center;padding:8px 14px;border-bottom:2px solid transparent;color:#5A5A5E;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;white-space:nowrap;}",

@@ -196,17 +196,19 @@
             }
         }
         async function loadPeople() {
+            const map = {};
+            const add = (key, name) => { if (key && name) map[String(key).toLowerCase()] = name; };
+            try {
+                // listHubUsers includes the Firebase uid, which is what login/tool events log.
+                const auth = await import('../fratello-auth.js');
+                const people = (auth && auth.listHubUsers ? await auth.listHubUsers() : []) || [];
+                people.forEach(p => { add(p.uid, p.name); add(p.id, p.name); add(p.email, p.name); });
+            } catch (error) {}
             try {
                 const users = await call('getUsers') || [];
-                const map = {};
-                users.forEach(u => {
-                    const nm = u.name || '';
-                    if (!nm) return;
-                    if (u.email) map[String(u.email).toLowerCase()] = nm;
-                    if (u.id) map[String(u.id).toLowerCase()] = nm;
-                });
-                peopleByKey = map;
-            } catch (error) { peopleByKey = {}; }
+                users.forEach(u => { add(u.uid, u.name); add(u.id, u.name); add(u.email, u.name); });
+            } catch (error) {}
+            peopleByKey = map;
         }
         function cap(value) { const s = String(value || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
         function prettyId(id) {
