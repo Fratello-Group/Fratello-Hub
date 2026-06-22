@@ -235,10 +235,16 @@ exports.handler = async (event) => {
         let setupUrl = '';
         let setupLinkError = '';
         try {
-            setupUrl = await getAuth(adminApp()).generatePasswordResetLink(email, {
+            const firebaseLink = await getAuth(adminApp()).generatePasswordResetLink(email, {
                 url: hubUrl,
                 handleCodeInApp: false
             });
+            // Point the setup link at our branded welcome page (carry the one-time
+            // code over) instead of Firebase's default reset screen.
+            const code = new URL(firebaseLink).searchParams.get('oobCode');
+            setupUrl = code
+                ? `${absoluteUrl(event, '/system/welcome.html')}?mode=resetPassword&oobCode=${encodeURIComponent(code)}`
+                : firebaseLink;
         } catch (linkError) {
             setupLinkError = linkError.message || 'Setup link could not be generated.';
             console.error('hub-invite generate-link failed', linkError);

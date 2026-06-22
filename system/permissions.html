@@ -783,8 +783,17 @@
             setHubUserDisabled,
             updateHubUser
         } from './fratello-auth.js';
+        import { logActivity } from '../api/activity-logger.js';
 
         const USE_FIREBASE_AUTH = firebaseConfigured();
+
+        function audit(action, details = {}) {
+            try {
+                logActivity('data_edit', { toolName: 'Manage People', details: { action, ...details } });
+            } catch (error) {
+                // audit logging is best-effort
+            }
+        }
 
         const PROFILES = {
             owner: {
@@ -1338,6 +1347,7 @@
                     renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
                     document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
                 }
+                audit('invite_sent', { target_email: payload.email, target_name: payload.name, profile: payload.profile });
                 clearInviteForm();
                 await loadUsers();
             } catch (error) {
@@ -1419,6 +1429,7 @@
             }
             document.getElementById(`access-${personId}`).innerHTML = accessTags(nextProfile);
             document.getElementById('saveState').textContent = 'Profile updated.';
+            audit('profile_changed', { target_email: person && person.email, profile: nextProfile });
             await loadUsers();
         }
 
@@ -1450,6 +1461,7 @@
                 await authRequest({ action: 'users:disable', id: personId, disabled });
             }
             document.getElementById('saveState').textContent = disabled ? 'User disabled.' : 'User enabled.';
+            audit(disabled ? 'user_disabled' : 'user_enabled', { target_email: person && person.email });
             await loadUsers();
         }
 
@@ -1475,6 +1487,7 @@
                 } else {
                     await authRequest({ action: 'users:delete', id: personId });
                 }
+                audit('user_deleted', { target_email: person.email, target_name: person.name });
                 document.getElementById('saveState').textContent = `${person.name} was deleted.`;
                 document.getElementById('adminMessage').textContent = `${person.name} was removed from the Hub.`;
                 await loadUsers();
