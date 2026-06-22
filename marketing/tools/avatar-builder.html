@@ -20,6 +20,13 @@
       <a href="../../index.html#settings" data-owner-nav hidden>Settings</a>
     </nav>
     <div class="hub-actions">
+      <div class="sub-profile-chip" id="subProfileChip" hidden>
+        <span class="sub-avatar" id="subAvatar">--</span>
+        <span class="sub-profile-copy">
+          <span class="sub-profile-name" id="subProfileName">--</span>
+          <span class="sub-profile-access" id="subProfileAccess">--</span>
+        </span>
+      </div>
       <button class="hub-button" type="button" onclick="window.signOutFromTool && window.signOutFromTool()">Sign Out</button>
     </div>
   </header>
@@ -672,7 +679,21 @@
     document.querySelectorAll('[data-owner-nav]').forEach(link => {
       link.hidden = role?.key !== 'owner';
     });
+    populateSubProfile(role);
     document.body.classList.remove('auth-checking', 'denied');
+  }
+
+  function populateSubProfile(role) {
+    const chip = document.getElementById('subProfileChip');
+    if (!chip) return;
+    const user = role && role.user;
+    if (!user) { chip.hidden = true; return; }
+    const name = user.name || user.email || 'Team member';
+    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join('') || 'TM';
+    document.getElementById('subAvatar').textContent = initials;
+    document.getElementById('subProfileName').textContent = name.split(' ')[0] || name;
+    document.getElementById('subProfileAccess').textContent = `${role.label || 'Staff'} access`;
+    chip.hidden = false;
   }
 
   function denyPage() {
@@ -1673,6 +1694,11 @@ recompute();
   .hub-nav a { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; padding: 13px 18px; border-bottom: 2px solid transparent; color: #5A5A5E; text-decoration: none; font-size: 12px; font-weight: 800; letter-spacing: 3.2px; text-transform: uppercase; }
   .hub-nav a[hidden] { display: none; }
   .hub-nav a:hover { color: #1A1A1A; border-bottom-color: #36B3AF; }
+  .sub-profile-chip { display: inline-flex; align-items: center; gap: 9px; padding: 5px 12px 5px 5px; border: 1px solid #E2E2E4; border-radius: 6px; background: #fff; }
+  .sub-avatar { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 3px; background: rgba(54,179,175,.12); border: 1px solid rgba(54,179,175,.5); color: #1f7a76; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+  .sub-profile-copy { display: flex; flex-direction: column; line-height: 1.15; }
+  .sub-profile-name { font-size: 12px; font-weight: 800; color: #1A1A1A; }
+  .sub-profile-access { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: #1f7a76; }
   .hub-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
   .hub-button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 11px 16px; border: 1px solid #E2E2E4; border-radius: 0; background: transparent; color: #5A5A5E; text-decoration: none; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
   .hub-button:hover { color: #1A1A1A; border-color: #36B3AF; }
