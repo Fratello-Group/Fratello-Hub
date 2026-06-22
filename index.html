@@ -1147,6 +1147,44 @@
             color: var(--subtext);
         }
 
+        .profile-wrap { position: relative; }
+        .profile-chip { cursor: pointer; }
+        .profile-chip .hub-nav-caret { font-size: 9px; color: var(--subtext); margin-left: 2px; }
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 250px;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
+            z-index: 60;
+        }
+        .profile-menu[hidden] { display: none; }
+        .profile-menu-header { padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+        .profile-menu-name { display: block; font-size: 14px; font-weight: 800; color: var(--text); }
+        .profile-menu-email { display: block; font-size: 12px; color: var(--subtext); margin-top: 2px; word-break: break-all; }
+        .profile-menu-rows { padding: 8px 16px; border-bottom: 1px solid var(--rule); }
+        .profile-menu-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; }
+        .profile-menu-row span { color: var(--subtext); text-transform: uppercase; letter-spacing: 1.2px; font-size: 9.5px; font-weight: 800; }
+        .profile-menu-row strong { color: var(--text); font-size: 12px; font-weight: 700; text-align: right; }
+        .profile-menu-link, .profile-menu-signout {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            background: var(--surface);
+            color: var(--text);
+            border: 0;
+            border-top: 1px solid var(--rule);
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .profile-menu-link:hover, .profile-menu-signout:hover { background: var(--teal-mute); }
+        .profile-menu-signout { color: #b3261e; }
+
         .signout-btn:hover {
             color: var(--text);
             border-color: var(--teal);
@@ -1852,14 +1890,28 @@
             <button class="hub-nav-btn" type="button" data-section="settings">Settings</button>
         </nav>
         <div class="masthead-right">
-            <div class="profile-chip" aria-label="Signed in user">
-                <span class="avatar-initials" id="avatarInitials">CP</span>
-                <span class="profile-copy">
-                    <span class="avatar-name" id="avatarName">Chris</span>
-                    <span class="profile-role" id="roleLabel">Owner access</span>
-                </span>
+            <div class="profile-wrap">
+                <button class="profile-chip" id="profileChip" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Your account" onclick="toggleProfileMenu(event)">
+                    <span class="avatar-initials" id="avatarInitials">CP</span>
+                    <span class="profile-copy">
+                        <span class="avatar-name" id="avatarName">Chris</span>
+                        <span class="profile-role" id="roleLabel">Owner access</span>
+                    </span>
+                    <span class="hub-nav-caret">▾</span>
+                </button>
+                <div class="profile-menu" id="profileMenu" hidden>
+                    <div class="profile-menu-header">
+                        <span class="profile-menu-name" id="profileMenuName">—</span>
+                        <span class="profile-menu-email" id="profileMenuEmail">—</span>
+                    </div>
+                    <div class="profile-menu-rows">
+                        <div class="profile-menu-row"><span>Access</span><strong id="profileMenuRole">—</strong></div>
+                        <div class="profile-menu-row"><span>Signed in with</span><strong id="profileMenuProvider">—</strong></div>
+                    </div>
+                    <a class="profile-menu-link" id="profileMenuManage" href="system/permissions.html">Manage people</a>
+                    <button class="profile-menu-signout" type="button" onclick="signOut()">Sign out</button>
+                </div>
             </div>
-            <button class="signout-btn" onclick="signOut()">Sign Out</button>
         </div>
     </div>
 
@@ -2993,6 +3045,7 @@ async function showDashboard(role) {
     document.getElementById('roleLabel').textContent = `${role.label} access`;
     document.getElementById('avatarInitials').textContent = person.initials;
     document.getElementById('avatarName').textContent = person.firstName;
+    populateProfileMenu(role, person);
     setupHubNav(role);
     const route = initialHubRoute(role);
     renderHub(role, route.view, route.sectionKey);
@@ -3001,6 +3054,39 @@ async function showDashboard(role) {
 // ════════════════════════════════════════════════
 // SIGN OUT
 // ════════════════════════════════════════════════
+
+function populateProfileMenu(role, person) {
+    const user = role.user || {};
+    document.getElementById('profileMenuName').textContent = user.name || person.name || person.firstName;
+    document.getElementById('profileMenuEmail').textContent = user.email || person.email || '—';
+    document.getElementById('profileMenuRole').textContent = role.label || '—';
+    document.getElementById('profileMenuProvider').textContent = user.provider || 'Email & password';
+    document.getElementById('profileMenuManage').style.display = role.key === 'owner' ? '' : 'none';
+
+    if (!window.__fratelloProfileMenuBound) {
+        document.addEventListener('click', event => {
+            if (event.target.closest('.profile-wrap')) return;
+            closeProfileMenu();
+        });
+        window.__fratelloProfileMenuBound = true;
+    }
+}
+
+function closeProfileMenu() {
+    const menu = document.getElementById('profileMenu');
+    if (menu && !menu.hidden) {
+        menu.hidden = true;
+        document.getElementById('profileChip').setAttribute('aria-expanded', 'false');
+    }
+}
+
+function toggleProfileMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById('profileMenu');
+    const willOpen = menu.hidden;
+    menu.hidden = !willOpen;
+    document.getElementById('profileChip').setAttribute('aria-expanded', String(willOpen));
+}
 
 async function signOut() {
     if (USE_FIREBASE_AUTH) {
@@ -3095,6 +3181,7 @@ window.handleProviderLogin = handleProviderLogin;
 window.handleCreateAccount = handleCreateAccount;
 window.handleLogin = handleLogin;
 window.signOut = signOut;
+window.toggleProfileMenu = toggleProfileMenu;
 </script>
 
 </body>

@@ -168,6 +168,15 @@ async function upsertTimeOffUserFromAccess({ name, email, title, profile, status
     }, { merge: true });
 }
 
+function providerLabel(providerIds) {
+    const ids = Array.isArray(providerIds) ? providerIds : [];
+    if (ids.includes('microsoft.com')) return 'Microsoft';
+    if (ids.includes('google.com')) return 'Google';
+    if (ids.includes('apple.com')) return 'Apple';
+    if (ids.includes('password')) return 'Email & password';
+    return '';
+}
+
 function roleFromProfile(id, data) {
     const profileKey = data.profile || 'staff';
     const profile = PROFILE_DEFINITIONS[profileKey] || PROFILE_DEFINITIONS.staff;
@@ -180,7 +189,8 @@ function roleFromProfile(id, data) {
             name: data.name || displayNameFromEmail(data.email),
             email: data.email,
             title: data.title || '',
-            status: data.status || 'active'
+            status: data.status || 'active',
+            provider: providerLabel(data.providerIds)
         }
     };
 }
