@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the Fratello Hub</title>
+    <link rel="icon" type="image/png" href="../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="design-tokens/tokens.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            min-height: 100vh;
+            background: var(--warm-gray-100, #f4f1ec);
+            color: var(--bean-black, #1a1a1a);
+            font-family: var(--font-primary, 'Montserrat', sans-serif);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        button, input { font: inherit; }
+        .card {
+            width: min(460px, 100%);
+            background: var(--fratello-white, #fff);
+            border: 1px solid var(--warm-gray-200, #e4e0d8);
+            border-radius: var(--radius-md, 10px);
+            box-shadow: var(--shadow-md, 0 18px 50px rgba(0,0,0,0.12));
+            padding: 36px 32px;
+        }
+        .logo { height: 30px; width: auto; display: block; margin-bottom: 26px; }
+        .eyebrow {
+            color: var(--brewing-blue-dark, #2f6f8f);
+            font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        h1 { font-size: 26px; line-height: 1.15; margin-bottom: 14px; }
+        p.lede { color: var(--warm-gray-600, #6b6b6b); font-size: 14px; line-height: 1.65; margin-bottom: 22px; }
+        .login-as {
+            display: block; margin-bottom: 22px; padding: 12px 14px;
+            background: var(--warm-gray-50, #faf8f4); border: 1px solid var(--warm-gray-200, #e4e0d8);
+            border-radius: var(--radius-sm, 6px);
+        }
+        .login-as span { display: block; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--warm-gray-500, #8a8a8a); margin-bottom: 3px; }
+        .login-as strong { font-size: 15px; word-break: break-all; }
+        label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--warm-gray-600, #6b6b6b); margin-bottom: 6px; }
+        .field { position: relative; margin-bottom: 16px; }
+        input[type=password], input[type=text] {
+            width: 100%; min-height: 48px; padding: 0 44px 0 14px;
+            border: 1px solid var(--warm-gray-300, #d4cfc5); border-radius: var(--radius-sm, 6px);
+            background: var(--warm-gray-50, #faf8f4); color: var(--bean-black, #1a1a1a);
+            outline: none; font-size: 15px;
+        }
+        input:focus { border-color: var(--brewing-blue, #4a90b8); }
+        .toggle-eye {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            border: 0; background: transparent; cursor: pointer; padding: 8px; color: var(--warm-gray-500, #8a8a8a); font-size: 13px;
+        }
+        .hint { font-size: 12px; color: var(--warm-gray-500, #8a8a8a); margin: -8px 0 18px; }
+        button.primary {
+            width: 100%; min-height: 50px; border: 0; border-radius: var(--radius-sm, 6px);
+            background: var(--brewing-blue, #4a90b8); color: #fff; font-size: 14px; font-weight: 800;
+            letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+        }
+        button.primary:disabled { opacity: 0.55; cursor: default; }
+        .message { margin-top: 18px; font-size: 14px; line-height: 1.6; }
+        .message.error { color: #b3261e; }
+        .message.ok { color: var(--brewing-blue-dark, #2f6f8f); }
+        .center { text-align: center; }
+        a.hub-link { display: inline-block; margin-top: 14px; color: var(--brewing-blue-dark, #2f6f8f); font-weight: 800; text-decoration: none; }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img class="logo" src="../assets/Fratello_Logo_Black.png" alt="Fratello">
+
+        <div id="loading">
+            <p class="lede">Checking your invite…</p>
+        </div>
+
+        <div id="setupForm" hidden>
+            <div class="eyebrow">Fratello Ops Hub</div>
+            <h1 id="welcomeHeading">Welcome!</h1>
+            <p class="lede">You've been given access to <strong>Fratello's internal operations hub</strong> — your home for company tools, time off, resources, and more. Create a password below to finish setting up your account.</p>
+
+            <span class="login-as">
+                <span>Your login</span>
+                <strong id="emailLabel">—</strong>
+            </span>
+
+            <form id="passwordForm">
+                <label for="password">Create a password</label>
+                <div class="field">
+                    <input id="password" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+                    <button class="toggle-eye" type="button" id="togglePassword" aria-label="Show password">Show</button>
+                </div>
+                <p class="hint">Use at least 8 characters. This is your private password — keep it safe.</p>
+
+                <button class="primary" type="submit" id="submitBtn">Create password &amp; sign in</button>
+            </form>
+            <div class="message" id="formMessage" hidden></div>
+        </div>
+
+        <div id="resultState" hidden>
+            <div class="eyebrow">Fratello Ops Hub</div>
+            <h1 id="resultHeading">All set.</h1>
+            <p class="lede" id="resultMessage"></p>
+            <div class="center"><a class="hub-link" id="hubLink" href="../index.html">Go to the Hub →</a></div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script type="module">
+        import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import {
+            getAuth,
+            verifyPasswordResetCode,
+            confirmPasswordReset,
+            signInWithEmailAndPassword
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode') || 'resetPassword';
+        const oobCode = params.get('oobCode') || '';
+        const continueUrl = params.get('continueUrl') || '../index.html';
+
+        const els = {
+            loading: document.getElementById('loading'),
+            setupForm: document.getElementById('setupForm'),
+            resultState: document.getElementById('resultState'),
+            welcomeHeading: document.getElementById('welcomeHeading'),
+            emailLabel: document.getElementById('emailLabel'),
+            password: document.getElementById('password'),
+            submitBtn: document.getElementById('submitBtn'),
+            formMessage: document.getElementById('formMessage'),
+            resultHeading: document.getElementById('resultHeading'),
+            resultMessage: document.getElementById('resultMessage'),
+            hubLink: document.getElementById('hubLink')
+        };
+
+        function firstNameFromEmail(email) {
+            const part = String(email || '').split('@')[0].split(/[._-]+/).filter(Boolean)[0] || '';
+            return part ? part.charAt(0).toUpperCase() + part.slice(1) : '';
+        }
+
+        function showResult(heading, message, isError) {
+            els.loading.hidden = true;
+            els.setupForm.hidden = true;
+            els.resultState.hidden = false;
+            els.resultHeading.textContent = heading;
+            els.resultMessage.textContent = message;
+            els.resultMessage.className = 'lede';
+            els.hubLink.href = continueUrl;
+        }
+
+        function setFormMessage(text, isError) {
+            els.formMessage.hidden = !text;
+            els.formMessage.textContent = text || '';
+            els.formMessage.className = 'message ' + (isError ? 'error' : 'ok');
+        }
+
+        const config = window.FRATELLO_FIREBASE_CONFIG || {};
+        if (!config.enabled || !config.apiKey) {
+            showResult('Something went wrong', 'The Hub is not configured correctly. Please contact an owner.', true);
+            throw new Error('Firebase not configured');
+        }
+
+        const app = getApps().find(item => item.name === 'fratello-hub') || initializeApp(config, 'fratello-hub');
+        const auth = getAuth(app);
+
+        let resetEmail = '';
+
+        async function start() {
+            if (mode !== 'resetPassword' || !oobCode) {
+                showResult('This link can’t be used', 'This invite link is invalid or has already been used. Ask an owner to send you a fresh one.', true);
+                return;
+            }
+            try {
+                resetEmail = await verifyPasswordResetCode(auth, oobCode);
+                const name = firstNameFromEmail(resetEmail);
+                els.welcomeHeading.textContent = name ? `Welcome, ${name}!` : 'Welcome!';
+                els.emailLabel.textContent = resetEmail;
+                els.loading.hidden = true;
+                els.setupForm.hidden = false;
+            } catch (error) {
+                showResult('This link has expired', 'This invite link has expired or was already used. Ask an owner to send you a new one — it only takes a moment.', true);
+            }
+        }
+
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const isText = els.password.type === 'text';
+            els.password.type = isText ? 'password' : 'text';
+            document.getElementById('togglePassword').textContent = isText ? 'Show' : 'Hide';
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const password = els.password.value;
+            if (password.length < 8) {
+                setFormMessage('Please use a password with at least 8 characters.', true);
+                return;
+            }
+            els.submitBtn.disabled = true;
+            els.submitBtn.textContent = 'Setting up…';
+            setFormMessage('');
+            try {
+                await confirmPasswordReset(auth, oobCode, password);
+                try {
+                    await signInWithEmailAndPassword(auth, resetEmail, password);
+                    showResult('You’re in! 🎉', 'Your password is set and you’re signed in. Taking you to the Hub…');
+                    setTimeout(() => { window.location.href = continueUrl; }, 1600);
+                } catch (signInError) {
+                    showResult('Password created', 'Your password is set. Head to the Hub and sign in with your email and new password.');
+                }
+            } catch (error) {
+                els.submitBtn.disabled = false;
+                els.submitBtn.textContent = 'Create password & sign in';
+                const code = error && error.code;
+                if (code === 'auth/expired-action-code' || code === 'auth/invalid-action-code') {
+                    showResult('This link has expired', 'This invite link expired or was already used. Ask an owner for a new one.', true);
+                } else if (code === 'auth/weak-password') {
+                    setFormMessage('That password is too weak. Try a longer one.', true);
+                } else {
+                    setFormMessage((error && error.message) || 'Something went wrong. Please try again.', true);
+                }
+            }
+        });
+
+        start();
+    </script>
+</body>
+</html>
