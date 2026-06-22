@@ -20,6 +20,13 @@
         .masthead .nav-link { border-color: var(--warm-gray-300); background: transparent; color: var(--warm-gray-600); }
         .masthead .nav-link:hover { border-color: var(--brewing-blue); color: var(--bean-black); }
         .btn.primary { border-color: var(--brewing-blue); background: var(--brewing-blue); color: var(--bean-black); }
+        .masthead-right { display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap; }
+        .sub-hamburger { display: none; align-items: center; justify-content: center; width: 44px; height: 40px; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); background: var(--fratello-white); color: var(--warm-gray-600); font-size: 20px; line-height: 1; cursor: pointer; }
+        .sub-profile-chip { display: inline-flex; align-items: center; gap: 9px; padding: 5px 12px 5px 5px; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); background: var(--fratello-white); }
+        .sub-avatar { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 3px; background: var(--brewing-blue-subtle); border: 1px solid color-mix(in srgb, var(--brewing-blue) 38%, transparent); color: var(--brewing-blue-dark); font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+        .sub-profile-copy { display: flex; flex-direction: column; line-height: 1.15; }
+        .sub-profile-name { font-size: 12px; font-weight: 800; color: var(--bean-black); }
+        .sub-profile-access { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--brewing-blue-dark); }
         main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: var(--space-2xl) 0 var(--space-3xl); }
         .intro { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--space-xl); align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--warm-gray-200); }
         .eyebrow { margin-bottom: var(--space-md); color: var(--brewing-blue-dark); font-size: 12px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; }
@@ -46,7 +53,12 @@
         .badge { display: inline-flex; min-height: 28px; align-items: center; border: 1px solid color-mix(in srgb, var(--brewing-blue) 38%, transparent); border-radius: var(--radius-sm); padding: 0 var(--space-sm); background: var(--brewing-blue-subtle); color: var(--brewing-blue-dark); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
         .access-state { margin-top: var(--space-xl); max-width: 760px; }
         @media (max-width: 860px) {
-            .masthead { align-items: flex-start; flex-direction: column; padding: var(--space-md) 22px; }
+            .masthead { flex-direction: row; flex-wrap: wrap; align-items: center; padding: var(--space-md) 22px; }
+            .sub-hamburger { display: inline-flex; margin-left: auto; }
+            .masthead-right { width: 100%; order: 3; display: none; flex-direction: column; align-items: stretch; gap: 10px; margin-top: 10px; }
+            .masthead.nav-open .masthead-right { display: flex; }
+            .masthead-actions { flex-direction: column; }
+            .nav-link { width: 100%; }
             main { width: min(100% - 32px, 1180px); padding-top: var(--space-xl); }
             .intro, .metrics, .filters { grid-template-columns: 1fr; }
             .panel-header { display: grid; }
@@ -56,12 +68,22 @@
 <body>
     <header class="masthead">
         <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_Black.png" alt="Fratello"></a>
-        <div class="masthead-actions">
-            <a class="nav-link" href="../../index.html#dashboard">Dashboard</a>
-            <a class="nav-link" href="../../index.html#departments">Departments</a>
-            <a class="nav-link" href="../../index.html#resources">Resources</a>
-            <a class="nav-link" href="../../index.html#owner-hub">Owner Hub</a>
-            <a class="nav-link" href="../../index.html#settings">Settings</a>
+        <button class="sub-hamburger" type="button" id="subHamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+        <div class="masthead-right">
+            <div class="masthead-actions">
+                <a class="nav-link" href="../../index.html#dashboard">Dashboard</a>
+                <a class="nav-link" href="../../index.html#departments">Departments</a>
+                <a class="nav-link" href="../../index.html#resources">Resources</a>
+                <a class="nav-link" href="../../index.html#owner-hub">Owner Hub</a>
+                <a class="nav-link" href="../../index.html#settings">Settings</a>
+            </div>
+            <div class="sub-profile-chip" id="subProfileChip" hidden>
+                <span class="sub-avatar" id="subAvatar">--</span>
+                <span class="sub-profile-copy">
+                    <span class="sub-profile-name" id="subProfileName">--</span>
+                    <span class="sub-profile-access" id="subProfileAccess">--</span>
+                </span>
+            </div>
         </div>
     </header>
     <main>
@@ -209,8 +231,28 @@
             link.click();
             setTimeout(() => URL.revokeObjectURL(link.href), 1000);
         }
+        function populateSubProfile() {
+            const r = readRole();
+            const chip = document.getElementById('subProfileChip');
+            if (!chip) return;
+            if (!r || !r.user) { chip.hidden = true; return; }
+            const name = r.user.name || r.user.email || 'Team member';
+            const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join('') || 'TM';
+            document.getElementById('subAvatar').textContent = initials;
+            document.getElementById('subProfileName').textContent = name.split(' ')[0] || name;
+            document.getElementById('subProfileAccess').textContent = `${r.label || 'Staff'} access`;
+            chip.hidden = false;
+        }
+        function toggleSubNav() {
+            const m = document.querySelector('.masthead');
+            const open = m.classList.toggle('nav-open');
+            const btn = document.getElementById('subHamburger');
+            if (btn) btn.setAttribute('aria-expanded', String(open));
+        }
+
         async function init() {
             role = readRole();
+            populateSubProfile();
             if (!role || roleKey() !== 'owner') {
                 els.connectionStatus.textContent = role ? 'Access denied' : 'Sign in required';
                 els.accessState.hidden = false;
@@ -226,6 +268,7 @@
             input.addEventListener('change', render);
         });
         document.getElementById('exportCsv').addEventListener('click', exportCsv);
+        document.getElementById('subHamburger').addEventListener('click', toggleSubNav);
         init();
     </script>
 </body>
