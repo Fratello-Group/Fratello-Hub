@@ -240,6 +240,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /expense_reports/{expenseId} {
+      allow get, list: if signedIn() && resource.data.user_email == signedInEmail();
+      allow create: if signedIn() && request.resource.data.user_email == signedInEmail();
+      allow delete: if signedIn() && resource.data.user_email == signedInEmail();
+      allow update: if false;
+    }
+
     match /avatar_logs/{avatarId} {
       allow read: if canUseAvatarBuilder();
       allow create: if canUseAvatarBuilder()

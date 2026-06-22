@@ -919,13 +919,123 @@
                 </div>
                 <div class="category-list" id="categorySummary"></div>
             </section>
+
+            <style>
+                #expenseHistory .hist-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--warm-gray-200,#e5e7eb); border-radius:8px; margin-bottom:10px; background:#fff; }
+                #expenseHistory details { flex:1; min-width:0; }
+                #expenseHistory summary { cursor:pointer; font-size:14px; color:var(--bean-black,#1a1a1a); }
+                #expenseHistory .hist-items { margin-top:8px; font-size:13px; color:var(--warm-gray-600,#57534e); line-height:1.6; }
+                #expenseHistory .hist-note { margin-top:6px; font-style:italic; }
+                #expenseHistory .hist-del { flex:0 0 auto; border:1px solid var(--warm-gray-300,#d7d9dd); background:transparent; color:#952f1f; border-radius:6px; padding:7px 12px; font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; }
+                #expenseHistory .hist-del:hover { border-color:#d9533d; }
+                #expenseHistory .hist-empty { color:var(--warm-gray-500,#78716c); font-size:13px; padding:8px 0; }
+            </style>
+            <section class="panel" id="expenseHistory" hidden>
+                <div class="panel-header">
+                    <h2 id="historyTitle">My expense history</h2>
+                    <p class="panel-note">A private record of the reports you've saved. Only you can see these — nobody else.</p>
+                </div>
+                <div style="padding:0 var(--space-lg,24px) var(--space-lg,24px);">
+                    <p id="historyMessage" style="margin:0 0 12px; color:var(--brewing-blue-dark,#2a8f8c); font-size:13px; font-weight:700;"></p>
+                    <div id="historyList"></div>
+                </div>
+            </section>
         </main>
     </div>
 
     <script type="module">
-        import { firebaseConfigured, onHubAuthChange } from '../../system/fratello-auth.js';
+        import { firebaseConfigured, onHubAuthChange, initFirebase } from '../../system/fratello-auth.js';
+        import { collection, addDoc, deleteDoc, doc, getDocs, query, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
         const allowed = new Set(['owner', 'controller', 'production', 'marketing', 'sales', 'staff']);
+
+        function expenseDb() {
+            const state = initFirebase();
+            return state && state.ready ? state.db : null;
+        }
+
+        function escapeHistory(value) {
+            return String(value || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        }
+
+        function currentExpenseEmail() {
+            return (window.currentHubEmployee && window.currentHubEmployee.email)
+                || (document.getElementById('employeeEmail') && document.getElementById('employeeEmail').value.trim())
+                || '';
+        }
+
+        async function saveMyExpenseHistory() {
+            const db = expenseDb();
+            const data = (typeof window.reportData === 'function') ? window.reportData() : null;
+            const email = currentExpenseEmail();
+            const msg = document.getElementById('historyMessage');
+            if (!db || !email || !data || !data.rows || !data.rows.length) return;
+            try {
+                await addDoc(collection(db, 'expense_reports'), {
+                    user_email: email,
+                    user_name: data.employeeName || '',
+                    department: data.department || '',
+                    report_date: data.reportDate || '',
+                    notes: data.notes || '',
+                    total_amount: Number((data.totals.amount || 0).toFixed(2)),
+                    total_gst: Number((data.totals.gst || 0).toFixed(2)),
+                    item_count: data.rows.length,
+                    items: data.rows.map(row => ({
+                        date: row.date || '', vendor: row.vendor || '', category: row.category || '',
+                        amount: row.amount || 0, gst: row.gst || 0, description: row.description || ''
+                    })),
+                    created_at: serverTimestamp()
+                });
+                if (msg) msg.textContent = 'Saved to your private history below.';
+                loadMyExpenseHistory();
+            } catch (error) {
+                if (msg) msg.textContent = 'Could not save to history: ' + (error.message || error);
+            }
+        }
+
+        async function loadMyExpenseHistory() {
+            const db = expenseDb();
+            const email = currentExpenseEmail();
+            const wrap = document.getElementById('expenseHistory');
+            const list = document.getElementById('historyList');
+            if (!wrap || !list) return;
+            if (!db || !email) { wrap.hidden = true; return; }
+            try {
+                const snap = await getDocs(query(collection(db, 'expense_reports'), where('user_email', '==', email)));
+                const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(b.report_date || '').localeCompare(String(a.report_date || '')));
+                wrap.hidden = false;
+                if (!docs.length) {
+                    list.innerHTML = '<div class="hist-empty">No saved reports yet. Save one and it appears here — only you can see these.</div>';
+                    return;
+                }
+                list.innerHTML = docs.map(d => `
+                    <div class="hist-row">
+                        <details>
+                            <summary><strong>${escapeHistory(d.report_date || '—')}</strong> · ${d.item_count || (d.items || []).length} item(s) · $${Number(d.total_amount || 0).toFixed(2)}</summary>
+                            <div class="hist-items">
+                                ${(d.items || []).map(it => `<div>${escapeHistory(it.date)} · ${escapeHistory(it.vendor || it.category)} · $${Number(it.amount || 0).toFixed(2)}${it.description ? ' — ' + escapeHistory(it.description) : ''}</div>`).join('')}
+                                ${d.notes ? `<div class="hist-note">Notes: ${escapeHistory(d.notes)}</div>` : ''}
+                            </div>
+                        </details>
+                        <button type="button" class="hist-del" data-id="${escapeHistory(d.id)}">Delete</button>
+                    </div>`).join('');
+                list.querySelectorAll('.hist-del').forEach(btn => btn.addEventListener('click', () => deleteMyExpenseHistory(btn.dataset.id)));
+            } catch (error) {
+                wrap.hidden = false;
+                list.innerHTML = '<div class="hist-empty">Could not load history: ' + escapeHistory(error.message || String(error)) + '</div>';
+            }
+        }
+
+        async function deleteMyExpenseHistory(id) {
+            const db = expenseDb();
+            if (!db || !id) return;
+            if (!window.confirm('Delete this saved expense report from your history? This cannot be undone.')) return;
+            try { await deleteDoc(doc(db, 'expense_reports', id)); loadMyExpenseHistory(); } catch (error) {}
+        }
+
+        window.saveMyExpenseHistory = saveMyExpenseHistory;
+        window.loadMyExpenseHistory = loadMyExpenseHistory;
 
         function roleFromLocalStorage() {
             try {
@@ -954,6 +1064,7 @@
                 employeeName.value = role.user.name || '';
                 employeeEmail.value = role.user.email || '';
             }
+            loadMyExpenseHistory();
         }
 
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
@@ -1316,7 +1427,8 @@ ${data.notes ? `<div class="notes"><span class="label">Notes for Finance</span><
 
             await ensureReportLogo();
             downloadBlob(buildReportHtml(data), 'text/html', `${filenameBase(data)}.html`);
-            showMessage('Report downloaded. Open it, print/save as PDF, then email it to Finance with your receipts.');
+            if (typeof window.saveMyExpenseHistory === 'function') window.saveMyExpenseHistory();
+            showMessage('Report downloaded and saved to your private history. Open it, print/save as PDF, then email it to Finance with your receipts.');
             maybeClearAfterExport();
         }
 
