@@ -359,6 +359,7 @@
                 });
                 if (saved) {
                     showMessage(saved.notification_error ? `Saved, but email needs setup: ${saved.notification_error}` : 'Vacation request submitted.');
+                    import('../../system/api/activity-logger.js').then(m => m.logActivity('form_submit', { toolName: 'Vacation Tracker', details: { type: 'vacation', start_date: start, end_date: end } })).catch(() => {});
                 } else {
                     const local = { id: `local-${Date.now()}`, user_id: currentUser.id, type: 'vacation', start_date: start, end_date: end, status: isAdmin() ? 'approved' : 'pending', notes: document.getElementById('notes').value };
                     myRequests.unshift(local);

@@ -1744,6 +1744,20 @@
             justify-self: end;
         }
 
+        .hub-hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 44px;
+            border: 1px solid var(--rule);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
         @media (max-width: 1260px) {
             .masthead {
                 grid-template-columns: auto auto;
@@ -1762,24 +1776,63 @@
 
         @media (max-width: 720px) {
             .masthead {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr auto;
+                align-items: center;
                 padding: 16px 20px;
             }
 
             .masthead-logo {
-                width: min(190px, 70vw);
+                width: min(190px, 60vw);
+                order: 1;
+            }
+
+            .hub-hamburger {
+                display: inline-flex;
+                order: 2;
+                justify-self: end;
             }
 
             .hub-nav {
-                order: 2;
+                order: 3;
+                grid-column: 1 / -1;
+                width: 100%;
+                display: none;
+                flex-direction: column;
+                gap: 4px;
+                overflow: visible;
+                margin-top: 8px;
+            }
+
+            .masthead.nav-open .hub-nav {
+                display: flex;
+            }
+
+            .hub-nav-item {
+                width: 100%;
+            }
+
+            .hub-nav-btn {
+                width: 100%;
+                justify-content: space-between;
+                min-height: 46px;
+            }
+
+            .hub-dropdown {
+                position: static;
+                min-width: 0;
+                width: 100%;
+                margin-top: 4px;
+                box-shadow: none;
             }
 
             .masthead-right {
-                order: 3;
+                order: 4;
+                grid-column: 1 / -1;
                 width: 100%;
                 justify-self: start;
                 justify-content: flex-start;
                 flex-wrap: wrap;
+                margin-top: 10px;
             }
         }
     </style>
@@ -1873,6 +1926,7 @@
 <div class="dashboard" id="dashboard">
     <div class="masthead">
         <img src="assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
+        <button class="hub-hamburger" type="button" id="hubHamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleHubNav()">☰</button>
         <nav class="hub-nav" aria-label="Hub sections">
             <button class="hub-nav-btn active" type="button" data-view="dashboard">Dashboard</button>
             <div class="hub-nav-item" data-nav-item="departments">
@@ -2524,9 +2578,25 @@ function closeNavMenus() {
     document.querySelectorAll('.hub-nav-item.open').forEach(item => item.classList.remove('open'));
 }
 
+function toggleHubNav() {
+    const masthead = document.querySelector('.masthead');
+    if (!masthead) return;
+    const open = masthead.classList.toggle('nav-open');
+    const btn = document.getElementById('hubHamburger');
+    if (btn) btn.setAttribute('aria-expanded', String(open));
+}
+
+function closeHubNav() {
+    const masthead = document.querySelector('.masthead');
+    if (masthead) masthead.classList.remove('nav-open');
+    const btn = document.getElementById('hubHamburger');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
 function renderHub(role, view = 'dashboard', sectionKey = '') {
     activeRole = role;
     closeNavMenus();
+    closeHubNav();
     setActiveNav(view, sectionKey);
     const hashTarget = sectionKey || view;
     if (hashTarget && location.hash !== `#${hashTarget}`) {
@@ -2708,6 +2778,13 @@ function createToolLink(card, sectionLabel) {
         const isExternal = /^https?:\/\//.test(card.href);
         link.target = isExternal ? '_blank' : '_self';
         if (isExternal) link.rel = 'noopener noreferrer';
+        link.addEventListener('click', () => {
+            try {
+                logActivity('tool_open', { toolName: card.title, details: { section: sectionLabel || '', href: card.href || '' }, keepalive: true });
+            } catch (error) {
+                // tool-open logging is best-effort
+            }
+        });
     } else {
         link.addEventListener('click', event => event.preventDefault());
     }
@@ -3207,6 +3284,7 @@ window.handleCreateAccount = handleCreateAccount;
 window.handleLogin = handleLogin;
 window.signOut = signOut;
 window.toggleProfileMenu = toggleProfileMenu;
+window.toggleHubNav = toggleHubNav;
 </script>
 
 </body>

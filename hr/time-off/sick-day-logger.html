@@ -248,6 +248,7 @@
                 });
                 if (saved) {
                     showMessage(saved.notification_error ? `Saved, but email needs setup: ${saved.notification_error}` : 'Sick day logged.');
+                    import('../../system/api/activity-logger.js').then(m => m.logActivity('form_submit', { toolName: 'Sick Day Logger', details: { type: 'sick', start_date: date } })).catch(() => {});
                 } else {
                     entries.unshift({ id: `local-${Date.now()}`, type: 'sick', start_date: date, status: 'approved', reason_category: document.getElementById('category').value, notes: document.getElementById('notes').value, edit_locked_at: new Date(Date.now() + 86400000).toISOString() });
                     showMessage('Prototype entry added on this screen. Firestore will save once connected.');

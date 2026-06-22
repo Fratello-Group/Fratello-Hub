@@ -635,23 +635,12 @@
         }
 
         function logActivity(action, comment) {
-            const payload = {
-                event_type: 'approval_action',
-                tool_name: 'Time Off Review',
-                details: { request_id: currentRequest?.id || requestId, action, comment },
-                timestamp: new Date().toISOString()
-            };
-
-            try {
-                const body = JSON.stringify(payload);
-                if (navigator.sendBeacon) {
-                    navigator.sendBeacon('/.netlify/functions/log-activity', new Blob([body], { type: 'application/json' }));
-                    return;
-                }
-                fetch('/.netlify/functions/log-activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true });
-            } catch (error) {
-                // Activity logging is best-effort from this static page.
-            }
+            import('../../system/api/activity-logger.js')
+                .then(m => m.logActivity('approval_action', {
+                    toolName: 'Time Off Review',
+                    details: { request_id: currentRequest?.id || requestId, action, comment }
+                }))
+                .catch(() => {});
         }
 
         async function init() {
