@@ -184,6 +184,7 @@
             els.startFilter.value = start.toISOString().slice(0, 10);
             els.endFilter.value = end.toISOString().slice(0, 10);
         }
+        let peopleByKey = {};
         async function loadEvents() {
             await loadClient();
             try {
@@ -192,6 +193,56 @@
             } catch (error) {
                 events = [];
                 els.connectionStatus.textContent = error.message || 'Activity log pending';
+            }
+        }
+        async function loadPeople() {
+            try {
+                const users = await call('getUsers') || [];
+                const map = {};
+                users.forEach(u => {
+                    const nm = u.name || '';
+                    if (!nm) return;
+                    if (u.email) map[String(u.email).toLowerCase()] = nm;
+                    if (u.id) map[String(u.id).toLowerCase()] = nm;
+                });
+                peopleByKey = map;
+            } catch (error) { peopleByKey = {}; }
+        }
+        function cap(value) { const s = String(value || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
+        function prettyId(id) {
+            const s = String(id || '');
+            if (!s || s.includes('@')) return s;
+            return s.split(/[-_.]/).filter(Boolean).map(cap).join(' ') || s;
+        }
+        function nameFor(item) {
+            const id = String(item.user_id || '');
+            return peopleByKey[id.toLowerCase()] || (item.details && item.details.name) || prettyId(id) || '—';
+        }
+        function describe(item) {
+            const d = item.details || {};
+            const tool = item.tool_name || '';
+            switch (item.event_type) {
+                case 'login': return d.method ? `Signed in with ${d.method}` : 'Signed in';
+                case 'logout': return 'Signed out';
+                case 'tool_open': return tool ? `Opened ${tool}` : 'Opened a tool';
+                case 'form_submit':
+                    if (d.type === 'vacation') return d.start_date ? `Submitted a vacation request for ${d.start_date}` : 'Submitted a vacation request';
+                    if (d.type === 'sick') return d.start_date ? `Logged a sick day for ${d.start_date}` : 'Logged a sick day';
+                    return tool ? `Submitted a form in ${tool}` : 'Submitted a form';
+                case 'approval_action': return `${cap(d.action || 'updated')} a time-off request`;
+                case 'data_edit': {
+                    const who = d.target_name || d.target_email || 'someone';
+                    switch (d.action) {
+                        case 'invite_sent': return d.profile ? `Invited ${who} as ${cap(d.profile)}` : `Invited ${who}`;
+                        case 'user_deleted': return `Deleted ${who}`;
+                        case 'profile_changed': return d.profile ? `Changed ${who}'s access to ${cap(d.profile)}` : `Changed ${who}'s access`;
+                        case 'user_disabled': return `Disabled ${who}`;
+                        case 'user_enabled': return `Enabled ${who}`;
+                        case 'manager_changed': return d.manager ? `Made ${who} a Manager` : `Removed ${who} as Manager`;
+                        default: return tool ? `Updated ${tool}` : 'Made a change';
+                    }
+                }
+                default: return tool || item.event_type || '';
             }
         }
         function filtered() {
@@ -214,16 +265,16 @@
             els.logRows.innerHTML = list.length ? list.map(item => `
                 <tr>
                     <td>${escapeHtml(fmt(item.timestamp))}</td>
-                    <td>${escapeHtml((item.details && item.details.name) || item.user_id || '')}</td>
+                    <td>${escapeHtml(nameFor(item))}</td>
                     <td><span class="badge">${escapeHtml(item.event_type || '')}</span></td>
                     <td>${escapeHtml(item.tool_name || '')}</td>
-                    <td>${escapeHtml(JSON.stringify(item.details || {}))}</td>
+                    <td title="${escapeHtml(JSON.stringify(item.details || {}))}">${escapeHtml(describe(item))}</td>
                 </tr>
             `).join('') : '<tr><td colspan="5">No activity events match these filters yet.</td></tr>';
         }
         function csvValue(value) { return `"${String(value || '').replace(/"/g, '""')}"`; }
         function exportCsv() {
-            const rows = [['Time','User','Event','Tool','Details']].concat(filtered().map(item => [fmt(item.timestamp), item.user_id || '', item.event_type || '', item.tool_name || '', JSON.stringify(item.details || {})]));
+            const rows = [['Time','User','Event','Tool','Details']].concat(filtered().map(item => [fmt(item.timestamp), nameFor(item), item.event_type || '', item.tool_name || '', describe(item)]));
             const csv = rows.map(row => row.map(csvValue).join(',')).join('\n');
             const link = document.createElement('a');
             link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -260,6 +311,7 @@
             }
             setDefaultDates();
             await loadEvents();
+            await loadPeople();
             render();
             els.logContent.hidden = false;
         }
