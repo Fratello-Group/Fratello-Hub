@@ -1270,6 +1270,8 @@
                 const needsInvite = USE_FIREBASE_AUTH && person.status !== 'active';
                 const department = personDepartment(person);
                 const tier = personRoleTier(person);
+                const isSeniorProfile = person.profile === 'owner' || person.profile === 'controller';
+                const isManagerTier = ['Owner', 'Controller', 'Manager'].includes(tier);
                 const manager = managerName(personManagerId(person));
                 const hireDate = person.hire_date ? ` · Hire date: ${person.hire_date}` : '';
                 return `
@@ -1285,6 +1287,10 @@
                                 <option value="${escapeHtml(key)}" ${person.profile === key ? 'selected' : ''}>${escapeHtml(profile.label)}</option>
                             `).join('')}
                         </select>
+                        <label class="mgr-toggle" style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--slate); cursor:${isSeniorProfile ? 'default' : 'pointer'};" title="${isSeniorProfile ? 'Owners and Controllers are always managers.' : 'Managers can use manager tools like the Hiring Document Generator.'}">
+                            <input type="checkbox" data-person="${safeId}" ${isManagerTier ? 'checked' : ''} ${isSeniorProfile ? 'disabled' : ''} onchange="toggleManager(this.dataset.person, this.checked)" style="width:auto; min-height:auto;">
+                            Manager
+                        </label>
                     </td>
                     <td>
                         <div class="profile-access" id="access-${safeId}">${accessTags(person.profile)}</div>
@@ -1539,6 +1545,25 @@
             await loadUsers();
         }
 
+        async function toggleManager(personId, makeManager) {
+            const person = STAFF.find(item => item.id === personId);
+            if (!person) return;
+            person.role_tier = makeManager ? 'Manager' : 'Staff';
+            try {
+                if (USE_FIREBASE_AUTH) {
+                    await updateHubUser(person, person.profile);
+                } else {
+                    await authRequest({ action: 'users:update', id: personId, role_tier: person.role_tier });
+                }
+                audit('manager_changed', { target_email: person.email, manager: makeManager });
+                document.getElementById('saveState').textContent = `${person.name} is ${makeManager ? 'now a Manager' : 'no longer a Manager'}.`;
+                await loadUsers();
+            } catch (error) {
+                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+                await loadUsers();
+            }
+        }
+
         async function deleteUser(personId, button) {
             const person = STAFF.find(item => item.id === personId);
             if (!person) return;
@@ -1623,6 +1648,7 @@
         window.updateProfile = updateProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;
+        window.toggleManager = toggleManager;
         window.deleteUser = deleteUser;
         window.copyGeneratedLink = copyGeneratedLink;
     </script>

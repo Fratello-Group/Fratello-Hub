@@ -184,6 +184,7 @@ function roleFromProfile(id, data) {
         key: profile.key,
         label: profile.label,
         sections: profile.sections,
+        roleTier: data.role_tier || timeOffRoleTier(profileKey),
         user: {
             id,
             name: data.name || displayNameFromEmail(data.email),

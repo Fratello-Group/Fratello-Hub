@@ -2136,6 +2136,7 @@ const SECTIONS = {
                 title: 'Hiring Document Generator',
                 href: 'hr/hiring/hiring-document-generator.html',
                 roles: ['owner', 'controller', 'production', 'marketing'],
+                managerOnly: true,
                 badge: 'Live',
                 quick: true
             },
@@ -2533,8 +2534,14 @@ function greetingWord(now = new Date()) {
     return 'Good evening';
 }
 
+function isManagerRole(role) {
+    return Boolean(role) && (role.key === 'owner' || role.key === 'controller' || String(role.roleTier || '').toLowerCase() === 'manager');
+}
+
 function cardIsVisible(card, role) {
-    return !card.roles || card.roles.includes(role.key);
+    if (card.roles && !card.roles.includes(role.key)) return false;
+    if (card.managerOnly && !isManagerRole(role)) return false;
+    return true;
 }
 
 function isActiveCard(card) {

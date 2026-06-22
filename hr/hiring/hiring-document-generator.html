@@ -999,11 +999,14 @@ import {
 } from '../../system/fratello-auth.js';
 
 (async function guardHiringAccess() {
-  const allowed = ['owner', 'controller', 'production', 'marketing'];
   const useFirebaseAuth = firebaseConfigured();
 
+  // Hiring is a manager-level tool: Owners, the Controller, and anyone
+  // marked as a Manager in Manage People. Regular staff are blocked.
   function isAllowed(role) {
-    return role && allowed.includes(role.key);
+    if (!role) return false;
+    if (role.key === 'owner' || role.key === 'controller') return true;
+    return String(role.roleTier || '').toLowerCase() === 'manager';
   }
 
   function showUnlocked(role) {
