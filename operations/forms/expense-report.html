@@ -54,7 +54,7 @@
             justify-content: space-between;
             gap: 24px;
             position: sticky;
-            top: 0;
+            top: var(--fh-bar-h, 72px);
             z-index: 20;
             background: rgba(26, 26, 26, 0.98);
             border-bottom: 1px solid var(--divider-dark);
@@ -731,6 +731,8 @@
 </head>
 <body class="auth-checking">
     <div class="shell">
+        <div id="fratello-hub-header"></div>
+        <script src="/system/hub-header.js"></script>
         <header class="hub-bar">
             <div class="brand">
                 <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello">

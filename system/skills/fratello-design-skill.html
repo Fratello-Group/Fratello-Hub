@@ -37,7 +37,7 @@
 
         .masthead {
             position: sticky;
-            top: 0;
+            top: var(--fh-bar-h, 72px);
             z-index: 20;
             max-width: none;
             width: 100%;
@@ -292,6 +292,8 @@
 </head>
 <body class="auth-checking">
     <div class="page">
+        <div id="fratello-hub-header"></div>
+        <script src="/system/hub-header.js"></script>
         <header class="masthead">
             <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
             <div class="masthead-right">

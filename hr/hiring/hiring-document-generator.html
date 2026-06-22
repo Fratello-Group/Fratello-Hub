@@ -464,7 +464,7 @@ header.app-header {
   border-bottom: 1px solid var(--border);
   padding: 18px 48px 22px;
   position: sticky;
-  top: 0;
+  top: var(--fh-bar-h, 72px);
   z-index: 100;
   box-shadow: none;
 }
@@ -1059,6 +1059,8 @@ import {
 </script>
 
 <!-- ============== HEADER ============== -->
+<div id="fratello-hub-header"></div>
+<script src="/system/hub-header.js"></script>
 <header class="app-header">
   <nav class="hub-nav" aria-label="Hub navigation">
     <a class="hub-back" href="/">Back to Hub</a>
