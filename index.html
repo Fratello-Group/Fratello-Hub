@@ -1409,11 +1409,14 @@
 
         .qa-serial {
             color: var(--teal-deep);
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 800;
             letter-spacing: 2px;
             font-variant-numeric: tabular-nums;
         }
+
+        .qa-card--gold .qa-chip { background: #E8A33D; color: #5A3A12; }
+        .qa-card--gold .qa-serial { color: #B5780F; }
 
         .qa-label {
             display: flex;
@@ -2186,12 +2189,11 @@ const FALLBACK_HUB_DATA = {
     attention: [],
     notes: [],
     quickActions: [
-        { id: 'qa_vacation', label: 'Submit Vacation Request', icon: 'calendar-plus', href: '/hr/time-off/vacation-tracker.html?view=submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 1, owner: 3 } },
-        { id: 'qa_sick', label: 'Log Sick Day', icon: 'thermometer', href: '/hr/time-off/sick-day-logger.html', tiers: ['staff', 'manager', 'owner'], order: { staff: 2, manager: 2, owner: 4 } },
-        { id: 'qa_expense', label: 'Expense Report', icon: 'receipt', href: '/operations/forms/expense-report.html', tiers: ['staff', 'manager', 'owner'], order: { staff: 3, manager: 3, owner: 5 } },
-        { id: 'qa_timeoff', label: 'My Time Off', icon: 'clock', href: '/hr/time-off/vacation-tracker.html?view=my-requests', tiers: ['staff', 'manager', 'owner'], order: { staff: 4, manager: 4, owner: 6 } },
-        { id: 'qa_approvals', label: 'Approvals Queue', icon: 'check-square', href: '/hr/time-off/vacation-tracker.html?view=approvals', tiers: ['manager', 'owner'], order: { manager: 5, owner: 1 } },
-        { id: 'qa_calendar', label: 'Team Calendar', icon: 'calendar', href: '/hr/time-off/vacation-tracker.html?view=calendar', tiers: ['owner'], order: { owner: 2 } }
+        { id: 'qa_vacation', label: 'Submit vacation', icon: 'calendar-plus', href: '/hr/time-off/vacation-tracker.html?view=submit', group: 'submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 1, owner: 1 } },
+        { id: 'qa_sick', label: 'Log a sick day', icon: 'thermometer', href: '/hr/time-off/sick-day-logger.html', group: 'submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 2, manager: 2, owner: 2 } },
+        { id: 'qa_expense', label: 'Submit an expense', icon: 'receipt', href: '/operations/forms/expense-report.html', group: 'submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 3, manager: 3, owner: 3 } },
+        { id: 'qa_calendar', label: 'Calendar', icon: 'calendar', href: '/hr/time-off/vacation-tracker.html?view=my-requests', group: 'review', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 2, owner: 2 } },
+        { id: 'qa_approvals', label: 'Approvals queue', icon: 'check-square', href: '/hr/time-off/vacation-tracker.html?view=approvals', group: 'review', tiers: ['manager', 'owner'], order: { manager: 1, owner: 1 } }
     ],
     users: {
         roleDefaults: {
@@ -2922,9 +2924,9 @@ function iconSvg(key) {
     return icons[key] || icons.calendar;
 }
 
-function createQuickActionCard(action, index) {
+function createQuickActionCard(action, index, accent) {
     const card = document.createElement('a');
-    card.className = 'qa-card fade-in';
+    card.className = 'qa-card fade-in' + (accent === 'gold' ? ' qa-card--gold' : '');
     card.href = action.href;
     card.innerHTML = `
         <span class="qa-top">
@@ -3032,20 +3034,29 @@ function renderDashboardHome(role) {
         main.appendChild(section);
     }
 
-    const quickSection = document.createElement('section');
-    quickSection.className = 'workbench-section fade-in';
-    quickSection.innerHTML = `
-        <div class="workbench-head">
-            <h2 class="workbench-title">My Quick Actions</h2>
-            <span class="workbench-meta">Most-used</span>
-        </div>
-    `;
-    const quickGrid = document.createElement('div');
-    quickGrid.className = 'qa-grid';
-    quickGrid.style.setProperty('--qa-columns', String(Math.min(Math.max(quickActions.length, 1), 6)));
-    quickActions.forEach((action, index) => quickGrid.appendChild(createQuickActionCard(action, index)));
-    quickSection.appendChild(quickGrid);
-    main.appendChild(quickSection);
+    const submitActions = quickActions.filter(action => (action.group || 'submit') === 'submit');
+    const reviewActions = quickActions.filter(action => action.group === 'review');
+
+    const buildQuickSection = (title, meta, actions, accent) => {
+        if (!actions.length) return;
+        const section = document.createElement('section');
+        section.className = 'workbench-section fade-in';
+        section.innerHTML = `
+            <div class="workbench-head">
+                <h2 class="workbench-title">${title}</h2>
+                <span class="workbench-meta">${meta}</span>
+            </div>
+        `;
+        const grid = document.createElement('div');
+        grid.className = 'qa-grid';
+        grid.style.setProperty('--qa-columns', String(Math.min(Math.max(actions.length, 1), 6)));
+        actions.forEach((action, index) => grid.appendChild(createQuickActionCard(action, index, accent)));
+        section.appendChild(grid);
+        main.appendChild(section);
+    };
+
+    buildQuickSection('Submit', 'Everyone', submitActions, 'teal');
+    buildQuickSection('Review', 'View what’s there', reviewActions, 'gold');
 
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
