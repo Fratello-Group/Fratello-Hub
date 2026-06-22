@@ -561,6 +561,66 @@
             box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
         }
 
+        .sub-hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 40px;
+            border: 1px solid var(--divider-dark);
+            border-radius: 4px;
+            background: var(--white);
+            color: var(--slate);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .sub-profile-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 12px 5px 5px;
+            border: 1px solid var(--divider-dark);
+            border-radius: 4px;
+            background: var(--white);
+        }
+
+        .sub-avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 3px;
+            background: rgba(54, 179, 175, 0.12);
+            border: 1px solid rgba(54, 179, 175, 0.5);
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .sub-profile-copy {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+        }
+
+        .sub-profile-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--black);
+        }
+
+        .sub-profile-access {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--teal);
+        }
+
         .nav-link,
         .ghost-button {
             color: var(--slate);
@@ -603,24 +663,32 @@
 
         @media (max-width: 860px) {
             .masthead {
-                padding: 18px 24px;
-                align-items: flex-start;
-                flex-direction: column;
+                padding: 16px 24px;
+                align-items: center;
+                flex-wrap: wrap;
             }
 
             .masthead-logo { height: 28px; }
+            .sub-hamburger { display: inline-flex; margin-left: auto; }
             .masthead-right {
                 width: 100%;
-                gap: 12px;
-                justify-content: flex-start;
-                overflow-x: auto;
+                order: 3;
+                display: none;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                overflow: visible;
+                margin-top: 10px;
             }
+            .masthead.nav-open .masthead-right { display: flex; }
             .hub-nav {
+                flex-direction: column;
                 flex-wrap: nowrap;
-                justify-content: flex-start;
-                min-width: max-content;
-                padding-bottom: 2px;
+                min-width: 0;
+                gap: 6px;
             }
+            .nav-link { width: 100%; text-align: left; }
+            .sub-profile-chip { align-self: flex-start; }
             .role-pill { display: none; }
 
             main { padding: 40px 24px 64px; }
@@ -647,6 +715,7 @@
     <div class="page-shell" id="pageShell">
         <header class="masthead">
             <img src="../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
+            <button class="sub-hamburger" type="button" id="subHamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleSubNav()">☰</button>
             <div class="masthead-right">
                 <nav class="hub-nav" aria-label="Hub sections">
                     <a class="nav-link" href="/#dashboard">Dashboard</a>
@@ -655,6 +724,13 @@
                     <a class="nav-link" href="/#owner-hub">Owner Hub</a>
                     <a class="nav-link" href="/#settings">Settings</a>
                 </nav>
+                <div class="sub-profile-chip" id="subProfileChip" hidden>
+                    <span class="sub-avatar" id="subAvatar">--</span>
+                    <span class="sub-profile-copy">
+                        <span class="sub-profile-name" id="subProfileName">--</span>
+                        <span class="sub-profile-access" id="subProfileAccess">--</span>
+                    </span>
+                </div>
             </div>
         </header>
 
@@ -768,6 +844,29 @@
             } catch (error) {
                 // audit logging is best-effort
             }
+        }
+
+        function toggleSubNav() {
+            const masthead = document.querySelector('.masthead');
+            if (!masthead) return;
+            const open = masthead.classList.toggle('nav-open');
+            const btn = document.getElementById('subHamburger');
+            if (btn) btn.setAttribute('aria-expanded', String(open));
+        }
+        window.toggleSubNav = toggleSubNav;
+
+        function populateSubProfile() {
+            let role = null;
+            try { role = JSON.parse(localStorage.getItem('fratello-role') || 'null'); } catch (error) {}
+            const chip = document.getElementById('subProfileChip');
+            if (!chip) return;
+            if (!role || !role.user) { chip.hidden = true; return; }
+            const name = role.user.name || role.user.email || 'Team member';
+            const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'TM';
+            document.getElementById('subAvatar').textContent = initials;
+            document.getElementById('subProfileName').textContent = name.split(' ')[0] || name;
+            document.getElementById('subProfileAccess').textContent = `${role.label || 'Staff'} access`;
+            chip.hidden = false;
         }
 
         const PROFILES = {
@@ -1477,6 +1576,7 @@
 
         (async function initPermissions() {
             populateStaffFilters();
+            populateSubProfile();
             document.getElementById('inviteName').addEventListener('input', () => setFieldError('InviteName', ''));
             document.getElementById('inviteEmail').addEventListener('input', () => setFieldError('InviteEmail', ''));
             document.getElementById('inviteProfile').addEventListener('change', () => applyProfileDefaults(true));
@@ -1485,6 +1585,7 @@
                 onHubAuthChange((role, error) => {
                     if (role) {
                         localStorage.setItem('fratello-role', JSON.stringify(role));
+                        populateSubProfile();
                         if (requireOwner()) {
                             renderProfiles();
                             loadUsers().catch(loadError => {
