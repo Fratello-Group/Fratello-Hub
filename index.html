@@ -2765,6 +2765,13 @@ function createActionDropdownItem(card, subtitle) {
     const isExternal = /^https?:\/\//.test(card.href);
     item.target = isExternal ? '_blank' : '_self';
     if (isExternal) item.rel = 'noopener noreferrer';
+    item.addEventListener('click', () => {
+        try {
+            logActivity('tool_open', { toolName: card.title, details: { section: subtitle || '', href: card.href || '' }, keepalive: true });
+        } catch (error) {
+            // tool-open logging is best-effort
+        }
+    });
     return item;
 }
 
