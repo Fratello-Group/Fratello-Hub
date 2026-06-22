@@ -326,7 +326,7 @@
             els.previewTitle.textContent = `${days} business day${days === 1 ? '' : 's'}`;
             els.previewList.innerHTML = `
                 <div class="summary-row"><span>Dates</span><strong>${fmt(start)} to ${fmt(end)}</strong></div>
-                <div class="summary-row"><span>Approver</span><strong>${userName(currentUser.manager_id) || (isAdmin() ? 'Auto-approved' : 'Manager')}</strong></div>
+                <div class="summary-row"><span>Approver</span><strong>${roleKey() === 'owner' ? 'Auto-approved (you)' : (currentUser.manager_id ? userName(currentUser.manager_id) : 'No manager set')}</strong></div>
                 <div class="summary-row"><span>Department overlap</span><strong>${sameDepartment.length ? sameDepartment.map(r => userName(r.user_id)).join(', ') : 'None found'}</strong></div>
                 <div class="summary-row"><span>Own overlap</span><strong>${ownOverlap.length ? 'Check dates' : 'Clear'}</strong></div>
             `;
