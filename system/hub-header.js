@@ -8,6 +8,8 @@
 // If the placeholder div is omitted, the header is prepended to <body>.
 (function () {
     var ROLE_KEY = 'fratello-role';
+    var styled = false;
+    var outsideBound = false;
 
     function readRole() {
         try { return JSON.parse(localStorage.getItem(ROLE_KEY) || 'null'); }
@@ -79,20 +81,13 @@
         window.location.href = '/index.html';
     }
 
-    function render() {
-        if (document.querySelector('.fh-bar')) return;
-
-        var role = readRole();
+    function buildBar(role) {
         var isOwner = role && (role.key === 'owner' || String(role.label || '').toLowerCase() === 'owner');
         var user = (role && role.user) || {};
         var name = user.name || user.email || '';
         var first = name ? (name.split(' ')[0] || name) : '';
         var email = user.email || '';
         var accessLabel = role ? String(role.label || 'Staff') : '';
-
-        var style = document.createElement('style');
-        style.textContent = CSS;
-        document.head.appendChild(style);
 
         var account = name
             ? '<div class="fh-account">' +
@@ -123,11 +118,10 @@
                 (isOwner ? '<a href="/index.html#settings">Settings</a>' : '') +
             '</nav>' +
             '<div class="fh-right">' + account + '</div>';
+        return bar;
+    }
 
-        var mount = document.getElementById('fratello-hub-header');
-        if (mount) { mount.replaceWith(bar); }
-        else { document.body.insertBefore(bar, document.body.firstChild); }
-
+    function wire(bar) {
         function publishHeight() {
             try { document.documentElement.style.setProperty('--fh-bar-h', bar.offsetHeight + 'px'); } catch (error) {}
         }
@@ -135,7 +129,7 @@
         window.addEventListener('resize', publishHeight);
 
         var burger = bar.querySelector('.fh-burger');
-        burger.addEventListener('click', function () {
+        if (burger) burger.addEventListener('click', function () {
             var open = bar.classList.toggle('fh-open');
             burger.setAttribute('aria-expanded', String(open));
             publishHeight();
@@ -150,21 +144,71 @@
                 menu.hidden = !open;
                 chip.setAttribute('aria-expanded', String(open));
             });
-            document.addEventListener('click', function (event) {
-                if (!menu.hidden && !event.target.closest('.fh-account')) {
-                    menu.hidden = true;
-                    chip.setAttribute('aria-expanded', 'false');
-                }
-            });
         }
 
         var signoutBtn = bar.querySelector('.fh-menu-signout');
         if (signoutBtn) signoutBtn.addEventListener('click', signOut);
     }
 
+    function bindOutside() {
+        if (outsideBound) return;
+        outsideBound = true;
+        document.addEventListener('click', function (event) {
+            if (event.target.closest('.fh-account')) return;
+            var menu = document.querySelector('.fh-menu');
+            var chip = document.querySelector('.fh-chip');
+            if (menu && !menu.hidden) {
+                menu.hidden = true;
+                if (chip) chip.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    function mount(role) {
+        if (!styled) {
+            var style = document.createElement('style');
+            style.textContent = CSS;
+            document.head.appendChild(style);
+            styled = true;
+        }
+        var bar = buildBar(role);
+        var existing = document.querySelector('.fh-bar');
+        if (existing) {
+            existing.replaceWith(bar);
+        } else {
+            var slot = document.getElementById('fratello-hub-header');
+            if (slot) { slot.replaceWith(bar); }
+            else { document.body.insertBefore(bar, document.body.firstChild); }
+        }
+        wire(bar);
+        bindOutside();
+    }
+
+    function hasName(role) {
+        return Boolean(role && role.user && (role.user.name || role.user.email));
+    }
+
+    function start() {
+        mount(readRole());
+        // The login can resolve after this script runs (Firebase auth is async).
+        // Fill the chip in once the role lands, then stop checking.
+        if (hasName(readRole())) return;
+        var tries = 0;
+        var timer = setInterval(function () {
+            tries += 1;
+            var role = readRole();
+            if (hasName(role)) {
+                mount(role);
+                clearInterval(timer);
+            } else if (tries >= 8) {
+                clearInterval(timer);
+            }
+        }, 500);
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', render);
+        document.addEventListener('DOMContentLoaded', start);
     } else {
-        render();
+        start();
     }
 })();
