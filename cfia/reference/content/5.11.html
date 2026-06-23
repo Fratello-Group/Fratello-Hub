@@ -1,0 +1,169 @@
+<h2>Purpose</h2>
+<p>This SOP outlines the complete process for final product packaging, including manual packaging steps, labelling, sealing, and integrated traceability using Odoo ERP. It ensures that all final packaged products meet food safety, labelling, and regulatory compliance requirements under Fratello Coffee Roasters' Preventive Control Plan (PCP) and the Safe Food for Canadians Regulations (SFCR).</p>
+
+<h2>Scope</h2>
+<p>Applies to all Fratello packaging operators, line leads, and QA personnel involved in:</p>
+<ul>
+  <li>Setting up and operating sealing, boxing, and labelling equipment</li>
+  <li>Applying and verifying product labels</li>
+  <li>Recording product data in Odoo</li>
+  <li>Handling packaging deviations and ensuring traceability from roast lot to finished product</li>
+</ul>
+
+<h2>Related SOPs and Documents</h2>
+<ul>
+  <li>SOP-PCP-3.1 &ndash; Product Formulation &amp; Processing</li>
+  <li>SOP-PCP-5.6 &ndash; Traceability and Control</li>
+  <li>SOP-PCP-7.1 &ndash; Label Control and Verification</li>
+  <li>SOP-PCP-6.1 &ndash; Sanitation Procedure</li>
+  <li>SOP-PCP-1.1a &ndash; Incoming Input Controls</li>
+  <li>SOP-PCP-9.1 &ndash; Product Disposition Procedure</li>
+  <li>Pre-Operational Inspection Procedure</li>
+  <li>Packaging Line QA Checklist</li>
+</ul>
+
+<h2>1. Packaging Line Setup (Manual Steps)</h2>
+<h3>Tasks</h3>
+<ul>
+  <li>Turn on sealing and boxing equipment (heat sealers, boxing tables, conveyor if applicable)</li>
+  <li>Ensure all food-contact surfaces are clean and sanitized (see Pre-Op SOP)</li>
+  <li>Calibrate or check scales for weight accuracy</li>
+  <li>Prepare packaging components: bags, degassers, boxes, labels</li>
+  <li>Verify all components match the roast product being packed</li>
+</ul>
+<h3>Documentation</h3>
+<ul>
+  <li>Pre-Operational Inspection Checklist</li>
+  <li>Packaging Log (paper or Odoo-integrated)</li>
+</ul>
+<h3>Food Safety Verification</h3>
+<ul>
+  <li>Bags and labels must be free from dust, debris, moisture</li>
+  <li>Only approved packaging materials from the Approved Supplier List are permitted</li>
+</ul>
+
+<h2>2. Bag Filling and Sealing</h2>
+<h3>Tasks</h3>
+<ul>
+  <li>Weigh coffee into bags based on pack size (e.g., 340g, 5lb)</li>
+  <li>Insert degasser if required</li>
+  <li>Confirm proper seal using heat sealer (test at start of shift)</li>
+  <li>Line lead performs random seal and weight checks hourly</li>
+</ul>
+<h3>Non-Conformances</h3>
+<ul>
+  <li>Underweight/overweight bags are rejected and reworked</li>
+  <li>Bad seals must be re-sealed or discarded</li>
+</ul>
+
+<h2>3. Labelling Procedure</h2>
+<h3>Tasks</h3>
+<ul>
+  <li>Use CoPilot or pre-approved label files for:
+    <ul>
+      <li>Roast date (YYMMDD)</li>
+      <li>Lot number (linked to roast batch)</li>
+      <li>Origin, weight, contact details, bilingual elements</li>
+    </ul>
+  </li>
+  <li>Confirm label matches approved design from Label Version Log</li>
+  <li>Apply to bag before or after sealing, depending on flow</li>
+</ul>
+<h3>Odoo Integration</h3>
+<ul>
+  <li>Odoo MO must reflect:
+    <ul>
+      <li>Roast lot &rarr; Packaging MO &rarr; Finished product lot</li>
+      <li>Packaging component lots used (e.g., bag SKU, label SKU)</li>
+    </ul>
+  </li>
+</ul>
+<h3>Label QA Checks</h3>
+<ul>
+  <li>First label every batch is signed off by QA</li>
+  <li>Hourly random label checks logged in QA Checklist</li>
+  <li>Errors = hold product, re-label, report under Corrective Action Procedure</li>
+</ul>
+
+<h2>4. Boxing, Taping, and Inventory Completion</h2>
+<h3>Tasks</h3>
+<ul>
+  <li>Group sealed bags by SKU into pre-labeled boxes</li>
+  <li>Add case label with finished lot number and roast date</li>
+  <li>Tape box and apply shipping label if required</li>
+  <li>Update physical or digital log of quantity boxed</li>
+  <li>Move to finished goods inventory in Odoo</li>
+</ul>
+<h3>Odoo Completion</h3>
+<ul>
+  <li>Finalize MO</li>
+  <li>Ensure lot traceability is complete:
+    <ul>
+      <li>Green Bean Lot &rarr; Roast Lot &rarr; Packaging Lot &rarr; Inventory</li>
+    </ul>
+  </li>
+</ul>
+<p>Traceability Tip: Use Odoo Smart Buttons ("Used In" / "Where Used") to verify links.</p>
+
+<h2>5. Deviations and Corrective Actions</h2>
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th>Issue</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mislabelled product</td>
+      <td>Isolate and re-label; log in CAR and Hold Log</td>
+    </tr>
+    <tr>
+      <td>Incorrect lot code</td>
+      <td>Notify QA; trace back roast; rework or dispose</td>
+    </tr>
+    <tr>
+      <td>Packaging failure (seal, weight)</td>
+      <td>Rework or discard per QA instructions</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Records and Verification</h2>
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th>Record/Form</th>
+      <th>Location</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Manufacturing Orders (MO) &ndash; Roast &amp; Packaging</td>
+      <td>Odoo</td>
+    </tr>
+    <tr>
+      <td>Label Version Log</td>
+      <td>Label Control SOP Archive</td>
+    </tr>
+    <tr>
+      <td>Packaging Logs</td>
+      <td>QA Office or Digital Drive</td>
+    </tr>
+    <tr>
+      <td>Pre-Op &amp; Seal Check Logs</td>
+      <td>QA Binder or Shared Folder</td>
+    </tr>
+    <tr>
+      <td>Traceability Logs</td>
+      <td>Odoo &gt; Smart Buttons / Manufacturing Record</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>CFIA Compliance Highlights</h2>
+<ul>
+  <li>Complies with SFCR Part 4 (Preventive Controls &ndash; Processing, Labelling, Packaging)</li>
+  <li>Satisfies traceability under SFCR Part 5 (one step forward, one step back)</li>
+  <li>Integrated with personnel training, sanitation, and packaging supplier controls</li>
+</ul>

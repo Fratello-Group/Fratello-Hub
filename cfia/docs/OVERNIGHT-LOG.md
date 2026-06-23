@@ -13,7 +13,7 @@ branch `codex-hub-access-design` for Chris to review + publish in the morning.
 
 ## Progress
 - [x] Phase 1 — full register **DONE**: 104 canonical docs tagged by department (committed dcd29cc)
-- [~] Phase 2 — reference content + viewer (viewer built `reference/view.html`; extracting content)
+- [x] Phase 2 — reference content + viewer **DONE**: 67 reference docs now readable via the viewer
 - [ ] Phase 3 — forms + quizzes
 - [ ] Phase 4 — foundation
 - [ ] Phase 5 — polish + verify

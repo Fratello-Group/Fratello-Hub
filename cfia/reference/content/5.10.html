@@ -1,0 +1,136 @@
+<h2>Purpose</h2>
+<p>To define standard operating procedures for managing inventory movements, receiving, and shipping of all coffee and packaging materials using the Odoo ERP system, while ensuring CFIA-compliant traceability, inventory accuracy, and fulfillment integrity under Fratello Coffee Roasters' Preventive Control Plan (PCP).</p>
+
+<h2>Scope</h2>
+<p>Applies to all warehouse staff, logistics coordinators, and operations team members involved in:</p>
+<ul>
+  <li>Receiving raw materials (green coffee, packaging, ingredients)</li>
+  <li>Managing internal stock movements and lot assignments</li>
+  <li>Shipping finished products to customers and distributors</li>
+</ul>
+
+<h2>Related CFIA SOPs and System Documents</h2>
+<ul>
+  <li>SOP-PCP-5.1 &ndash; Receiving Procedure</li>
+  <li>SOP-PCP-5.2 &ndash; Shipping Procedure</li>
+  <li>SOP-PCP-5.6 &ndash; Traceability and Control</li>
+  <li>SOP-PCP-1.1a &ndash; Incoming Input Controls</li>
+  <li>SOP-PCP-6.8 &ndash; Premises Inspection Procedure</li>
+  <li>SOP-PCP-3.6 &ndash; Packaging &amp; Labelling Procedure</li>
+</ul>
+
+<h2>1. Product Receiving (Odoo Ref: pg. 95&ndash;99)</h2>
+<h3>Step-by-Step</h3>
+<ul>
+  <li>Access Inventory &gt; Receipts in Odoo</li>
+  <li>Locate PO for expected incoming goods</li>
+  <li>Visually inspect all materials (follow Receiving SOP)</li>
+  <li>Enter actual received quantity and assign or verify Lot Numbers</li>
+  <li>Validate receipt to update stock in Odoo</li>
+</ul>
+<h3>Food Safety Verification</h3>
+<ul>
+  <li>Confirm COAs and packaging integrity (Incoming Input Controls)</li>
+  <li>Reject or hold any damaged or questionable products (Hold SOP)</li>
+  <li>Record supplier lot and internal lot for traceability</li>
+</ul>
+
+<h2>2. Internal Warehouse Transfers (Odoo Ref: pg. 100&ndash;103)</h2>
+<h3>Common Scenarios</h3>
+<ul>
+  <li>Green coffee from receiving bay to silo staging</li>
+  <li>Roasted coffee from production to packaging station</li>
+  <li>Finished goods to storage or shipping staging</li>
+</ul>
+<h3>Step-by-Step</h3>
+<ul>
+  <li>Navigate to Inventory &gt; Internal Transfers</li>
+  <li>Select product and specify origin/destination locations</li>
+  <li>Enter Lot Number for traceability</li>
+  <li>Confirm move in Odoo</li>
+</ul>
+<h3>Controls</h3>
+<ul>
+  <li>All transfers must maintain product identity (no commingling lots)</li>
+  <li>Use physical tags if transferring between areas temporarily</li>
+</ul>
+
+<h2>3. Inventory Adjustments &amp; Cycle Counts</h2>
+<h3>When to Use</h3>
+<ul>
+  <li>Stock discrepancy</li>
+  <li>Physical count correction</li>
+  <li>Damaged/lost product</li>
+</ul>
+<h3>Procedure</h3>
+<ul>
+  <li>Go to Inventory &gt; Adjustments</li>
+  <li>Select product and location</li>
+  <li>Record reason and update lot quantity</li>
+  <li>Submit for QA or supervisor approval</li>
+</ul>
+<h3>Recordkeeping</h3>
+<ul>
+  <li>Must be logged in Inventory Adjustment Log</li>
+  <li>Significant losses require incident review (Corrective Action SOP)</li>
+</ul>
+
+<h2>4. Outbound Shipping (Odoo Ref: pg. 126&ndash;132)</h2>
+<h3>Step-by-Step</h3>
+<ul>
+  <li>Navigate to Sales &gt; Delivery Orders</li>
+  <li>Match against active Sales Orders (SOs)</li>
+  <li>Select correct finished goods Lot Numbers</li>
+  <li>Pick, pack, and confirm shipment quantities</li>
+  <li>Validate shipment to deduct inventory</li>
+</ul>
+<h3>Verification &amp; Controls</h3>
+<ul>
+  <li>Use shipping checklist to ensure:
+    <ul>
+      <li>Correct customer and order</li>
+      <li>Lot codes match traceability records</li>
+      <li>Labels present and legible</li>
+    </ul>
+  </li>
+  <li>Maintain lot-level traceability for all shipments</li>
+</ul>
+
+<h2>5. Records and Logs</h2>
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th>Record/Form</th>
+      <th>Location</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Receiving Logs</td>
+      <td>Odoo + Receiving SOP Checklist</td>
+    </tr>
+    <tr>
+      <td>Internal Transfer Logs</td>
+      <td>Odoo &gt; Inventory &gt; Operations</td>
+    </tr>
+    <tr>
+      <td>Inventory Adjustment Logs</td>
+      <td>Digital or Physical Binder</td>
+    </tr>
+    <tr>
+      <td>Shipping Logs</td>
+      <td>Odoo &gt; Sales &gt; Delivery Orders</td>
+    </tr>
+    <tr>
+      <td>Traceability Reports</td>
+      <td>Odoo Smart Buttons &gt; Lot Tree</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>CFIA Compliance Highlights</h2>
+<ul>
+  <li>Supports SFCR Part 4 &ndash; Preventive Controls: Inventory control, segregation, damage protocols</li>
+  <li>Fulfills Part 5 &ndash; Traceability (lot-level trace in/out)</li>
+  <li>Tied to supplier approval, label control, and deviation management</li>
+</ul>

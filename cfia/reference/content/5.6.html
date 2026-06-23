@@ -1,0 +1,168 @@
+<h2>1. Purpose</h2>
+<p>To ensure that all raw materials, in-process items, and finished products are traceable from origin to customer, enabling rapid and effective product recall or investigation in case of a food safety concern, as required by the Safe Food for Canadians Regulations (SFCR), Part 5 &amp; Section 89.</p>
+
+<h2>2. Scope</h2>
+<p>This procedure applies to:</p>
+<ul>
+  <li>Green coffee beans</li>
+  <li>Roasted and ground coffee</li>
+  <li>Packaging materials</li>
+  <li>Finished packaged coffee</li>
+  <li>Returned or non-conforming product</li>
+</ul>
+
+<h2>3. Responsibilities</h2>
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Responsibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Receiving Personnel</td>
+      <td>Record incoming LOT numbers, suppliers, and product data in Transport Log.</td>
+    </tr>
+    <tr>
+      <td>Roasters / Production Staff</td>
+      <td>Ensure LOTs are recorded in Cropster and physical labels match production logs.</td>
+    </tr>
+    <tr>
+      <td>QA / Traceability Coordinator</td>
+      <td>Ensure full forward and backward traceability; conduct mock recalls and verify record completeness.</td>
+    </tr>
+    <tr>
+      <td>Warehouse Team</td>
+      <td>Maintain Hold Log and ensure proper tagging of quarantined product.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. Procedure</h2>
+<h3>4.1 Incoming Traceability ("One Step Back")</h3>
+<ul>
+  <li>All raw materials and packaging are received per SOP-PCP-1.1a.</li>
+  <li>At receiving:
+    <ul>
+      <li>Supplier, product name, LOT number, BOL, quantity, and condition are logged in the Transport Log.</li>
+      <li>Green beans are tagged and recorded on the Silo Inventory Board, chamber magnets, and entered into Cropster.</li>
+      <li>Packaging and other materials are assigned traceable identifiers and stored appropriately.</li>
+    </ul>
+  </li>
+</ul>
+<h3>4.2 Internal Traceability</h3>
+<ul>
+  <li>During roasting:
+    <ul>
+      <li>Roasters select LOTs and link them to Cropster Roast Profiles and equipment (e.g., G90, G120, L12, Roest sample).</li>
+      <li>QA records roast values and assigns Cropster-generated LOT numbers (PR codes) to finished batches.</li>
+    </ul>
+  </li>
+  <li>During grinding:
+    <ul>
+      <li>Ground coffee is recorded in the Grinding Log with reference to original roasted batch LOT number.</li>
+      <li>Ground totes are tagged and held in WIP area for traceability and packaging.</li>
+    </ul>
+  </li>
+  <li>In Odoo (Manufacturing Module):
+    <ul>
+      <li>Assembly builds link input LOTs (green/roasted beans) to output LOTs (finished product) for full trace-forward/back capability.</li>
+      <li>All roasted coffee is linked to its Cropster PR code via the 'Lot/Serial Number' field.</li>
+    </ul>
+  </li>
+</ul>
+<h3>4.3 Finished Product Traceability ("One Step Forward")</h3>
+<ul>
+  <li>At packaging and shipping:
+    <ul>
+      <li>Packaged product is tagged with Cropster LOT number and roast date.</li>
+      <li>Shipping records capture customer, product name, quantity, and LOT number for each shipment.</li>
+      <li>All records are stored in QuickBooks, Cropster, and Shipping Logs.</li>
+    </ul>
+  </li>
+</ul>
+<h3>4.4 Non-Conforming and Returned Product</h3>
+<ul>
+  <li>Returned or damaged items:
+    <ul>
+      <li>Are moved to a designated Hold area.</li>
+      <li>Logged in the Hold Log and tagged with reason for hold and LOT number.</li>
+      <li>Evaluated by QA prior to any disposition decision.</li>
+    </ul>
+  </li>
+</ul>
+<h3>4.5 Recordkeeping &amp; Recall Readiness</h3>
+<ul>
+  <li>Records include:
+    <ul>
+      <li>Receiving logs</li>
+      <li>Silo inventory boards</li>
+      <li>Cropster roast and grinding logs</li>
+      <li>Odoo assembly builds</li>
+      <li>Shipping/invoice records</li>
+      <li>Hold and corrective action logs</li>
+    </ul>
+  </li>
+  <li>Traceability records are retrievable within 24 hours in case of CFIA request or product recall scenario.</li>
+</ul>
+
+<h2>5. Corrective Actions</h2>
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th>Issue</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Missing LOT number</td>
+      <td>Hold product, investigate and trace back. Document deviation.</td>
+    </tr>
+    <tr>
+      <td>Incorrect LOT tagging</td>
+      <td>Correct label, update records, and retrain staff.</td>
+    </tr>
+    <tr>
+      <td>Unable to link product forward/backward</td>
+      <td>Investigate record gaps, conduct mock recall, retrain staff.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6. Relevant Records and Systems</h2>
+<ul>
+  <li>Transport &amp; Receiving Logs</li>
+  <li>Cropster Roasting &amp; Grinding Logs</li>
+  <li>Odoo Assembly &amp; Build Sheets</li>
+  <li>Daily Roast Tracking Sheet</li>
+  <li>Inventory Board &amp; Silo Chamber Magnets</li>
+  <li>Hold Log</li>
+  <li>Shipping and Invoicing Records</li>
+  <li>Corrective Action Records</li>
+</ul>
+
+<h2>7. CFIA Compliance Notes</h2>
+<table class="doc-table">
+  <thead>
+    <tr>
+      <th>SFCR Requirement</th>
+      <th>Fratello Compliance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Part 5 &ndash; Traceability</td>
+      <td>Meets "one step forward / one step back" traceability for all food and packaging.</td>
+    </tr>
+    <tr>
+      <td>s. 89 &ndash; Retention of records</td>
+      <td>All records retrievable within 24 hours; backed up in digital systems (Cropster, Odoo).</td>
+    </tr>
+    <tr>
+      <td>Product Recall Preparedness</td>
+      <td>Ready to support recall investigations and lot isolations efficiently.</td>
+    </tr>
+  </tbody>
+</table>

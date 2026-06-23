@@ -1,0 +1,123 @@
+<h2>Purpose</h2>
+<p>To define the standard operating procedures for green coffee receiving, green coffee silo loading, roasting operations, and grinding using the Odoo ERP system, in compliance with Fratello Coffee Roasters' Preventive Control Plan (PCP) and CFIA regulatory requirements under the Safe Food for Canadians Regulations (SFCR).</p>
+
+<h2>Scope</h2>
+<p>This SOP applies to warehouse, roasting, and production staff involved in:</p>
+<ul>
+  <li>Receiving green coffee</li>
+  <li>Loading green coffee into silos</li>
+  <li>Executing roast batches and confirming lot traceability</li>
+  <li>Grinding roasted coffee prior to packaging</li>
+</ul>
+
+<h2>Related CFIA SOPs and Operational References</h2>
+<ul>
+  <li>SOP-PCP-1.1a – Incoming Input Controls</li>
+  <li>SOP-PCP-5.1 – Receiving Procedure</li>
+  <li>SOP-PCP-6.1 – Sanitation Procedure</li>
+  <li>SOP-PCP-3.1 – Product Formulation &amp; Processing</li>
+  <li>SOP-PCP-5.6 – Traceability and Control</li>
+  <li>SOP-PCP-6.8 – Premises Inspection Procedure</li>
+  <li>SOP-PCP-3.6 – Final Packaging &amp; Traceability SOP (replaces packaging section here)</li>
+</ul>
+<p>Detailed Operational SOPs Referenced:</p>
+<ul>
+  <li>Fratello Green Beans Loading Procedures</li>
+  <li>Fratello Roasting SOPs: L12, G90, G120, Roest Sample Roaster</li>
+  <li>Fratello Grinding Procedures</li>
+</ul>
+
+<h2>Procedure</h2>
+
+<h3>1. Green Coffee Receiving (Odoo Manual Ref: pg. 95–99)</h3>
+<p><strong>Step-by-Step:</strong></p>
+<ul>
+  <li>Select Inventory &gt; Receipts in Odoo</li>
+  <li>Click on the PO linked to green coffee</li>
+  <li>Visually inspect and confirm physical product condition (refer to Receiving SOP)</li>
+  <li>Enter quantity received in Odoo</li>
+  <li>Assign or generate the Lot Number (ensure it matches the CoA and invoice)</li>
+  <li>Validate receipt; mark completed</li>
+</ul>
+<p><strong>Food Safety Verification:</strong></p>
+<ul>
+  <li>Review CoA, check packaging, verify pest/mold status</li>
+  <li>Isolate any deviation per Hold Product SOP</li>
+</ul>
+
+<h3>2. Green Coffee Silo Loading</h3>
+<p><strong>Reference SOP:</strong> Fratello Green Beans Loading Procedures</p>
+<p><strong>Key Controls:</strong></p>
+<ul>
+  <li>Confirm silo is empty and cleaned (Sanitation Log)</li>
+  <li>Assign one lot per silo only</li>
+  <li>Document lot in Silo Logbook or digital file</li>
+  <li>Use physical tag or zip tie with Lot ID</li>
+</ul>
+<p><strong>Odoo Integration:</strong></p>
+<ul>
+  <li>Lot will be pulled into Manufacturing Orders (MOs) during roasting</li>
+</ul>
+
+<h3>3. Coffee Roasting (Odoo Manual Ref: pg. 109–115)</h3>
+<p><strong>Reference SOPs:</strong></p>
+<ul>
+  <li>Fratello L12 Roasting Procedures</li>
+  <li>Fratello G90 Roasting Procedures</li>
+  <li>Fratello G120 Roasting Procedures</li>
+  <li>Fratello Roest Sample Roaster Procedures</li>
+</ul>
+<p><strong>Odoo Step-by-Step:</strong></p>
+<ul>
+  <li>Open Manufacturing &gt; MOs</li>
+  <li>Select correct SKU/BOM for roast type</li>
+  <li>Assign input green bean Lot Number</li>
+  <li>Enter roast quantity</li>
+  <li>Confirm and process MO</li>
+  <li>Generate roast Lot Number for traceability</li>
+</ul>
+<p><strong>Quality &amp; Safety Notes:</strong></p>
+<ul>
+  <li>Pre-Op roaster checks (airflow, probe calibration)</li>
+  <li>Validate roast curves and consistency (via Cropster)</li>
+</ul>
+
+<h3>4. Grinding (Manual + Odoo Workflow)</h3>
+<p><strong>Reference SOP:</strong> Fratello Grinding Procedures</p>
+<p><strong>Step-by-Step:</strong></p>
+<ul>
+  <li>Weigh roasted coffee and stage for grinding</li>
+  <li>Set grinder settings per product requirement (e.g., pour over, espresso)</li>
+  <li>Run test grind, confirm particle size visually or via sieve (if applicable)</li>
+  <li>Assign same roast lot number to ground product</li>
+  <li>Transfer ground product to packaging staging area</li>
+</ul>
+<p><strong>Odoo Integration:</strong></p>
+<ul>
+  <li>Ground coffee is typically not a separate MO, but remains linked to roast lot</li>
+</ul>
+<p><strong>Safety Notes:</strong></p>
+<ul>
+  <li>Ensure CO ventilation is functioning</li>
+  <li>Clean grinder components daily (Sanitation SOP)</li>
+  <li>Record grinder checks in Grinder Maintenance Log</li>
+</ul>
+
+<h2>Records and Monitoring Tools</h2>
+<table class="doc-table">
+  <thead>
+    <tr><th>Record/Form</th><th>Location</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Green Coffee Receiving Logs</td><td>Odoo &amp; Receiving SOP</td></tr>
+    <tr><td>Silo Loading Log</td><td>Physical or Digital Logbook</td></tr>
+    <tr><td>Roast Logs</td><td>Cropster / Odoo Manufacturing Records</td></tr>
+    <tr><td>Grinding Records</td><td>Grinder Log / Daily QC Sheet</td></tr>
+    <tr><td>Lot Traceability Reports</td><td>Odoo Smart Buttons &gt; Traceability Tree</td></tr>
+  </tbody>
+</table>
+<p><strong>Notes:</strong></p>
+<ul>
+  <li>Packaging steps have been removed from this SOP and are now fully outlined in SOP-PCP-3.6 – Packaging, Labelling &amp; Traceability.</li>
+  <li>All process and equipment-specific controls are governed by the roasting and grinding SOPs listed above.</li>
+</ul>
