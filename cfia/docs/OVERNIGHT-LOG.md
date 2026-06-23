@@ -15,8 +15,8 @@ branch `codex-hub-access-design` for Chris to review + publish in the morning.
 - [x] Phase 1 — full register **DONE**: 104 canonical docs tagged by department (committed dcd29cc)
 - [x] Phase 2 — reference content + viewer **DONE**: 67 reference docs now readable via the viewer
 - [x] Phase 3 — forms **DONE**: 35 schemas; 17 forms fillable via the generic form page (quizzes -> P4)
-- [ ] Phase 4 — foundation
-- [~] Phase 5 — polish: linkified cross-refs, structural QA clean, fidelity pass running
-- [ ] Phase 6 — morning brief
+- [s] Phase 4 — foundation: rules designed + hardened (FOUNDATION-SPECS.md), STAGED not deployed (can't test rules here)
+- [x] Phase 5 — polish **DONE**: cross-refs linkified, structural QA clean, fidelity pass (66/67 faithful, 1 fixed)
+- [x] Phase 6 — morning brief **DONE** (MORNING-BRIEF.md)
 
 _Log updated as each phase completes._

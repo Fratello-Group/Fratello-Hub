@@ -35,4 +35,5 @@ Everything below is **live** on the site and was **tested before each push** (a 
 - Plan + decisions: `cfia/docs/PLAN-OF-ATTACK.md`, blueprint `BLUEPRINT.md`, gaps `GAP-BACKLOG.md`, foundation `FOUNDATION-SPECS.md`, this brief, and the running `OVERNIGHT-LOG.md`.
 - Register (all docs): `cfia/config/document-register.js` · forms: `form-schemas.js` · people/roles: `people.js`.
 
-_Fidelity-pass results are appended at the end of this file once that step finishes._
+## Fidelity-pass result
+All **67** reference documents were re-read against their source and checked value-by-value. **66 verified faithful; 1 corrected (SOP 10.3).** Agents confirmed load-bearing details match the originals — roaster temperatures and chaff cycles, moisture ranges (9–13%), lux thresholds, retention periods, SFCR clause citations. The readable Hub versions are audit-faithful; the original documents remain the controlled source of record.
