@@ -65,6 +65,21 @@
             letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
         }
         button.primary:disabled { opacity: 0.55; cursor: default; }
+        .providers { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .provider-btn {
+            width: 100%; min-height: 50px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            border: 1px solid var(--warm-gray-300, #d4cfc5); border-radius: var(--radius-sm, 6px);
+            background: #fff; color: var(--bean-black, #1a1a1a); font-size: 14px; font-weight: 700; cursor: pointer;
+        }
+        .provider-btn:hover { border-color: var(--brewing-blue, #4a90b8); }
+        .provider-btn:disabled { opacity: 0.55; cursor: default; }
+        .provider-ic { display: inline-flex; width: 20px; height: 20px; flex: 0 0 auto; }
+        .provider-ic svg { width: 100%; height: 100%; display: block; }
+        .or-divider {
+            display: flex; align-items: center; gap: 12px; margin: 4px 0 18px;
+            color: var(--warm-gray-500, #8a8a8a); font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--warm-gray-200, #e4e0d8); }
         .message { margin-top: 18px; font-size: 14px; line-height: 1.6; }
         .message.error { color: #b3261e; }
         .message.ok { color: var(--brewing-blue-dark, #2f6f8f); }
@@ -84,12 +99,25 @@
         <div id="setupForm" hidden>
             <div class="eyebrow">Fratello Ops Hub</div>
             <h1 id="welcomeHeading">Welcome!</h1>
-            <p class="lede">You've been given access to <strong>Fratello's internal operations hub</strong> — your home for company tools, time off, resources, and more. Create a password below to finish setting up your account.</p>
+            <p class="lede">You've been given access to <strong>Fratello's internal operations hub</strong> — your home for company tools, time off, resources, and more. The quickest way in is your Fratello Microsoft account — or create a password below.</p>
 
             <span class="login-as">
                 <span>Your login</span>
                 <strong id="emailLabel">—</strong>
             </span>
+
+            <div class="providers">
+                <button class="provider-btn" type="button" id="msBtn">
+                    <span class="provider-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#F25022" d="M1 1h10v10H1z"/><path fill="#7FBA00" d="M13 1h10v10H13z"/><path fill="#00A4EF" d="M1 13h10v10H1z"/><path fill="#FFB900" d="M13 13h10v10H13z"/></svg></span>
+                    Sign in with Microsoft
+                </button>
+                <button class="provider-btn" type="button" id="googleBtn">
+                    <span class="provider-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C4 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 4 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z"/></svg></span>
+                    Sign in with Google
+                </button>
+            </div>
+
+            <div class="or-divider">or create a password</div>
 
             <form id="passwordForm">
                 <label for="password">Create a password</label>
@@ -121,6 +149,7 @@
             confirmPasswordReset,
             signInWithEmailAndPassword
         } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { signInWithGoogle, signInWithMicrosoft, friendlyAuthError } from './fratello-auth.js';
 
         const params = new URLSearchParams(window.location.search);
         const mode = params.get('mode') || 'resetPassword';
@@ -135,6 +164,8 @@
             emailLabel: document.getElementById('emailLabel'),
             password: document.getElementById('password'),
             submitBtn: document.getElementById('submitBtn'),
+            msBtn: document.getElementById('msBtn'),
+            googleBtn: document.getElementById('googleBtn'),
             formMessage: document.getElementById('formMessage'),
             resultHeading: document.getElementById('resultHeading'),
             resultMessage: document.getElementById('resultMessage'),
@@ -228,6 +259,30 @@
                 }
             }
         });
+
+        async function signInWithProvider(kind) {
+            setFormMessage('');
+            els.msBtn.disabled = true;
+            els.googleBtn.disabled = true;
+            try {
+                if (kind === 'microsoft') await signInWithMicrosoft();
+                else await signInWithGoogle();
+                showResult('You’re in! 🎉', 'Signed in with your ' + (kind === 'microsoft' ? 'Microsoft' : 'Google') + ' account. Taking you to the Hub…');
+                setTimeout(() => { window.location.href = continueUrl; }, 1300);
+            } catch (error) {
+                els.msBtn.disabled = false;
+                els.googleBtn.disabled = false;
+                const code = error && error.code;
+                if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+                    setFormMessage('');
+                    return;
+                }
+                setFormMessage(friendlyAuthError(error) || 'We couldn’t sign you in with that account. Try again, or create a password below.', true);
+            }
+        }
+
+        els.msBtn.addEventListener('click', () => signInWithProvider('microsoft'));
+        els.googleBtn.addEventListener('click', () => signInWithProvider('google'));
 
         start();
     </script>
