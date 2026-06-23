@@ -37,7 +37,11 @@
         .panel-header { display: flex; justify-content: space-between; gap: var(--space-md); align-items: start; padding: var(--space-lg); border-bottom: 1px solid var(--warm-gray-200); }
         .panel-title { font-size: 21px; font-weight: 800; }
         .panel-note { margin-top: var(--space-sm); color: var(--warm-gray-600); font-size: 13px; line-height: 1.6; }
-        .filters { display: grid; grid-template-columns: minmax(200px, 1fr) 170px 170px 170px; gap: var(--space-sm); padding: var(--space-lg); border-bottom: 1px solid var(--warm-gray-200); }
+        .filters { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-md); padding: var(--space-lg); border-bottom: 1px solid var(--warm-gray-200); }
+        .filter-field { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
+        .filter-field--grow { flex: 1 1 200px; }
+        .filter-field select, .filter-field input[type="date"] { width: 158px; }
+        .filter-label { color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
         input, select { width: 100%; min-height: 42px; border: 1px solid var(--warm-gray-300); border-radius: var(--radius-sm); padding: 0 var(--space-md); background: var(--warm-gray-50); color: var(--bean-black); outline: none; font-size: 14px; }
         .table-wrap { overflow-x: auto; }
         table { width: 100%; min-width: 860px; border-collapse: collapse; }
@@ -49,7 +53,10 @@
         @media (max-width: 860px) {
             .masthead { align-items: flex-start; flex-direction: column; padding: var(--space-md) 22px; }
             main { width: min(100% - 32px, 1180px); padding-top: var(--space-xl); }
-            .intro, .metrics, .filters { grid-template-columns: 1fr; }
+            .intro, .metrics { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .filter-field, .filter-field--grow { flex: 1 1 auto; width: 100%; }
+            .filter-field select, .filter-field input[type="date"] { width: 100%; }
             .panel-header { display: grid; }
         }
     </style>
@@ -95,11 +102,26 @@
                     <button class="btn primary" type="button" id="exportCsv">Export CSV</button>
                 </div>
                 <div class="filters">
-                    <input id="employeeFilter" type="search" placeholder="Search employee">
-                    <select id="departmentFilter"><option value="">All departments</option></select>
-                    <select id="categoryFilter"><option value="">All categories</option><option>Illness</option><option>Medical Appointment</option><option>Family Care</option><option>Other</option></select>
-                    <input id="startFilter" type="date">
-                    <input id="endFilter" type="date">
+                    <label class="filter-field filter-field--grow">
+                        <span class="filter-label">Employee</span>
+                        <input id="employeeFilter" type="search" placeholder="Search by name">
+                    </label>
+                    <label class="filter-field">
+                        <span class="filter-label">Department</span>
+                        <select id="departmentFilter"><option value="">All departments</option></select>
+                    </label>
+                    <label class="filter-field">
+                        <span class="filter-label">Category</span>
+                        <select id="categoryFilter"><option value="">All categories</option><option>Illness</option><option>Medical Appointment</option><option>Family Care</option><option>Other</option></select>
+                    </label>
+                    <label class="filter-field">
+                        <span class="filter-label">From date</span>
+                        <input id="startFilter" type="date">
+                    </label>
+                    <label class="filter-field">
+                        <span class="filter-label">To date</span>
+                        <input id="endFilter" type="date">
+                    </label>
                 </div>
                 <div class="table-wrap">
                     <table>
