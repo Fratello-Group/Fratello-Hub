@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Document</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow" id="barEyebrow">Reference</div>
+                <div class="bar-title" id="barTitle">Document</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" href="/cfia/index.html">Dashboard</a>
+            <button class="btn" type="button" onclick="window.print()">Save PDF</button>
+            <a class="btn btn-primary" id="formBtn" href="#" style="display:none;">Fill the Log →</a>
+        </div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This controlled document is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <a id="crumbDept" href="/cfia/map.html">System Map</a><span class="crumb-sep">›</span>
+            <span class="crumb-current" id="crumbCode">Document</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline" id="docSection">Reference document</div>
+            <h1 id="docTitle">Loading…</h1>
+        </section>
+
+        <div class="doc-meta" id="docMeta"></div>
+        <div id="docCallout"></div>
+        <div class="doc-body" id="docBody"><p style="color:var(--grey);">Loading content…</p></div>
+        <div class="doc-body" id="docRelated" style="margin-top:24px;"></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
+
+        const code = new URLSearchParams(location.search).get('code') || '';
+        const byCode = Object.fromEntries(DOCUMENT_REGISTER.map(d => [d.code, d]));
+        const doc = byCode[code];
+
+        function linkFor(c) {
+            const e = byCode[c];
+            if (!e) return null;
+            if (e.href) return e.href;
+            return `/cfia/reference/view.html?code=${encodeURIComponent(c)}`;
+        }
+
+        async function render() {
+            if (!doc) {
+                document.getElementById('docTitle').textContent = 'Document not found';
+                document.getElementById('docBody').innerHTML = '<p>That document code is not in the register.</p>';
+                return;
+            }
+            const typeLabel = { SOP: 'SOP', Policy: 'Policy', Plan: 'Plan', Form: 'Form', Quiz: 'Quiz', Training: 'Training', Manual: 'Manual', JobDescription: 'Job description', Report: 'Report', Other: 'Reference' }[doc.docType] || 'Reference';
+            document.getElementById('barEyebrow').textContent = `Reference · ${doc.code}`;
+            document.getElementById('barTitle').textContent = doc.title;
+            document.getElementById('docSection').textContent = `${typeLabel} ${doc.code}`;
+            document.getElementById('docTitle').textContent = `${doc.code} — ${doc.title}`;
+            document.getElementById('crumbCode').textContent = doc.code;
+
+            const meta = [
+                ['Status', 'Controlled'],
+                ['Type', typeLabel],
+                ['Version', doc.version || '1.0'],
+                ['Effective', doc.effectiveDate || '—'],
+                ['Owner / approved by', doc.approvedBy || '—'],
+                ['Cadence', doc.cadence || '—']
+            ];
+            document.getElementById('docMeta').innerHTML = meta.map(([k, v]) =>
+                `<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('');
+
+            // linked fillable form, if any
+            const form = (doc.related || []).map(c => byCode[c]).find(e => e && e.fillable);
+            if (form) {
+                const fhref = form.href || `/cfia/reference/view.html?code=${form.code}`;
+                document.getElementById('docCallout').innerHTML =
+                    `<div class="callout"><strong>Record for this procedure:</strong> <a href="${fhref}">Form ${escapeHtml(form.code)} — ${escapeHtml(form.title)} →</a></div>`;
+                const fb = document.getElementById('formBtn');
+                fb.href = fhref; fb.style.display = '';
+            }
+
+            // content fragment
+            try {
+                const res = await fetch(`/cfia/reference/content/${encodeURIComponent(doc.code)}.html`);
+                document.getElementById('docBody').innerHTML = res.ok ? await res.text()
+                    : '<div class="callout"><strong>Full text is being prepared.</strong> The controlled metadata above is current; the readable body for this document is being loaded into the Hub.</div>';
+            } catch (e) {
+                document.getElementById('docBody').innerHTML = '<div class="callout">Content could not be loaded.</div>';
+            }
+
+            // related cross-links
+            const rel = (doc.related || []).map(c => ({ c, e: byCode[c] })).filter(x => x.e);
+            if (rel.length) {
+                document.getElementById('docRelated').innerHTML =
+                    `<h2>Related documents</h2><p>` + rel.map(x => {
+                        const h = linkFor(x.c);
+                        return `<a href="${h}">${escapeHtml(x.c)} — ${escapeHtml(x.e.title)}</a>`;
+                    }).join(' · ') + `</p>`;
+            }
+        }
+
+        guardPage(role => { if (role) render(); });
+    </script>
+</body>
+</html>

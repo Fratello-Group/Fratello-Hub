@@ -12,8 +12,8 @@ branch `codex-hub-access-design` for Chris to review + publish in the morning.
 6. **Morning brief** — summary + review/publish checklist.
 
 ## Progress
-- [ ] Phase 1 — full register (started)
-- [ ] Phase 2 — reference content + viewer
+- [x] Phase 1 — full register **DONE**: 104 canonical docs tagged by department (committed dcd29cc)
+- [~] Phase 2 — reference content + viewer (viewer built `reference/view.html`; extracting content)
 - [ ] Phase 3 — forms + quizzes
 - [ ] Phase 4 — foundation
 - [ ] Phase 5 — polish + verify
