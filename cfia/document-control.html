@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Document Control Register</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .dc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 6px 0 22px; }
+        .dc-stat { background: var(--card); border: 1px solid var(--divider); border-radius: var(--r-md); padding: 14px 16px; }
+        .dc-stat .n { font-size: 26px; font-weight: 800; color: var(--black); }
+        .dc-stat .l { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--grey); }
+        .dc-stat.warn .n { color: var(--due); }
+        .dc-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+        .dc-controls input, .dc-controls select { height: 44px; border: 1px solid var(--divider); border-radius: var(--r-sm); padding: 8px 12px; font-size: 14px; outline: none; }
+        .dc-controls input { flex: 1; min-width: 200px; }
+        .dc-controls input:focus, .dc-controls select:focus { border-color: var(--teal); }
+        .dc-table-wrap { border: 1px solid var(--divider); border-radius: var(--r-md); overflow: auto; background: var(--white); }
+        table.dc { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.dc th { text-align: left; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--grey); background: var(--card); padding: 11px 12px; border-bottom: 1px solid var(--divider); cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
+        table.dc th:hover { color: var(--teal-dark); }
+        table.dc td { padding: 10px 12px; border-bottom: 1px solid var(--fog); color: var(--slate); vertical-align: top; }
+        table.dc tr:hover td { background: var(--card); }
+        table.dc td.code { font-weight: 800; color: var(--black); white-space: nowrap; }
+        table.dc td.title a { color: var(--teal-dark); text-decoration: none; font-weight: 600; }
+        table.dc td.title a:hover { text-decoration: underline; }
+        .dc-pill { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--na-soft); color: var(--slate); }
+        .dc-pill.ref { background: rgba(54,179,175,.12); color: var(--teal-dark); }
+        .dc-pill.form { background: var(--pass-soft); color: var(--pass); }
+        .dc-pill.train { background: rgba(127,119,221,.14); color: #4a42a8; }
+        .dc-miss { color: var(--due); font-weight: 700; }
+        .dc-dept { font-size: 11px; color: var(--grey); }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Audit</div>
+                <div class="bar-title">Document Control Register</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" href="/cfia/index.html">Dashboard</a>
+            <button class="btn" type="button" onclick="window.print()">Save PDF</button>
+        </div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>The document control register is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">Document Control</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline">Audit · document control</div>
+            <h1>Document Control Register</h1>
+            <p>Every controlled document with its version, owner, effective date and review status — the one place an auditor looks first. Click a column to sort; click a title to open it.</p>
+        </section>
+
+        <div class="dc-stats" id="dcStats"></div>
+        <div class="dc-controls">
+            <input id="dcSearch" type="text" placeholder="Search code, title, owner…" aria-label="Search">
+            <select id="dcDept"><option value="">All departments</option></select>
+            <select id="dcType"><option value="">All types</option></select>
+            <select id="dcGaps"><option value="">All records</option><option value="missing">Missing metadata only</option></select>
+        </div>
+        <div class="dc-table-wrap">
+            <table class="dc">
+                <thead><tr id="dcHead"></tr></thead>
+                <tbody id="dcBody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module">
+        import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
+        import { DEPARTMENTS, DEPARTMENT_ORDER } from '/cfia/config/departments.js';
+
+        const COLS = [
+            { key: 'code', label: 'Code' },
+            { key: 'title', label: 'Title' },
+            { key: 'docType', label: 'Type' },
+            { key: 'departments', label: 'Department' },
+            { key: 'version', label: 'Version' },
+            { key: 'approvedBy', label: 'Owner / approved by' },
+            { key: 'effectiveDate', label: 'Effective' }
+        ];
+        let sortKey = 'code', sortDir = 1;
+
+        function destFor(d) { return d.href || `/cfia/reference/view.html?code=${encodeURIComponent(d.code)}`; }
+        function deptLabels(d) { return (d.departments || []).map(k => (DEPARTMENTS[k] || {}).label || k).join(', '); }
+        function typeClass(t) { return t === 'Form' || t === 'Quiz' ? 'form' : (t === 'Training' ? 'train' : 'ref'); }
+        function isMissing(d) { return !d.version || !d.approvedBy || !d.effectiveDate; }
+
+        function rows() {
+            const q = document.getElementById('dcSearch').value.toLowerCase();
+            const dep = document.getElementById('dcDept').value;
+            const typ = document.getElementById('dcType').value;
+            const gaps = document.getElementById('dcGaps').value;
+            let list = DOCUMENT_REGISTER.filter(d => {
+                if (dep && !(d.departments || []).includes(dep)) return false;
+                if (typ && d.docType !== typ) return false;
+                if (gaps === 'missing' && !isMissing(d)) return false;
+                if (q && !(`${d.code} ${d.title} ${d.approvedBy} ${deptLabels(d)}`.toLowerCase().includes(q))) return false;
+                return true;
+            });
+            list.sort((a, b) => {
+                const av = String(sortKey === 'departments' ? deptLabels(a) : (a[sortKey] || '')).toLowerCase();
+                const bv = String(sortKey === 'departments' ? deptLabels(b) : (b[sortKey] || '')).toLowerCase();
+                return av.localeCompare(bv, undefined, { numeric: true }) * sortDir;
+            });
+            return list;
+        }
+
+        function renderHead() {
+            document.getElementById('dcHead').innerHTML = COLS.map(c =>
+                `<th data-k="${c.key}">${escapeHtml(c.label)}${sortKey === c.key ? (sortDir === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('');
+            document.querySelectorAll('#dcHead th').forEach(th => th.addEventListener('click', () => {
+                const k = th.dataset.k;
+                if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+                render();
+            }));
+        }
+
+        function render() {
+            renderHead();
+            const list = rows();
+            document.getElementById('dcBody').innerHTML = list.map(d => `
+                <tr>
+                    <td class="code">${escapeHtml(d.code)}</td>
+                    <td class="title"><a href="${destFor(d)}">${escapeHtml(d.title)}</a></td>
+                    <td><span class="dc-pill ${typeClass(d.docType)}">${escapeHtml(d.docType)}</span></td>
+                    <td class="dc-dept">${escapeHtml(deptLabels(d))}</td>
+                    <td>${d.version ? escapeHtml(d.version) : '<span class="dc-miss">—</span>'}</td>
+                    <td>${d.approvedBy ? escapeHtml(d.approvedBy) : '<span class="dc-miss">missing</span>'}</td>
+                    <td>${d.effectiveDate ? escapeHtml(d.effectiveDate) : '<span class="dc-miss">—</span>'}</td>
+                </tr>`).join('');
+        }
+
+        function renderStats() {
+            const R = DOCUMENT_REGISTER;
+            const stat = (n, l, warn) => `<div class="dc-stat${warn ? ' warn' : ''}"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+            document.getElementById('dcStats').innerHTML =
+                stat(R.length, 'controlled docs') +
+                stat(R.filter(d => ['SOP', 'Policy', 'Plan'].includes(d.docType)).length, 'reference') +
+                stat(R.filter(d => d.fillable).length, 'forms / records') +
+                stat(R.filter(d => ['Training', 'Quiz'].includes(d.docType)).length, 'training') +
+                stat(R.filter(d => !d.approvedBy).length, 'missing owner', true) +
+                stat(R.filter(d => !d.effectiveDate).length, 'no effective date', true);
+        }
+
+        function init() {
+            document.getElementById('dcDept').innerHTML += DEPARTMENT_ORDER.map(k => `<option value="${k}">${escapeHtml((DEPARTMENTS[k] || {}).label || k)}</option>`).join('');
+            const types = [...new Set(DOCUMENT_REGISTER.map(d => d.docType))].sort();
+            document.getElementById('dcType').innerHTML += types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+            ['dcSearch', 'dcDept', 'dcType', 'dcGaps'].forEach(id => document.getElementById(id).addEventListener('input', render));
+            renderStats();
+            render();
+        }
+
+        guardPage(role => { if (role) init(); });
+    </script>
+</body>
+</html>
