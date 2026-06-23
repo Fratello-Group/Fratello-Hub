@@ -16,7 +16,7 @@ branch `codex-hub-access-design` for Chris to review + publish in the morning.
 - [x] Phase 2 — reference content + viewer **DONE**: 67 reference docs now readable via the viewer
 - [x] Phase 3 — forms **DONE**: 35 schemas; 17 forms fillable via the generic form page (quizzes -> P4)
 - [ ] Phase 4 — foundation
-- [ ] Phase 5 — polish + verify
+- [~] Phase 5 — polish: linkified cross-refs, structural QA clean, fidelity pass running
 - [ ] Phase 6 — morning brief
 
 _Log updated as each phase completes._
