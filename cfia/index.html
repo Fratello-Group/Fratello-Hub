@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
     <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
     <link rel="stylesheet" href="/cfia/system/cfia.css">
     <script src="/system/firebase-config.js"></script>
@@ -18,15 +19,10 @@
 
     <header class="cfia-bar">
         <div class="brand">
-            <img src="/assets/Fratello_Logo_Black.png" alt="Fratello">
             <div class="context">
                 <div class="eyebrow">Food Safety · CFIA / HACCP</div>
                 <div class="bar-title">Compliance Hub</div>
             </div>
-        </div>
-        <div class="actions">
-            <a class="btn" href="/index.html">Back to Hub</a>
-            <a class="btn" href="/cfia/records.html">Submitted Records</a>
         </div>
     </header>
 
@@ -41,52 +37,41 @@
     <main class="cfia-page">
         <section class="hero">
             <div class="dateline">Preventive Control Plan</div>
-            <h1>Fratello Food Safety Program</h1>
-            <p>Your CFIA / SFCR documents, procedures and daily records — in one place, audit-ready. This is the pilot: one procedure and its daily log, working end to end. The rest of the program follows once this is proven.</p>
+            <h1>Food Safety</h1>
+            <p id="heroLine">Pick your department to find everything you need. Audit-ready, in one place.</p>
         </section>
 
-        <div class="card-grid">
-            <a class="doc-card" href="/cfia/department.html?dept=packaging">
-                <div class="doc-icon">📦</div>
-                <span class="type-tag">Department</span>
-                <div class="doc-code">Packaging</div>
-                <h3>Packaging Department Binder</h3>
-                <p>Everything the packaging team needs — policies, SOPs, forms, training and manuals, organized and searchable.</p>
-            </a>
-
-            <a class="doc-card" href="/cfia/reference/sop-6-3.html">
-                <div class="doc-icon">📘</div>
-                <span class="type-tag ref">Reference · SOP</span>
-                <div class="doc-code">SOP 6.3</div>
-                <h3>Pre-Operational Inspection Procedure</h3>
-                <p>The controlled procedure that staff read and follow before production starts.</p>
-            </a>
-
-            <a class="doc-card" href="/cfia/forms/form-6-3a.html">
-                <div class="doc-icon">📝</div>
-                <span class="type-tag form">Record · Form</span>
-                <div class="doc-code">Form 6.3a</div>
-                <h3>Pre-Op Inspection Log</h3>
-                <p>The daily checklist your team completes. Saved, time-stamped, and locked for the audit.</p>
-            </a>
-
-            <a class="doc-card" href="/cfia/records.html">
-                <div class="doc-icon">🗂️</div>
-                <span class="type-tag">Manager view</span>
-                <div class="doc-code">Records</div>
-                <h3>Submitted Records</h3>
-                <p>Every completed log — who, when, and the result — exportable as a clean PDF.</p>
-            </a>
-        </div>
-
-        <div class="callout">
-            <strong>How the documents link together.</strong> Each document keeps its real Fratello code (SOP 6.3, Form 6.3a). Because of that, every document has a permanent address — so the procedure links straight to its log, and the log links back to the procedure. As we add the rest of the ~150 documents, that cross-linking is automatic.
-        </div>
+        <div class="tile-grid" id="tileGrid"></div>
     </main>
 
     <script type="module">
-        import { guardPage } from '/cfia/system/cfia-core.js';
-        guardPage(() => {});
+        import { guardPage, getRole } from '/cfia/system/cfia-core.js';
+
+        // Department tiles + the two program-wide tiles. Once roles carry a
+        // department, a staff member sees ONLY their department tile here.
+        const DEPT_TILES = [
+            { dept: 'packaging', name: 'Packaging', icon: 'ti-package' },
+            { dept: 'roasting', name: 'Roasting', icon: 'ti-flame' },
+            { dept: 'warehouse', name: 'Warehouse', icon: 'ti-forklift' }
+        ];
+
+        function tile(href, icon, name, sub, soon) {
+            return `<a class="tile${soon ? ' soon' : ''}" href="${href}">
+                <span class="tile-icon"><i class="ti ${icon}" aria-hidden="true"></i></span>
+                <span class="tile-name">${name}</span>
+                <span class="tile-sub">${sub}</span>
+            </a>`;
+        }
+
+        guardPage(role => {
+            if (!role) return;
+            const grid = document.getElementById('tileGrid');
+            const depts = DEPT_TILES.map(t => tile(`/cfia/department.html?dept=${t.dept}`, t.icon, t.name, 'Department')).join('');
+            const programs =
+                tile('/cfia/map.html', 'ti-map-2', 'System Map', 'All documents') +
+                tile('/cfia/records.html', 'ti-clipboard-check', 'Records', 'Submitted logs');
+            grid.innerHTML = depts + programs;
+        });
     </script>
 </body>
 </html>

@@ -38,7 +38,7 @@ button, input, select, textarea { font: inherit; }
 }
 .brand { display: flex; align-items: center; gap: 18px; min-width: 0; }
 .brand img { width: 156px; height: auto; display: block; flex: 0 0 auto; }
-.context { padding-left: 18px; border-left: 1px solid var(--divider); min-width: 0; }
+.context { min-width: 0; }
 .eyebrow {
     color: var(--teal-dark); font-size: 11px; font-weight: 800;
     letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px;
@@ -246,6 +246,16 @@ body.cfia-denied .blocked { display: grid; }
 .map-tag.pending { background: var(--na-soft); color: var(--na); }
 .map-tag.hub { background: var(--due-soft); color: var(--due); }
 @media (max-width: 760px) { .map-meta { display: none; } .map-code { min-width: 40px; } }
+
+/* ─── Dashboard tiles (compact, bold, simple) ─────────────── */
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 8px; }
+.tile { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; border: 1px solid var(--divider); border-radius: var(--r-lg); background: var(--white); padding: 18px; text-decoration: none; transition: border-color .2s, box-shadow .2s, transform .2s; }
+.tile:hover { border-color: var(--teal); box-shadow: var(--shadow-card); transform: translateY(-2px); }
+.tile-icon { width: 40px; height: 40px; border-radius: var(--r-md); display: grid; place-items: center; background: rgba(54, 179, 175, 0.10); color: var(--teal-dark); font-size: 22px; }
+.tile-name { font-size: 18px; font-weight: 800; color: var(--black); letter-spacing: .3px; }
+.tile-sub { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); }
+.tile.soon { opacity: .55; }
+.tile.soon:hover { border-color: var(--divider); box-shadow: none; transform: none; }
 
 /* ─── Print (clean PDF) ─────────────────────────────── */
 @media print {

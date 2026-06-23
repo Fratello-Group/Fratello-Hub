@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fratello Food Safety — Department</title>
+    <title>Fratello Food Safety — System Map</title>
     <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,8 +20,8 @@
     <header class="cfia-bar">
         <div class="brand">
             <div class="context">
-                <div class="eyebrow">Food Safety · Department</div>
-                <div class="bar-title" id="barTitle">Packaging</div>
+                <div class="eyebrow">Food Safety · System Map</div>
+                <div class="bar-title">All Documents</div>
             </div>
         </div>
     </header>
@@ -36,46 +36,47 @@
 
     <main class="cfia-page">
         <section class="hero">
-            <div class="dateline">Department binder</div>
-            <h1 id="deptTitle">Packaging</h1>
-            <p id="deptBlurb"></p>
+            <div class="dateline">Every document</div>
+            <h1>System Map</h1>
+            <p>The whole program in one place. Filter by department, or search by name or code. Inside a department you only see what applies to you — this is the full picture.</p>
         </section>
 
-        <div class="dept-switch" id="deptSwitch"></div>
+        <div class="dept-switch" id="deptFilter"></div>
         <div id="mapMount"></div>
     </main>
 
     <script type="module">
         import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
-        import { DEPARTMENTS, DEPARTMENT_ORDER, DOC_TYPE_GROUPS, getDepartment, docInDepartment } from '/cfia/config/departments.js';
+        import { DEPARTMENTS, DEPARTMENT_ORDER, DOC_TYPE_GROUPS, docInDepartment } from '/cfia/config/departments.js';
         import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
         import { renderSystemsMap } from '/cfia/system/cfia-map.js';
 
-        const params = new URLSearchParams(location.search);
-        let deptKey = params.get('dept') || 'packaging';
-        if (!DEPARTMENTS[deptKey]) deptKey = 'packaging';
+        let active = 'all';
 
-        function renderSwitch() {
-            document.getElementById('deptSwitch').innerHTML = DEPARTMENT_ORDER.map(k => {
+        function renderFilter() {
+            const all = `<a class="dept-chip${active === 'all' ? ' on' : ''}" href="#" data-d="all"><i class="ti ti-layout-grid" aria-hidden="true"></i> All</a>`;
+            const chips = DEPARTMENT_ORDER.map(k => {
                 const d = DEPARTMENTS[k];
-                const on = k === deptKey ? ' on' : '';
-                return `<a class="dept-chip${on}" href="/cfia/department.html?dept=${k}"><i class="ti ${d.icon}" aria-hidden="true"></i> ${escapeHtml(d.label)}</a>`;
+                return `<a class="dept-chip${active === k ? ' on' : ''}" href="#" data-d="${k}"><i class="ti ${d.icon}" aria-hidden="true"></i> ${escapeHtml(d.label)}</a>`;
             }).join('');
+            const el = document.getElementById('deptFilter');
+            el.innerHTML = all + chips;
+            el.querySelectorAll('[data-d]').forEach(a => a.addEventListener('click', e => {
+                e.preventDefault();
+                active = a.dataset.d;
+                draw();
+            }));
         }
 
-        function render() {
-            const dept = getDepartment(deptKey);
-            document.getElementById('barTitle').textContent = dept.label;
-            document.getElementById('deptTitle').textContent = dept.label;
-            document.getElementById('deptBlurb').textContent = dept.blurb;
-            renderSwitch();
-            const docs = DOCUMENT_REGISTER
-                .filter(d => docInDepartment(d, deptKey))
+        function draw() {
+            renderFilter();
+            const docs = (active === 'all' ? DOCUMENT_REGISTER : DOCUMENT_REGISTER.filter(d => docInDepartment(d, active)))
+                .slice()
                 .sort((a, b) => (a.code || 'zz').localeCompare(b.code || 'zz', undefined, { numeric: true }));
             renderSystemsMap({ mount: document.getElementById('mapMount'), docs, groups: DOC_TYPE_GROUPS });
         }
 
-        guardPage(role => { if (role) render(); });
+        guardPage(role => { if (role) draw(); });
     </script>
 </body>
 </html>
