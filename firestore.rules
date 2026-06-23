@@ -1,5 +1,9 @@
 rules_version = '2';
 
+// Firestore security rules for the Fratello Hub.
+// Deployed automatically by .github/workflows/deploy-firestore-rules.yml
+// whenever this file changes on main (no manual console paste needed).
+
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
