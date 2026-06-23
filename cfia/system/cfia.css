@@ -257,6 +257,13 @@ body.cfia-denied .blocked { display: grid; }
 .tile.soon { opacity: .55; }
 .tile.soon:hover { border-color: var(--divider); box-shadow: none; transform: none; }
 
+/* ─── Breadcrumbs (every page) ─────────────── */
+.crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-size: 13px; color: var(--grey); margin-bottom: 18px; }
+.crumbs a { color: var(--teal-dark); text-decoration: none; font-weight: 700; }
+.crumbs a:hover { text-decoration: underline; }
+.crumb-sep { color: var(--grey-light); }
+.crumb-current { color: var(--slate); font-weight: 700; }
+
 /* ─── Print (clean PDF) ─────────────────────────────── */
 @media print {
     @page { size: letter; margin: 0.5in; }

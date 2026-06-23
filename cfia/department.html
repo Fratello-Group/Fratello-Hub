@@ -35,6 +35,12 @@
     </section>
 
     <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current" id="crumbDept">Packaging</span>
+        </nav>
+
         <section class="hero">
             <div class="dateline">Department binder</div>
             <h1 id="deptTitle">Packaging</h1>
@@ -68,6 +74,7 @@
             document.getElementById('barTitle').textContent = dept.label;
             document.getElementById('deptTitle').textContent = dept.label;
             document.getElementById('deptBlurb').textContent = dept.blurb;
+            document.getElementById('crumbDept').textContent = dept.label;
             renderSwitch();
             const docs = DOCUMENT_REGISTER
                 .filter(d => docInDepartment(d, deptKey))
