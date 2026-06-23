@@ -66,26 +66,7 @@
     </style>
 </head>
 <body>
-    <header class="masthead">
-        <a href="../../index.html" aria-label="Back to Fratello Hub"><img src="../../assets/Fratello_Logo_Black.png" alt="Fratello"></a>
-        <button class="sub-hamburger" type="button" id="subHamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-        <div class="masthead-right">
-            <div class="masthead-actions">
-                <a class="nav-link" href="../../index.html#dashboard">Dashboard</a>
-                <a class="nav-link" href="../../index.html#departments">Departments</a>
-                <a class="nav-link" href="../../index.html#resources">Resources</a>
-                <a class="nav-link" href="../../index.html#owner-hub">Owner Hub</a>
-                <a class="nav-link" href="../../index.html#settings">Settings</a>
-            </div>
-            <div class="sub-profile-chip" id="subProfileChip" hidden>
-                <span class="sub-avatar" id="subAvatar">--</span>
-                <span class="sub-profile-copy">
-                    <span class="sub-profile-name" id="subProfileName">--</span>
-                    <span class="sub-profile-access" id="subProfileAccess">--</span>
-                </span>
-            </div>
-        </div>
-    </header>
+    <div id="fratello-hub-header"></div>
     <main>
         <section class="intro">
             <div>
@@ -142,6 +123,7 @@
         </div>
     </main>
     <script src="../firebase-config.js"></script>
+    <script src="/system/hub-header.js"></script>
     <script type="module">
         let role = null;
         let client = null;
@@ -322,7 +304,8 @@
             input.addEventListener('change', render);
         });
         document.getElementById('exportCsv').addEventListener('click', exportCsv);
-        document.getElementById('subHamburger').addEventListener('click', toggleSubNav);
+        const subHamburgerBtn = document.getElementById('subHamburger');
+        if (subHamburgerBtn) subHamburgerBtn.addEventListener('click', toggleSubNav);
         init();
     </script>
 </body>

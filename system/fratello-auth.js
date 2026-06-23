@@ -353,6 +353,21 @@ export async function sendHubInviteEmail(payload = {}) {
     return data;
 }
 
+export async function deleteHubUserServer(person = {}) {
+    const token = await currentIdToken();
+    const response = await fetch('/.netlify/functions/hub-delete-user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ email: person.email || '', uid: person.uid || '' })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not delete the user.');
+    return data;
+}
+
 export async function signOutHub() {
     initFirebase();
     await signOut(auth);

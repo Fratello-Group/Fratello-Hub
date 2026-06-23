@@ -713,26 +713,7 @@
     </div>
 
     <div class="page-shell" id="pageShell">
-        <header class="masthead">
-            <img src="../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
-            <button class="sub-hamburger" type="button" id="subHamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleSubNav()">☰</button>
-            <div class="masthead-right">
-                <nav class="hub-nav" aria-label="Hub sections">
-                    <a class="nav-link" href="/#dashboard">Dashboard</a>
-                    <a class="nav-link" href="/#departments">Departments</a>
-                    <a class="nav-link" href="/#resources">Resources</a>
-                    <a class="nav-link" href="/#owner-hub">Owner Hub</a>
-                    <a class="nav-link" href="/#settings">Settings</a>
-                </nav>
-                <div class="sub-profile-chip" id="subProfileChip" hidden>
-                    <span class="sub-avatar" id="subAvatar">--</span>
-                    <span class="sub-profile-copy">
-                        <span class="sub-profile-name" id="subProfileName">--</span>
-                        <span class="sub-profile-access" id="subProfileAccess">--</span>
-                    </span>
-                </div>
-            </div>
-        </header>
+        <div id="fratello-hub-header"></div>
 
         <main>
             <div class="eyebrow">Manage People</div>
@@ -821,9 +802,10 @@
     </div>
 
     <script src="firebase-config.js"></script>
+    <script src="/system/hub-header.js"></script>
     <script type="module">
         import {
-            deleteHubUser,
+            deleteHubUserServer,
             firebaseConfigured,
             friendlyAuthError,
             listHubUsers,
@@ -1582,7 +1564,7 @@
 
             try {
                 if (USE_FIREBASE_AUTH) {
-                    await deleteHubUser(person);
+                    await deleteHubUserServer(person);
                 } else {
                     await authRequest({ action: 'users:delete', id: personId });
                 }
@@ -1595,7 +1577,9 @@
                     button.disabled = false;
                     button.textContent = originalLabel || 'Delete User';
                 }
-                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+                const message = (error && error.message) || 'Could not delete the user.';
+                document.getElementById('adminMessage').textContent = message;
+                window.alert('Could not delete this user:\n\n' + message);
             }
         }
 
