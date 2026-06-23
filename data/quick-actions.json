@@ -2,7 +2,7 @@
   {
     "id": "qa_vacation",
     "label": "Submit vacation",
-    "icon": "calendar-plus",
+    "icon": "plane",
     "href": "/hr/time-off/vacation-tracker.html?view=submit",
     "group": "submit",
     "tiers": ["staff", "manager", "owner"],
@@ -20,7 +20,7 @@
   {
     "id": "qa_expense",
     "label": "Submit an expense",
-    "icon": "receipt",
+    "icon": "dollar",
     "href": "/operations/forms/expense-report.html",
     "group": "submit",
     "tiers": ["staff", "manager", "owner"],

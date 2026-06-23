@@ -1,8 +1,8 @@
 // Shared Fratello Hub header.
 //
-// Drop this onto any page to get the standard header (logo, nav, account
-// dropdown, mobile hamburger). It uses absolute paths so it works at any
-// folder depth. Usage on a page:
+// Drop this onto any page to get the standard header (logo, account dropdown,
+// and a hamburger menu for navigation). It uses absolute paths so it works at
+// any folder depth. Usage on a page:
 //   <div id="fratello-hub-header"></div>
 //   <script src="/system/hub-header.js"></script>
 // If the placeholder div is omitted, the header is prepended to <body>.
@@ -30,12 +30,9 @@
     }
 
     var CSS = [
-        ".fh-bar{position:sticky;top:0;z-index:500;display:flex;align-items:center;gap:18px;padding:14px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #E2E2E4;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Montserrat',sans-serif;box-sizing:border-box;}",
+        ".fh-bar{position:sticky;top:0;z-index:500;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #E2E2E4;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Montserrat',sans-serif;box-sizing:border-box;}",
         ".fh-logo{height:30px;width:auto;display:block;}",
-        ".fh-nav{display:flex;align-items:center;gap:2px;margin-right:auto;flex-wrap:wrap;}",
-        ".fh-nav a{min-height:42px;display:inline-flex;align-items:center;padding:8px 14px;border-bottom:2px solid transparent;color:#5A5A5E;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;white-space:nowrap;}",
-        ".fh-nav a:hover{color:#1A1A1A;border-bottom-color:#36B3AF;}",
-        ".fh-right{display:flex;align-items:center;gap:12px;}",
+        ".fh-right{display:flex;align-items:center;gap:10px;}",
         ".fh-account{position:relative;}",
         ".fh-chip{display:inline-flex;align-items:center;gap:9px;padding:5px 10px 5px 5px;border:1px solid #E2E2E4;border-radius:6px;background:#fff;cursor:pointer;font:inherit;}",
         ".fh-avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:3px;background:rgba(54,179,175,.12);border:1px solid rgba(54,179,175,.5);color:#1f7a76;font-size:11px;font-weight:800;letter-spacing:1px;}",
@@ -43,7 +40,7 @@
         ".fh-name{font-size:12px;font-weight:800;color:#1A1A1A;}",
         ".fh-access{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#1f7a76;}",
         ".fh-caret{font-size:9px;color:#8a8a8a;margin-left:1px;}",
-        ".fh-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:248px;background:#fff;border:1px solid #E2E2E4;box-shadow:0 14px 34px rgba(0,0,0,.14);z-index:60;}",
+        ".fh-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:248px;background:#fff;border:1px solid #E2E2E4;box-shadow:0 14px 34px rgba(0,0,0,.14);z-index:600;}",
         ".fh-menu[hidden]{display:none;}",
         ".fh-menu-head{padding:14px 16px;border-bottom:1px solid #E2E2E4;}",
         ".fh-menu-name{display:block;font-size:14px;font-weight:800;color:#1A1A1A;}",
@@ -55,16 +52,19 @@
         ".fh-menu-link,.fh-menu-signout{display:block;width:100%;text-align:left;padding:12px 16px;font-size:13px;font-weight:700;background:#fff;color:#1A1A1A;border:0;border-top:1px solid #E2E2E4;cursor:pointer;text-decoration:none;}",
         ".fh-menu-link:hover,.fh-menu-signout:hover{background:rgba(54,179,175,.1);}",
         ".fh-menu-signout{color:#b3261e;}",
-        ".fh-burger{display:none;align-items:center;justify-content:center;width:44px;height:40px;border:1px solid #E2E2E4;border-radius:6px;background:#fff;color:#5A5A5E;font-size:20px;line-height:1;cursor:pointer;}",
-        "@media (max-width:860px){",
-        ".fh-bar{flex-wrap:wrap;padding:14px 20px;}",
-        ".fh-burger{display:inline-flex;margin-left:auto;}",
-        ".fh-nav,.fh-right{display:none;width:100%;flex-direction:column;align-items:stretch;gap:6px;margin-top:10px;}",
-        ".fh-bar.fh-open .fh-nav,.fh-bar.fh-open .fh-right{display:flex;}",
-        ".fh-nav a{width:100%;}",
-        ".fh-account{width:100%;}",
-        ".fh-chip{width:100%;justify-content:flex-start;}",
-        ".fh-menu{position:static;min-width:0;margin-top:8px;box-shadow:none;}",
+        ".fh-navwrap{position:relative;}",
+        ".fh-burger{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border:1px solid #36B3AF;border-radius:6px;background:rgba(54,179,175,.12);color:#1f7a76;font:inherit;font-weight:800;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;}",
+        ".fh-burger:hover{background:rgba(54,179,175,.2);}",
+        ".fh-burger svg{display:block;flex:none;}",
+        ".fh-navmenu{position:absolute;top:calc(100% + 6px);right:0;min-width:220px;background:#fff;border:1px solid #E2E2E4;box-shadow:0 14px 34px rgba(0,0,0,.16);z-index:600;padding:6px 0;}",
+        ".fh-navmenu[hidden]{display:none;}",
+        ".fh-navmenu a{display:block;padding:12px 18px;color:#1A1A1A;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.3px;}",
+        ".fh-navmenu a:hover{background:rgba(54,179,175,.1);color:#1f7a76;}",
+        "@media (max-width:560px){",
+        ".fh-bar{padding:12px 16px;}",
+        ".fh-copy .fh-access{display:none;}",
+        ".fh-burger-text{display:none;}",
+        ".fh-burger{padding:0 11px;}",
         "}"
     ].join('');
 
@@ -105,19 +105,26 @@
               '</div>'
             : '<button class="fh-menu-signout" type="button" style="border:1px solid #E2E2E4;border-radius:6px;">Sign out</button>';
 
+        var nav =
+            '<div class="fh-navwrap">' +
+                '<button class="fh-burger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open navigation menu">' +
+                    '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>' +
+                    '<span class="fh-burger-text">Menu</span>' +
+                '</button>' +
+                '<nav class="fh-navmenu" hidden aria-label="Hub navigation">' +
+                    '<a href="/index.html">Dashboard</a>' +
+                    '<a href="/index.html#departments">Departments</a>' +
+                    '<a href="/index.html#resources">Resources</a>' +
+                    (isOwner ? '<a href="/index.html#owner-admin">Owner Hub</a>' : '') +
+                    (isOwner ? '<a href="/index.html#settings">Settings</a>' : '') +
+                '</nav>' +
+            '</div>';
+
         var bar = document.createElement('header');
         bar.className = 'fh-bar';
         bar.innerHTML =
-            '<a href="/index.html" aria-label="Fratello Hub"><img class="fh-logo" src="/assets/Fratello_Logo_Black.png" alt="Fratello"></a>' +
-            '<button class="fh-burger" type="button" aria-label="Open menu" aria-expanded="false">☰</button>' +
-            '<nav class="fh-nav" aria-label="Hub navigation">' +
-                '<a href="/index.html#dashboard">Dashboard</a>' +
-                '<a href="/index.html#departments">Departments</a>' +
-                '<a href="/index.html#resources">Resources</a>' +
-                (isOwner ? '<a href="/index.html#owner-admin">Owner Hub</a>' : '') +
-                (isOwner ? '<a href="/index.html#settings">Settings</a>' : '') +
-            '</nav>' +
-            '<div class="fh-right">' + account + '</div>';
+            '<a class="fh-logo-link" href="/index.html" aria-label="Fratello Hub"><img class="fh-logo" src="/assets/Fratello_Logo_Black.png" alt="Fratello"></a>' +
+            '<div class="fh-right">' + account + nav + '</div>';
         return bar;
     }
 
@@ -129,18 +136,32 @@
         window.addEventListener('resize', publishHeight);
 
         var burger = bar.querySelector('.fh-burger');
-        if (burger) burger.addEventListener('click', function () {
-            var open = bar.classList.toggle('fh-open');
-            burger.setAttribute('aria-expanded', String(open));
-            publishHeight();
-        });
-
+        var navmenu = bar.querySelector('.fh-navmenu');
         var chip = bar.querySelector('.fh-chip');
         var menu = bar.querySelector('.fh-menu');
+
+        function closeAccount() {
+            if (menu && !menu.hidden) { menu.hidden = true; if (chip) chip.setAttribute('aria-expanded', 'false'); }
+        }
+        function closeNav() {
+            if (navmenu && !navmenu.hidden) { navmenu.hidden = true; if (burger) burger.setAttribute('aria-expanded', 'false'); }
+        }
+
+        if (burger && navmenu) {
+            burger.addEventListener('click', function (event) {
+                event.stopPropagation();
+                var open = navmenu.hidden;
+                closeAccount();
+                navmenu.hidden = !open;
+                burger.setAttribute('aria-expanded', String(open));
+            });
+        }
+
         if (chip && menu) {
             chip.addEventListener('click', function (event) {
                 event.stopPropagation();
                 var open = menu.hidden;
+                closeNav();
                 menu.hidden = !open;
                 chip.setAttribute('aria-expanded', String(open));
             });
@@ -154,12 +175,17 @@
         if (outsideBound) return;
         outsideBound = true;
         document.addEventListener('click', function (event) {
-            if (event.target.closest('.fh-account')) return;
-            var menu = document.querySelector('.fh-menu');
-            var chip = document.querySelector('.fh-chip');
-            if (menu && !menu.hidden) {
-                menu.hidden = true;
-                if (chip) chip.setAttribute('aria-expanded', 'false');
+            var bar = document.querySelector('.fh-bar');
+            if (!bar) return;
+            if (!event.target.closest('.fh-account')) {
+                var menu = bar.querySelector('.fh-menu');
+                var chip = bar.querySelector('.fh-chip');
+                if (menu && !menu.hidden) { menu.hidden = true; if (chip) chip.setAttribute('aria-expanded', 'false'); }
+            }
+            if (!event.target.closest('.fh-navwrap')) {
+                var navmenu = bar.querySelector('.fh-navmenu');
+                var burger = bar.querySelector('.fh-burger');
+                if (navmenu && !navmenu.hidden) { navmenu.hidden = true; if (burger) burger.setAttribute('aria-expanded', 'false'); }
             }
         });
     }
