@@ -932,6 +932,19 @@
             align-items: center;
         }
 
+        .resources-subhead {
+            margin: 28px 0 12px;
+            color: var(--black);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 2.4px;
+            text-transform: uppercase;
+        }
+
+        .resources-subhead:first-of-type {
+            margin-top: 4px;
+        }
+
         .empty-state {
             border: 1px solid var(--divider-light);
             border-radius: 6px;
@@ -1917,18 +1930,9 @@
         <img src="assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
         <nav class="hub-nav" aria-label="Hub sections">
             <button class="hub-nav-btn active" type="button" data-view="dashboard">Dashboard</button>
-            <div class="hub-nav-item" data-nav-item="departments">
-                <button class="hub-nav-btn" type="button" data-view="departments">Departments<span class="hub-nav-caret">▾</span></button>
-                <div class="hub-dropdown" id="departmentsMenu" aria-label="Departments menu"></div>
-            </div>
-            <div class="hub-nav-item" data-nav-item="resources">
-                <button class="hub-nav-btn" type="button" data-view="resources">Resources<span class="hub-nav-caret">▾</span></button>
-                <div class="hub-dropdown" id="resourcesMenu" aria-label="Resources menu"></div>
-            </div>
-            <div class="hub-nav-item" data-nav-item="owner-hub">
-                <button class="hub-nav-btn" type="button" data-view="owner-hub">Owner Hub<span class="hub-nav-caret">▾</span></button>
-                <div class="hub-dropdown" id="ownerHubMenu" aria-label="Owner Hub menu"></div>
-            </div>
+            <button class="hub-nav-btn" type="button" data-view="departments">Departments</button>
+            <button class="hub-nav-btn" type="button" data-view="resources">Resources</button>
+            <button class="hub-nav-btn" type="button" data-view="owner-hub">Owner Hub</button>
             <button class="hub-nav-btn" type="button" data-section="settings">Settings</button>
         </nav>
         <div class="masthead-right">
@@ -2608,6 +2612,11 @@ function renderHub(role, view = 'dashboard', sectionKey = '') {
         return;
     }
 
+    if (view === 'resources') {
+        renderResourcesIndex(role);
+        return;
+    }
+
     if (sectionKey) {
         renderSectionPage(role, sectionKey);
         return;
@@ -2620,9 +2629,9 @@ function initialHubRoute(role) {
     const hash = decodeURIComponent((location.hash || '').replace(/^#/, '')).trim();
     if (!hash || hash === 'dashboard') return { view: 'dashboard', sectionKey: '' };
     if (hash === 'departments') return { view: 'departments', sectionKey: '' };
+    if (hash === 'resources') return { view: 'resources', sectionKey: '' };
 
     const sectionAliases = {
-        resources: 'employee-resources',
         'owner-hub': 'owner-admin'
     };
     const sectionKey = sectionAliases[hash] || hash;
@@ -2635,96 +2644,23 @@ function initialHubRoute(role) {
 
 function setupHubNav(role) {
     const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
-    const departmentsItem = document.querySelector('[data-nav-item="departments"]');
-    const departmentsMenu = document.getElementById('departmentsMenu');
-    const resourcesItem = document.querySelector('[data-nav-item="resources"]');
-    const resourcesMenu = document.getElementById('resourcesMenu');
-    const ownerHubItem = document.querySelector('[data-nav-item="owner-hub"]');
-    const ownerHubMenu = document.getElementById('ownerHubMenu');
-
-    departmentsItem.hidden = !departmentSections.length;
-    departmentsMenu.innerHTML = '';
-    resourcesMenu.innerHTML = '';
-    ownerHubMenu.innerHTML = '';
-
-    if (departmentSections.length) {
-        const topDepartments = departmentSections.filter(section => !section.menuParent);
-        const productionDepartments = departmentSections.filter(section => section.menuParent === 'Production');
-
-        if (topDepartments.length) {
-            const label = document.createElement('div');
-            label.className = 'hub-dropdown-label';
-            label.textContent = 'Departments';
-            departmentsMenu.appendChild(label);
-
-            topDepartments.forEach(section => {
-                departmentsMenu.appendChild(createSectionDropdownItem(section, 'Department'));
-            });
-        }
-
-        if (productionDepartments.length) {
-            const label = document.createElement('div');
-            label.className = 'hub-dropdown-label';
-            label.textContent = 'Production';
-            departmentsMenu.appendChild(label);
-
-            productionDepartments.forEach(section => {
-                departmentsMenu.appendChild(createSectionDropdownItem(section, 'Production'));
-            });
-        }
-    }
-
-    const departmentsButton = departmentsItem.querySelector('.hub-nav-btn');
-    departmentsButton.onclick = event => {
-        event.stopPropagation();
-        const shouldOpen = !departmentsItem.classList.contains('open');
-        renderHub(role, 'departments');
-        if (shouldOpen) departmentsItem.classList.add('open');
-    };
-
     const resourcesSections = ['time-off', 'employee-resources']
         .map(key => visibleSection(role, key))
         .filter(Boolean);
-    resourcesItem.hidden = !resourcesSections.length;
-    resourcesSections.forEach(section => {
-        const label = document.createElement('div');
-        label.className = 'hub-dropdown-label';
-        label.textContent = section.group === 'Time Off' ? 'Time Off' : 'Forms & Docs';
-        resourcesMenu.appendChild(label);
-        section.cards
-            .filter(card => cardIsVisible(card, role))
-            .forEach(card => resourcesMenu.appendChild(createActionDropdownItem(card, section.label)));
-    });
-
-    const resourcesButton = resourcesItem.querySelector('.hub-nav-btn');
-    resourcesButton.onclick = event => {
-        event.stopPropagation();
-        closeNavMenus();
-        if (!resourcesItem.hidden) resourcesItem.classList.add('open');
-    };
-
     const ownerSection = visibleSection(role, 'owner-admin');
-    ownerHubItem.hidden = !ownerSection;
-    if (ownerSection) {
-        const label = document.createElement('div');
-        label.className = 'hub-dropdown-label';
-        label.textContent = 'Needs Attention';
-        ownerHubMenu.appendChild(label);
-        ownerSection.cards.forEach(card => ownerHubMenu.appendChild(createActionDropdownItem(card, ownerSection.label)));
+
+    // Each menu button simply opens its own page — no dropdowns.
+    function wireNav(selector, visible, handler) {
+        const btn = document.querySelector(selector);
+        if (!btn) return;
+        btn.hidden = !visible;
+        btn.onclick = handler;
     }
 
-    const ownerButton = ownerHubItem.querySelector('.hub-nav-btn');
-    ownerButton.onclick = event => {
-        event.stopPropagation();
-        const shouldOpen = !ownerHubItem.classList.contains('open');
-        renderHub(role, 'section', 'owner-admin');
-        if (shouldOpen && !ownerHubItem.hidden) ownerHubItem.classList.add('open');
-    };
-
-    document.querySelectorAll('.hub-nav-btn[data-view="dashboard"]').forEach(btn => {
-        btn.hidden = false;
-        btn.onclick = () => renderHub(role, 'dashboard');
-    });
+    wireNav('.hub-nav-btn[data-view="dashboard"]', true, () => renderHub(role, 'dashboard'));
+    wireNav('.hub-nav-btn[data-view="departments"]', departmentSections.length > 0, () => renderHub(role, 'departments'));
+    wireNav('.hub-nav-btn[data-view="resources"]', resourcesSections.length > 0, () => renderHub(role, 'resources'));
+    wireNav('.hub-nav-btn[data-view="owner-hub"]', Boolean(ownerSection), () => renderHub(role, 'section', 'owner-admin'));
 
     document.querySelectorAll('.hub-nav-btn[data-section]').forEach(btn => {
         const key = btn.dataset.section;
@@ -2734,7 +2670,6 @@ function setupHubNav(role) {
 
     if (!window.__fratelloHubNavBound) {
         document.addEventListener('click', event => {
-            if (!event.target.closest('.hub-nav-item')) closeNavMenus();
             if (!event.target.closest('.hub-nav') && !event.target.closest('.hub-hamburger')) closeHubNav();
         });
         window.__fratelloHubNavBound = true;
@@ -3129,6 +3064,48 @@ function renderDepartmentsIndex(role) {
         list.appendChild(row);
     });
     main.appendChild(list);
+}
+
+function renderResourcesIndex(role) {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+
+    const sections = ['time-off', 'employee-resources']
+        .map(key => visibleSection(role, key))
+        .filter(Boolean);
+
+    const header = document.createElement('section');
+    header.className = 'tool-view-header fade-in';
+    header.innerHTML = `
+        <div class="section-kicker">Resources</div>
+        <h1 class="tool-view-title">Resources.</h1>
+        <p class="tool-view-note">Time off, calendars, forms, and everyday resources for the team — all in one place.</p>
+    `;
+    main.appendChild(header);
+
+    let shown = 0;
+    sections.forEach(section => {
+        const visibleCards = section.cards.filter(card => cardIsVisible(card, role));
+        if (!visibleCards.length) return;
+        shown += visibleCards.length;
+
+        const subhead = document.createElement('h2');
+        subhead.className = 'resources-subhead fade-in';
+        subhead.textContent = section.group === 'Time Off' ? 'Time Off' : 'Forms & Docs';
+        main.appendChild(subhead);
+
+        const list = document.createElement('div');
+        list.className = 'tool-view-list fade-in';
+        visibleCards.forEach(card => list.appendChild(createToolLink(card, section.label)));
+        main.appendChild(list);
+    });
+
+    if (!shown) {
+        const empty = document.createElement('p');
+        empty.className = 'tool-view-note fade-in';
+        empty.textContent = 'No resources are available for your access level yet.';
+        main.appendChild(empty);
+    }
 }
 
 function renderSectionPage(role, sectionKey) {
