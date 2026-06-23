@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
     <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
     <link rel="stylesheet" href="/cfia/system/cfia.css">
     <script src="/system/firebase-config.js"></script>
@@ -43,46 +42,53 @@
         <section class="hero">
             <div class="dateline">Preventive Control Plan</div>
             <h1>Food Safety</h1>
-            <p id="heroLine">Pick your department to find everything you need. Audit-ready, in one place.</p>
+            <p id="heroLine">Pick your area to find everything you need. Audit-ready, in one place.</p>
         </section>
 
         <div class="tile-grid" id="tileGrid"></div>
+
+        <div class="tile-section-label">Across the program</div>
+        <div class="subtile-row" id="subRow"></div>
     </main>
 
     <script type="module">
-        import { guardPage, getRole } from '/cfia/system/cfia-core.js';
+        import { guardPage } from '/cfia/system/cfia-core.js';
 
-        // Generic single-colour icons. Coffee-bag illustration for Packaging
-        // (bags + labels); the rest use the shared outline icon set.
+        const S = (w, h, body) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="${w}" height="${h}" aria-hidden="true">${body}</svg>`;
         const ICON = {
-            bag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" aria-hidden="true"><path d="M7 8h10v11.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19.5Z"/><path d="M7 8 6.2 5.4A1 1 0 0 1 7.1 4H16.9A1 1 0 0 1 17.8 5.4L17 8"/><path d="M9.8 4.4v3M12.4 4.4v3M15 4.4v2.6"/><rect x="9.4" y="11.6" width="5.2" height="4" rx=".6"/></svg>`,
-            ti: (n) => `<i class="ti ${n}" aria-hidden="true"></i>`
+            program: S(24, 24, '<path d="M12 3l7 2.5v5.2c0 4.4-3 7.6-7 9.3-4-1.7-7-4.9-7-9.3V5.5z"/><path d="M9 12l2 2 4-4"/>'),
+            roasting: S(24, 24, '<path d="M12 2c3 3.5 5 5.5 5 9a5 5 0 0 1-10 0c0-1.8.8-3.2 1.8-4.3C9 8 10.5 7 12 2z"/><path d="M12 19a3 3 0 0 0 3-3c0-1.6-1.2-2.4-1.8-3.3-.6.9-1.5 1.3-2.2 2.1A2.5 2.5 0 0 0 12 19z"/>'),
+            packaging: S(24, 24, '<path d="M7 8h10v11.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19.5Z"/><path d="M7 8 6.2 5.4A1 1 0 0 1 7.1 4H16.9A1 1 0 0 1 17.8 5.4L17 8"/><path d="M9.8 4.4v3M12.4 4.4v3M15 4.4v2.6"/><rect x="9.4" y="11.6" width="5.2" height="4" rx=".6"/>'),
+            warehouse: S(24, 24, '<rect x="3.5" y="12" width="7" height="7.5" rx=".7"/><rect x="13.5" y="12" width="7" height="7.5" rx=".7"/><rect x="8.5" y="4" width="7" height="7.5" rx=".7"/>'),
+            map: S(20, 20, '<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>'),
+            records: S(20, 20, '<rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 4.5V3.6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v.9"/><path d="M8.7 12.5l2 2 4-4"/>')
         };
 
-        // Department tiles. Once roles carry a department, a staff member sees
-        // ONLY their department tile here.
-        const DEPT_TILES = [
-            { dept: 'packaging', name: 'Packaging', iconHtml: ICON.bag },
-            { dept: 'roasting', name: 'Roasting', iconHtml: ICON.ti('ti-flame') },
-            { dept: 'warehouse', name: 'Warehouse', iconHtml: ICON.ti('ti-forklift') }
+        // Main tabs: program-wide first, then the three departments.
+        // Once roles carry a department, a staff member sees only their department here.
+        const MAIN = [
+            { href: '/cfia/department.html?dept=company', icon: ICON.program, name: 'Company-Wide', sub: 'Applies to all' },
+            { href: '/cfia/department.html?dept=roasting', icon: ICON.roasting, name: 'Roasting', sub: 'Department' },
+            { href: '/cfia/department.html?dept=packaging', icon: ICON.packaging, name: 'Packaging', sub: 'Department' },
+            { href: '/cfia/department.html?dept=warehouse', icon: ICON.warehouse, name: 'Warehouse', sub: 'Department' }
         ];
-
-        function tile(href, iconHtml, name, sub) {
-            return `<a class="tile" href="${href}">
-                <span class="tile-icon">${iconHtml}</span>
-                <span class="tile-name">${name}</span>
-                <span class="tile-sub">${sub}</span>
-            </a>`;
-        }
+        const SECONDARY = [
+            { href: '/cfia/map.html', icon: ICON.map, name: 'System Map', sub: 'every document' },
+            { href: '/cfia/records.html', icon: ICON.records, name: 'Records', sub: 'submitted logs' }
+        ];
 
         guardPage(role => {
             if (!role) return;
-            const grid = document.getElementById('tileGrid');
-            const depts = DEPT_TILES.map(t => tile(`/cfia/department.html?dept=${t.dept}`, t.iconHtml, t.name, 'Department')).join('');
-            const programs =
-                tile('/cfia/map.html', ICON.ti('ti-map-2'), 'System Map', 'All documents') +
-                tile('/cfia/records.html', ICON.ti('ti-clipboard-check'), 'Records', 'Submitted logs');
-            grid.innerHTML = depts + programs;
+            document.getElementById('tileGrid').innerHTML = MAIN.map(t => `
+                <a class="tile" href="${t.href}">
+                    <span class="tile-icon">${t.icon}</span>
+                    <span class="tile-name">${t.name}</span>
+                    <span class="tile-sub">${t.sub}</span>
+                </a>`).join('');
+            document.getElementById('subRow').innerHTML = SECONDARY.map(t => `
+                <a class="subtile" href="${t.href}">${t.icon}
+                    <span><span class="subtile-name">${t.name}</span> <span class="subtile-sub">${t.sub}</span></span>
+                </a>`).join('');
         });
     </script>
 </body>

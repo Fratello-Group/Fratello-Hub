@@ -256,13 +256,24 @@ body.cfia-denied .blocked { display: grid; }
 .tile-sub { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); }
 .tile.soon { opacity: .55; }
 .tile.soon:hover { border-color: var(--divider); box-shadow: none; transform: none; }
+.tile-icon svg { display: block; }
+
+/* Secondary tier — program-wide tools, distinct from the main department tabs */
+.tile-section-label { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); margin: 28px 0 10px; }
+.subtile-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.subtile { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--card); padding: 11px 16px; text-decoration: none; }
+.subtile:hover { border-color: var(--teal); background: var(--white); }
+.subtile svg { color: var(--teal-dark); flex: 0 0 auto; }
+.subtile-name { font-size: 14px; font-weight: 800; color: var(--black); }
+.subtile-sub { font-size: 11px; color: var(--grey); }
 
 /* ─── Breadcrumbs (every page) ─────────────── */
-.crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-size: 13px; color: var(--grey); margin-bottom: 18px; }
+.crumbs { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--grey); margin-bottom: 20px; padding: 8px 15px; background: var(--card); border: 1px solid var(--divider); border-radius: 999px; }
 .crumbs a { color: var(--teal-dark); text-decoration: none; font-weight: 700; }
 .crumbs a:hover { text-decoration: underline; }
-.crumb-sep { color: var(--grey-light); }
+.crumb-sep { color: var(--grey-light); font-weight: 700; }
 .crumb-current { color: var(--slate); font-weight: 700; }
+.crumbs::before { content: ""; display: inline-block; width: 14px; height: 14px; flex: 0 0 auto; background: var(--grey); -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%203%203%2010v11h6v-6h6v6h6V10z'/%3E%3C/svg%3E") center/14px no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%203%203%2010v11h6v-6h6v6h6V10z'/%3E%3C/svg%3E") center/14px no-repeat; }
 
 /* ─── Print (clean PDF) ─────────────────────────────── */
 @media print {
