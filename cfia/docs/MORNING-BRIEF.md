@@ -35,5 +35,10 @@ Everything below is **live** on the site and was **tested before each push** (a 
 - Plan + decisions: `cfia/docs/PLAN-OF-ATTACK.md`, blueprint `BLUEPRINT.md`, gaps `GAP-BACKLOG.md`, foundation `FOUNDATION-SPECS.md`, this brief, and the running `OVERNIGHT-LOG.md`.
 - Register (all docs): `cfia/config/document-register.js` · forms: `form-schemas.js` · people/roles: `people.js`.
 
+
+## Also staged tonight (config, foundation-ready)
+- **Equipment registry seed** (`cfia/config/equipment.js`) — the real machines (Probat G90/G120/L12, Roest, 700 FX grinder, CoPilot-500, ActionPak, scales, probe) as first-class entities, ready for per-machine maintenance history.
+- **Training quiz content** (`cfia/config/quizzes.js`) — HACCP (8.4) and Hygiene (8.5) quizzes fully transcribed (auto-scorable + open questions), GMP captured as a supervisor-reviewed visual quiz. Ready for the training module once the foundation is wired.
+
 ## Fidelity-pass result
 All **67** reference documents were re-read against their source and checked value-by-value. **66 verified faithful; 1 corrected (SOP 10.3).** Agents confirmed load-bearing details match the originals — roaster temperatures and chaff cycles, moisture ranges (9–13%), lux thresholds, retention periods, SFCR clause citations. The readable Hub versions are audit-faithful; the original documents remain the controlled source of record.
