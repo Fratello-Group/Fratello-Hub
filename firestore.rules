@@ -266,5 +266,23 @@ service cloud.firestore {
       allow delete: if canUseAvatarBuilder()
         && (isOwnerOrController() || isAvatarCreator(resource.data));
     }
+
+    // ── CFIA / HACCP food-safety records (immutable, audit-grade) ──
+    // A completed form is a permanent record: create-only, NEVER edited,
+    // NEVER deleted — not by the author, a manager, or the owner. The
+    // submitter must stamp THEMSELVES and the SERVER time, so a client
+    // (or a bad actor editing the page) cannot forge who or when.
+    // A correction is filed as a new record that links via `supersedes`.
+    match /cfia_records/{recordId} {
+      allow get, list: if isOwnerOrController()
+        || (signedIn() && resource.data.submitted_by_email == signedInEmail());
+      allow create: if signedIn()
+        && request.resource.data.submitted_by_uid == request.auth.uid
+        && request.resource.data.submitted_by_email == signedInEmail()
+        && request.resource.data.submitted_at == request.time
+        && request.resource.data.created_via == 'cfia-hub';
+      allow update: if false;
+      allow delete: if false;
+    }
   }
 }

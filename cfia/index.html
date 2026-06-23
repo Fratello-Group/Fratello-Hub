@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub — Food Safety (CFIA / HACCP)</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <img src="/assets/Fratello_Logo_Black.png" alt="Fratello">
+            <div class="context">
+                <div class="eyebrow">Food Safety · CFIA / HACCP</div>
+                <div class="bar-title">Compliance Hub</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" href="/index.html">Back to Hub</a>
+            <a class="btn" href="/cfia/records.html">Submitted Records</a>
+        </div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>The Food Safety area is part of the Fratello Ops Hub. Please sign in to the Hub first, then open this page again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <section class="hero">
+            <div class="dateline">Preventive Control Plan</div>
+            <h1>Fratello Food Safety Program</h1>
+            <p>Your CFIA / SFCR documents, procedures and daily records — in one place, audit-ready. This is the pilot: one procedure and its daily log, working end to end. The rest of the program follows once this is proven.</p>
+        </section>
+
+        <div class="card-grid">
+            <a class="doc-card" href="/cfia/reference/sop-6-3.html">
+                <div class="doc-icon">📘</div>
+                <span class="type-tag ref">Reference · SOP</span>
+                <div class="doc-code">SOP 6.3</div>
+                <h3>Pre-Operational Inspection Procedure</h3>
+                <p>The controlled procedure that staff read and follow before production starts.</p>
+            </a>
+
+            <a class="doc-card" href="/cfia/forms/form-6-3a.html">
+                <div class="doc-icon">📝</div>
+                <span class="type-tag form">Record · Form</span>
+                <div class="doc-code">Form 6.3a</div>
+                <h3>Pre-Op Inspection Log</h3>
+                <p>The daily checklist your team completes. Saved, time-stamped, and locked for the audit.</p>
+            </a>
+
+            <a class="doc-card" href="/cfia/records.html">
+                <div class="doc-icon">🗂️</div>
+                <span class="type-tag">Manager view</span>
+                <div class="doc-code">Records</div>
+                <h3>Submitted Records</h3>
+                <p>Every completed log — who, when, and the result — exportable as a clean PDF.</p>
+            </a>
+        </div>
+
+        <div class="callout">
+            <strong>How the documents link together.</strong> Each document keeps its real Fratello code (SOP 6.3, Form 6.3a). Because of that, every document has a permanent address — so the procedure links straight to its log, and the log links back to the procedure. As we add the rest of the ~150 documents, that cross-linking is automatic.
+        </div>
+    </main>
+
+    <script type="module">
+        import { guardPage } from '/cfia/system/cfia-core.js';
+        guardPage(() => {});
+    </script>
+</body>
+</html>

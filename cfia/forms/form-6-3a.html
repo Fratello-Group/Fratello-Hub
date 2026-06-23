@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form 6.3a — Pre-Op Inspection Log</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <img src="/assets/Fratello_Logo_Black.png" alt="Fratello">
+            <div class="context">
+                <div class="eyebrow">Record · Form 6.3a</div>
+                <div class="bar-title">Pre-Op Inspection Log</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" href="/cfia/index.html">Food Safety Hub</a>
+            <a class="btn" href="/cfia/reference/sop-6-3.html">Read SOP 6.3</a>
+            <a class="btn" href="/cfia/records.html">Records</a>
+        </div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This food-safety log is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <section class="hero">
+            <div class="dateline" id="heroDateline">Daily Record</div>
+            <h1 id="heroTitle">Pre-Op Inspection Log</h1>
+            <p id="heroIntro"></p>
+        </section>
+
+        <div class="callout">
+            <strong>Procedure:</strong> <a href="/cfia/reference/sop-6-3.html">SOP 6.3 — Pre-Operational Inspection Procedure →</a>
+        </div>
+        <div class="callout lock-note">
+            <strong>This record is permanent.</strong> Once you submit, it can't be edited or deleted — that's what makes it audit-proof. To fix a mistake later, you file a new linked correction.
+        </div>
+
+        <form id="cfiaForm">
+            <div id="formMount"></div>
+
+            <section class="cfia-panel">
+                <h2 class="panel-title">Sign-off</h2>
+                <p class="panel-help">The account you're signed in with is recorded automatically and can't be changed. The "Completed by" name defaults to you — change it on a shared computer if someone else actually did this inspection.</p>
+                <div class="field-grid">
+                    <div class="field">
+                        <label class="field-label" for="performedBy">Completed by <span class="req">*</span></label>
+                        <div class="field-help">Defaults to you. Type a different name if it was someone else.</div>
+                        <input class="input" type="text" id="performedBy">
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Signed-in account (recorded automatically)</label>
+                        <div class="field-help">This is the locked, unforgeable part of the record.</div>
+                        <div class="input" id="accountLine" style="display:flex;align-items:center;background:var(--card);color:var(--slate);"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-message" id="message"></div>
+
+            <div class="actions" style="justify-content:flex-start;">
+                <button class="btn btn-primary btn-lg" type="submit" id="submitBtn">Submit inspection</button>
+                <a class="btn btn-lg" href="/cfia/index.html">Cancel</a>
+            </div>
+        </form>
+
+        <section class="cfia-panel" id="successPanel" style="display:none;">
+            <h2 class="panel-title" style="color:var(--pass);">✓ Inspection recorded</h2>
+            <p class="panel-help" id="successText"></p>
+            <div class="actions" style="justify-content:flex-start;">
+                <a class="btn btn-primary" href="/cfia/records.html">View in Submitted Records →</a>
+                <button class="btn" type="button" id="anotherBtn">Log another</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { guardPage, getRole, createRecord, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { renderForm } from '/cfia/system/fh-render-form.js';
+        import { getSchema } from '/cfia/config/form-schemas.js';
+
+        const schema = getSchema('6.3a');
+        const mount = document.getElementById('formMount');
+        const form = document.getElementById('cfiaForm');
+        const message = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        let engine = null;
+
+        document.getElementById('heroTitle').textContent = `Form ${schema.code} — ${schema.title}`;
+        document.getElementById('heroDateline').textContent = schema.frequency || 'Daily Record';
+        document.getElementById('heroIntro').textContent = schema.intro || '';
+
+        function showMessage(text, kind) {
+            message.textContent = text;
+            message.className = 'form-message visible' + (kind ? ' ' + kind : '');
+            message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        guardPage(role => {
+            if (!role) return;
+            engine = renderForm(schema, mount);
+            const name = (role.user && role.user.name) || '';
+            const email = (role.user && role.user.email) || '';
+            document.getElementById('performedBy').value = name;
+            document.getElementById('accountLine').textContent = `${name}${email ? ' · ' + email : ''}`;
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!engine) return;
+            const role = getRole();
+            const { values, errors, anyFail } = engine.collect();
+            const performedBy = document.getElementById('performedBy').value.trim();
+
+            if (errors.length) {
+                showMessage('Please complete: ' + errors.join(', ') + '.', 'error');
+                return;
+            }
+            if (!performedBy) {
+                showMessage('Please enter who completed this inspection.', 'error');
+                return;
+            }
+            const notCleared = values.cleared && values.cleared.indexOf('No') === 0;
+            if ((anyFail || notCleared) && !values.corrective) {
+                showMessage('Something failed or was not cleared — please describe the corrective action taken before submitting.', 'error');
+                return;
+            }
+
+            const accountName = (role && role.user && role.user.name) || '';
+            const signoff = {
+                performedByName: performedBy,
+                someoneElse: performedBy.toLowerCase() !== accountName.toLowerCase()
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving…';
+            try {
+                const saved = await createRecord(schema, values, signoff);
+                form.style.display = 'none';
+                document.getElementById('successPanel').style.display = 'block';
+                document.getElementById('successText').innerHTML =
+                    `Record <strong>${escapeHtml(saved.record_id)}</strong> was saved and locked. ` +
+                    `Completed by <strong>${escapeHtml(saved.performed_by_name)}</strong>` +
+                    (signoff.someoneElse ? ` (submitted from <strong>${escapeHtml(saved.submitted_by_name)}</strong>'s signed-in account)` : '') +
+                    `, stamped with the date and time on the server.`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit inspection';
+                showMessage('Could not save: ' + (err.message || err), 'error');
+            }
+        });
+
+        document.getElementById('anotherBtn').addEventListener('click', () => location.reload());
+    </script>
+</body>
+</html>
