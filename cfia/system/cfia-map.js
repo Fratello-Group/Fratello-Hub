@@ -35,11 +35,6 @@ function rowHtml(d) {
 export function renderSystemsMap({ mount, docs, groups }) {
     const present = groups.filter(g => docs.some(d => d.docType === g.key));
 
-    const toc = present.map(g => {
-        const n = docs.filter(d => d.docType === g.key).length;
-        return `<a class="map-toc-item" href="#grp-${slug(g.key)}"><i class="ti ${g.icon}" aria-hidden="true"></i> ${escapeHtml(g.label)} <span class="map-toc-n">${n}</span></a>`;
-    }).join('');
-
     const chips = `<button class="map-chip on" data-f="all">All <span>${docs.length}</span></button>` +
         present.map(g => {
             const n = docs.filter(d => d.docType === g.key).length;
@@ -55,7 +50,6 @@ export function renderSystemsMap({ mount, docs, groups }) {
     }).join('');
 
     mount.innerHTML = `
-        <nav class="map-toc" aria-label="Sections">${toc}</nav>
         <div class="map-controls">
             <input class="map-search" id="mapSearch" type="text" placeholder="Search this area by name or code…" aria-label="Search documents">
             <div class="map-chips">${chips}</div>
