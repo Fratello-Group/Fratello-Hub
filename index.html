@@ -932,19 +932,6 @@
             align-items: center;
         }
 
-        .resources-subhead {
-            margin: 28px 0 12px;
-            color: var(--black);
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 2.4px;
-            text-transform: uppercase;
-        }
-
-        .resources-subhead:first-of-type {
-            margin-top: 4px;
-        }
-
         .empty-state {
             border: 1px solid var(--divider-light);
             border-radius: 6px;
@@ -1430,6 +1417,12 @@
 
         .qa-card--gold .qa-chip { background: #E8A33D; color: #5A3A12; }
         .qa-card--gold .qa-serial { color: #B5780F; }
+
+        .qa-card--soon { opacity: 0.6; cursor: default; }
+        .qa-card--soon:hover { transform: none; box-shadow: none; border-color: var(--rule); }
+        .qa-card--soon:hover .qa-chip { transform: none; }
+        .qa-card--soon .qa-chip { background: var(--rule); color: var(--subtext); }
+        .qa-soon-tag { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--subtext); }
 
         .dept-list { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
         .dept-row { display: flex; align-items: center; gap: 16px; padding: 15px 18px; border: 1px solid var(--rule); background: var(--surface); cursor: pointer; transition: border-color 0.18s ease; }
@@ -2855,7 +2848,10 @@ function iconSvg(key) {
         marketing: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8.5a4 4 0 0 1 0 7"/></svg>',
         people: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 6a3 3 0 0 1 0 6M18.5 20a5 5 0 0 0-3-4.6"/></svg>',
         plane: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 10h4a2 2 0 0 1 0 4h-4l-4 7H9l2-7H6l-2 2H2l2-4-2-4h2l2 2h5L9 3h3z"/></svg>',
-        dollar: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
+        dollar: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        document: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>',
+        book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4a2 2 0 0 1 2-2h12v17H7a2 2 0 0 0-2 2z"/><path d="M5 19a2 2 0 0 1 2-2h12"/></svg>',
+        feed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.6"/></svg>'
     };
     return icons[key] || icons.calendar;
 }
@@ -3066,41 +3062,102 @@ function renderDepartmentsIndex(role) {
     main.appendChild(list);
 }
 
+// Group + icon for each Resources tool, so the page reads like the dashboard:
+// what you DO (Submit), what you CHECK (Review), and reference material (Forms).
+const RESOURCE_META = {
+    'Submit Vacation Request': { group: 'submit', icon: 'plane' },
+    'Log Sick Day':            { group: 'submit', icon: 'thermometer' },
+    'Expense Reimbursement':   { group: 'submit', icon: 'dollar' },
+    'My Time Off':             { group: 'review', icon: 'calendar' },
+    'Team Calendar':           { group: 'review', icon: 'people' },
+    'Approvals Queue':         { group: 'review', icon: 'check-square' },
+    'Calendar Subscriptions':  { group: 'review', icon: 'feed' },
+    'Staff Forms':             { group: 'forms',  icon: 'document' },
+    'SOPs & Manuals':          { group: 'forms',  icon: 'book' },
+    'Employee Handbook':       { group: 'forms',  icon: 'book' },
+    'HR Forms':                { group: 'forms',  icon: 'document' }
+};
+const RESOURCE_FALLBACK = { group: 'forms', icon: 'document' };
+
+function createResourceCard(card, index, accent, icon) {
+    const active = Boolean(card.href) && card.href !== '#';
+    const el = document.createElement(active ? 'a' : 'div');
+    el.className = 'qa-card fade-in' + (accent === 'gold' ? ' qa-card--gold' : '') + (active ? '' : ' qa-card--soon');
+    if (active) el.href = card.href;
+    el.innerHTML = `
+        <span class="qa-top">
+            <span class="qa-chip">${iconSvg(icon)}</span>
+            <span class="qa-serial">${String(index + 1).padStart(2, '0')}</span>
+        </span>
+        <span class="qa-label">
+            <span>${card.title}</span>
+            ${active ? '<span class="qa-arrow">→</span>' : '<span class="qa-soon-tag">Soon</span>'}
+        </span>
+    `;
+    if (active) {
+        const isExternal = /^https?:\/\//.test(card.href);
+        if (isExternal) { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
+        el.addEventListener('click', () => {
+            try {
+                logActivity('tool_open', { toolName: card.title, details: { section: 'Resources', href: card.href || '' }, keepalive: true });
+            } catch (error) {
+                // best-effort logging
+            }
+        });
+    }
+    return el;
+}
+
 function renderResourcesIndex(role) {
     const main = document.getElementById('mainContent');
     main.innerHTML = '';
 
-    const sections = ['time-off', 'employee-resources']
+    const allCards = ['time-off', 'employee-resources']
         .map(key => visibleSection(role, key))
-        .filter(Boolean);
+        .filter(Boolean)
+        .flatMap(section => section.cards.filter(card => cardIsVisible(card, role)));
 
     const header = document.createElement('section');
     header.className = 'tool-view-header fade-in';
     header.innerHTML = `
         <div class="section-kicker">Resources</div>
         <h1 class="tool-view-title">Resources.</h1>
-        <p class="tool-view-note">Time off, calendars, forms, and everyday resources for the team — all in one place.</p>
+        <p class="tool-view-note">Time off, calendars, and shared forms — grouped by what you're trying to do.</p>
     `;
     main.appendChild(header);
 
-    let shown = 0;
-    sections.forEach(section => {
-        const visibleCards = section.cards.filter(card => cardIsVisible(card, role));
-        if (!visibleCards.length) return;
-        shown += visibleCards.length;
+    const groups = [
+        { key: 'submit', title: 'Submit', meta: 'Add or request', accent: 'teal' },
+        { key: 'review', title: 'Review', meta: 'View what’s there', accent: 'gold' },
+        { key: 'forms',  title: 'Forms & Docs', meta: 'Reference', accent: 'teal' }
+    ];
 
-        const subhead = document.createElement('h2');
-        subhead.className = 'resources-subhead fade-in';
-        subhead.textContent = section.group === 'Time Off' ? 'Time Off' : 'Forms & Docs';
-        main.appendChild(subhead);
+    let rendered = 0;
+    groups.forEach(group => {
+        const cards = allCards.filter(card => (RESOURCE_META[card.title] || RESOURCE_FALLBACK).group === group.key);
+        if (!cards.length) return;
+        rendered += cards.length;
 
-        const list = document.createElement('div');
-        list.className = 'tool-view-list fade-in';
-        visibleCards.forEach(card => list.appendChild(createToolLink(card, section.label)));
-        main.appendChild(list);
+        const section = document.createElement('section');
+        section.className = 'workbench-section fade-in';
+        section.innerHTML = `
+            <div class="workbench-head">
+                <h2 class="workbench-title">${group.title}</h2>
+                <span class="workbench-meta">${group.meta}</span>
+            </div>
+        `;
+        const grid = document.createElement('div');
+        grid.className = 'qa-grid';
+        grid.style.setProperty('--qa-columns', String(Math.min(Math.max(cards.length, 1), 4)));
+        cards.forEach((card, index) => {
+            const icon = (RESOURCE_META[card.title] || RESOURCE_FALLBACK).icon;
+            grid.appendChild(createResourceCard(card, index, group.accent, icon));
+        });
+        section.appendChild(grid);
+        main.appendChild(section);
     });
 
-    if (!shown) {
+    if (!rendered) {
         const empty = document.createElement('p');
         empty.className = 'tool-view-note fade-in';
         empty.textContent = 'No resources are available for your access level yet.';
