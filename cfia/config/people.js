@@ -33,15 +33,16 @@ export const PEOPLE = [
     { name: 'Allana Contois', title: 'Warehouse Supervisor', dept: 'warehouse', reportsTo: 'Kyle Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
     { name: 'Monica Lynn', title: 'Warehouse Team Member', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
     { name: 'Sandra Mestre', title: 'Warehouse Team Member', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
-    { name: 'Luke Prefontaine', title: 'Delivery Driver', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
+    { name: 'Luke Prefontaine', title: 'Delivery Driver (name may change)', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false }, // placeholder; Luke's primary role is Marketing (above)
 
     // ── Commercial & office (Hub users; not in the daily food-safety record chain,
     //    but do company-wide training + policy acknowledgements) ──
     { name: 'Chris McGhee', title: 'Controller', dept: 'finance', reportsTo: 'Russ Prefontaine', email: 'chris.mcghee@fratellocoffee.com', hubProfile: 'controller', cfiaTier: 'office', safetyOfficer: false },
     { name: 'Mateo Corredor', title: 'Marketing & Brand Manager', dept: 'marketing', reportsTo: 'Russ Prefontaine', email: 'mateo.corredor@fratellocoffee.com', hubProfile: 'marketing', cfiaTier: 'office', safetyOfficer: false },
+    { name: 'Luke Prefontaine', title: 'Marketing', dept: 'marketing', reportsTo: 'Mateo Corredor', email: '', hubProfile: 'marketing', cfiaTier: 'office', safetyOfficer: false }, // also the Delivery Driver below (in two places)
     { name: 'Joel May', title: 'Key Account Manager', dept: 'sales', reportsTo: 'Russ Prefontaine', email: 'joel.may@fratellocoffee.com', hubProfile: 'sales', cfiaTier: 'office', safetyOfficer: false },
     { name: 'Nancy Gibb', title: 'Bookkeeper & Customer Service Coordinator', dept: 'finance', reportsTo: 'Chris McGhee', email: '', hubProfile: 'staff', cfiaTier: 'office', safetyOfficer: false },
-    { name: "D'Arcy Watsham", title: 'Customer Care Specialist', dept: 'sales', reportsTo: 'Joel May', email: '', hubProfile: 'staff', cfiaTier: 'office', safetyOfficer: false }
+    { name: "D'Arcy Watsham", title: 'Customer Care Specialist', dept: 'sales', reportsTo: 'Russ Prefontaine', email: '', hubProfile: 'staff', cfiaTier: 'office', safetyOfficer: false }
 ];
 
 // Kyle (Production Manager) sits ABOVE the three department supervisors and below the owners.

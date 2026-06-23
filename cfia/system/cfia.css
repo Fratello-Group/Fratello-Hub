@@ -251,19 +251,19 @@ body.cfia-denied .blocked { display: grid; }
 .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 8px; }
 .tile { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; border: 1px solid var(--divider); border-radius: var(--r-lg); background: var(--white); padding: 18px; text-decoration: none; transition: border-color .2s, box-shadow .2s, transform .2s; }
 .tile:hover { border-color: var(--teal); box-shadow: var(--shadow-card); transform: translateY(-2px); }
-.tile-icon { width: 40px; height: 40px; border-radius: var(--r-md); display: grid; place-items: center; background: rgba(54, 179, 175, 0.10); color: var(--teal-dark); font-size: 22px; }
+.tile-icon { width: 50px; height: 50px; border-radius: var(--r-md); display: grid; place-items: center; background: rgba(54, 179, 175, 0.12); color: var(--teal-dark); }
 .tile-name { font-size: 18px; font-weight: 800; color: var(--black); letter-spacing: .3px; }
 .tile-sub { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); }
 .tile.soon { opacity: .55; }
 .tile.soon:hover { border-color: var(--divider); box-shadow: none; transform: none; }
-.tile-icon svg { display: block; }
+.tile-icon svg { display: block; width: 30px; height: 30px; stroke-width: 2.3; }
 
 /* Secondary tier — program-wide tools, distinct from the main department tabs */
 .tile-section-label { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); margin: 28px 0 10px; }
 .subtile-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .subtile { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--card); padding: 11px 16px; text-decoration: none; }
 .subtile:hover { border-color: var(--teal); background: var(--white); }
-.subtile svg { color: var(--teal-dark); flex: 0 0 auto; }
+.subtile svg { color: var(--teal-dark); flex: 0 0 auto; width: 24px; height: 24px; stroke-width: 2.3; }
 .subtile-name { font-size: 14px; font-weight: 800; color: var(--black); }
 .subtile-sub { font-size: 11px; color: var(--grey); }
 
