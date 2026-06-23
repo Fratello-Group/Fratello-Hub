@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════════════════════════════
+   FRATELLO CFIA — DESIGN TOKENS  (the ONE place to restyle everything)
+   ---------------------------------------------------------------
+   Every CFIA page loads this FIRST, then cfia.css. To rebrand the whole
+   module (colours, accent, fonts), change the values here — nowhere else.
+   Strict palette: white · black · teal. Functional status colours only.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ─── Brand colours ─────────────────────────────── */
+    --black: #1A1A1A;
+    --white: #FFFFFF;
+    --teal: #36B3AF;          /* the one accent: links, CTAs, highlights */
+    --teal-bright: #00D4C8;   /* hover */
+    --teal-dark: #2A8F8C;     /* readable teal text on white */
+
+    /* ─── Neutrals ─────────────────────────────── */
+    --slate: #4A4A4A;         /* body text */
+    --grey: #908F8A;          /* fine print / hints */
+    --grey-light: #C4C3C0;
+    --paper: #F5F5F7;         /* page background */
+    --card: #FAFAFB;          /* subtle surface */
+    --divider: #E0E0E0;
+    --fog: #ECECEE;
+
+    /* ─── Functional status (pass / fail / not-applicable) ── */
+    --pass: #1F9D6B;
+    --pass-soft: rgba(31, 157, 107, 0.10);
+    --fail: #D9533D;
+    --fail-soft: rgba(217, 83, 61, 0.10);
+    --na: #908F8A;
+    --na-soft: rgba(144, 143, 138, 0.12);
+
+    /* ─── Scheduling status (due / overdue) for dashboards ── */
+    --due: #B5780F;           /* due soon — amber, readable on white */
+    --due-soft: rgba(232, 163, 61, 0.14);
+    --overdue: #952F1F;       /* overdue — deep clay */
+    --overdue-soft: rgba(217, 83, 61, 0.14);
+
+    /* ─── Type: change these two lines to re-font the module ── */
+    --font: 'Montserrat', Helvetica, Arial, sans-serif;   /* UI + body */
+    --font-head: 'Montserrat', Helvetica, Arial, sans-serif; /* headings */
+
+    /* Type scale (available for components; keep body ≥ 13px) */
+    --fs-h1: clamp(28px, 4vw, 42px);
+    --fs-h2: 20px;
+    --fs-h3: 16px;
+    --fs-body: 15px;
+    --fs-small: 13px;
+    --fs-label: 11px;
+
+    /* ─── Spacing / radii / shadows / chrome ─────────────── */
+    --sp-xs: 4px;  --sp-sm: 8px;  --sp-md: 16px;  --sp-lg: 24px;  --sp-xl: 32px;
+    --r-sm: 4px;   --r-md: 8px;   --r-lg: 12px;
+    --shadow-card: 0 8px 30px rgba(26, 26, 26, 0.08);
+    --header-height: 64px;
+}

@@ -5,27 +5,8 @@
    Built on /system/design-tokens/tokens.css where available.
    ═══════════════════════════════════════════════════════════════ */
 
-:root {
-    --black: #1A1A1A;
-    --white: #FFFFFF;
-    --teal: #36B3AF;
-    --teal-bright: #00D4C8;
-    --teal-dark: #2A8F8C;
-    --slate: #4A4A4A;
-    --grey: #908F8A;
-    --grey-light: #C4C3C0;
-    --paper: #F5F5F7;
-    --card: #FAFAFB;
-    --divider: #E0E0E0;
-    --fog: #ECECEE;
-    --pass: #1F9D6B;
-    --pass-soft: rgba(31, 157, 107, 0.10);
-    --fail: #D9533D;
-    --fail-soft: rgba(217, 83, 61, 0.10);
-    --na: #908F8A;
-    --na-soft: rgba(144, 143, 138, 0.12);
-    --font: 'Montserrat', Helvetica, Arial, sans-serif;
-}
+/* All brand variables live in cfia-tokens.css — the single place to restyle
+   the whole CFIA module. Load cfia-tokens.css BEFORE this file on every page. */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -231,6 +212,46 @@ body.cfia-denied .blocked { display: grid; }
     .rec-row { grid-template-columns: 1fr; gap: 6px; }
     .doc-meta div { border-right: 0; border-bottom: 1px solid var(--divider); }
 }
+
+/* ─── Department switcher + reusable systems map ─────────────── */
+.dept-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.dept-chip { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border: 1px solid var(--divider); border-radius: 999px; background: var(--white); color: var(--slate); text-decoration: none; font-size: 13px; font-weight: 700; }
+.dept-chip:hover { border-color: var(--teal); color: var(--black); }
+.dept-chip.on { background: var(--teal); border-color: var(--teal); color: var(--black); }
+.dept-chip i { font-size: 16px; }
+
+.map-toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px; border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--card); margin-bottom: 16px; }
+.map-toc-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--slate); text-decoration: none; padding: 4px 8px; border-radius: var(--r-sm); }
+.map-toc-item:hover { background: var(--white); color: var(--teal-dark); }
+.map-toc-item i { font-size: 15px; color: var(--teal-dark); }
+.map-toc-n { color: var(--grey); font-size: 11px; }
+
+.map-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+.map-search { flex: 1; min-width: 200px; height: 46px; border: 1px solid var(--divider); border-radius: var(--r-sm); padding: 10px 14px; font-size: 15px; outline: none; }
+.map-search:focus { border-color: var(--teal); }
+.map-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.map-chip { font-size: 12px; font-weight: 700; padding: 7px 12px; border: 1px solid var(--divider); border-radius: 999px; background: var(--white); color: var(--slate); cursor: pointer; }
+.map-chip span { color: var(--grey); }
+.map-chip.on { background: var(--black); border-color: var(--black); color: var(--white); }
+.map-chip.on span { color: var(--grey-light); }
+
+.map-group { margin-bottom: 22px; }
+.map-group-h { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--grey); padding-bottom: 8px; border-bottom: 1px solid var(--divider); margin-bottom: 6px; }
+.map-group-h i { font-size: 18px; color: var(--teal-dark); }
+.map-rows { display: flex; flex-direction: column; }
+.map-row { display: flex; align-items: center; gap: 10px; padding: 11px 8px; border-bottom: 1px solid var(--fog); text-decoration: none; color: var(--slate); font-size: 14.5px; }
+.map-row:hover { background: var(--card); }
+.map-row.pending { cursor: default; }
+.map-dot { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 auto; }
+.map-code { font-weight: 800; color: var(--black); min-width: 48px; }
+.map-title { flex: 1; color: var(--black); }
+.map-row.pending .map-title { color: var(--slate); }
+.map-meta { font-size: 12px; color: var(--grey); white-space: nowrap; }
+.map-tag { font-size: 10px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; flex: 0 0 auto; }
+.map-tag.live { background: var(--pass-soft); color: var(--pass); }
+.map-tag.pending { background: var(--na-soft); color: var(--na); }
+.map-tag.hub { background: var(--due-soft); color: var(--due); }
+@media (max-width: 760px) { .map-meta { display: none; } .map-code { min-width: 40px; } }
 
 /* ─── Print (clean PDF) ─────────────────────────────── */
 @media print {

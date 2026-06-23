@@ -1,0 +1,1520 @@
+{
+  "generated": "2026-06-23",
+  "totalFilesClassified": 333,
+  "deptBinderCopies": 178,
+  "canonicalCount": 155,
+  "byType": {
+    "SOP": 57,
+    "Form/Log": 25,
+    "Policy": 6,
+    "Org/Other": 4,
+    "Record-template": 11,
+    "Plan": 4,
+    "Quiz": 3,
+    "Training": 10,
+    "Agreement": 31,
+    "Report": 4
+  },
+  "fillableCount": 40,
+  "referenceCount": 67,
+  "trainingCount": 13,
+  "groups": [
+    {
+      "key": "Section 1",
+      "count": 10,
+      "docs": [
+        {
+          "code": "1.0",
+          "title": "Preventive Control Plan Master SOP – Import, Export, and Interprovincial Trade",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Master PCP SOP for trade regulatory compliance and linked SOPs"
+        },
+        {
+          "code": "1.1",
+          "title": "Incoming Input Controls",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Receiving, inspection, and traceability of incoming materials"
+        },
+        {
+          "code": "1.2",
+          "title": "CFIA Program Review Checklist with Frequency Assignments",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Checklist assigning review frequency and responsibility per SOP"
+        },
+        {
+          "code": "1.3",
+          "title": "Internal Audit and Verification SOP",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Quarterly",
+          "purpose": "Defines internal audit and verification process for PCP"
+        },
+        {
+          "code": "1.4",
+          "title": "Document Control Policy",
+          "type": "Policy",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Process for creating, approving, versioning, archiving PCP documents"
+        },
+        {
+          "code": "1.5",
+          "title": "Equipment Maintenance Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Preventive and corrective maintenance procedures for production equipment"
+        },
+        {
+          "code": "1.6",
+          "title": "Roasting Manuals and Preventive Maintenance",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Roaster-specific preventive maintenance manuals and operating procedures"
+        },
+        {
+          "code": "1.7",
+          "title": "Preventative Maintenance",
+          "type": "Form/Log",
+          "format": "xlsx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Preventive maintenance schedule and tracking log for equipment"
+        },
+        {
+          "code": "1.8",
+          "title": "New Equipment Approval Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Assess and approve new or modified equipment before food use"
+        },
+        {
+          "code": "1.9",
+          "title": "Light Inspection and Lux Monitoring Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Monthly",
+          "purpose": "Monthly lighting inspection and lux measurement for food-safe lighting"
+        }
+      ]
+    },
+    {
+      "key": "Section 2",
+      "count": 4,
+      "docs": [
+        {
+          "code": "2.1",
+          "title": "Approved Supplier Procedures",
+          "type": "Policy",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Approved supplier program: selection, onboarding, documentation, monitoring"
+        },
+        {
+          "code": "2.2",
+          "title": "Approved Supplier Listing",
+          "type": "Form/Log",
+          "format": "xlsx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Master register of approved suppliers and their status"
+        },
+        {
+          "code": "2.3",
+          "title": "Incoming Input Controls",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Receiving, inspecting, tagging incoming inputs to prevent contamination"
+        },
+        {
+          "code": "2.4",
+          "title": "Green Coffee Sourcing, Receiving, Ordering & Grading",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Sourcing, receiving, analyzing, grading green coffee for quality and traceability"
+        }
+      ]
+    },
+    {
+      "key": "Section 3",
+      "count": 12,
+      "docs": [
+        {
+          "code": "3.1",
+          "title": "Product Formulation, Specification, and Processing",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Defines and verifies product formulations, materials, and processing steps"
+        },
+        {
+          "code": "3.10",
+          "title": "Cupping Protocol & Quality Evaluation Procedures FINAL",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "SCA-aligned cupping and sensory quality evaluation protocol"
+        },
+        {
+          "code": "3.11",
+          "title": "Coffee Quality Assurance - Process & Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "QA process from green intake through cupping and documentation"
+        },
+        {
+          "code": "3.2",
+          "title": "Production Workflow and Critical Control SOP",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Controls production workflow from receiving green beans to dispatch"
+        },
+        {
+          "code": "3.3",
+          "title": "Label Control and Verification Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Ensures labels are accurate, compliant, and verified before release"
+        },
+        {
+          "code": "3.4",
+          "title": "Green Coffee Receiving, Roasting, and Packaging Operations (Odoo Integrated)",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Standard operations for receiving, roasting, grinding using Odoo ERP"
+        },
+        {
+          "code": "3.5",
+          "title": "Probat G90 Roasting Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Operating procedure for roasting on the Probat G90 roaster"
+        },
+        {
+          "code": "3.6",
+          "title": "Probat G120 Roasting Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Operating procedure for roasting on the Probat G120 roaster"
+        },
+        {
+          "code": "3.7",
+          "title": "Probat L12 Roasting Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Operating procedure for roasting profiling batches on Probat L12"
+        },
+        {
+          "code": "3.8",
+          "title": "Roest Sample Roaster Roasting Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Operating procedure for sample roasting on the Roest roaster"
+        },
+        {
+          "code": "3.9",
+          "title": "Grinding Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Procedure for grinding roasted beans to customer specifications"
+        },
+        {
+          "code": "",
+          "title": "Roasting Workflow - Graphic",
+          "type": "Org/Other",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Visual graphic illustrating the coffee roasting workflow steps"
+        }
+      ]
+    },
+    {
+      "key": "Section 4",
+      "count": 3,
+      "docs": [
+        {
+          "code": "4.1",
+          "title": "Preventive Control Plan SOP – Import Controls",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Supplier approval and verification procedure for imported materials"
+        },
+        {
+          "code": "4.2",
+          "title": "Export Control Documentation",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Ensures eligible products exported with required CFIA certification documentation"
+        },
+        {
+          "code": "4.3",
+          "title": "Preventive Control Plan - Importing and Interprovincial Trade",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Controls for import and interprovincial trade of coffee and packaging"
+        }
+      ]
+    },
+    {
+      "key": "Section 5",
+      "count": 10,
+      "docs": [
+        {
+          "code": "5.1",
+          "title": "Food Conveyances, Purchasing, Receiving & Storage Prerequisite Program",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Prerequisite program for clean transport, receiving, and storage of goods"
+        },
+        {
+          "code": "5.10",
+          "title": "Warehouse Inventory, Receiving & Shipping (Odoo Integrated)",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Manage inventory, receiving, and shipping movements via Odoo ERP"
+        },
+        {
+          "code": "5.11",
+          "title": "Final Product Packaging, Labelling & Traceability (Odoo + Manual Integration)",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Final packaging, labelling, sealing, and traceability via Odoo and manual steps"
+        },
+        {
+          "code": "5.2",
+          "title": "Shipping & Receiving - Main Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Main SOP for inspecting and handling incoming and outgoing goods"
+        },
+        {
+          "code": "5.3",
+          "title": "Receiving Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Inspect incoming materials for cleanliness, integrity, and documentation"
+        },
+        {
+          "code": "5.4",
+          "title": "Shipping Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Ensure finished products shipped clean, secure, and contamination-free"
+        },
+        {
+          "code": "5.5",
+          "title": "Vehicle Conveyance Inspection SOP",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Inspect vehicles before loading or unloading to prevent contamination"
+        },
+        {
+          "code": "5.6",
+          "title": "Traceability and Control",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Ensure full forward and backward traceability from origin to customer"
+        },
+        {
+          "code": "5.7",
+          "title": "Green Beans Loading Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Load green beans into silos while maintaining traceability and inventory"
+        },
+        {
+          "code": "5.8",
+          "title": "Action Pak Packaging Procedures",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Pack roasted and ground coffee per spec, maintaining traceability"
+        }
+      ]
+    },
+    {
+      "key": "Section 6",
+      "count": 15,
+      "docs": [
+        {
+          "code": "6.1",
+          "title": "Sanitation Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Procedure for cleaning and sanitizing facility and equipment"
+        },
+        {
+          "code": "6.10",
+          "title": "Facility Interior Inspection",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Monthly",
+          "purpose": "Interior premises inspection checklist with corrective actions"
+        },
+        {
+          "code": "6.11",
+          "title": "Premises Inspection Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Monthly",
+          "purpose": "Procedure for monthly interior and exterior premises inspections"
+        },
+        {
+          "code": "6.12",
+          "title": "Approved Chemicals and Sanitation List",
+          "type": "Record-template",
+          "format": "doc",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Master list of approved chemicals, storage, SDS, inventory numbers"
+        },
+        {
+          "code": "6.13",
+          "title": "Chemical and Sanitation Product Control Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Procedure for approving, storing, and using facility chemicals safely"
+        },
+        {
+          "code": "6.2",
+          "title": "Sanitation, Biosecurity, and Biocontainment",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Overarching SOP for sanitation, hygiene, pest, and biohazard control"
+        },
+        {
+          "code": "6.3",
+          "title": "Pre-Operational Inspection Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Verifies equipment cleanliness and readiness before production starts"
+        },
+        {
+          "code": "6.4",
+          "title": "Glass & Brittle Plastic Breakage Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Monthly",
+          "purpose": "Controls and response for glass and brittle plastic breakage"
+        },
+        {
+          "code": "6.5",
+          "title": "Pest Control Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Monthly",
+          "purpose": "Procedure to monitor and control pest activity at facility"
+        },
+        {
+          "code": "6.6",
+          "title": "Fire Prevention and Response Plan",
+          "type": "Plan",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Plan for fire prevention, emergency response, and evacuation"
+        },
+        {
+          "code": "6.7",
+          "title": "Security Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Food-defense procedure preventing intentional contamination and tampering"
+        },
+        {
+          "code": "6.7a",
+          "title": "Security Self Assessment",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Annual yes/no food-security self-assessment checklist with comments"
+        },
+        {
+          "code": "6.8",
+          "title": "Visitor Policy",
+          "type": "Policy",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Hygiene and conduct rules visitors must follow on-site"
+        },
+        {
+          "code": "6.8a",
+          "title": "Visitor Log",
+          "type": "Form/Log",
+          "format": "xlsx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Visitor sign-in/out log capturing each facility visit"
+        },
+        {
+          "code": "6.9",
+          "title": "Facility Exterior Inspection",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Monthly",
+          "purpose": "Exterior premises inspection checklist with corrective actions"
+        }
+      ]
+    },
+    {
+      "key": "Section 7",
+      "count": 2,
+      "docs": [
+        {
+          "code": "7.1",
+          "title": "Preventive Maintenance & Verification Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Maintains equipment, infrastructure, and tools to prevent contamination"
+        },
+        {
+          "code": "7.2",
+          "title": "Coffee Roasters – Calibration and Verification Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Calibrates and verifies critical measuring and monitoring devices"
+        }
+      ]
+    },
+    {
+      "key": "Section 8",
+      "count": 13,
+      "docs": [
+        {
+          "code": "8.1",
+          "title": "Employee Onboarding Hygiene & Good Manufacturing Practices Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Daily",
+          "purpose": "Procedure for personnel hygiene and GMP compliance"
+        },
+        {
+          "code": "8.2",
+          "title": "Employee Onboarding & Food Safety Training SOP",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "SOP for onboarding and food safety training of staff"
+        },
+        {
+          "code": "8.3",
+          "title": "Personnel Training Schedule & Tracking Program",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Defines training requirements, schedule, and tracking for staff"
+        },
+        {
+          "code": "8.3a",
+          "title": "Annual Personnel Training Acknowledgment & Checklist",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Checklist for employees to acknowledge completed training"
+        },
+        {
+          "code": "8.4",
+          "title": "HACCP Training Quiz",
+          "type": "Quiz",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Quiz assessing employee HACCP and hazard knowledge"
+        },
+        {
+          "code": "8.5",
+          "title": "Personal Hygiene Training Quiz",
+          "type": "Quiz",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Quiz assessing employee personal hygiene knowledge"
+        },
+        {
+          "code": "8.6",
+          "title": "Injury Incident Reporting Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Procedure for reporting, assessing, documenting employee injuries"
+        },
+        {
+          "code": "8.6a",
+          "title": "Injury Incident Report",
+          "type": "Form/Log",
+          "format": "doc",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Form documenting workplace injury and food safety impact"
+        },
+        {
+          "code": "",
+          "title": "Food Safety Training Slides - 2021",
+          "type": "Training",
+          "format": "pptx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Slide deck delivering food safety training (2021 edition)"
+        },
+        {
+          "code": "",
+          "title": "GMP Quiz",
+          "type": "Quiz",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "",
+          "purpose": "Picture-based quiz circling non-GMP practices (Alberta/Canada APF)"
+        },
+        {
+          "code": "",
+          "title": "HACCP Training Presentation",
+          "type": "Training",
+          "format": "pptx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Slide deck delivering HACCP food safety training"
+        },
+        {
+          "code": "",
+          "title": "Onboard Training Record",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Record sheet logging trainer, topics, and attendee signatures"
+        },
+        {
+          "code": "",
+          "title": "Training Matrix",
+          "type": "Form/Log",
+          "format": "xlsx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Spreadsheet tracking employee training completion by topic"
+        }
+      ]
+    },
+    {
+      "key": "Section 9",
+      "count": 6,
+      "docs": [
+        {
+          "code": "9.1",
+          "title": "Defective, Suspect, or Returned Product Disposition Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Controls handling, assessment, and disposition of defective or returned product"
+        },
+        {
+          "code": "9.2",
+          "title": "Defective or Returned Product Disposition Record",
+          "type": "Form/Log",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Records inspection, assessment, and disposition of defective/returned product"
+        },
+        {
+          "code": "9.3",
+          "title": "Customer Complaints and Corrective Actions",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Governs documenting, investigating, and resolving customer complaints"
+        },
+        {
+          "code": "9.3a",
+          "title": "Customer Complaint Form (fillable)",
+          "type": "Form/Log",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Captures complaint intake, investigation, and closure details"
+        },
+        {
+          "code": "9.3b",
+          "title": "Customer Complaints Log",
+          "type": "Form/Log",
+          "format": "xlsx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Running log of complaints for tracking and trend analysis"
+        },
+        {
+          "code": "9.4",
+          "title": "Hold Product Form",
+          "type": "Form/Log",
+          "format": "xls",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Records product placed on hold pending disposition decision"
+        }
+      ]
+    },
+    {
+      "key": "Section 10",
+      "count": 6,
+      "docs": [
+        {
+          "code": "10.1",
+          "title": "Recall Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Steps and recall team for product recall or withdrawal"
+        },
+        {
+          "code": "10.2",
+          "title": "Recall Process",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Process for initiating and managing a product recall"
+        },
+        {
+          "code": "10.3",
+          "title": "Mock Recall Execution and Documentation",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Procedure for conducting and documenting annual mock recall"
+        },
+        {
+          "code": "10.4",
+          "title": "Mock Recall Report Template",
+          "type": "Record-template",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Template to record mock recall scenario, traceability, results"
+        },
+        {
+          "code": "10.5",
+          "title": "Mock Recall Documentation under SFCR",
+          "type": "Policy",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "CFIA expectations and guidance for documenting mock recalls"
+        },
+        {
+          "code": "",
+          "title": "Form E – CFIA Recall Reporting Sheet",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Form to report product recall details to CFIA"
+        }
+      ]
+    },
+    {
+      "key": "Section 11",
+      "count": 10,
+      "docs": [
+        {
+          "code": "11.0",
+          "title": "Hazard Analysis and Preventive Controls for Incoming Materials",
+          "type": "Plan",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Comprehensive hazard analysis and preventive controls for all incoming materials"
+        },
+        {
+          "code": "11.1",
+          "title": "Hazard Identification & Risk Assessment Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Procedure to identify hazards and controls for incoming materials"
+        },
+        {
+          "code": "11.1a",
+          "title": "Hazard Identification & Risk Assessment - Incoming Materials (HIRA) Form",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "",
+          "purpose": "Documents incoming-material hazards, risk ratings and CCP designations"
+        },
+        {
+          "code": "11.1b",
+          "title": "Incoming Materials Receiving & Transport Inspection Training SOP",
+          "type": "Training",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Training for receiving staff on inspecting and documenting incoming materials"
+        },
+        {
+          "code": "11.1c",
+          "title": "Incoming Material Receiving & Transport Inspection Log",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Records transport, packaging and material inspection at receiving"
+        },
+        {
+          "code": "11.2",
+          "title": "Hazard Identification & Risk Assessment Production (HIRA) Form",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Documents production-step hazards, risk ratings and CCP designations"
+        },
+        {
+          "code": "11.2a",
+          "title": "Training SOP for Production Hazard Identification",
+          "type": "Training",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Training procedures for production staff to identify and report hazards"
+        },
+        {
+          "code": "11.2b",
+          "title": "Production Hazard Identification & Risk Assessment (HIRA) Implementation SOP",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Procedures for implementing, monitoring and verifying production HIRA"
+        },
+        {
+          "code": "11.3",
+          "title": "CCP Summary Table",
+          "type": "Plan",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Summarizes CCPs, critical limits, monitoring and corrective actions"
+        },
+        {
+          "code": "11.4",
+          "title": "CCP Flow Diagram",
+          "type": "Plan",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Process flow diagram showing hazards and CCP justification per step"
+        }
+      ]
+    },
+    {
+      "key": "Section 12",
+      "count": 3,
+      "docs": [
+        {
+          "code": "12.1",
+          "title": "Loose Leaf Tea Packaging Procedure (Idle Tea)",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Defines packaging of bulk loose leaf tea into Idle Tea retail units"
+        },
+        {
+          "code": "12.2",
+          "title": "Idle Tea Product Specification & Label Verification Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Ensures Idle Tea labels are accurate and SFCR-compliant"
+        },
+        {
+          "code": "12.3",
+          "title": "Tea Supplier & Ingredient Verification Log Procedure",
+          "type": "SOP",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Documents receipt and verification of incoming loose leaf tea"
+        }
+      ]
+    },
+    {
+      "key": "Allergens",
+      "count": 13,
+      "docs": [
+        {
+          "code": "16",
+          "title": "Certificate Human Consumption",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Routin certificate that 1883 syrups are fit for human consumption"
+        },
+        {
+          "code": "2",
+          "title": "Food Safety Guarantee Hollander",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Hollander supplier food safety guarantee and audit standing certificate"
+        },
+        {
+          "code": "4",
+          "title": "Food allergen declaration",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Hollander allergen certification (content is allergen certification letter)"
+        },
+        {
+          "code": "6",
+          "title": "Allergens Pacific",
+          "type": "Form/Log",
+          "format": "doc",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Completed supplier allergen checklist for Pacific barista milks"
+        },
+        {
+          "code": "",
+          "title": "1883 Allergen list",
+          "type": "Record-template",
+          "format": "xlsx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Routin 1883 syrups allergen matrix spreadsheet source file"
+        },
+        {
+          "code": "",
+          "title": "2026 Allergen Statement",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Say When Beverages allergen-free statement for chai supply"
+        },
+        {
+          "code": "",
+          "title": "30276 Phillips Chocolate Sauce Spec",
+          "type": "Record-template",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Lyons Magnus Phillips chocolate sauce product specification sheet"
+        },
+        {
+          "code": "",
+          "title": "Allergen Certification Hollander 2026",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Hollander supplier allergen control certification, effective 2026"
+        },
+        {
+          "code": "",
+          "title": "Allergen list 1883 2026 au 23.04.26",
+          "type": "Record-template",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Routin 1883 syrups full allergen matrix by flavour"
+        },
+        {
+          "code": "",
+          "title": "Allergens Statement Smartfruit",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Smartfruit supplier allergen statement listing products containing allergens"
+        },
+        {
+          "code": "",
+          "title": "Pacafic Letter of Guarantee",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Campbell's continuing food and drug guaranty for Pacific brand"
+        },
+        {
+          "code": "",
+          "title": "Pacific Barista Allergen Statements",
+          "type": "Record-template",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Pacific barista milk ingredient and contains-allergen label statements"
+        },
+        {
+          "code": "",
+          "title": "Smartfruit Product Statement",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Smartfruit supplier product and allergen-free certification statement"
+        }
+      ]
+    },
+    {
+      "key": "Training",
+      "count": 13,
+      "docs": [
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations (Jaleisy)",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for employee Jaleisy"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations (Oleana)",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for employee Oleana"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations (Yerly)",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for employee Yerly"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Alex",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for Alex"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Allana",
+          "type": "Training",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Conduct, hygiene and safety expectations refresher for production staff"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Kyle",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for Kyle"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Luke",
+          "type": "Training",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Conduct, hygiene and safety expectations refresher for production staff"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Monica (scanned)",
+          "type": "Training",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Scanned signed Team Expectations acknowledgment copy for Monica"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Sandra",
+          "type": "Training",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Conduct, hygiene and safety expectations refresher for production staff"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - SungJoo",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for SungJoo"
+        },
+        {
+          "code": "",
+          "title": "Coffee Production, Packaging and Warehouse Team Expectations - Tatum",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Signed team expectations acknowledgment for Tatum"
+        },
+        {
+          "code": "",
+          "title": "Team Accountability Meeting",
+          "type": "Training",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Hygiene, conduct and accountability meeting guide for all departments"
+        },
+        {
+          "code": "",
+          "title": "Team Meeting - CFIA Refresher",
+          "type": "Training",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Staff hygiene, conduct and accountability refresher for CFIA audit"
+        }
+      ]
+    },
+    {
+      "key": "People & Onboarding",
+      "count": 23,
+      "docs": [
+        {
+          "code": "",
+          "title": "Allana Contois Employee Agreement 2024",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Allana Contois"
+        },
+        {
+          "code": "",
+          "title": "Anastasia Stasiulevich - Jun 15, 2025",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Anastasia Stasiulevich"
+        },
+        {
+          "code": "",
+          "title": "Chris McGhee - Jun 15, 2025",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Chris McGhee"
+        },
+        {
+          "code": "",
+          "title": "D'Arcy Watsham - Jun 15, 2025",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee D'Arcy Watsham"
+        },
+        {
+          "code": "",
+          "title": "Direct Deposit Authorization",
+          "type": "Form/Log",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Collects employee banking details to set up payroll direct deposit"
+        },
+        {
+          "code": "",
+          "title": "Drug and Alcohol Policy (Mar 2025)",
+          "type": "Policy",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Sets rules on drug and alcohol use for workplace safety"
+        },
+        {
+          "code": "",
+          "title": "Employee Agreement - Coffee - Salaried Nov 2024",
+          "type": "Agreement",
+          "format": "doc",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Blank salaried employment agreement template for new hires"
+        },
+        {
+          "code": "",
+          "title": "Employee Agreement - Coffee - Salaried-Commission Nov 2024",
+          "type": "Agreement",
+          "format": "doc",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Blank salaried-plus-commission employment agreement template"
+        },
+        {
+          "code": "",
+          "title": "Employee Agreement - Hourly (Mar 2025)",
+          "type": "Agreement",
+          "format": "doc",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Blank hourly employment agreement template for new hires"
+        },
+        {
+          "code": "",
+          "title": "GroupSource Enrollment Form",
+          "type": "Form/Log",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Enrolls employee and dependents in group benefits plan"
+        },
+        {
+          "code": "",
+          "title": "Harassment & Violence in the Workplace Policy (Mar 2025)",
+          "type": "Policy",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Defines harassment and violence prevention obligations for employees"
+        },
+        {
+          "code": "",
+          "title": "Jaeoh Park - Jun 15, 2025",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Jaeoh Park"
+        },
+        {
+          "code": "",
+          "title": "Jaleisy Quintero Employee Agreement 2024",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Jaleisy Quintero"
+        },
+        {
+          "code": "",
+          "title": "Joel May Employee Agreement 2024",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Joel May"
+        },
+        {
+          "code": "",
+          "title": "Meghdad Baghan Employee Agreement 2023",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Meghdad Baghan"
+        },
+        {
+          "code": "",
+          "title": "Nancy Gibb Employee Agreement 2024",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Nancy Gibb"
+        },
+        {
+          "code": "",
+          "title": "Oleksandr Svyrydov - Jun 15, 2025",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Oleksandr Svyrydov"
+        },
+        {
+          "code": "",
+          "title": "Olena Zaitseva Employee Agreement 2024",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Olena Zaitseva"
+        },
+        {
+          "code": "",
+          "title": "Sandra Quintero Employee Agreement 2024",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Sandra Quintero"
+        },
+        {
+          "code": "",
+          "title": "Sungjoo Hong - Jun 15, 2025",
+          "type": "Agreement",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "",
+          "purpose": "Signed employment agreement for employee Sungjoo Hong"
+        },
+        {
+          "code": "",
+          "title": "TD1 - Alberta - 2025",
+          "type": "Form/Log",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "Alberta provincial Personal Tax Credits Return for payroll deductions"
+        },
+        {
+          "code": "",
+          "title": "TD1 - Federal - 2025",
+          "type": "Form/Log",
+          "format": "pdf",
+          "fillable": true,
+          "frequency": "Annual",
+          "purpose": "CRA federal Personal Tax Credits Return for payroll deductions"
+        },
+        {
+          "code": "",
+          "title": "Vacation & Leave Request Form",
+          "type": "Form/Log",
+          "format": "docx",
+          "fillable": true,
+          "frequency": "As-needed",
+          "purpose": "Employee requests vacation, sick, bereavement or parental leave"
+        }
+      ]
+    },
+    {
+      "key": "Recall drill records",
+      "count": 7,
+      "docs": [
+        {
+          "code": "",
+          "title": "Delivery Slips",
+          "type": "Record-template",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Delivery slips supporting mock recall traceability evidence"
+        },
+        {
+          "code": "",
+          "title": "FW: MOCK RECALL — TEST ONLY — Activation — Costa Rica Los Santos Finca Fatima Green Lot 005/818/0472",
+          "type": "Record-template",
+          "format": "msg",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Forwarded mock recall activation email to recall team"
+        },
+        {
+          "code": "",
+          "title": "FW: MOCK RECALL — TEST ONLY — Activation — Costa Rica Los Santos Finca Fatima Green Lot 005/818/0472 (1)",
+          "type": "Record-template",
+          "format": "msg",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Second forwarded mock recall activation email copy"
+        },
+        {
+          "code": "",
+          "title": "MOCK RECALL — TEST ONLY — Activation — Costa Rica Los Santos Finca Fatima Green Lot 005/818/0472",
+          "type": "Record-template",
+          "format": "msg",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Original mock recall activation email for green coffee lot"
+        },
+        {
+          "code": "",
+          "title": "Mock Recall Report - 20260612",
+          "type": "Report",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Completed mock recall exercise report, June 12 2026"
+        },
+        {
+          "code": "",
+          "title": "Mock Recall Report - 20260612",
+          "type": "Report",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "PDF export of the completed mock recall report"
+        },
+        {
+          "code": "",
+          "title": "Re: MOCK RECALL — TEST ONLY — Activation — Costa Rica Los Santos Finca Fatima Green Lot 005/818/0472",
+          "type": "Record-template",
+          "format": "msg",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Reply email in the mock recall activation thread"
+        }
+      ]
+    },
+    {
+      "key": "Program / Master",
+      "count": 5,
+      "docs": [
+        {
+          "code": "",
+          "title": "Coffee Roasters Master Forms & Logs Reference Table",
+          "type": "Org/Other",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "Reference table tracking all active forms, logs and checklists"
+        },
+        {
+          "code": "",
+          "title": "Final Inspection Report - 2026-01-29",
+          "type": "Report",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "CFIA final inspection report, case INS-2025-000063399"
+        },
+        {
+          "code": "",
+          "title": "Group Inc Final Inspection Report",
+          "type": "Report",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "As-needed",
+          "purpose": "CFIA final inspection report, case INS-2025-0000074408"
+        },
+        {
+          "code": "",
+          "title": "Organizational Chart - 2026",
+          "type": "Org/Other",
+          "format": "pdf",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Company org chart showing roles and reporting structure"
+        },
+        {
+          "code": "",
+          "title": "Preventive Control Plan (PCP) Master Index",
+          "type": "Org/Other",
+          "format": "docx",
+          "fillable": false,
+          "frequency": "Annual",
+          "purpose": "Master index organizing all PCP SOPs, forms and logs"
+        }
+      ]
+    }
+  ]
+}
