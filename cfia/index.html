@@ -47,17 +47,24 @@
     <script type="module">
         import { guardPage, getRole } from '/cfia/system/cfia-core.js';
 
-        // Department tiles + the two program-wide tiles. Once roles carry a
-        // department, a staff member sees ONLY their department tile here.
+        // Generic single-colour icons. Coffee-bag illustration for Packaging
+        // (bags + labels); the rest use the shared outline icon set.
+        const ICON = {
+            bag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" aria-hidden="true"><path d="M7 8h10v11.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19.5Z"/><path d="M7 8 6.2 5.4A1 1 0 0 1 7.1 4H16.9A1 1 0 0 1 17.8 5.4L17 8"/><path d="M9.8 4.4v3M12.4 4.4v3M15 4.4v2.6"/><rect x="9.4" y="11.6" width="5.2" height="4" rx=".6"/></svg>`,
+            ti: (n) => `<i class="ti ${n}" aria-hidden="true"></i>`
+        };
+
+        // Department tiles. Once roles carry a department, a staff member sees
+        // ONLY their department tile here.
         const DEPT_TILES = [
-            { dept: 'packaging', name: 'Packaging', icon: 'ti-package' },
-            { dept: 'roasting', name: 'Roasting', icon: 'ti-flame' },
-            { dept: 'warehouse', name: 'Warehouse', icon: 'ti-forklift' }
+            { dept: 'packaging', name: 'Packaging', iconHtml: ICON.bag },
+            { dept: 'roasting', name: 'Roasting', iconHtml: ICON.ti('ti-flame') },
+            { dept: 'warehouse', name: 'Warehouse', iconHtml: ICON.ti('ti-forklift') }
         ];
 
-        function tile(href, icon, name, sub, soon) {
-            return `<a class="tile${soon ? ' soon' : ''}" href="${href}">
-                <span class="tile-icon"><i class="ti ${icon}" aria-hidden="true"></i></span>
+        function tile(href, iconHtml, name, sub) {
+            return `<a class="tile" href="${href}">
+                <span class="tile-icon">${iconHtml}</span>
                 <span class="tile-name">${name}</span>
                 <span class="tile-sub">${sub}</span>
             </a>`;
@@ -66,10 +73,10 @@
         guardPage(role => {
             if (!role) return;
             const grid = document.getElementById('tileGrid');
-            const depts = DEPT_TILES.map(t => tile(`/cfia/department.html?dept=${t.dept}`, t.icon, t.name, 'Department')).join('');
+            const depts = DEPT_TILES.map(t => tile(`/cfia/department.html?dept=${t.dept}`, t.iconHtml, t.name, 'Department')).join('');
             const programs =
-                tile('/cfia/map.html', 'ti-map-2', 'System Map', 'All documents') +
-                tile('/cfia/records.html', 'ti-clipboard-check', 'Records', 'Submitted logs');
+                tile('/cfia/map.html', ICON.ti('ti-map-2'), 'System Map', 'All documents') +
+                tile('/cfia/records.html', ICON.ti('ti-clipboard-check'), 'Records', 'Submitted logs');
             grid.innerHTML = depts + programs;
         });
     </script>
