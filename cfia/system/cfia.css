@@ -275,12 +275,26 @@ body.cfia-denied .blocked { display: grid; }
 .crumb-current { color: var(--slate); font-weight: 700; }
 .crumbs::before { content: ""; display: inline-block; width: 14px; height: 14px; flex: 0 0 auto; background: var(--grey); -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%203%203%2010v11h6v-6h6v6h6V10z'/%3E%3C/svg%3E") center/14px no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%203%203%2010v11h6v-6h6v6h6V10z'/%3E%3C/svg%3E") center/14px no-repeat; }
 
-/* ─── Print (clean PDF) ─────────────────────────────── */
+/* ─── Accessibility: visible keyboard focus ─────────────── */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, .tile:focus-visible, .subtile:focus-visible, .dept-chip:focus-visible,
+.map-chip:focus-visible, .fb:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.status-opt input:focus-visible + span { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+/* ─── Print (clean, audit-ready PDF) ─────────────────────────────── */
 @media print {
-    @page { size: letter; margin: 0.5in; }
-    body { background: #fff; }
-    .cfia-bar, .actions, .blocked, .btn, .form-message, #fratello-hub-header, .no-print { display: none !important; }
+    @page { size: letter; margin: 0.6in; }
+    body { background: #fff; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cfia-bar, .actions, .blocked, .btn, .form-message, #fratello-hub-header,
+    .crumbs, .dept-switch, .map-controls, .map-toc, .tile-grid, .tile-section-label,
+    .subtile-row, .dc-controls, .dc-stats, .no-print { display: none !important; }
     .cfia-page { max-width: none; padding: 0; }
-    .cfia-panel, .rec-list, .doc-meta { border: 1px solid #ccc; }
+    .hero { border: 0; padding: 0; margin: 0 0 12px; }
+    .doc-body { max-width: none; }
+    .cfia-panel, .rec-list, .doc-meta, .dc-table-wrap { border: 1px solid #999; }
     .rec-detail { background: #fff; }
+    .doc-table th, .doc-table td, table.dc th, table.dc td { border: 1px solid #ccc; }
+    .map-group, .rec-detail, .cfia-panel, tr, .doc-table tr { page-break-inside: avoid; }
+    a { color: #000; text-decoration: none; }
+    table.dc th { position: static; }
 }
