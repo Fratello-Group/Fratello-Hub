@@ -35,5 +35,11 @@ _Log updated as each phase completes._
 - [x] **records.html** — sign-off status column + on the PDF (verification chain visible)
 - [x] quiz.html records completions; reference view.html has read-acknowledgement
 - [x] dashboard: What's Due + Verify & Sign Off tiles
+- [x] **training/index.html** — Training & Competency (courses, completions, current/expired via trainingStatus, acks); listTraining/listAcks/tsDateISO added
+- [x] **equipment.html** — Equipment Registry (listEquipment/addEquipment; stable config id → doc id; verifier one-tap seed)
+- [x] **audit.html** — Compliance Overview (stats: docs/records/due/coverage/training/equipment + due list + recent sign-offs; print snapshot)
+- [x] **team.html** — Team & Responsibilities (do→verify→oversee→owners chain + roster by role, from people.js)
+- [x] dashboard reorganized into two groups (Compliance & oversight / Library & control); 9 tiles total
+- [x] Final QA sweep: all 14 tile targets + 5 config files serve 200; 24 core exports live
 - Decisions locked: role model ✓ · Russ = Kyle's backup signer · 5-yr retention · Roasting Supervisor TBD
 - Still open: seed profile role fields (then open beyond owner + per-person dashboard), photo evidence + storage.rules, reminders, phone smoke-test of a real submit, add Pre-Op 6.3a to register (so it shows on What's Due)

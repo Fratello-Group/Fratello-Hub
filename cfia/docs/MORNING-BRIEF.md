@@ -15,11 +15,14 @@ Last night this was "designed but not deployed." It's now **deployed and verifie
 - Five locked, permanent record types now exist: records, sign-offs, equipment, training completions, acknowledgements.
 
 ## New pages you'll see this morning
-- **Verify & Sign Off** (`/cfia/signoff.html`) — the supervisor/QA page. Shows the team's records, you tick the ones you've reviewed, add a note, and sign off. Your own submissions are greyed out (you can't self-verify).
+- **Compliance Overview** (`/cfia/audit.html`) — the QA/owner home and audit snapshot: controlled-document count, records on file, what's due now, sign-off coverage %, training currency, equipment tracked — plus the due list and recent sign-offs. Has a **Print snapshot** button to hand an inspector.
 - **What's Due** (`/cfia/schedule.html`) — every recurring record with its status: **Done this period** or **Due now**, worked out automatically from each form's cadence (daily / weekly / monthly / quarterly / annual) against what's actually been submitted. This is the first question an inspector asks: *"show me your logs are current."*
+- **Verify & Sign Off** (`/cfia/signoff.html`) — the supervisor/QA page. Shows the team's records, you tick the ones you've reviewed, add a note, and sign off. Your own submissions are greyed out (you can't self-verify).
 - **Records page now shows sign-off status** — a Verified / Flagged / Awaiting-sign-off badge on every record, and it prints on the PDF. The review chain is visible at a glance.
-- **Training quizzes now record completions**, and **reference documents now have an "I have read & understood" button**.
-- Two new dashboard tiles: **What's Due** and **Verify & Sign Off**.
+- **Training & Competency** (`/cfia/training/index.html`) — course catalog, who's passed what, and whether each certification is still current or expired. Quizzes now record completions; reference documents now have an **"I have read & understood"** button.
+- **Equipment Registry** (`/cfia/equipment.html`) — every roaster, line, scale and probe as a tracked machine (with a one-tap "add standard equipment" button for you). Calibrated devices live here.
+- **Team & Responsibilities** (`/cfia/team.html`) — the do → verify → oversee → owners sign-off chain and the full roster by role. Shows who verifies each person's records. (Assigned responsibility is a CFIA requirement.)
+- **Dashboard reorganized** into two groups: **Compliance & oversight** (Overview, What's Due, Records, Verify & Sign Off, Training, Equipment) and **Library & control** (System Map, Document Control, Team & Roles).
 
 ## Your 4 decisions — locked in
 1. **Role model** — confirmed (owners → Kyle as Production Manager + QA officer → department supervisors → staff). Wired into the rules.
