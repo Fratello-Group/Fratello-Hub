@@ -170,6 +170,20 @@ export async function listSignoffs() {
     return snap.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => millis(b.signed_at) - millis(a.signed_at));
 }
 
+export async function listTraining() {
+    const d = db();
+    if (!d || !currentRole) return [];
+    const snap = await getDocs(collection(d, 'cfia_training_completions'));
+    return snap.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => millis(b.taken_at) - millis(a.taken_at));
+}
+
+export async function listAcks() {
+    const d = db();
+    if (!d || !currentRole) return [];
+    const snap = await getDocs(collection(d, 'cfia_acknowledgements'));
+    return snap.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => millis(b.read_at) - millis(a.read_at));
+}
+
 // America/Edmonton calendar date (YYYY-MM-DD) — the program timezone for "due today".
 export function edmontonToday() {
     return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -211,6 +225,29 @@ export function recordDateISO(r) {
     if (v && /^\d{4}-\d{2}-\d{2}/.test(String(v))) return String(v).slice(0, 10);
     const ms = millis(r && r.submitted_at);
     return ms ? ymd(new Date(ms)) : '';
+}
+
+// Local calendar date (YYYY-MM-DD) of a Firestore timestamp.
+export function tsDateISO(t) {
+    const ms = millis(t);
+    return ms ? ymd(new Date(ms)) : '';
+}
+
+function addMonthsISO(iso, n) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return ymd(new Date(y, m - 1 + n, d));
+}
+
+// Is a training certification still current, given how often it must be retaken?
+// Returns {state:'current'|'expired'|'missing', label, expires}.
+export function trainingStatus(recurrence, takenISO, todayISO) {
+    if (!takenISO) return { state: 'missing', label: 'Not taken', expires: '' };
+    const r = (recurrence || '').toLowerCase();
+    const months = /bienn|two.?year|2.?year/.test(r) ? 24 : /annual|year/.test(r) ? 12 : /quarter/.test(r) ? 3 : /month/.test(r) ? 1 : 0;
+    if (!months) return { state: 'current', label: 'Complete', expires: '' };
+    const exp = addMonthsISO(takenISO, months);
+    const expired = todayISO > exp;
+    return { state: expired ? 'expired' : 'current', label: expired ? 'Expired' : 'Current', expires: exp };
 }
 
 // ─── shared helpers ───

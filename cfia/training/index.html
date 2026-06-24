@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Training & Competency</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .tr-list { border: 1px solid var(--divider); border-radius: var(--r-md); overflow: hidden; background: var(--white); }
+        .tr-row { display: grid; gap: 12px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--fog); font-size: 13px; color: var(--slate); }
+        .tr-row:first-child { border-top: none; }
+        .tr-course { grid-template-columns: 1fr 90px 110px 110px; }
+        .tr-comp   { grid-template-columns: 1fr 150px 90px 120px 110px; }
+        .tr-ack    { grid-template-columns: 1fr 1fr 130px; }
+        .tr-head { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); background: var(--card); }
+        .tr-row strong { color: var(--black); }
+        .chip { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .3px; padding: 4px 9px; border-radius: 999px; text-transform: uppercase; }
+        .chip.ok { background: #e6f4ea; color: #1c7a3f; }
+        .chip.no { background: #fdeceb; color: #b42318; }
+        .chip.mut { background: var(--card); color: var(--grey); }
+        .sec-label { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); margin: 32px 0 12px; }
+        .sc-sum { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 22px; }
+        .sc-sum .chip { font-size: 12px; padding: 6px 12px; }
+        @media (max-width: 760px) {
+            .tr-course, .tr-comp, .tr-ack { grid-template-columns: 1fr auto; }
+            .tr-row span:nth-child(n+3) { display: none; }
+            .tr-head { display: none; }
+        }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Training</div>
+                <div class="bar-title">Training &amp; Competency</div>
+            </div>
+        </div>
+        <div class="actions"><a class="btn" href="/cfia/index.html">Dashboard</a></div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This training record is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">Training</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline" id="todayLine">Training records</div>
+            <h1>Training &amp; Competency</h1>
+            <p>Who has been trained, on what, and whether it's still current. Competency records are a CFIA requirement — every completion here is a permanent, dated record.</p>
+        </section>
+
+        <div class="sc-sum" id="summary"></div>
+
+        <div class="sec-label">Courses</div>
+        <div id="courses"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+
+        <div class="sec-label">Recent completions</div>
+        <div id="completions"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+
+        <div class="sec-label">Recent document acknowledgements</div>
+        <div id="acks"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, listTraining, listAcks, trainingStatus, tsDateISO, edmontonToday, escapeHtml, fmtDate, fmtDateTime } from '/cfia/system/cfia-core.js';
+        import { QUIZZES } from '/cfia/config/quizzes.js';
+
+        const today = edmontonToday();
+        const courses = Object.values(QUIZZES);
+
+        guardPage(async role => {
+            if (!role) return;
+            document.getElementById('todayLine').textContent = 'As of ' + fmtDate(today);
+            let comps = [], acks = [];
+            try { [comps, acks] = await Promise.all([listTraining().catch(() => []), listAcks().catch(() => [])]); }
+            catch (e) { /* handled per-section below */ }
+            renderCourses(comps);
+            renderCompletions(comps);
+            renderAcks(acks);
+        });
+
+        function howOften(r) {
+            const x = (r || '').toLowerCase();
+            if (/bienn/.test(x)) return 'Every 2 years';
+            if (/annual|year/.test(x)) return 'Yearly';
+            if (/quarter/.test(x)) return 'Quarterly';
+            if (!x || /one|once/.test(x)) return 'One-time';
+            return r;
+        }
+
+        function renderCourses(comps) {
+            const passed = comps.filter(c => c.passed);
+            document.getElementById('summary').innerHTML =
+                `<span class="chip ok">${courses.length} courses</span>` +
+                `<span class="chip mut">${passed.length} passes recorded</span>`;
+            const head = `<div class="tr-row tr-course tr-head"><span>Course</span><span>Pass mark</span><span>How often</span><span></span></div>`;
+            const body = courses.map(q => {
+                const mine = comps.filter(c => c.quiz_code === q.code && c.passed);
+                const last = mine[0];
+                const note = last ? `${mine.length} pass${mine.length === 1 ? '' : 'es'} · latest ${escapeHtml(fmtDate(tsDateISO(last.taken_at)))}` : 'No completions yet';
+                return `<div class="tr-row tr-course">
+                    <span><strong>${escapeHtml(q.code)} — ${escapeHtml(q.title)}</strong><br><span style="font-size:12px;color:var(--grey);">${note}</span></span>
+                    <span>${escapeHtml(String(q.passThreshold || 90))}%</span>
+                    <span>${escapeHtml(howOften(q.recurrence))}</span>
+                    <span><a class="btn" href="/cfia/training/quiz.html?code=${encodeURIComponent(q.code)}">Take →</a></span>
+                </div>`;
+            }).join('');
+            document.getElementById('courses').innerHTML = `<div class="tr-list">${head}${body}</div>`;
+        }
+
+        function renderCompletions(comps) {
+            const el = document.getElementById('completions');
+            if (!comps.length) { el.innerHTML = `<div class="rec-empty" style="padding:18px;border:1px solid var(--divider);border-radius:var(--r-md);">No training completions recorded yet.</div>`; return; }
+            const head = `<div class="tr-row tr-comp tr-head"><span>Person</span><span>Course</span><span>Score</span><span>Taken</span><span>Status</span></div>`;
+            const body = comps.map(c => {
+                const taken = tsDateISO(c.taken_at);
+                const st = c.passed ? trainingStatus(c.recurrence, taken, today) : { state: 'no', label: 'Did not pass' };
+                const cls = st.state === 'current' ? 'ok' : (st.state === 'expired' || st.state === 'no' ? 'no' : 'mut');
+                return `<div class="tr-row tr-comp">
+                    <strong>${escapeHtml(c.name || c.email || '—')}</strong>
+                    <span>${escapeHtml(c.quiz_code)} — ${escapeHtml(c.quiz_title || '')}</span>
+                    <span>${escapeHtml(String(c.score))}%</span>
+                    <span>${escapeHtml(fmtDate(taken))}</span>
+                    <span><span class="chip ${cls}">${escapeHtml(st.label)}</span></span>
+                </div>`;
+            }).join('');
+            el.innerHTML = `<div class="tr-list">${head}${body}</div>`;
+        }
+
+        function renderAcks(acks) {
+            const el = document.getElementById('acks');
+            if (!acks.length) { el.innerHTML = `<div class="rec-empty" style="padding:18px;border:1px solid var(--divider);border-radius:var(--r-md);">No document acknowledgements recorded yet.</div>`; return; }
+            const head = `<div class="tr-row tr-ack tr-head"><span>Person</span><span>Document</span><span>Read on</span></div>`;
+            const body = acks.map(a => `<div class="tr-row tr-ack">
+                <strong>${escapeHtml(a.name || a.email || '—')}</strong>
+                <span>${escapeHtml(a.doc_code)} — ${escapeHtml(a.doc_title || '')}${a.version ? ' (v' + escapeHtml(a.version) + ')' : ''}</span>
+                <span>${escapeHtml(fmtDateTime(a.read_at))}</span>
+            </div>`).join('');
+            el.innerHTML = `<div class="tr-list">${head}${body}</div>`;
+        }
+    </script>
+</body>
+</html>
