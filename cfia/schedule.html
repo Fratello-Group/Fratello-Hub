@@ -49,7 +49,7 @@
                 <div class="bar-title">What's Due</div>
             </div>
         </div>
-        <div class="actions"><a class="btn" href="/cfia/index.html">Dashboard</a></div>
+        <div class="actions"><a class="btn btn-primary" href="/cfia/index.html">Food Safety Dashboard</a></div>
     </header>
 
     <section class="blocked" id="blocked">
@@ -70,14 +70,16 @@
         <section class="hero">
             <div class="dateline" id="todayLine">Compliance schedule</div>
             <h1>What's Due</h1>
-            <p>Every recurring record, and whether it's current for its period. This is the question an inspector asks first — “show me your logs are up to date.”</p>
+            <p>The recurring food-safety logs, and whether each one has been done for its current period. A red <strong>Due now</strong> simply means that log hasn't been completed yet for today, this week, or this month — it is not an error or a problem. As the team fills each one, it turns green.</p>
         </section>
 
         <div class="sc-sum" id="summary"></div>
+        <p class="sc-help" id="dueHelp" style="display:none;margin:-12px 0 20px;font-size:13px;color:var(--grey);"></p>
 
         <div id="scheduled"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
 
-        <div class="sec-label" id="evLabel" style="display:none;">Event-driven records — completed when the event happens</div>
+        <div class="sec-label" id="evLabel" style="display:none;">As-needed records — no schedule</div>
+        <p id="evIntro" style="display:none;font-size:13px;color:var(--slate);margin:0 0 14px;max-width:680px;">Nothing here is “due.” These records have no schedule — you only fill one <strong>when the matching event actually happens</strong> (an injury, a complaint, a product hold, a recall, a deviation). They're listed so everyone knows they exist and where to find them.</p>
         <div class="ev-grid" id="events"></div>
     </main>
 
@@ -120,7 +122,14 @@
             const dueN = rows.filter(r => r.st.state === 'due').length;
             const doneN = rows.filter(r => r.st.state === 'done').length;
             document.getElementById('summary').innerHTML =
-                `<span class="chip due">${dueN} need attention</span><span class="chip done">${doneN} up to date</span>`;
+                `<span class="chip due">${dueN} due now</span><span class="chip done">${doneN} up to date</span>`;
+            const help = document.getElementById('dueHelp');
+            if (dueN) {
+                help.style.display = '';
+                help.innerHTML = doneN === 0
+                    ? `<strong>Nothing has been logged yet.</strong> Every recurring log shows as “due now” until it's completed the first time — that's expected for a brand-new program, not a backlog. Tap a row to fill it.`
+                    : `“Due now” means that log hasn't been completed yet for its current period. Tap any row to fill it.`;
+            } else { help.style.display = 'none'; }
 
             if (!rows.length) { wrap.innerHTML = `<div class="rec-empty" style="padding:18px;border:1px solid var(--divider);border-radius:var(--r-md);">No scheduled records configured yet.</div>`; return; }
 
@@ -145,6 +154,7 @@
         function renderEvents(rows) {
             if (!rows.length) return;
             document.getElementById('evLabel').style.display = '';
+            document.getElementById('evIntro').style.display = '';
             rows.sort((a, b) => a.f.code.localeCompare(b.f.code, undefined, { numeric: true }));
             document.getElementById('events').innerHTML = rows.map(r =>
                 `<a class="ev-card" href="${r.f.href}"><strong>${escapeHtml(r.f.code)} — ${escapeHtml(r.f.title)}</strong><span>${escapeHtml(deptLabel(r.f))}</span></a>`).join('');
