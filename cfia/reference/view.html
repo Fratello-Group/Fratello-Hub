@@ -108,7 +108,7 @@
 
             // content fragment
             try {
-                const res = await fetch(`/cfia/reference/content/${encodeURIComponent(doc.code)}.html`);
+                const res = await fetch(`/cfia/reference/content/${encodeURIComponent(doc.code.toLowerCase())}.html`);
                 document.getElementById('docBody').innerHTML = res.ok ? await res.text()
                     : '<div class="callout"><strong>Full text is being prepared.</strong> The controlled metadata above is current; the readable body for this document is being loaded into the Hub.</div>';
             } catch (e) {
