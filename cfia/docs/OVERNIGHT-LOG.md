@@ -26,3 +26,14 @@ _Log updated as each phase completes._
 - Conduct policies + 5 job descriptions readable (register now 111 docs)
 - records.html generalized to all forms (filter + generic PDF)
 - Clean audit PDF print + a11y focus; full link-check (0 broken); page syntax harness (jsc+DOM stubs)
+
+## Session 2 — FOUNDATION DEPLOYED (Chris confirmed 4 decisions; AUTO permission)
+- [x] Phase 4 foundation **NOW LIVE** (was staged): firestore.rules deployed via GH Action — role helpers (isSafetyOfficer/isCfiaVerifier), cfiaRecordValid 15-field validation, froze role-escalation fields, + 4 immutable collections (cfia_signoffs w/ separation-of-duties, cfia_equipment, cfia_training_completions, cfia_acknowledgements). Deploy succeeded.
+- [x] cfia-core writers: recordTraining, recordAck, createSignoff, listSignoffs, dueStatus+recordDateISO (scheduling, **unit-tested 21/21**), edmontonToday, RETENTION_YEARS=5
+- [x] **signoff.html** — manager/QA Verify & Sign Off (SoD: can't sign own records)
+- [x] **schedule.html** — What's Due: per-form done/due computed from real records vs cadence
+- [x] **records.html** — sign-off status column + on the PDF (verification chain visible)
+- [x] quiz.html records completions; reference view.html has read-acknowledgement
+- [x] dashboard: What's Due + Verify & Sign Off tiles
+- Decisions locked: role model ✓ · Russ = Kyle's backup signer · 5-yr retention · Roasting Supervisor TBD
+- Still open: seed profile role fields (then open beyond owner + per-person dashboard), photo evidence + storage.rules, reminders, phone smoke-test of a real submit, add Pre-Op 6.3a to register (so it shows on What's Due)
