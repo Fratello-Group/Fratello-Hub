@@ -45,7 +45,7 @@
         </nav>
 
         <section class="hero">
-            <div class="dateline">Pre-Operational Inspection · Form 6.3a</div>
+            <div class="dateline">All food-safety records</div>
             <h1>Submitted Records</h1>
             <p id="scopeNote"></p>
         </section>
@@ -55,102 +55,103 @@
         </div>
 
         <div class="rec-bar" id="recBar"></div>
-
-        <div class="rec-list" id="recList">
-            <div class="rec-empty">Loading…</div>
-        </div>
+        <div class="rec-list" id="recList"><div class="rec-empty">Loading…</div></div>
     </main>
 
     <script type="module">
-        import { guardPage, getRole, listRecords, isManager, fmtDate, fmtDateTime, escapeHtml } from '/cfia/system/cfia-core.js';
-        import { getSchema } from '/cfia/config/form-schemas.js';
+        import { guardPage, listRecords, isManager, fmtDate, fmtDateTime, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { FORM_SCHEMAS } from '/cfia/config/form-schemas.js';
 
         const listEl = document.getElementById('recList');
-        const schema = getSchema('6.3a');
+        let allRecords = [];
+        let filter = 'all';
 
-        // map field id -> label for nice detail rendering
-        const labelFor = {};
-        schema.sections.forEach(s => s.fields.forEach(f => { labelFor[f.id] = f.label; }));
+        function recDate(r) {
+            const v = r.values || {};
+            return v.date ? fmtDate(v.date) : fmtDate(r.submitted_at);
+        }
+        function statusPill(val) {
+            const cls = val === 'Pass' ? 'ok' : (val === 'Fail' || String(val).indexOf('No') === 0 ? 'no' : '');
+            return cls ? `<span class="pill ${cls}">${escapeHtml(val)}</span>` : escapeHtml(val || '—');
+        }
+        function isStatusField(schema, id) {
+            if (!schema) return false;
+            return schema.sections.some(s => s.fields.some(f => f.id === id && f.type === 'status'));
+        }
 
         guardPage(async role => {
             if (!role) return;
             document.getElementById('scopeNote').textContent = isManager()
-                ? 'You can see every submitted inspection. Click any row for the full detail and a one-click PDF.'
-                : 'You can see the inspections you submitted. Click any row for the full detail and a one-click PDF.';
-            await load();
-        });
-
-        async function load() {
-            let records = [];
+                ? 'Every submitted record across all forms. Filter by form, click any row for the full detail and a one-click PDF.'
+                : 'The records you submitted. Click any row for the full detail and a one-click PDF.';
             try {
-                records = await listRecords({ formCode: '6.3a' });
+                allRecords = await listRecords({});
             } catch (err) {
                 listEl.innerHTML = `<div class="rec-empty">Could not load records: ${escapeHtml(err.message || err)}</div>`;
                 return;
             }
+            render();
+        });
+
+        function render() {
+            const codes = [...new Set(allRecords.map(r => r.form_code))].sort();
+            const opts = ['<option value="all">All forms</option>']
+                .concat(codes.map(c => `<option value="${escapeHtml(c)}"${filter === c ? ' selected' : ''}>${escapeHtml(c)} — ${escapeHtml((FORM_SCHEMAS[c] || {}).title || allRecords.find(r => r.form_code === c).form_title || '')}</option>`));
+            const records = filter === 'all' ? allRecords : allRecords.filter(r => r.form_code === filter);
 
             document.getElementById('recBar').innerHTML =
-                `<span><strong>${records.length}</strong> record${records.length === 1 ? '' : 's'}</span>`;
+                `<span><strong>${records.length}</strong> record${records.length === 1 ? '' : 's'}</span>` +
+                `<select id="formFilter" style="height:38px;border:1px solid var(--divider);border-radius:var(--r-sm);padding:6px 10px;font-size:13px;">${opts.join('')}</select>`;
+            document.getElementById('formFilter').addEventListener('change', e => { filter = e.target.value; render(); });
 
             if (!records.length) {
-                listEl.innerHTML = `<div class="rec-empty">No inspections submitted yet. <a href="/cfia/forms/form-6-3a.html" style="color:var(--teal-dark);font-weight:700;">Complete the first one →</a></div>`;
+                listEl.innerHTML = `<div class="rec-empty">No records submitted yet. <a href="/cfia/forms/form-6-3a.html" style="color:var(--teal-dark);font-weight:700;">Complete the first one →</a></div>`;
                 return;
             }
 
-            const head = `<div class="rec-head"><span>Date</span><span>Area / line</span><span>Completed by</span><span>Submitted</span><span>Result</span></div>`;
-            const rows = records.map((r, i) => {
-                const cleared = (r.values && r.values.cleared) || '';
-                const ok = cleared.indexOf('Yes') === 0;
-                return `
-                    <div class="rec-row" data-i="${i}">
-                        <strong>${escapeHtml(fmtDate(r.values && r.values.date))}</strong>
-                        <span>${escapeHtml((r.values && r.values.area) || '—')}</span>
-                        <span>${escapeHtml(r.performed_by_name || '—')}</span>
-                        <span>${escapeHtml(fmtDateTime(r.submitted_at))}</span>
-                        <span><span class="pill ${ok ? 'ok' : 'no'}">${ok ? 'Cleared' : 'Not cleared'}</span></span>
-                    </div>
-                    <div class="rec-detail" id="detail-${i}" style="display:none;"></div>`;
-            }).join('');
+            const head = `<div class="rec-head"><span>Date</span><span>Form</span><span>Completed by</span><span>Submitted</span><span>Dept</span></div>`;
+            const rows = records.map((r, i) => `
+                <div class="rec-row" data-i="${i}">
+                    <strong>${escapeHtml(recDate(r))}</strong>
+                    <span>${escapeHtml(r.form_code)} — ${escapeHtml(r.form_title || '')}</span>
+                    <span>${escapeHtml(r.performed_by_name || '—')}</span>
+                    <span>${escapeHtml(fmtDateTime(r.submitted_at))}</span>
+                    <span>${escapeHtml(r.department || '—')}</span>
+                </div>
+                <div class="rec-detail" id="detail-${i}" style="display:none;"></div>`).join('');
 
             listEl.innerHTML = head + rows;
-            listEl.querySelectorAll('.rec-row').forEach(row => {
-                row.addEventListener('click', () => toggle(Number(row.dataset.i), records));
-            });
-            window.__cfiaRecords = records;
+            listEl.querySelectorAll('.rec-row').forEach(row =>
+                row.addEventListener('click', () => toggle(Number(row.dataset.i), records)));
         }
 
         function toggle(i, records) {
             const box = document.getElementById('detail-' + i);
             if (!box) return;
             if (box.style.display === 'block') { box.style.display = 'none'; return; }
-            box.innerHTML = detailHtml(records[i], i);
+            box.innerHTML = detailHtml(records[i]);
             box.style.display = 'block';
             box.querySelector('[data-print]').addEventListener('click', () => printRecord(records[i]));
         }
 
-        function checklistHtml(values) {
-            return schema.sections[1].fields.map(f => {
-                const v = values[f.id] || '—';
-                const cls = v === 'Pass' ? 'ok' : (v === 'Fail' ? 'no' : '');
-                const pill = cls ? `<span class="pill ${cls}">${escapeHtml(v)}</span>` : escapeHtml(v);
-                return `<div><span>${escapeHtml(f.label)}</span>${pill}</div>`;
-            }).join('');
-        }
-
-        function detailHtml(r, i) {
+        function detailHtml(r) {
             const v = r.values || {};
-            return `
-                <h4>Inspection</h4>
-                <div class="rec-kv">
-                    <div><span>Date</span><strong>${escapeHtml(fmtDate(v.date))}</strong></div>
-                    <div><span>Area / line</span><strong>${escapeHtml(v.area || '—')}</strong></div>
-                    <div><span>Shift</span><strong>${escapeHtml(v.shift || '—')}</strong></div>
-                    <div><span>Cleared to start?</span><strong>${escapeHtml(v.cleared || '—')}</strong></div>
-                </div>
-                <h4>Checklist</h4>
-                <div class="rec-kv">${checklistHtml(v)}</div>
-                <h4>Corrective action / notes</h4>
-                <div class="rec-kv"><div><strong>${escapeHtml(v.corrective || 'None recorded')}</strong></div></div>
+            const schema = FORM_SCHEMAS[r.form_code];
+            let body = '';
+            if (schema) {
+                body = schema.sections.map(sec => {
+                    const fields = sec.fields.map(f => {
+                        const val = v[f.id];
+                        const shown = f.type === 'status' ? statusPill(val) : escapeHtml(val || '—');
+                        return `<div><span>${escapeHtml(f.label)}</span><strong>${shown}</strong></div>`;
+                    }).join('');
+                    return `<h4>${escapeHtml(sec.title)}</h4><div class="rec-kv">${fields}</div>`;
+                }).join('');
+            } else {
+                const fields = Object.keys(v).map(k => `<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(v[k] || '—')}</strong></div>`).join('');
+                body = `<h4>Values</h4><div class="rec-kv">${fields}</div>`;
+            }
+            return body + `
                 <div class="stamp">
                     <strong>Record ${escapeHtml(r.record_id || '')}</strong> · Form ${escapeHtml(r.form_code)} v${escapeHtml(r.form_version || '')}<br>
                     Completed by <strong>${escapeHtml(r.performed_by_name || '—')}</strong>${r.performed_by_is_self === false ? ' (entered on a shared/other account)' : ''}<br>
@@ -164,48 +165,44 @@
 
         function printRecord(r) {
             const v = r.values || {};
-            const checklist = schema.sections[1].fields
-                .map(f => `<tr><td>${escapeHtml(f.label)}</td><td>${escapeHtml(v[f.id] || '—')}</td></tr>`).join('');
-            const cleared = (v.cleared || '').indexOf('Yes') === 0;
+            const schema = FORM_SCHEMAS[r.form_code];
+            let rowsHtml;
+            if (schema) {
+                rowsHtml = schema.sections.map(sec =>
+                    `<tr><td colspan="2" style="background:#FAFAFB;font-weight:800;">${escapeHtml(sec.title)}</td></tr>` +
+                    sec.fields.map(f => `<tr><td>${escapeHtml(f.label)}</td><td>${escapeHtml(v[f.id] || '—')}</td></tr>`).join('')
+                ).join('');
+            } else {
+                rowsHtml = Object.keys(v).map(k => `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v[k] || '—')}</td></tr>`).join('');
+            }
+            const logo = new URL('/assets/Fratello_Logo_Black.png', location.href).href;
             const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(r.record_id || 'Record')}</title>
 <style>
 @page{size:letter;margin:0.6in}
 body{font-family:Montserrat,Helvetica,Arial,sans-serif;color:#1A1A1A;margin:0;line-height:1.4}
 .top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #36B3AF;padding-bottom:14px;margin-bottom:18px}
 .top img{width:170px}
-h1{font-size:20px;margin:2px 0 0}
+h1{font-size:19px;margin:2px 0 0}
 .lbl{font-size:9px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#908F8A}
-.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 22px;font-size:13px;margin-bottom:16px}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
-th{text-align:left;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:#908F8A;border-bottom:1px solid #E0E0E0;padding:7px 6px}
-td{border-bottom:1px solid #EEE;padding:7px 6px}
-.result{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:800;font-size:12px;background:${cleared ? '#E7F5EF;color:#0F6E56' : '#FBE9E5;color:#952F1F'}}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+td{border:1px solid #E0E0E0;padding:7px 9px;vertical-align:top}
+td:first-child{width:42%;color:#4A4A4A}
 .stamp{margin-top:18px;padding-top:12px;border-top:1px dashed #CCC;font-size:11px;color:#666;line-height:1.7}
-.notes{margin-top:14px;padding:10px 12px;border-left:3px solid #36B3AF;background:#FAFAFB;font-size:13px}
 </style></head><body>
 <div class="top">
-  <div><img src="${new URL('/assets/Fratello_Logo_Black.png', location.href).href}" alt="Fratello"><h1>Pre-Operational Inspection Record</h1></div>
-  <div><div class="lbl">Form</div><strong>6.3a (v${escapeHtml(r.form_version || '')})</strong><br><div class="lbl" style="margin-top:8px">Record</div><strong>${escapeHtml(r.record_id || '')}</strong></div>
+  <div><img src="${logo}" alt="Fratello"><h1>${escapeHtml(r.form_title || 'Food Safety Record')}</h1></div>
+  <div><div class="lbl">Form</div><strong>${escapeHtml(r.form_code)} (v${escapeHtml(r.form_version || '')})</strong><br><div class="lbl" style="margin-top:8px">Record</div><strong>${escapeHtml(r.record_id || '')}</strong></div>
 </div>
-<div class="meta">
-  <div><span class="lbl">Inspection date</span><br>${escapeHtml(fmtDate(v.date))}</div>
-  <div><span class="lbl">Area / line</span><br>${escapeHtml(v.area || '—')}</div>
-  <div><span class="lbl">Shift</span><br>${escapeHtml(v.shift || '—')}</div>
-  <div><span class="lbl">Result</span><br><span class="result">${cleared ? 'Cleared to start' : 'Not cleared'}</span></div>
-</div>
-<table><thead><tr><th>Checklist item</th><th>Result</th></tr></thead><tbody>${checklist}</tbody></table>
-${v.corrective ? `<div class="notes"><span class="lbl">Corrective action / notes</span><br>${escapeHtml(v.corrective)}</div>` : ''}
+<table><tbody>${rowsHtml}</tbody></table>
 <div class="stamp">
   Completed by <strong>${escapeHtml(r.performed_by_name || '—')}</strong>${r.performed_by_is_self === false ? ' (entered on a shared/other account)' : ''}.<br>
   Submitted from account ${escapeHtml(r.submitted_by_name || '')} (${escapeHtml(r.submitted_by_email || '')}) on ${escapeHtml(fmtDateTime(r.submitted_at))}.<br>
-  This is a permanent, immutable record — it cannot be edited or deleted. Procedure: SOP 6.3.
+  This is a permanent, immutable record — it cannot be edited or deleted.
 </div>
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) { alert('Your browser blocked the print window. Allow pop-ups and try again.'); return; }
-            w.document.write(html);
-            w.document.close();
-            w.focus();
+            w.document.write(html); w.document.close(); w.focus();
             setTimeout(() => w.print(), 300);
         }
     </script>
