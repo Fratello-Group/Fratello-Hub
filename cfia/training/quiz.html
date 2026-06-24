@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Training Quiz</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .qz { border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--white); padding: 18px 20px; margin-bottom: 14px; }
+        .qz-q { font-size: 15px; font-weight: 700; color: var(--black); margin-bottom: 10px; }
+        .qz-opt { display: flex; align-items: center; gap: 10px; padding: 9px 0; font-size: 15px; color: var(--slate); cursor: pointer; }
+        .qz-opt input { width: 20px; height: 20px; }
+        .qz-note { font-size: 12px; color: var(--grey); margin-top: 4px; }
+        .qz-result { font-size: 16px; font-weight: 800; }
+        .qz-result.pass { color: var(--pass); }
+        .qz-result.fail { color: var(--fail); }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow" id="barEyebrow">Training · Quiz</div>
+                <div class="bar-title" id="barTitle">Quiz</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" href="/cfia/index.html">Dashboard</a>
+            <a class="btn" id="sopBtn" href="#" style="display:none;">Read the procedure</a>
+        </div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This training quiz is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current" id="crumbCode">Quiz</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline" id="heroDateline">Training quiz</div>
+            <h1 id="heroTitle">Quiz</h1>
+        </section>
+
+        <div class="callout">
+            <strong>How this works.</strong> Multiple-choice and true/false answers are scored automatically (pass mark <span id="passMark">90</span>%). Written answers are reviewed by your supervisor. <em>Permanent completion recording — your name, score and date — is added once the training-records foundation is live.</em>
+        </div>
+
+        <form id="quizForm">
+            <div id="quizMount"></div>
+            <div class="form-message" id="message"></div>
+            <div class="actions" style="justify-content:flex-start;">
+                <button class="btn btn-primary btn-lg" type="submit" id="submitBtn">Submit answers</button>
+            </div>
+        </form>
+
+        <section class="cfia-panel" id="resultPanel" style="display:none;">
+            <h2 class="panel-title" id="resultTitle"></h2>
+            <p class="panel-help" id="resultText"></p>
+            <div id="resultDetail"></div>
+            <div class="actions" style="justify-content:flex-start;margin-top:12px;">
+                <button class="btn" type="button" id="retryBtn">Try again</button>
+                <a class="btn" href="/cfia/index.html">Done</a>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { QUIZZES } from '/cfia/config/quizzes.js';
+        import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
+
+        const code = new URLSearchParams(location.search).get('code') || '';
+        const quiz = QUIZZES[code];
+        const byCode = Object.fromEntries(DOCUMENT_REGISTER.map(d => [d.code, d]));
+        const form = document.getElementById('quizForm');
+        const message = document.getElementById('message');
+
+        if (!quiz) {
+            document.getElementById('heroTitle').textContent = 'Quiz not found';
+        } else {
+            document.getElementById('barEyebrow').textContent = `Training · ${quiz.code}`;
+            document.getElementById('barTitle').textContent = quiz.title;
+            document.getElementById('heroTitle').textContent = quiz.title;
+            document.getElementById('crumbCode').textContent = quiz.title;
+            document.getElementById('passMark').textContent = quiz.passThreshold || 90;
+            if (quiz.sopCode && byCode[quiz.sopCode]) {
+                const sb = document.getElementById('sopBtn');
+                sb.href = byCode[quiz.sopCode].href || `/cfia/reference/view.html?code=${quiz.sopCode}`;
+                sb.style.display = '';
+            }
+        }
+
+        function render() {
+            document.getElementById('quizMount').innerHTML = quiz.questions.map((q, i) => {
+                let control = '';
+                if (q.type === 'mc') {
+                    control = q.options.map((o, j) =>
+                        `<label class="qz-opt"><input type="radio" name="${q.id}" value="${j}"> <span>${escapeHtml(o)}</span></label>`).join('');
+                } else if (q.type === 'truefalse') {
+                    control = ['True', 'False'].map((o, j) =>
+                        `<label class="qz-opt"><input type="radio" name="${q.id}" value="${o === 'True'}"> <span>${o}</span></label>`).join('');
+                } else if (q.type === 'open') {
+                    control = `<textarea class="textarea" id="${q.id}" placeholder="Your answer"></textarea><div class="qz-note">Reviewed by your supervisor.</div>`;
+                } else {
+                    control = `<div class="qz-note">${escapeHtml(q.note || 'Supervisor-administered.')}</div>`;
+                }
+                return `<div class="qz"><div class="qz-q">${i + 1}. ${escapeHtml(q.prompt)}</div>${control}</div>`;
+            }).join('');
+        }
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            let auto = 0, autoTotal = 0, openCount = 0;
+            const wrong = [];
+            quiz.questions.forEach((q, i) => {
+                if (q.type === 'mc' || q.type === 'truefalse') {
+                    autoTotal++;
+                    const sel = form.querySelector(`input[name="${q.id}"]:checked`);
+                    const val = sel ? sel.value : null;
+                    const correct = q.type === 'mc' ? String(q.correct) : String(q.correct);
+                    if (val === correct) auto++; else wrong.push(i + 1);
+                } else if (q.type === 'open') {
+                    openCount++;
+                }
+            });
+            const pct = autoTotal ? Math.round((auto / autoTotal) * 100) : 0;
+            const pass = pct >= (quiz.passThreshold || 90);
+            form.style.display = 'none';
+            const panel = document.getElementById('resultPanel');
+            panel.style.display = 'block';
+            const t = document.getElementById('resultTitle');
+            t.className = 'panel-title qz-result ' + (pass ? 'pass' : 'fail');
+            t.textContent = pass ? `✓ Passed — ${pct}%` : `Not yet — ${pct}%`;
+            document.getElementById('resultText').textContent =
+                `${auto} of ${autoTotal} auto-scored questions correct.` +
+                (openCount ? ` ${openCount} written answer${openCount === 1 ? '' : 's'} will be reviewed by your supervisor.` : '') +
+                (pass ? '' : ` You need ${quiz.passThreshold || 90}%. Review the procedure and try again.`);
+            document.getElementById('resultDetail').innerHTML = wrong.length
+                ? `<p class="panel-help">Review questions: ${wrong.join(', ')}.</p>` : '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        document.getElementById('retryBtn').addEventListener('click', () => location.reload());
+
+        guardPage(role => { if (role && quiz) render(); });
+    </script>
+</body>
+</html>
