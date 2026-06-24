@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Compliance Overview</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 8px 0 24px; }
+        .stat { border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--white); padding: 16px 18px; }
+        .stat .n { font-size: 30px; font-weight: 800; color: var(--black); line-height: 1.1; }
+        .stat .l { font-size: 12px; color: var(--grey); margin-top: 4px; font-weight: 600; }
+        .stat .s { font-size: 11px; color: var(--slate); margin-top: 6px; }
+        .stat.warn .n { color: #b42318; }
+        .ov-list { border: 1px solid var(--divider); border-radius: var(--r-md); overflow: hidden; background: var(--white); }
+        .ov-row { display: grid; gap: 12px; align-items: center; padding: 11px 14px; border-top: 1px solid var(--fog); font-size: 13px; color: var(--slate); }
+        .ov-row:first-child { border-top: none; }
+        .ov-row strong { color: var(--black); }
+        .ov-due { grid-template-columns: 1fr 110px 120px; }
+        .ov-sign { grid-template-columns: 120px 1fr 130px; }
+        .sec-label { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); margin: 30px 0 12px; }
+        .chip { display: inline-block; font-size: 11px; font-weight: 800; padding: 4px 9px; border-radius: 999px; text-transform: uppercase; }
+        .chip.ok { background: #e6f4ea; color: #1c7a3f; }
+        .chip.no { background: #fdeceb; color: #b42318; }
+        @media print {
+            .cfia-bar, .crumbs, #fratello-hub-header, .no-print { display: none !important; }
+            .cfia-page { padding: 0 !important; }
+            body { background: #fff; }
+        }
+        @media (max-width: 760px) { .ov-due, .ov-sign { grid-template-columns: 1fr; gap: 4px; } }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Oversight</div>
+                <div class="bar-title">Compliance Overview</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" href="/cfia/index.html">Dashboard</a>
+            <button class="btn btn-primary" type="button" onclick="window.print()">Print snapshot</button>
+        </div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This oversight view is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">Compliance overview</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline" id="asOf">Audit snapshot</div>
+            <h1>Compliance Overview</h1>
+            <p>The whole food-safety program at a glance — documents, records, supervisor sign-off, training and equipment. Built for the QA officer and owners; print it for an inspector.</p>
+        </section>
+
+        <div class="stat-grid" id="stats"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+
+        <div class="sec-label">Records due now</div>
+        <div id="due"></div>
+
+        <div class="sec-label">Recent supervisor sign-offs</div>
+        <div id="signoffs"></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, listRecords, listSignoffs, listTraining, listEquipment, dueStatus, recordDateISO, trainingStatus, tsDateISO, edmontonToday, escapeHtml, fmtDate, fmtDateTime } from '/cfia/system/cfia-core.js';
+        import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
+
+        const today = edmontonToday();
+        const DEPT = { company: 'Company-wide', roasting: 'Roasting', packaging: 'Packaging', warehouse: 'Warehouse' };
+        const forms = DOCUMENT_REGISTER.filter(d => d.fillable && d.href && d.href.indexOf('form.html') > -1);
+
+        guardPage(async role => {
+            if (!role) return;
+            document.getElementById('asOf').textContent = 'As of ' + fmtDate(today) + ' · Mountain Time';
+            const [records, signoffs, training, equipment] = await Promise.all([
+                listRecords({}).catch(() => []), listSignoffs().catch(() => []),
+                listTraining().catch(() => []), listEquipment().catch(() => [])
+            ]);
+
+            // due-now computation
+            const lastByForm = {};
+            records.forEach(r => { const iso = recordDateISO(r); if (iso && (!lastByForm[r.form_code] || iso > lastByForm[r.form_code])) lastByForm[r.form_code] = iso; });
+            const dueRows = forms.map(f => ({ f, st: dueStatus(f.cadence, lastByForm[f.code] || '', today) })).filter(r => r.st.state === 'due');
+
+            // sign-off coverage
+            const signed = new Set();
+            signoffs.forEach(s => (s.record_ids || []).forEach(id => signed.add(id)));
+            const coverage = records.length ? Math.round(100 * [...signed].filter(id => records.some(r => r.id === id)).length / records.length) : 0;
+
+            // training currency
+            const trainingCurrent = training.filter(c => c.passed && trainingStatus(c.recurrence, tsDateISO(c.taken_at), today).state === 'current').length;
+            const trainingExpired = training.filter(c => c.passed && trainingStatus(c.recurrence, tsDateISO(c.taken_at), today).state === 'expired').length;
+
+            renderStats({
+                docs: DOCUMENT_REGISTER.length, forms: forms.length, records: records.length,
+                dueN: dueRows.length, coverage, signoffs: signoffs.length,
+                trainingCurrent, trainingExpired, equipment: equipment.length
+            });
+            renderDue(dueRows);
+            renderSignoffs(signoffs.slice(0, 8));
+        });
+
+        function stat(n, l, s, warn) {
+            return `<div class="stat${warn ? ' warn' : ''}"><div class="n">${n}</div><div class="l">${escapeHtml(l)}</div>${s ? `<div class="s">${escapeHtml(s)}</div>` : ''}</div>`;
+        }
+        function renderStats(d) {
+            document.getElementById('stats').innerHTML =
+                stat(d.docs, 'Controlled documents', 'version-controlled') +
+                stat(d.records, 'Records on file', 'permanent & immutable') +
+                stat(d.dueN, 'Records due now', d.dueN ? 'need completing' : 'all current', d.dueN > 0) +
+                stat(d.coverage + '%', 'Sign-off coverage', `${d.signoffs} sign-offs filed`) +
+                stat(d.trainingCurrent, 'Training current', d.trainingExpired ? `${d.trainingExpired} expired` : 'no expiries', d.trainingExpired > 0) +
+                stat(d.equipment, 'Equipment tracked', 'machines & probes');
+        }
+        function renderDue(rows) {
+            const el = document.getElementById('due');
+            if (!rows.length) { el.innerHTML = `<div class="rec-empty" style="padding:16px;border:1px solid var(--divider);border-radius:var(--r-md);">Nothing outstanding — every scheduled record is current. <a href="/cfia/schedule.html" style="font-weight:700;color:var(--teal-dark);">Open What's Due →</a></div>`; return; }
+            rows.sort((a, b) => a.f.code.localeCompare(b.f.code, undefined, { numeric: true }));
+            const head = `<div class="ov-row ov-due"><span style="font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--grey);">Record</span><span style="font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--grey);">Cadence</span><span></span></div>`;
+            el.innerHTML = `<div class="ov-list">${head}` + rows.map(r => `<div class="ov-row ov-due">
+                <span><strong>${escapeHtml(r.f.code)} — ${escapeHtml(r.f.title)}</strong></span>
+                <span>${escapeHtml(r.f.cadence)}</span>
+                <span class="no-print"><a class="chip no" href="${r.f.href}" style="text-decoration:none;">Fill now</a></span>
+            </div>`).join('') + `</div>`;
+        }
+        function renderSignoffs(list) {
+            const el = document.getElementById('signoffs');
+            if (!list.length) { el.innerHTML = `<div class="rec-empty" style="padding:16px;border:1px solid var(--divider);border-radius:var(--r-md);">No supervisor sign-offs filed yet.</div>`; return; }
+            el.innerHTML = `<div class="ov-list">` + list.map(s => `<div class="ov-row ov-sign">
+                <strong>${escapeHtml(fmtDate(s.signed_at))}</strong>
+                <span>${escapeHtml(s.covers_form || '')} · <span class="chip ${s.status === 'verified' ? 'ok' : 'no'}">${escapeHtml(s.status)}</span> · ${(s.record_ids || []).length} record(s)${s.scope_note ? ' — ' + escapeHtml(s.scope_note) : ''}</span>
+                <span>${escapeHtml(s.signed_by_name || '')}</span>
+            </div>`).join('') + `</div>`;
+        }
+    </script>
+</body>
+</html>
