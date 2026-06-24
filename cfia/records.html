@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
     <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .rec-head, .rec-row { grid-template-columns: 104px 1fr 120px 120px 84px 128px; }
+        @media (max-width: 760px) { .rec-head { display: none; } .rec-row { grid-template-columns: 1fr; gap: 6px; } }
+    </style>
     <script src="/system/firebase-config.js"></script>
 </head>
 <body class="cfia-checking">
@@ -59,12 +63,19 @@
     </main>
 
     <script type="module">
-        import { guardPage, listRecords, isManager, fmtDate, fmtDateTime, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { guardPage, listRecords, listSignoffs, isManager, fmtDate, fmtDateTime, millis, escapeHtml } from '/cfia/system/cfia-core.js';
         import { FORM_SCHEMAS } from '/cfia/config/form-schemas.js';
 
         const listEl = document.getElementById('recList');
         let allRecords = [];
+        let signoffByRecord = {};
         let filter = 'all';
+
+        function verifyCell(r) {
+            const s = signoffByRecord[r.id];
+            if (!s) return `<span class="pill">Awaiting sign-off</span>`;
+            return `<span class="pill ${s.status === 'verified' ? 'ok' : 'no'}">${s.status === 'verified' ? 'Verified' : 'Flagged'}</span>`;
+        }
 
         function recDate(r) {
             const v = r.values || {};
@@ -85,7 +96,13 @@
                 ? 'Every submitted record across all forms. Filter by form, click any row for the full detail and a one-click PDF.'
                 : 'The records you submitted. Click any row for the full detail and a one-click PDF.';
             try {
-                allRecords = await listRecords({});
+                const [recs, signs] = await Promise.all([listRecords({}), listSignoffs().catch(() => [])]);
+                allRecords = recs;
+                signoffByRecord = {};
+                signs.forEach(s => (s.record_ids || []).forEach(id => {
+                    const prev = signoffByRecord[id];
+                    if (!prev || millis(s.signed_at) > millis(prev.signed_at)) signoffByRecord[id] = s;
+                }));
             } catch (err) {
                 listEl.innerHTML = `<div class="rec-empty">Could not load records: ${escapeHtml(err.message || err)}</div>`;
                 return;
@@ -109,7 +126,7 @@
                 return;
             }
 
-            const head = `<div class="rec-head"><span>Date</span><span>Form</span><span>Completed by</span><span>Submitted</span><span>Dept</span></div>`;
+            const head = `<div class="rec-head"><span>Date</span><span>Form</span><span>Completed by</span><span>Submitted</span><span>Dept</span><span>Sign-off</span></div>`;
             const rows = records.map((r, i) => `
                 <div class="rec-row" data-i="${i}">
                     <strong>${escapeHtml(recDate(r))}</strong>
@@ -117,6 +134,7 @@
                     <span>${escapeHtml(r.performed_by_name || '—')}</span>
                     <span>${escapeHtml(fmtDateTime(r.submitted_at))}</span>
                     <span>${escapeHtml(r.department || '—')}</span>
+                    <span>${verifyCell(r)}</span>
                 </div>
                 <div class="rec-detail" id="detail-${i}" style="display:none;"></div>`).join('');
 
@@ -151,11 +169,16 @@
                 const fields = Object.keys(v).map(k => `<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(v[k] || '—')}</strong></div>`).join('');
                 body = `<h4>Values</h4><div class="rec-kv">${fields}</div>`;
             }
+            const s = signoffByRecord[r.id];
+            const signLine = s
+                ? `<strong style="color:${s.status === 'verified' ? 'var(--pass)' : 'var(--fail)'};">${s.status === 'verified' ? 'Verified' : 'Flagged'}</strong> by ${escapeHtml(s.signed_by_name || '')} · ${escapeHtml(fmtDateTime(s.signed_at))}${s.scope_note ? ' — ' + escapeHtml(s.scope_note) : ''}`
+                : 'Awaiting supervisor sign-off.';
             return body + `
                 <div class="stamp">
                     <strong>Record ${escapeHtml(r.record_id || '')}</strong> · Form ${escapeHtml(r.form_code)} v${escapeHtml(r.form_version || '')}<br>
                     Completed by <strong>${escapeHtml(r.performed_by_name || '—')}</strong>${r.performed_by_is_self === false ? ' (entered on a shared/other account)' : ''}<br>
                     Submitted from account <strong>${escapeHtml(r.submitted_by_name || '')}</strong> (${escapeHtml(r.submitted_by_email || '')}) · ${escapeHtml(fmtDateTime(r.submitted_at))}<br>
+                    Supervisor sign-off: ${signLine}<br>
                     Permanent record — cannot be edited or deleted.
                 </div>
                 <div class="actions" style="justify-content:flex-start;margin-top:14px;">
@@ -197,6 +220,7 @@ td:first-child{width:42%;color:#4A4A4A}
 <div class="stamp">
   Completed by <strong>${escapeHtml(r.performed_by_name || '—')}</strong>${r.performed_by_is_self === false ? ' (entered on a shared/other account)' : ''}.<br>
   Submitted from account ${escapeHtml(r.submitted_by_name || '')} (${escapeHtml(r.submitted_by_email || '')}) on ${escapeHtml(fmtDateTime(r.submitted_at))}.<br>
+  Supervisor sign-off: ${signoffByRecord[r.id] ? `${signoffByRecord[r.id].status === 'verified' ? 'Verified' : 'Flagged'} by ${escapeHtml(signoffByRecord[r.id].signed_by_name || '')} on ${escapeHtml(fmtDateTime(signoffByRecord[r.id].signed_at))}` : 'Awaiting supervisor sign-off'}.<br>
   This is a permanent, immutable record — it cannot be edited or deleted.
 </div>
 </body></html>`;
