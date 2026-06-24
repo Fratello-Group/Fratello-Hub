@@ -156,7 +156,10 @@ service cloud.firestore {
         && request.resource.data.status == resource.data.status
         && request.resource.data.role_tier == resource.data.role_tier
         && request.resource.data.manager_id == resource.data.manager_id
-        && request.resource.data.department == resource.data.department;
+        && request.resource.data.department == resource.data.department
+        && request.resource.data.get('safetyOfficer', false) == resource.data.get('safetyOfficer', false)
+        && request.resource.data.get('cfia_tier', '') == resource.data.get('cfia_tier', '')
+        && request.resource.data.get('cfia_department', '') == resource.data.get('cfia_department', '');
     }
 
     function validAvatarStatus(data) {
@@ -167,6 +170,38 @@ service cloud.firestore {
       return signedIn()
         && data.created_by_uid == request.auth.uid
         && data.created_by_email == signedInEmail();
+    }
+
+    // ── CFIA role model ──
+    // Kyle = QA / food-safety officer (safetyOfficer flag on the profile); owners always qualify.
+    function cfiaProfile() { return get(profilePath(request.auth.uid)).data; }
+    function isSafetyOfficer() {
+      return isOwner()
+        || (
+          signedIn() && exists(profilePath(request.auth.uid))
+          && cfiaProfile().status == 'active'
+          && cfiaProfile().get('safetyOfficer', false) == true
+        );
+    }
+    // Who may verify / sign off and read all records: owner, controller, QA officer.
+    function isCfiaVerifier() { return isOwnerOrController() || isSafetyOfficer(); }
+
+    // Field-level validation for an immutable record (must match cfia-core.js exactly).
+    function cfiaRecordValid(d) {
+      return d.keys().hasOnly([
+          'form_code','form_title','sop_code','form_version','record_id','values',
+          'performed_by_name','performed_by_is_self','submitted_by_uid','submitted_by_email',
+          'submitted_by_name','submitted_at','department','supersedes','created_via'
+        ])
+        && d.form_code is string && d.form_code.size() > 0
+        && d.record_id is string && d.record_id.size() > 0
+        && d.values is map
+        && d.performed_by_name is string && d.performed_by_name.size() > 0
+        && d.performed_by_is_self is bool
+        && d.submitted_by_name is string
+        && d.submitted_at is timestamp
+        && (d.supersedes == null || d.supersedes is string)
+        && d.created_via == 'cfia-hub';
     }
 
     match /hubProfiles/{uid} {
@@ -274,13 +309,65 @@ service cloud.firestore {
     // (or a bad actor editing the page) cannot forge who or when.
     // A correction is filed as a new record that links via `supersedes`.
     match /cfia_records/{recordId} {
-      allow get, list: if isOwnerOrController()
+      // Managers + QA see all; a person sees their own.
+      allow get, list: if isCfiaVerifier()
         || (signedIn() && resource.data.submitted_by_email == signedInEmail());
+      // Create-only, self + server stamped, field-validated.
       allow create: if signedIn()
         && request.resource.data.submitted_by_uid == request.auth.uid
         && request.resource.data.submitted_by_email == signedInEmail()
         && request.resource.data.submitted_at == request.time
-        && request.resource.data.created_via == 'cfia-hub';
+        && request.resource.data.created_via == 'cfia-hub'
+        && cfiaRecordValid(request.resource.data);
+      allow update: if false;   // immutable — corrections are new superseding records
+      allow delete: if false;   // append-only — retained >= 5 years, never deleted
+    }
+
+    // ── Manager / QA verification sign-offs (the 3-tier oversight chain) ──
+    // A department head or QA confirms a set of records was done properly.
+    // Separation of duties: the signer must NOT be a submitter of the records signed.
+    match /cfia_signoffs/{id} {
+      allow get, list: if isCfiaVerifier()
+        || (signedIn() && resource.data.signed_by_email == signedInEmail());
+      allow create: if isCfiaVerifier()
+        && request.resource.data.signed_by_uid == request.auth.uid
+        && request.resource.data.signed_by_email == signedInEmail()
+        && request.resource.data.signed_at == request.time
+        && request.resource.data.created_via == 'cfia-hub-signoff'
+        && !(signedInEmail() in request.resource.data.record_submitter_emails);
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── Equipment registry (first-class machines; per-machine history) ──
+    match /cfia_equipment/{id} {
+      allow get, list: if signedIn();
+      allow create, update: if isCfiaVerifier();
+      allow delete: if false;   // retire via active:false, never hard-delete
+    }
+
+    // ── Training completions (quiz passes; immutable, self-written) ──
+    match /cfia_training_completions/{id} {
+      allow get, list: if isCfiaVerifier()
+        || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == signedInEmail()
+        && request.resource.data.taken_at == request.time
+        && request.resource.data.created_via == 'cfia-hub-training';
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── Document acknowledgements ("I read SOP vX"; immutable, self-written) ──
+    match /cfia_acknowledgements/{id} {
+      allow get, list: if isCfiaVerifier()
+        || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == signedInEmail()
+        && request.resource.data.read_at == request.time
+        && request.resource.data.created_via == 'cfia-hub-ack';
       allow update: if false;
       allow delete: if false;
     }
