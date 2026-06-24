@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Equipment Registry</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .eq-list { border: 1px solid var(--divider); border-radius: var(--r-md); overflow: hidden; background: var(--white); }
+        .eq-row { display: grid; grid-template-columns: 1fr 120px 110px 120px 86px; gap: 12px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--fog); font-size: 13px; color: var(--slate); }
+        .eq-row:first-child { border-top: none; }
+        .eq-head { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); background: var(--card); }
+        .eq-row strong { color: var(--black); display: block; }
+        .eq-row .eq-id { font-size: 11px; color: var(--grey); }
+        .chip { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .3px; padding: 4px 9px; border-radius: 999px; text-transform: uppercase; }
+        .chip.ok { background: #e6f4ea; color: #1c7a3f; }
+        .chip.mut { background: var(--card); color: var(--grey); }
+        .sec-label { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); margin: 32px 0 12px; }
+        @media (max-width: 760px) {
+            .eq-row { grid-template-columns: 1fr auto; }
+            .eq-row span:nth-child(n+3) { display: none; }
+            .eq-head { display: none; }
+        }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Equipment</div>
+                <div class="bar-title">Equipment Registry</div>
+            </div>
+        </div>
+        <div class="actions"><a class="btn" href="/cfia/index.html">Dashboard</a></div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This registry is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">Equipment</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline">Machines & measurement devices</div>
+            <h1>Equipment Registry</h1>
+            <p>Every roaster, line, scale and probe as a tracked entity. Records and maintenance logs reference a machine here, so you can pull a full per-machine history — and it's where calibrated devices (scales, temperature probes) are controlled.</p>
+        </section>
+
+        <div id="seedBox"></div>
+        <div class="sec-label">Registered equipment</div>
+        <div id="registry"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, listEquipment, addEquipment, isManager, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { EQUIPMENT } from '/cfia/config/equipment.js';
+
+        const DEPT = { company: 'Company-wide', roasting: 'Roasting', packaging: 'Packaging', warehouse: 'Warehouse' };
+        const TYPE = { roaster: 'Roaster', grinder: 'Grinder', 'packaging-line': 'Packaging line', scale: 'Scale', probe: 'Probe', area: 'Area' };
+        let registry = [];
+
+        guardPage(async role => { if (role) await load(); });
+
+        async function load() {
+            try { registry = await listEquipment(); }
+            catch (e) { document.getElementById('registry').innerHTML = `<div class="rec-empty" style="padding:18px;">Could not load: ${escapeHtml(e.message || e)}</div>`; return; }
+            render();
+        }
+
+        function render() {
+            const have = new Set(registry.map(e => e.id));
+            const missing = EQUIPMENT.filter(e => !have.has(e.id));
+
+            // Seed panel — verifiers only, when standard machines aren't in the registry yet.
+            const seed = document.getElementById('seedBox');
+            if (isManager() && missing.length) {
+                seed.innerHTML = `<div class="callout"><strong>${missing.length} standard machine${missing.length === 1 ? '' : 's'} not yet in the registry.</strong>
+                    Add the known Fratello equipment list (roasters, lines, scales, probe) in one step.
+                    <div style="margin-top:10px;"><button class="btn btn-primary" id="seedBtn" type="button">Add standard equipment</button>
+                    <span id="seedMsg" style="margin-left:10px;font-weight:700;"></span></div></div>`;
+                document.getElementById('seedBtn').addEventListener('click', seedAll);
+            } else {
+                seed.innerHTML = '';
+            }
+
+            const wrap = document.getElementById('registry');
+            if (!registry.length) {
+                wrap.innerHTML = `<div class="rec-empty" style="padding:18px;border:1px solid var(--divider);border-radius:var(--r-md);">No equipment registered yet.${isManager() ? ' Use “Add standard equipment” above.' : ''}</div>`;
+                return;
+            }
+            const order = { roaster: 0, grinder: 1, 'packaging-line': 2, scale: 3, probe: 4, area: 5 };
+            const rows = registry.slice().sort((a, b) => (order[a.type] ?? 9) - (order[b.type] ?? 9) || String(a.id).localeCompare(String(b.id)));
+            const head = `<div class="eq-row eq-head"><span>Machine</span><span>Type</span><span>Department</span><span>Check cadence</span><span>Status</span></div>`;
+            const body = rows.map(e => {
+                const manual = e.manual_code ? ` · <a href="/cfia/reference/view.html?code=${encodeURIComponent(e.manual_code)}">manual ${escapeHtml(e.manual_code)}</a>` : '';
+                return `<div class="eq-row">
+                    <span><strong>${escapeHtml(e.name || e.id)}</strong><span class="eq-id">${escapeHtml(e.id)}${manual}</span></span>
+                    <span>${escapeHtml(TYPE[e.type] || e.type || '—')}</span>
+                    <span>${escapeHtml(DEPT[e.department] || e.department || '—')}</span>
+                    <span>${escapeHtml(e.cadence || '—')}</span>
+                    <span><span class="chip ${e.active !== false ? 'ok' : 'mut'}">${e.active !== false ? 'Active' : 'Retired'}</span></span>
+                </div>`;
+            }).join('');
+            wrap.innerHTML = `<div class="eq-list">${head}${body}</div>`;
+        }
+
+        async function seedAll() {
+            const btn = document.getElementById('seedBtn'), msg = document.getElementById('seedMsg');
+            btn.disabled = true; btn.textContent = 'Adding…';
+            const have = new Set(registry.map(e => e.id));
+            const missing = EQUIPMENT.filter(e => !have.has(e.id));
+            try {
+                for (const e of missing) await addEquipment(e);
+                msg.style.color = 'var(--pass)'; msg.textContent = `Added ${missing.length}.`;
+                await load();
+            } catch (e) {
+                btn.disabled = false; btn.textContent = 'Add standard equipment';
+                msg.style.color = 'var(--fail)'; msg.textContent = 'Could not add: ' + (e.message || e);
+            }
+        }
+    </script>
+</body>
+</html>

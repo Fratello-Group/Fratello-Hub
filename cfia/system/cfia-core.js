@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { firebaseConfigured, onHubAuthChange, initFirebase, normalizeEmail } from '/system/fratello-auth.js';
 import {
-    collection, addDoc, getDocs, query, where, serverTimestamp
+    collection, addDoc, getDocs, query, where, serverTimestamp, doc, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // Pilot phase: owner-only. (Later, open this to production staff by adding
@@ -182,6 +182,29 @@ export async function listAcks() {
     if (!d || !currentRole) return [];
     const snap = await getDocs(collection(d, 'cfia_acknowledgements'));
     return snap.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => millis(b.read_at) - millis(a.read_at));
+}
+
+// ── Equipment registry (machines as first-class entities) ──
+export async function listEquipment() {
+    const d = db();
+    if (!d || !currentRole) return [];
+    const snap = await getDocs(collection(d, 'cfia_equipment'));
+    return snap.docs.map(x => ({ id: x.id, ...x.data() }));
+}
+
+// Add (or refresh) one machine. The stable config id becomes the Firestore doc id,
+// so records can reference an equipmentId and pull a full per-machine history.
+export async function addEquipment(item) {
+    const d = db(); const a = authState();
+    if (!d || !a || !a.currentUser) throw new Error('Please sign in again.');
+    const u = a.currentUser;
+    const rec = {
+        name: item.name || '', type: item.type || '', department: item.department || '',
+        manual_code: item.manualCode || '', cadence: item.cadence || '', active: item.active !== false,
+        added_by_email: normalizeEmail(u.email), added_at: serverTimestamp(), created_via: 'cfia-hub-equipment'
+    };
+    await setDoc(doc(d, 'cfia_equipment', item.id), rec);
+    return { id: item.id, ...rec };
 }
 
 // America/Edmonton calendar date (YYYY-MM-DD) — the program timezone for "due today".
