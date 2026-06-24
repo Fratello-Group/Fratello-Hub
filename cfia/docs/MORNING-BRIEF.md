@@ -9,6 +9,14 @@ Everything below is **live** on the site and was **tested before each push** (a 
 - **Inline cross-links**: where a document mentions "SOP 6.1" or "Form 6.3a", it's now a clickable link — the built-in hyperlinking you asked for early on.
 - **17 forms are fillable** through a generic form page (same locked, immutable sign-off as the Pre-Op pilot), from **36 form schemas** built off the real forms.
 
+## Built later the same day (continued — all live + tested)
+- **Document Control Register** (`/cfia/document-control.html`) — the audit view: every document's version, owner, effective date, with metadata-gap flags; sortable/filterable. Linked from the dashboard ("Document Control"). Auditors look here first.
+- **Conduct policies + all five job descriptions are now readable** (Drug & Alcohol, Harassment; Packaging Team Member, Packaging Machine Operator, Coffee Roaster, Warehouse Team Member, Warehouse Supervisor). The register is now **111 documents**.
+- **Records view generalized** — the manager records page shows **every** form's records (not just Pre-Op), filterable by form, each rendered from its schema with a generic immutable-record PDF export.
+- **Clean, audit-ready PDF print** and **keyboard-accessible focus** across the whole module.
+- **Maintainability docs** — `ADDING-A-DOCUMENT.md`, `DATA-MODEL.md`, and a module `README.md` so this stays editable by a non-developer.
+- **Full link-check** (0 broken cross-references), robust lowercase fragment fetch, and a **page syntax-validation harness** (jsc + DOM stubs) that now gates every page change.
+
 ## How to take a quick tour
 1. Open **Food Safety** → tap **Roasting** or **Warehouse** (now populated, not just Packaging).
 2. Open any SOP — e.g. **Recall Procedure (10.1)** — to see a converted, readable, cross-linked document.

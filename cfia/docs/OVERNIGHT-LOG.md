@@ -20,3 +20,9 @@ branch `codex-hub-access-design` for Chris to review + publish in the morning.
 - [x] Phase 6 — morning brief **DONE** (MORNING-BRIEF.md)
 
 _Log updated as each phase completes._
+
+## Continued the same day (live + tested)
+- Document Control Register (audit view) + dashboard link
+- Conduct policies + 5 job descriptions readable (register now 111 docs)
+- records.html generalized to all forms (filter + generic PDF)
+- Clean audit PDF print + a11y focus; full link-check (0 broken); page syntax harness (jsc+DOM stubs)
