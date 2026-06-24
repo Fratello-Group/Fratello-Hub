@@ -2122,21 +2122,14 @@ const SECTIONS = {
         ]
     },
 
+    // Food Safety opens its own full dashboard (cfia/index.html) — no redundant
+    // in-Hub section page. directLink makes the Departments row navigate straight there.
     'food-safety': {
         group: 'Departments',
         label: 'Food Safety',
         menuParent: '',
-        cards: [
-            { title: 'Food Safety Home', href: 'cfia/index.html', badge: 'Live', quick: true },
-            { title: 'All SOPs & Documents', href: 'cfia/map.html', badge: 'Live', quick: true },
-            { title: 'Company-Wide', href: 'cfia/department.html?dept=company', badge: 'Live' },
-            { title: 'Roasting', href: 'cfia/department.html?dept=roasting', badge: 'Live' },
-            { title: 'Packaging', href: 'cfia/department.html?dept=packaging', badge: 'Live' },
-            { title: 'Warehouse', href: 'cfia/department.html?dept=warehouse', badge: 'Live' },
-            { title: 'Compliance Overview', href: 'cfia/audit.html', badge: 'Manager', roles: ['owner', 'controller'] },
-            { title: "What's Due", href: 'cfia/schedule.html', badge: 'Manager', roles: ['owner', 'controller'] },
-            { title: 'Records', href: 'cfia/records.html', badge: 'Manager', roles: ['owner', 'controller'] }
-        ]
+        directLink: 'cfia/index.html',
+        cards: []
     },
 
     'employee-resources': {
@@ -2718,7 +2711,7 @@ function visibleSectionsForRole(role) {
             const cards = section.cards.filter(card => cardIsVisible(card, role));
             return { key: sectionKey, ...section, cards };
         })
-        .filter(section => section && section.cards.length);
+        .filter(section => section && (section.cards.length || section.directLink));
 }
 
 function visibleSection(role, sectionKey) {
@@ -2762,14 +2755,18 @@ function closeHubNav() {
     if (btn) btn.setAttribute('aria-expanded', 'false');
 }
 
-function renderHub(role, view = 'dashboard', sectionKey = '') {
+function renderHub(role, view = 'dashboard', sectionKey = '', push = true) {
     activeRole = role;
     closeNavMenus();
     closeHubNav();
     setActiveNav(view, sectionKey);
     const hashTarget = sectionKey || view;
-    if (hashTarget && location.hash !== `#${hashTarget}`) {
-        history.replaceState(null, '', `#${hashTarget}`);
+    const newHash = `#${hashTarget}`;
+    // Each navigation is its own history entry, so the browser Back button
+    // returns to the previous view (not a stale one). The first render replaces.
+    if (location.hash !== newHash) {
+        if (push) history.pushState({ view, sectionKey }, '', newHash);
+        else history.replaceState({ view, sectionKey }, '', newHash);
     }
 
     if (view === 'departments') {
@@ -2788,6 +2785,17 @@ function renderHub(role, view = 'dashboard', sectionKey = '') {
     }
 
     renderDashboardHome(role);
+}
+
+// Back / Forward: re-render the view for the hash we landed on (no new entry).
+if (!window.__fratelloHubPopBound) {
+    window.addEventListener('popstate', () => {
+        const dash = document.getElementById('dashboard');
+        if (!activeRole || !dash || !dash.classList.contains('active')) return;
+        const route = initialHubRoute(activeRole);
+        renderHub(activeRole, route.view, route.sectionKey, false);
+    });
+    window.__fratelloHubPopBound = true;
 }
 
 function initialHubRoute(role) {
@@ -3219,17 +3227,23 @@ function renderDepartmentsIndex(role) {
         const row = document.createElement('article');
         row.className = 'dept-row fade-in';
         row.tabIndex = 0;
+        const subtitle = section.directLink
+            ? 'Open the full dashboard'
+            : `${section.cards.length} item${section.cards.length === 1 ? '' : 's'}`;
         row.innerHTML = `
             <span class="dept-icon">${iconSvg(deptIcons[section.key] || 'calendar')}</span>
             <span class="dept-copy">
                 <span class="dept-title">${section.label}</span>
-                <span class="dept-count">${section.cards.length} item${section.cards.length === 1 ? '' : 's'}</span>
+                <span class="dept-count">${subtitle}</span>
             </span>
             <span class="dept-arrow">→</span>
         `;
-        row.onclick = () => renderHub(role, 'section', section.key);
+        const go = section.directLink
+            ? () => { window.location.href = section.directLink; }
+            : () => renderHub(role, 'section', section.key);
+        row.onclick = go;
         row.onkeydown = event => {
-            if (event.key === 'Enter' || event.key === ' ') renderHub(role, 'section', section.key);
+            if (event.key === 'Enter' || event.key === ' ') go();
         };
         list.appendChild(row);
     });
@@ -3341,6 +3355,7 @@ function renderResourcesIndex(role) {
 
 function renderSectionPage(role, sectionKey) {
     const section = visibleSection(role, sectionKey);
+    if (section && section.directLink) { window.location.href = section.directLink; return; }
     const main = document.getElementById('mainContent');
     main.innerHTML = '';
 
@@ -3389,7 +3404,7 @@ async function showDashboard(role) {
     populateProfileMenu(role, person);
     setupHubNav(role);
     const route = initialHubRoute(role);
-    renderHub(role, route.view, route.sectionKey);
+    renderHub(role, route.view, route.sectionKey, false);
 }
 
 // ════════════════════════════════════════════════
