@@ -82,11 +82,11 @@
     </main>
 
     <script type="module">
-        import { guardPage, getRole, listRecords, createSignoff, listSignoffs, fmtDate, fmtDateTime, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { guardManagerPage, getRole, listRecords, createSignoff, listSignoffs, fmtDate, fmtDateTime, escapeHtml } from '/cfia/system/cfia-core.js';
 
         let records = [], myEmail = '';
 
-        guardPage(async role => {
+        guardManagerPage(async role => {
             if (!role) return;
             myEmail = (role.user && role.user.email || '').toLowerCase();
             try { records = await listRecords({}); } catch (e) { document.getElementById('pending').innerHTML = `<div class="rec-empty">Could not load records: ${escapeHtml(e.message || e)}</div>`; }

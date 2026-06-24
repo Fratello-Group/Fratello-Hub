@@ -55,7 +55,7 @@
     </main>
 
     <script type="module">
-        import { guardPage } from '/cfia/system/cfia-core.js';
+        import { guardPage, isManager } from '/cfia/system/cfia-core.js';
 
         const S = (w, h, body) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="${w}" height="${h}" aria-hidden="true">${body}</svg>`;
         const ICON = {
@@ -83,11 +83,11 @@
             { href: '/cfia/department.html?dept=warehouse', icon: ICON.warehouse, name: 'Warehouse', sub: 'Department' }
         ];
         const COMPLIANCE = [
-            { href: '/cfia/audit.html', icon: ICON.overview, name: 'Compliance Overview', sub: 'audit snapshot' },
-            { href: '/cfia/schedule.html', icon: ICON.schedule, name: "What's Due", sub: 'recurring records' },
-            { href: '/cfia/records.html', icon: ICON.records, name: 'Records', sub: 'submitted logs' },
-            { href: '/cfia/signoff.html', icon: ICON.verify, name: 'Verify & Sign Off', sub: 'manager oversight' },
-            { href: '/cfia/training/index.html', icon: ICON.training, name: 'Training', sub: 'who is trained' },
+            { href: '/cfia/audit.html', icon: ICON.overview, name: 'Compliance Overview', sub: 'audit snapshot', manager: true },
+            { href: '/cfia/schedule.html', icon: ICON.schedule, name: "What's Due", sub: 'recurring records', manager: true },
+            { href: '/cfia/records.html', icon: ICON.records, name: 'Records', sub: 'submitted logs', manager: true },
+            { href: '/cfia/signoff.html', icon: ICON.verify, name: 'Verify & Sign Off', sub: 'manager oversight', manager: true },
+            { href: '/cfia/training/index.html', icon: ICON.training, name: 'Training', sub: 'who is trained', manager: true },
             { href: '/cfia/equipment.html', icon: ICON.equipment, name: 'Equipment', sub: 'machines & probes' }
         ];
         const LIBRARY = [
@@ -108,7 +108,8 @@
                 <a class="subtile" href="${t.href}">${t.icon}
                     <span><span class="subtile-name">${t.name}</span> <span class="subtile-sub">${t.sub}</span></span>
                 </a>`;
-            document.getElementById('compRow').innerHTML = COMPLIANCE.map(subtile).join('');
+            const mgr = isManager();
+            document.getElementById('compRow').innerHTML = COMPLIANCE.filter(t => !t.manager || mgr).map(subtile).join('');
             document.getElementById('libRow').innerHTML = LIBRARY.map(subtile).join('');
         });
     </script>

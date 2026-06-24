@@ -612,6 +612,9 @@ export function friendlyAuthError(error) {
     if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
         return 'Email or password is incorrect. Use Forgot password if needed.';
     }
+    if (code === 'auth/too-many-requests') {
+        return 'Too many sign-in attempts. This account is temporarily locked — wait a few minutes or use Forgot password.';
+    }
     if (code === 'auth/email-already-in-use') return 'That email already has an account. Sign in instead.';
     if (code === 'auth/weak-password') return 'Use a password with at least 6 characters.';
     if (code === 'auth/unauthorized-domain') return 'This domain has not been added to Firebase authorized domains yet.';

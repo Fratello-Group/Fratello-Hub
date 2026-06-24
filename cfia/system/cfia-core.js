@@ -7,9 +7,11 @@ import {
     collection, addDoc, getDocs, query, where, serverTimestamp, doc, setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// Pilot phase: owner-only. (Later, open this to production staff by adding
-// 'production', 'staff', etc. — the Firestore rules already support them.)
-const ALLOWED = new Set(['owner']);
+// Any signed-in employee can VIEW food-safety reference content (SOPs, the system
+// map, their department pages) and fill their own forms. Oversight pages (all
+// records, sign-offs, compliance status) opt into a tighter set via guardPage's
+// { allow } option. The Firestore rules are the real enforcement boundary.
+const VIEW_ROLES = new Set(['owner', 'controller', 'production', 'marketing', 'sales', 'staff']);
 // Who sees ALL submitted records (manager / audit view). Others see their own.
 const MANAGERS = new Set(['owner', 'controller']);
 
@@ -23,9 +25,12 @@ function roleFromLocalStorage() {
 }
 
 // Gate the page. Calls cb(role) once we know who (or null if not allowed in).
-export function guardPage(cb) {
+// opts.allow — an array/Set of role keys allowed on this page. Defaults to every
+// signed-in employee (view access); oversight pages pass { allow: ['owner','controller'] }.
+export function guardPage(cb, opts) {
+    const allow = opts && opts.allow ? new Set(opts.allow) : VIEW_ROLES;
     const apply = (role) => {
-        currentRole = (role && ALLOWED.has(role.key)) ? role : null;
+        currentRole = (role && allow.has(role.key)) ? role : null;
         document.body.classList.remove('cfia-checking');
         if (!currentRole) {
             document.body.classList.add('cfia-denied');
@@ -47,6 +52,9 @@ export function guardPage(cb) {
 
 export function getRole() { return currentRole; }
 export function isManager() { return !!(currentRole && MANAGERS.has(currentRole.key)); }
+
+// Oversight pages (all records, sign-offs, compliance status) — owners/managers only.
+export function guardManagerPage(cb) { return guardPage(cb, { allow: ['owner', 'controller'] }); }
 
 function db() { const s = initFirebase(); return s && s.ready ? s.db : null; }
 function authState() { const s = initFirebase(); return s && s.ready ? s.auth : null; }

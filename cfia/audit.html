@@ -84,14 +84,14 @@
     </main>
 
     <script type="module">
-        import { guardPage, listRecords, listSignoffs, listTraining, listEquipment, dueStatus, recordDateISO, trainingStatus, tsDateISO, edmontonToday, escapeHtml, fmtDate, fmtDateTime } from '/cfia/system/cfia-core.js';
+        import { guardManagerPage, listRecords, listSignoffs, listTraining, listEquipment, dueStatus, recordDateISO, trainingStatus, tsDateISO, edmontonToday, escapeHtml, fmtDate, fmtDateTime } from '/cfia/system/cfia-core.js';
         import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
 
         const today = edmontonToday();
         const DEPT = { company: 'Company-wide', roasting: 'Roasting', packaging: 'Packaging', warehouse: 'Warehouse' };
         const forms = DOCUMENT_REGISTER.filter(d => d.fillable && d.href && d.href.indexOf('form.html') > -1);
 
-        guardPage(async role => {
+        guardManagerPage(async role => {
             if (!role) return;
             document.getElementById('asOf').textContent = 'As of ' + fmtDate(today) + ' · Mountain Time';
             const [records, signoffs, training, equipment] = await Promise.all([

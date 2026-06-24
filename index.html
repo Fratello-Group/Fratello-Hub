@@ -85,6 +85,35 @@
             margin-bottom: 14px;
         }
 
+        .login-input.has-toggle { padding-right: 50px; }
+        .pw-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            background: none;
+            border: 0;
+            padding: 6px;
+            margin: 0;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 0;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+        }
+        .pw-toggle:hover { color: rgba(255, 255, 255, 0.92); }
+        .pw-toggle:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.5); }
+        .pw-toggle svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .login-input {
             width: 100%;
             padding: 18px 22px;
@@ -1881,11 +1910,14 @@
             <div class="login-input-wrap">
                 <input
                     type="password"
-                    class="login-input"
+                    class="login-input has-toggle"
                     id="loginPassword"
                     placeholder="Password"
                     autocomplete="current-password"
                 >
+                <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" aria-pressed="false" onclick="togglePasswordVisibility()">
+                    <svg id="pwEye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
             </div>
             <div class="login-input-wrap setup-code-wrap" id="setupCodeWrap">
                 <input
@@ -2033,6 +2065,7 @@ const SECTIONS = {
         label: 'Roasting',
         menuParent: 'Production',
         cards: [
+            { title: 'Food Safety — Roasting', href: 'cfia/department.html?dept=roasting', badge: 'Live', quick: true },
             { title: 'Roast Schedule', href: '#', badge: 'Coming Soon' },
             { title: 'Batch Records', href: '#', badge: 'Coming Soon' },
             { title: 'Roast Profiles', href: '#', badge: 'Coming Soon' },
@@ -2045,10 +2078,10 @@ const SECTIONS = {
         label: 'Packaging',
         menuParent: 'Production',
         cards: [
+            { title: 'Food Safety — Packaging', href: 'cfia/department.html?dept=packaging', badge: 'Live', quick: true },
             { title: 'Packaging Schedule', href: '#', badge: 'Coming Soon' },
             { title: 'Build Assemblies', href: '#', badge: 'Coming Soon' },
-            { title: 'Label & Material Checks', href: '#', badge: 'Coming Soon' },
-            { title: 'Packaging SOPs', href: '#', badge: 'Coming Soon' }
+            { title: 'Label & Material Checks', href: '#', badge: 'Coming Soon' }
         ]
     },
 
@@ -2057,10 +2090,10 @@ const SECTIONS = {
         label: 'Warehouse',
         menuParent: 'Production',
         cards: [
+            { title: 'Food Safety — Warehouse', href: 'cfia/department.html?dept=warehouse', badge: 'Live', quick: true },
             { title: 'Order Fulfillment', href: '#', badge: 'Coming Soon' },
             { title: 'Inventory Support', href: '#', badge: 'Coming Soon' },
-            { title: 'Delivery Planning', href: '#', badge: 'Coming Soon' },
-            { title: 'Warehouse SOPs', href: '#', badge: 'Coming Soon' }
+            { title: 'Delivery Planning', href: '#', badge: 'Coming Soon' }
         ]
     },
 
@@ -2089,13 +2122,29 @@ const SECTIONS = {
         ]
     },
 
+    'food-safety': {
+        group: 'Departments',
+        label: 'Food Safety',
+        menuParent: '',
+        cards: [
+            { title: 'Food Safety Home', href: 'cfia/index.html', badge: 'Live', quick: true },
+            { title: 'All SOPs & Documents', href: 'cfia/map.html', badge: 'Live', quick: true },
+            { title: 'Company-Wide', href: 'cfia/department.html?dept=company', badge: 'Live' },
+            { title: 'Roasting', href: 'cfia/department.html?dept=roasting', badge: 'Live' },
+            { title: 'Packaging', href: 'cfia/department.html?dept=packaging', badge: 'Live' },
+            { title: 'Warehouse', href: 'cfia/department.html?dept=warehouse', badge: 'Live' },
+            { title: 'Compliance Overview', href: 'cfia/audit.html', badge: 'Manager', roles: ['owner', 'controller'] },
+            { title: "What's Due", href: 'cfia/schedule.html', badge: 'Manager', roles: ['owner', 'controller'] },
+            { title: 'Records', href: 'cfia/records.html', badge: 'Manager', roles: ['owner', 'controller'] }
+        ]
+    },
+
     'employee-resources': {
         group: 'Resources',
         label: 'Resources',
         cards: [
             { title: 'Expense Reimbursement', href: 'operations/forms/expense-report.html', badge: 'Live', quick: true },
             { title: 'Staff Forms', href: '#', badge: 'Coming Soon' },
-            { title: 'SOPs & Manuals', href: 'cfia/index.html', badge: 'Live', roles: ['owner'] },
             { title: 'Employee Handbook', href: '#', badge: 'Coming Soon' },
             { title: 'HR Forms', href: '#', badge: 'Coming Soon' }
         ]
@@ -2163,12 +2212,12 @@ const SECTIONS = {
 };
 
 const ROLE_SECTION_MAP = {
-    owner: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'],
-    controller: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'hr-people', 'employee-resources', 'time-off'],
-    marketing: ['marketing', 'hr-people', 'employee-resources', 'time-off'],
-    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'hr-people', 'employee-resources', 'time-off'],
-    sales: ['sales', 'marketing', 'employee-resources', 'time-off'],
-    staff: ['employee-resources', 'time-off']
+    owner: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'],
+    controller: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
+    marketing: ['marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
+    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
+    sales: ['sales', 'marketing', 'food-safety', 'employee-resources', 'time-off'],
+    staff: ['food-safety', 'employee-resources', 'time-off']
 };
 
 const FALLBACK_HUB_DATA = {
@@ -2431,6 +2480,105 @@ async function handleCreateAccount() {
     }
 }
 
+// Force the password field back to hidden + reset the toggle (used on logout).
+function setPasswordHidden() {
+    const input = document.getElementById('loginPassword');
+    const btn = document.getElementById('pwToggle');
+    const eye = document.getElementById('pwEye');
+    if (input) input.type = 'password';
+    if (btn) {
+        btn.setAttribute('aria-pressed', 'false');
+        btn.setAttribute('aria-label', 'Show password');
+    }
+    if (eye) eye.innerHTML = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
+}
+
+// Show / hide the typed password so a user can check for typos.
+function togglePasswordVisibility() {
+    const input = document.getElementById('loginPassword');
+    const btn = document.getElementById('pwToggle');
+    const eye = document.getElementById('pwEye');
+    if (!input || !eye) return;
+    if (input.type !== 'password') { setPasswordHidden(); return; }
+    input.type = 'text';
+    if (btn) {
+        btn.setAttribute('aria-pressed', 'true');
+        btn.setAttribute('aria-label', 'Hide password');
+    }
+    eye.innerHTML = '<path d="M3 3l18 18"/><path d="M10.6 6.1A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a16.3 16.3 0 0 1-3.4 4M6.6 6.6A16.4 16.4 0 0 0 2 12s3.5 6 10 6a9.7 9.7 0 0 0 3.2-.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+}
+
+// ── Brute-force protection: lock an email's sign-in after repeated failures ──
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCK_MS = 30 * 60 * 1000; // 30 minutes
+const LOGIN_ATTEMPTS_KEY = 'fratello-login-attempts';
+let loginLockTimer = null;
+
+function readLoginAttempts() {
+    try { return JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '{}'); }
+    catch (e) { return {}; }
+}
+function writeLoginAttempts(map) {
+    try { localStorage.setItem(LOGIN_ATTEMPTS_KEY, JSON.stringify(map)); } catch (e) { /* storage best-effort */ }
+}
+function loginEmailKey(email) { return String(email || '').trim().toLowerCase(); }
+
+function loginLockRemaining(email) {
+    const rec = readLoginAttempts()[loginEmailKey(email)];
+    return rec && rec.lockedUntil ? Math.max(0, rec.lockedUntil - Date.now()) : 0;
+}
+function noteLoginFailure(email) {
+    const key = loginEmailKey(email);
+    if (!key) return;
+    const map = readLoginAttempts();
+    const rec = map[key] || { count: 0, lockedUntil: 0 };
+    rec.count = (rec.count || 0) + 1;
+    if (rec.count >= LOGIN_MAX_ATTEMPTS) { rec.lockedUntil = Date.now() + LOGIN_LOCK_MS; rec.count = 0; }
+    map[key] = rec;
+    writeLoginAttempts(map);
+}
+function clearLoginFailures(email) {
+    const key = loginEmailKey(email);
+    const map = readLoginAttempts();
+    if (map[key]) { delete map[key]; writeLoginAttempts(map); }
+}
+function loginAttemptsLeft(email) {
+    const rec = readLoginAttempts()[loginEmailKey(email)];
+    return LOGIN_MAX_ATTEMPTS - ((rec && rec.count) || 0);
+}
+function fmtLockClock(ms) {
+    const total = Math.ceil(ms / 1000);
+    const mm = String(Math.floor(total / 60)).padStart(2, '0');
+    const ss = String(total % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+}
+function clearLoginLockTimer() {
+    if (loginLockTimer) { clearInterval(loginLockTimer); loginLockTimer = null; }
+}
+
+// Disable the button and show a live countdown until the lock expires.
+function showLoginLock(email) {
+    const btn = document.getElementById('loginBtn');
+    const error = document.getElementById('loginError');
+    clearLoginLockTimer();
+    const tick = () => {
+        const ms = loginLockRemaining(email);
+        if (ms <= 0) {
+            clearLoginLockTimer();
+            btn.disabled = false;
+            btn.textContent = USE_FIREBASE_AUTH ? 'Sign In' : 'Enter';
+            error.classList.remove('visible');
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = `Locked ${fmtLockClock(ms)}`;
+        error.textContent = `Too many failed attempts. Try again in ${fmtLockClock(ms)}.`;
+        error.classList.add('visible');
+    };
+    tick();
+    loginLockTimer = setInterval(tick, 1000);
+}
+
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -2439,12 +2587,19 @@ async function handleLogin() {
 
     if ((!email || !password) && !code) return;
 
+    // Brute-force lock: if this email is cooling down, block before trying.
+    if (email && loginLockRemaining(email) > 0) {
+        showLoginLock(email);
+        return;
+    }
+
     btn.disabled = true;
     btn.textContent = '...';
 
     if (USE_FIREBASE_AUTH && email && password) {
         try {
             const role = await signInWithEmail(email, password);
+            clearLoginFailures(email);
             localStorage.setItem('fratello-role', JSON.stringify(role));
             localStorage.removeItem('fratello-session');
             showDashboard(role);
@@ -2453,7 +2608,14 @@ async function handleLogin() {
             const input = document.getElementById('loginEmail');
             input.classList.add('error');
             setTimeout(() => input.classList.remove('error'), 400);
-            setLoginError(friendlyAuthError(error));
+            noteLoginFailure(email);
+            if (loginLockRemaining(email) > 0) {
+                showLoginLock(email);
+                return;
+            }
+            const left = loginAttemptsLeft(email);
+            const base = friendlyAuthError(error);
+            setLoginError(left <= 2 ? `${base} ${left} attempt${left === 1 ? '' : 's'} left before a 30-minute lock.` : base);
         }
 
         btn.disabled = false;
@@ -2475,13 +2637,23 @@ async function handleLogin() {
         if (response.ok) {
             const data = await response.json();
             const role = normalizeRole(data.role);
+            if (email) clearLoginFailures(email);
             if (data.sessionToken) localStorage.setItem('fratello-session', data.sessionToken);
             localStorage.setItem('fratello-role', JSON.stringify(role));
             showDashboard(role);
         } else {
+            if (email) {
+                noteLoginFailure(email);
+                if (loginLockRemaining(email) > 0) {
+                    showLoginLock(email);
+                    return;
+                }
+            }
             const input = email ? document.getElementById('loginEmail') : document.getElementById('accessCode');
             const error = document.getElementById('loginError');
-            error.textContent = email ? 'Invalid email or password. Use Forgot password if needed.' : 'Invalid login';
+            const left = email ? loginAttemptsLeft(email) : 99;
+            const baseMsg = email ? 'Invalid email or password. Use Forgot password if needed.' : 'Invalid login';
+            error.textContent = (email && left <= 2) ? `${baseMsg} ${left} attempt${left === 1 ? '' : 's'} left before a 30-minute lock.` : baseMsg;
             input.classList.add('error');
             error.classList.add('visible');
             setTimeout(() => input.classList.remove('error'), 400);
@@ -2851,7 +3023,8 @@ function iconSvg(key) {
         dollar: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
         document: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>',
         book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4a2 2 0 0 1 2-2h12v17H7a2 2 0 0 0-2 2z"/><path d="M5 19a2 2 0 0 1 2-2h12"/></svg>',
-        feed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.6"/></svg>'
+        feed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.6"/></svg>',
+        shield: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 2.5v5.2c0 4.4-3 7.6-7 9.3-4-1.7-7-4.9-7-9.3V5.5z"/><path d="M9 12l2 2 4-4"/></svg>'
     };
     return icons[key] || icons.calendar;
 }
@@ -3036,6 +3209,7 @@ function renderDepartmentsIndex(role) {
         'production-warehouse': 'warehouse',
         'sales': 'sales',
         'marketing': 'marketing',
+        'food-safety': 'shield',
         'hr-people': 'people'
     };
 
@@ -3198,6 +3372,7 @@ function renderSectionPage(role, sectionKey) {
 }
 
 async function showDashboard(role) {
+    clearLoginLockTimer();   // a lock countdown must never outlive the login screen
     role = normalizeRole(role);
     await loadHubData();
     const person = personForRole(role);
@@ -3275,6 +3450,12 @@ async function signOut() {
     document.getElementById('loginPassword').value = '';
     document.getElementById('accessCode').value = '';
     document.getElementById('mainContent').innerHTML = '';
+    // Reset the sign-in UI so the next login starts clean.
+    clearLoginLockTimer();
+    setPasswordHidden();
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = USE_FIREBASE_AUTH ? 'Sign In' : 'Enter'; }
+    document.getElementById('loginError').classList.remove('visible');
 }
 
 // ════════════════════════════════════════════════
@@ -3353,6 +3534,7 @@ window.handlePasswordReset = handlePasswordReset;
 window.handleProviderLogin = handleProviderLogin;
 window.handleCreateAccount = handleCreateAccount;
 window.handleLogin = handleLogin;
+window.togglePasswordVisibility = togglePasswordVisibility;
 window.signOut = signOut;
 window.toggleProfileMenu = toggleProfileMenu;
 window.toggleHubNav = toggleHubNav;

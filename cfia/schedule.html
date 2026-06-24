@@ -82,7 +82,7 @@
     </main>
 
     <script type="module">
-        import { guardPage, listRecords, dueStatus, recordDateISO, edmontonToday, escapeHtml, fmtDate } from '/cfia/system/cfia-core.js';
+        import { guardManagerPage, listRecords, dueStatus, recordDateISO, edmontonToday, escapeHtml, fmtDate } from '/cfia/system/cfia-core.js';
         import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
 
         const today = edmontonToday();
@@ -94,7 +94,7 @@
             return (d.departments || []).map(x => DEPT[x] || x).join(', ') || '—';
         }
 
-        guardPage(async role => {
+        guardManagerPage(async role => {
             if (!role) return;
             document.getElementById('todayLine').textContent = 'As of ' + fmtDate(today) + ' (Mountain Time)';
             let records = [];

@@ -63,7 +63,7 @@
     </main>
 
     <script type="module">
-        import { guardPage, listRecords, listSignoffs, isManager, fmtDate, fmtDateTime, millis, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { guardManagerPage, listRecords, listSignoffs, isManager, fmtDate, fmtDateTime, millis, escapeHtml } from '/cfia/system/cfia-core.js';
         import { FORM_SCHEMAS } from '/cfia/config/form-schemas.js';
 
         const listEl = document.getElementById('recList');
@@ -90,7 +90,7 @@
             return schema.sections.some(s => s.fields.some(f => f.id === id && f.type === 'status'));
         }
 
-        guardPage(async role => {
+        guardManagerPage(async role => {
             if (!role) return;
             document.getElementById('scopeNote').textContent = isManager()
                 ? 'Every submitted record across all forms. Filter by form, click any row for the full detail and a one-click PDF.'

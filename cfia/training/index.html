@@ -82,13 +82,13 @@
     </main>
 
     <script type="module">
-        import { guardPage, listTraining, listAcks, trainingStatus, tsDateISO, edmontonToday, escapeHtml, fmtDate, fmtDateTime } from '/cfia/system/cfia-core.js';
+        import { guardManagerPage, listTraining, listAcks, trainingStatus, tsDateISO, edmontonToday, escapeHtml, fmtDate, fmtDateTime } from '/cfia/system/cfia-core.js';
         import { QUIZZES } from '/cfia/config/quizzes.js';
 
         const today = edmontonToday();
         const courses = Object.values(QUIZZES);
 
-        guardPage(async role => {
+        guardManagerPage(async role => {
             if (!role) return;
             document.getElementById('todayLine').textContent = 'As of ' + fmtDate(today);
             let comps = [], acks = [];
