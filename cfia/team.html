@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Team & Responsibilities</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .chain { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0; margin: 8px 0 26px; border: 1px solid var(--divider); border-radius: var(--r-md); overflow: hidden; background: var(--white); }
+        .chain .step { padding: 14px 16px; border-right: 1px solid var(--fog); position: relative; }
+        .chain .step:last-child { border-right: none; }
+        .chain .tier { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brand); }
+        .chain .who { font-size: 14px; font-weight: 700; color: var(--black); margin-top: 4px; }
+        .chain .does { font-size: 12px; color: var(--grey); margin-top: 3px; }
+        .grp { margin-top: 28px; }
+        .grp h2 { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--grey); margin: 0 0 12px; }
+        .people { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+        .person { border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--white); padding: 14px 16px; }
+        .person .nm { font-size: 15px; font-weight: 700; color: var(--black); }
+        .person .ti { font-size: 12px; color: var(--slate); margin-top: 2px; }
+        .person .rl { font-size: 12px; color: var(--grey); margin-top: 8px; line-height: 1.5; }
+        .badge { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .4px; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
+        .badge.qa { background: #e8f0fe; color: #1a56b4; }
+        .badge.owner { background: #efe9fb; color: #5b32b0; }
+        .badge.sup { background: #e6f4ea; color: #1c7a3f; }
+        .badge.staff { background: var(--card); color: var(--grey); }
+        .badge.office { background: #fdf3e6; color: #9a5b00; }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Team</div>
+                <div class="bar-title">Team &amp; Responsibilities</div>
+            </div>
+        </div>
+        <div class="actions"><a class="btn" href="/cfia/index.html">Dashboard</a></div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This page is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">Team &amp; responsibilities</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline">Roles &amp; accountability</div>
+            <h1>Team &amp; Responsibilities</h1>
+            <p>Who is responsible for food safety, and the sign-off chain a record travels through. CFIA expects clearly assigned responsibility — this is it.</p>
+        </section>
+
+        <div class="chain" id="chain"></div>
+        <div id="groups"></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { PEOPLE, DEPT_HEADS, SAFETY_OFFICER } from '/cfia/config/people.js';
+
+        const DEPT = { roasting: 'Roasting', packaging: 'Packaging', warehouse: 'Warehouse', production: 'Production', leadership: 'Leadership', office: 'Office', company: 'Company-wide' };
+        const TIER = { owner: ['Owner', 'owner'], qa: ['QA / Food Safety', 'qa'], supervisor: ['Supervisor', 'sup'], staff: ['Staff', 'staff'], office: ['Office', 'office'] };
+
+        guardPage(role => { if (role) render(); });
+
+        function signsOffFor(p) {
+            if (p.cfiaTier === 'staff') return p.reportsTo ? `Records verified by <strong>${escapeHtml(p.reportsTo)}</strong>` : '';
+            if (p.cfiaTier === 'supervisor') return `Signs off their team's records · oversight by <strong>${escapeHtml(SAFETY_OFFICER)}</strong>`;
+            if (p.cfiaTier === 'qa') return `Food-safety oversight of all departments · backup signer <strong>Russ Prefontaine</strong>`;
+            if (p.cfiaTier === 'owner') return `Sees every record across the program`;
+            return p.reportsTo ? `Reports to ${escapeHtml(p.reportsTo)}` : '';
+        }
+
+        function badge(tier) {
+            const t = TIER[tier];
+            return t ? `<span class="badge ${t[1]}">${t[0]}</span>` : '';
+        }
+
+        function render() {
+            document.getElementById('chain').innerHTML = [
+                ['Step 1 · Do', 'Staff', 'Completes the daily / recurring record'],
+                ['Step 2 · Verify', 'Department supervisor', "Signs off the team's records were done properly"],
+                ['Step 3 · Oversee', `${SAFETY_OFFICER} (QA)`, 'Food-safety officer — oversight across all departments'],
+                ['Step 4 · Owners', 'Chris & Russ Prefontaine', 'See everything; Russ is backup signer']
+            ].map(s => `<div class="step"><div class="tier">${escapeHtml(s[0])}</div><div class="who">${escapeHtml(s[1])}</div><div class="does">${escapeHtml(s[2])}</div></div>`).join('');
+
+            const order = ['owner', 'qa', 'supervisor', 'staff', 'office'];
+            const heads = { owner: 'Owners', qa: 'QA & Food Safety', supervisor: 'Department supervisors', staff: 'Production staff', office: 'Office & commercial' };
+            const byTier = {};
+            PEOPLE.forEach(p => { (byTier[p.cfiaTier] = byTier[p.cfiaTier] || []).push(p); });
+
+            const html = order.filter(t => byTier[t]).map(t => {
+                const people = byTier[t].map(p => `
+                    <div class="person">
+                        <div class="nm">${escapeHtml(p.name)}${badge(p.cfiaTier)}${p.safetyOfficer ? '<span class="badge qa">Safety Officer</span>' : ''}</div>
+                        <div class="ti">${escapeHtml(p.title)}${p.dept && DEPT[p.dept] ? ' · ' + escapeHtml(DEPT[p.dept]) : ''}</div>
+                        <div class="rl">${signsOffFor(p)}</div>
+                    </div>`).join('');
+                return `<div class="grp"><h2>${escapeHtml(heads[t] || t)}</h2><div class="people">${people}</div></div>`;
+            }).join('');
+            document.getElementById('groups').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
