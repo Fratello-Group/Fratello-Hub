@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — What's Due</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .sc-list { border: 1px solid var(--divider); border-radius: var(--r-md); overflow: hidden; background: var(--white); }
+        .sc-row { display: grid; grid-template-columns: 1fr 120px 110px 130px 96px; gap: 12px; align-items: center; padding: 12px 14px; border-top: 1px solid var(--fog); font-size: 13px; color: var(--slate); }
+        .sc-row:first-child { border-top: none; }
+        .sc-head { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); background: var(--card); }
+        .sc-name strong { color: var(--black); display: block; font-size: 14px; }
+        .sc-name span { font-size: 12px; color: var(--grey); }
+        .chip { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .3px; padding: 4px 9px; border-radius: 999px; text-transform: uppercase; }
+        .chip.done { background: #e6f4ea; color: #1c7a3f; }
+        .chip.due  { background: #fdeceb; color: #b42318; }
+        .chip.event{ background: var(--card); color: var(--grey); }
+        .sc-cad { font-weight: 700; color: var(--slate); }
+        .sec-label { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--grey); margin: 30px 0 12px; }
+        .ev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+        .ev-card { display: block; border: 1px solid var(--divider); border-radius: var(--r-md); padding: 12px 14px; background: var(--white); text-decoration: none; }
+        .ev-card strong { color: var(--black); display: block; font-size: 13px; }
+        .ev-card span { font-size: 12px; color: var(--grey); }
+        .ev-card:hover { border-color: var(--brand); }
+        .sc-sum { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 22px; }
+        .sc-sum .chip { font-size: 12px; padding: 6px 12px; }
+        @media (max-width: 760px) {
+            .sc-row { grid-template-columns: 1fr auto; }
+            .sc-row span:nth-child(2), .sc-row span:nth-child(3) { display: none; }
+            .sc-head { display: none; }
+        }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Compliance</div>
+                <div class="bar-title">What's Due</div>
+            </div>
+        </div>
+        <div class="actions"><a class="btn" href="/cfia/index.html">Dashboard</a></div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This compliance view is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">What's due</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline" id="todayLine">Compliance schedule</div>
+            <h1>What's Due</h1>
+            <p>Every recurring record, and whether it's current for its period. This is the question an inspector asks first — “show me your logs are up to date.”</p>
+        </section>
+
+        <div class="sc-sum" id="summary"></div>
+
+        <div id="scheduled"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+
+        <div class="sec-label" id="evLabel" style="display:none;">Event-driven records — completed when the event happens</div>
+        <div class="ev-grid" id="events"></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, listRecords, dueStatus, recordDateISO, edmontonToday, escapeHtml, fmtDate } from '/cfia/system/cfia-core.js';
+        import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
+
+        const today = edmontonToday();
+        const DEPT = { company: 'Company-wide', roasting: 'Roasting', packaging: 'Packaging', warehouse: 'Warehouse' };
+        const CAD_ORDER = { Daily: 0, Weekly: 1, 'Bi-weekly': 2, Monthly: 3, Quarterly: 4, Annual: 5 };
+        const forms = DOCUMENT_REGISTER.filter(d => d.fillable && d.href && d.href.indexOf('form.html') > -1);
+
+        function deptLabel(d) {
+            return (d.departments || []).map(x => DEPT[x] || x).join(', ') || '—';
+        }
+
+        guardPage(async role => {
+            if (!role) return;
+            document.getElementById('todayLine').textContent = 'As of ' + fmtDate(today) + ' (Mountain Time)';
+            let records = [];
+            try { records = await listRecords({}); }
+            catch (e) { document.getElementById('scheduled').innerHTML = `<div class="rec-empty" style="padding:18px;">Could not load records: ${escapeHtml(e.message || e)}</div>`; return; }
+
+            const lastByForm = {};
+            records.forEach(r => {
+                const iso = recordDateISO(r);
+                if (iso && (!lastByForm[r.form_code] || iso > lastByForm[r.form_code])) lastByForm[r.form_code] = iso;
+            });
+
+            const rows = forms.map(f => {
+                const last = lastByForm[f.code] || '';
+                return { f, last, st: dueStatus(f.cadence, last, today) };
+            });
+            renderScheduled(rows.filter(r => r.st.state !== 'event'));
+            renderEvents(rows.filter(r => r.st.state === 'event'));
+        });
+
+        function renderScheduled(rows) {
+            const wrap = document.getElementById('scheduled');
+            const dueN = rows.filter(r => r.st.state === 'due').length;
+            const doneN = rows.filter(r => r.st.state === 'done').length;
+            document.getElementById('summary').innerHTML =
+                `<span class="chip due">${dueN} need attention</span><span class="chip done">${doneN} up to date</span>`;
+
+            if (!rows.length) { wrap.innerHTML = `<div class="rec-empty" style="padding:18px;border:1px solid var(--divider);border-radius:var(--r-md);">No scheduled records configured yet.</div>`; return; }
+
+            rows.sort((a, b) => {
+                if ((a.st.state === 'due') !== (b.st.state === 'due')) return a.st.state === 'due' ? -1 : 1;
+                const ca = CAD_ORDER[a.f.cadence] ?? 9, cb = CAD_ORDER[b.f.cadence] ?? 9;
+                if (ca !== cb) return ca - cb;
+                return a.f.code.localeCompare(b.f.code, undefined, { numeric: true });
+            });
+
+            const head = `<div class="sc-row sc-head"><span>Record</span><span>Department</span><span>Cadence</span><span>Last done</span><span>Status</span></div>`;
+            const body = rows.map(r => `<div class="sc-row">
+                <span class="sc-name"><strong><a href="${r.f.href}" style="color:inherit;text-decoration:none;">${escapeHtml(r.f.code)} — ${escapeHtml(r.f.title)}</a></strong><span>${escapeHtml(deptLabel(r.f))}</span></span>
+                <span>${escapeHtml(deptLabel(r.f))}</span>
+                <span class="sc-cad">${escapeHtml(r.f.cadence)}</span>
+                <span>${r.last ? escapeHtml(fmtDate(r.last)) : '—'}</span>
+                <span><a href="${r.f.href}" style="text-decoration:none;"><span class="chip ${r.st.state}">${r.st.state === 'due' ? 'Fill now' : 'Done'}</span></a></span>
+            </div>`).join('');
+            wrap.innerHTML = `<div class="sc-list">${head}${body}</div>`;
+        }
+
+        function renderEvents(rows) {
+            if (!rows.length) return;
+            document.getElementById('evLabel').style.display = '';
+            rows.sort((a, b) => a.f.code.localeCompare(b.f.code, undefined, { numeric: true }));
+            document.getElementById('events').innerHTML = rows.map(r =>
+                `<a class="ev-card" href="${r.f.href}"><strong>${escapeHtml(r.f.code)} — ${escapeHtml(r.f.title)}</strong><span>${escapeHtml(deptLabel(r.f))}</span></a>`).join('');
+        }
+    </script>
+</body>
+</html>

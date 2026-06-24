@@ -175,6 +175,44 @@ export function edmontonToday() {
     return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 }
 
+// ── Scheduling / compliance ──────────────────────────────────────
+// Local YYYY-MM-DD (no UTC shift) for a Date.
+function ymd(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// First day of the period a recurring cadence is measured in, given today (YYYY-MM-DD).
+// Returns null for event-driven cadences (as-needed, per batch, each delivery, on receipt…).
+function periodStartFor(cadence, todayISO) {
+    const c = (cadence || '').toLowerCase();
+    if (!c || /need|request|batch|delivery|deliver|shipment|receipt|receiv|incident|complaint|recall|reject|ad.?hoc|event|change|when |order/.test(c)) return null;
+    const d = new Date(todayISO + 'T00:00:00');
+    if (/year|annual/.test(c)) return todayISO.slice(0, 4) + '-01-01';
+    if (/quarter/.test(c)) { const m = d.getMonth(); return `${todayISO.slice(0, 4)}-${String(m - (m % 3) + 1).padStart(2, '0')}-01`; }
+    if (/month/.test(c)) return todayISO.slice(0, 7) + '-01';
+    if (/week|biweek|fortnight/.test(c)) { const off = (d.getDay() + 6) % 7; d.setDate(d.getDate() - off); return ymd(d); }
+    return todayISO; // daily / twice-daily / per-shift / hourly / continuous → satisfied if done today
+}
+
+// Compliance state for a recurring form: {state:'done'|'due'|'event', label}.
+//   lastISO  — date of the most recent record for this form (YYYY-MM-DD), or '' if none.
+//   todayISO — the program "today" (America/Edmonton).
+export function dueStatus(cadence, lastISO, todayISO) {
+    const ps = periodStartFor(cadence, todayISO);
+    if (ps === null) return { state: 'event', label: 'As needed' };
+    if (lastISO && lastISO >= ps) return { state: 'done', label: 'Done this period' };
+    return { state: 'due', label: lastISO ? 'Due now' : 'No record yet' };
+}
+
+// The effective calendar date (YYYY-MM-DD) of a record: its filled-in date if present,
+// otherwise the server submission timestamp.
+export function recordDateISO(r) {
+    const v = r && r.values && r.values.date;
+    if (v && /^\d{4}-\d{2}-\d{2}/.test(String(v))) return String(v).slice(0, 10);
+    const ms = millis(r && r.submitted_at);
+    return ms ? ymd(new Date(ms)) : '';
+}
+
 // ─── shared helpers ───
 export function isoToday() { return new Date().toISOString().slice(0, 10); }
 export function millis(t) {
