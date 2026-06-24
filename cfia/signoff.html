@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Food Safety — Verify & Sign Off</title>
+    <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/cfia/system/cfia-tokens.css">
+    <link rel="stylesheet" href="/cfia/system/cfia.css">
+    <style>
+        .so-row { display: grid; grid-template-columns: 28px 110px 1fr 130px 150px; gap: 10px; align-items: center; padding: 11px 12px; border-top: 1px solid var(--fog); font-size: 13px; color: var(--slate); }
+        .so-row strong { color: var(--black); }
+        .so-head { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); background: var(--card); }
+        .so-list { border: 1px solid var(--divider); border-radius: var(--r-md); overflow: hidden; background: var(--white); }
+        .so-own { opacity: .5; }
+        @media (max-width: 760px) { .so-row { grid-template-columns: 24px 1fr; } .so-row span:nth-child(n+4) { display: none; } }
+    </style>
+    <script src="/system/firebase-config.js"></script>
+</head>
+<body class="cfia-checking">
+    <div id="fratello-hub-header"></div>
+    <script src="/system/hub-header.js"></script>
+
+    <header class="cfia-bar">
+        <div class="brand">
+            <div class="context">
+                <div class="eyebrow">Food Safety · Oversight</div>
+                <div class="bar-title">Verify &amp; Sign Off</div>
+            </div>
+        </div>
+        <div class="actions"><a class="btn" href="/cfia/index.html">Dashboard</a></div>
+    </header>
+
+    <section class="blocked" id="blocked">
+        <div class="blocked-card">
+            <h1>Hub sign-in required.</h1>
+            <p>This oversight page is part of the Fratello Ops Hub. Please sign in first, then open it again.</p>
+            <a class="btn btn-primary" href="/index.html">Go to Hub sign-in</a>
+        </div>
+    </section>
+
+    <main class="cfia-page">
+        <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a><span class="crumb-sep">›</span>
+            <a href="/cfia/index.html">Food Safety</a><span class="crumb-sep">›</span>
+            <span class="crumb-current">Verify &amp; sign off</span>
+        </nav>
+
+        <section class="hero">
+            <div class="dateline">Supervisory oversight</div>
+            <h1>Verify &amp; Sign Off</h1>
+            <p>Confirm your team's records were completed properly. Your sign-off is itself a permanent record — this is the documented supervisory oversight a CFIA auditor looks for.</p>
+        </section>
+
+        <div class="callout"><strong>Separation of duties.</strong> You can't sign off a record you submitted yourself — those are shown greyed out. Select the records you've reviewed, add a note, and sign off.</div>
+
+        <div id="pending"></div>
+
+        <section class="cfia-panel" id="signPanel" style="display:none;">
+            <h2 class="panel-title">Sign off</h2>
+            <div class="field-grid">
+                <div class="field">
+                    <label class="field-label" for="soStatus">Result</label>
+                    <select class="select" id="soStatus"><option value="verified">Verified — done properly</option><option value="flagged">Flagged — issues to follow up</option></select>
+                </div>
+                <div class="field full">
+                    <label class="field-label" for="soNote">Scope / notes</label>
+                    <textarea class="textarea" id="soNote" placeholder="e.g. Reviewed all Pre-Op logs for this week; spot-checked the roaster CCP entries."></textarea>
+                </div>
+            </div>
+            <div class="form-message" id="soMsg"></div>
+            <div class="actions" style="justify-content:flex-start;">
+                <button class="btn btn-primary btn-lg" id="soBtn" type="button">Sign off <span id="soCount">0</span> selected</button>
+            </div>
+        </section>
+
+        <h2 style="margin-top:30px;font-size:20px;">Recent sign-offs</h2>
+        <div class="so-list" id="signoffList"><div class="rec-empty" style="padding:18px;">Loading…</div></div>
+    </main>
+
+    <script type="module">
+        import { guardPage, getRole, listRecords, createSignoff, listSignoffs, fmtDate, fmtDateTime, escapeHtml } from '/cfia/system/cfia-core.js';
+
+        let records = [], myEmail = '';
+
+        guardPage(async role => {
+            if (!role) return;
+            myEmail = (role.user && role.user.email || '').toLowerCase();
+            try { records = await listRecords({}); } catch (e) { document.getElementById('pending').innerHTML = `<div class="rec-empty">Could not load records: ${escapeHtml(e.message || e)}</div>`; }
+            renderPending();
+            renderSignoffs();
+        });
+
+        function selected() {
+            return [...document.querySelectorAll('.so-check:checked')].map(c => records[Number(c.dataset.i)]);
+        }
+        function updateCount() {
+            const n = selected().length;
+            document.getElementById('soCount').textContent = n;
+            document.getElementById('signPanel').style.display = n ? 'block' : 'none';
+        }
+
+        function renderPending() {
+            const wrap = document.getElementById('pending');
+            if (!records.length) { wrap.innerHTML = `<div class="rec-empty" style="padding:18px;border:1px solid var(--divider);border-radius:var(--r-md);">No records to review yet.</div>`; return; }
+            const head = `<div class="so-row so-head"><span></span><span>Date</span><span>Form</span><span>Completed by</span><span>Submitted</span></div>`;
+            const rows = records.map((r, i) => {
+                const own = (r.submitted_by_email || '').toLowerCase() === myEmail;
+                return `<div class="so-row ${own ? 'so-own' : ''}">
+                    <span>${own ? '' : `<input type="checkbox" class="so-check" data-i="${i}" style="width:18px;height:18px;">`}</span>
+                    <strong>${escapeHtml(fmtDate((r.values && r.values.date) || r.submitted_at))}</strong>
+                    <span>${escapeHtml(r.form_code)} — ${escapeHtml(r.form_title || '')}</span>
+                    <span>${escapeHtml(r.performed_by_name || '—')}</span>
+                    <span>${escapeHtml(fmtDateTime(r.submitted_at))}${own ? ' · you' : ''}</span>
+                </div>`;
+            }).join('');
+            wrap.innerHTML = `<div class="so-list">${head}${rows}</div>`;
+            wrap.querySelectorAll('.so-check').forEach(c => c.addEventListener('change', updateCount));
+            updateCount();
+        }
+
+        document.getElementById('soBtn').addEventListener('click', async () => {
+            const sel = selected();
+            if (!sel.length) return;
+            const btn = document.getElementById('soBtn'); btn.disabled = true; btn.textContent = 'Signing…';
+            try {
+                await createSignoff({
+                    recordIds: sel.map(r => r.id),
+                    recordSubmitterEmails: [...new Set(sel.map(r => (r.submitted_by_email || '').toLowerCase()))],
+                    department: sel[0].department || '',
+                    coversForm: [...new Set(sel.map(r => r.form_code))].join(', '),
+                    status: document.getElementById('soStatus').value,
+                    scopeNote: document.getElementById('soNote').value.trim(),
+                    tier: 'supervisor'
+                });
+                document.getElementById('soMsg').className = 'form-message visible success';
+                document.getElementById('soMsg').innerHTML = `<strong>Signed off ${sel.length} record(s).</strong> Permanent oversight record created.`;
+                document.getElementById('soNote').value = '';
+                renderSignoffs();
+            } catch (e) {
+                btn.disabled = false; btn.textContent = `Sign off ${sel.length} selected`;
+                document.getElementById('soMsg').className = 'form-message visible error';
+                document.getElementById('soMsg').textContent = 'Could not sign off: ' + (e.message || e);
+            }
+        });
+
+        async function renderSignoffs() {
+            let list = [];
+            try { list = await listSignoffs(); } catch (e) {}
+            const el = document.getElementById('signoffList');
+            if (!list.length) { el.innerHTML = `<div class="rec-empty" style="padding:18px;">No sign-offs yet.</div>`; return; }
+            el.innerHTML = list.map(s => `<div class="so-row"><span></span>
+                <strong>${escapeHtml(fmtDate(s.signed_at))}</strong>
+                <span>${escapeHtml(s.covers_form || '')} · <span class="pill ${s.status === 'verified' ? 'ok' : 'no'}">${escapeHtml(s.status)}</span> · ${(s.record_ids || []).length} record(s)${s.scope_note ? ' — ' + escapeHtml(s.scope_note) : ''}</span>
+                <span>${escapeHtml(s.signed_by_name || '')}</span>
+                <span>${escapeHtml(fmtDateTime(s.signed_at))}</span></div>`).join('');
+        }
+    </script>
+</body>
+</html>

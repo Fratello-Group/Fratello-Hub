@@ -110,6 +110,71 @@ function buildRecordId(form, fields) {
     return `${prefix}-${date}-${suffix}`;
 }
 
+// Record retention required (years) — CFIA / Fratello policy.
+export const RETENTION_YEARS = 5;
+
+function whoName(u) {
+    return (currentRole && currentRole.user && currentRole.user.name) || u.displayName || normalizeEmail(u.email);
+}
+
+// ── Training completion (immutable; quiz pass/fail) ──
+export async function recordTraining(quiz, score, passed) {
+    const d = db(); const a = authState();
+    if (!d || !a || !a.currentUser) throw new Error('Please sign in again before submitting.');
+    const u = a.currentUser;
+    const rec = {
+        quiz_code: quiz.code, quiz_title: quiz.title || '',
+        score: Math.round(score), pass_threshold: quiz.passThreshold || 90, passed: !!passed,
+        recurrence: quiz.recurrence || 'annual', version: quiz.version || '1',
+        uid: u.uid, email: normalizeEmail(u.email), name: whoName(u),
+        taken_at: serverTimestamp(), created_via: 'cfia-hub-training'
+    };
+    const ref = await addDoc(collection(d, 'cfia_training_completions'), rec);
+    return { id: ref.id, ...rec };
+}
+
+// ── Document acknowledgement ("I have read & understood SOP vX") ──
+export async function recordAck(docMeta) {
+    const d = db(); const a = authState();
+    if (!d || !a || !a.currentUser) throw new Error('Please sign in again.');
+    const u = a.currentUser;
+    const rec = {
+        doc_code: docMeta.code, doc_title: docMeta.title || '', version: docMeta.version || '',
+        uid: u.uid, email: normalizeEmail(u.email), name: whoName(u),
+        read_at: serverTimestamp(), created_via: 'cfia-hub-ack'
+    };
+    const ref = await addDoc(collection(d, 'cfia_acknowledgements'), rec);
+    return { id: ref.id, ...rec };
+}
+
+// ── Manager / QA sign-off (immutable; separation of duties enforced in rules) ──
+export async function createSignoff(opts) {
+    const d = db(); const a = authState();
+    if (!d || !a || !a.currentUser) throw new Error('Please sign in again.');
+    const u = a.currentUser;
+    const rec = {
+        covers_form: opts.coversForm || '', covers_date: opts.coversDate || '', department: opts.department || '',
+        record_ids: opts.recordIds || [], record_submitter_emails: opts.recordSubmitterEmails || [],
+        status: opts.status || 'verified', scope_note: opts.scopeNote || '', tier: opts.tier || 'supervisor',
+        signed_by_uid: u.uid, signed_by_email: normalizeEmail(u.email), signed_by_name: whoName(u),
+        signed_at: serverTimestamp(), created_via: 'cfia-hub-signoff'
+    };
+    const ref = await addDoc(collection(d, 'cfia_signoffs'), rec);
+    return { id: ref.id, ...rec };
+}
+
+export async function listSignoffs() {
+    const d = db();
+    if (!d || !currentRole) return [];
+    const snap = await getDocs(collection(d, 'cfia_signoffs'));
+    return snap.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => millis(b.signed_at) - millis(a.signed_at));
+}
+
+// America/Edmonton calendar date (YYYY-MM-DD) — the program timezone for "due today".
+export function edmontonToday() {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+
 // ─── shared helpers ───
 export function isoToday() { return new Date().toISOString().slice(0, 10); }
 export function millis(t) {

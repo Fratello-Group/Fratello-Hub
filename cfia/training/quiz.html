@@ -83,7 +83,7 @@
     </main>
 
     <script type="module">
-        import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { guardPage, escapeHtml, recordTraining } from '/cfia/system/cfia-core.js';
         import { QUIZZES } from '/cfia/config/quizzes.js';
         import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
 
@@ -156,6 +156,9 @@
             document.getElementById('resultDetail').innerHTML = wrong.length
                 ? `<p class="panel-help">Review questions: ${wrong.join(', ')}.</p>` : '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            recordTraining(quiz, pct, pass)
+                .then(() => { document.getElementById('resultText').textContent += ' Your completion has been recorded.'; })
+                .catch(err => { document.getElementById('resultText').textContent += ' (Completion not recorded: ' + (err.message || err) + ')'; });
         });
 
         document.getElementById('retryBtn').addEventListener('click', () => location.reload());

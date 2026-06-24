@@ -55,10 +55,11 @@
         <div id="docCallout"></div>
         <div class="doc-body" id="docBody"><p style="color:var(--grey);">Loading content…</p></div>
         <div class="doc-body" id="docRelated" style="margin-top:24px;"></div>
+        <div id="ackBox" style="margin-top:22px;"></div>
     </main>
 
     <script type="module">
-        import { guardPage, escapeHtml } from '/cfia/system/cfia-core.js';
+        import { guardPage, escapeHtml, recordAck } from '/cfia/system/cfia-core.js';
         import { DOCUMENT_REGISTER } from '/cfia/config/document-register.js';
 
         const code = new URLSearchParams(location.search).get('code') || '';
@@ -123,6 +124,25 @@
                         const h = linkFor(x.c);
                         return `<a href="${h}">${escapeHtml(x.c)} — ${escapeHtml(x.e.title)}</a>`;
                     }).join(' · ') + `</p>`;
+            }
+
+            // read-acknowledgement (skip for forms, which are completed not acknowledged)
+            if (!doc.fillable) {
+                document.getElementById('ackBox').innerHTML =
+                    `<div class="callout"><strong>Acknowledgement.</strong> Confirm you have read and understood ${escapeHtml(doc.code)} (v${escapeHtml(doc.version || '1.0')}).
+                     <div style="margin-top:10px;"><button class="btn btn-primary" id="ackBtn" type="button">I have read &amp; understood</button>
+                     <span id="ackMsg" style="margin-left:10px;font-weight:700;"></span></div></div>`;
+                document.getElementById('ackBtn').addEventListener('click', async () => {
+                    const btn = document.getElementById('ackBtn'), msg = document.getElementById('ackMsg');
+                    btn.disabled = true; btn.textContent = 'Recording…';
+                    try {
+                        await recordAck(doc);
+                        msg.style.color = 'var(--pass)'; msg.textContent = 'Recorded — thank you.'; btn.style.display = 'none';
+                    } catch (e) {
+                        btn.disabled = false; btn.textContent = 'I have read & understood';
+                        msg.style.color = 'var(--fail)'; msg.textContent = 'Could not record: ' + (e.message || e);
+                    }
+                });
             }
         }
 
