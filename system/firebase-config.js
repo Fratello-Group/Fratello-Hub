@@ -16,6 +16,11 @@ window.FRATELLO_FIREBASE_CONFIG = {
     measurementId: ''
 };
 
+// Microsoft 365 "Directory (tenant) ID" for Fratello. When set, only accounts
+// from this company tenant can sign in with Microsoft (no personal/outside
+// accounts). Ask ShiftIT for the Directory (tenant) ID and paste it here.
+window.FRATELLO_MICROSOFT_TENANT = '';
+
 window.FRATELLO_OWNER_EMAILS = [
     'prefontainech@gmail.com',
     'russ@fratellocoffee.com'

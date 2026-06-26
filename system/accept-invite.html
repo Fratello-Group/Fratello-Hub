@@ -198,7 +198,7 @@
                 <input id="confirmPassword" type="password" placeholder="Confirm Password" autocomplete="new-password">
                 <button id="submitBtn" type="submit">Activate Login</button>
             </form>
-            <div class="message" id="message">Use at least 10 characters.</div>
+            <div class="message" id="message">Use at least 8 characters.</div>
         </div>
 
         <div class="success" id="successState">
@@ -225,8 +225,8 @@
                 message.classList.add('error');
                 return;
             }
-            if (password.length < 10) {
-                message.textContent = 'Please use at least 10 characters.';
+            if (password.length < 8) {
+                message.textContent = 'Please use at least 8 characters.';
                 message.classList.add('error');
                 return;
             }

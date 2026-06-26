@@ -263,8 +263,8 @@ async function acceptInvite(event) {
     const password = String(body.password || '');
     const name = String(body.name || '').trim();
 
-    if (!body.token || password.length < 10) {
-        return json(400, { error: 'Use the invite link and a password of at least 10 characters' });
+    if (!body.token || password.length < 8) {
+        return json(400, { error: 'Use the invite link and a password of at least 8 characters' });
     }
 
     const users = await readUsers();
