@@ -21,10 +21,12 @@ window.FRATELLO_OWNER_EMAILS = [
     'russ@fratellocoffee.com'
 ];
 
+// Microsoft is temporarily OFF until the Microsoft 365 (Entra) app registration
+// is connected to Firebase. Re-enable by setting microsoft: true once that's done.
 window.FRATELLO_AUTH_PROVIDERS = {
     email: true,
     google: true,
-    microsoft: true,
+    microsoft: false,
     apple: false
 };
 

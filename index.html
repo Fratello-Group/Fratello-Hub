@@ -85,28 +85,38 @@
             margin-bottom: 14px;
         }
 
-        .login-input.has-toggle { padding-right: 50px; }
+        .login-input.has-toggle { padding-right: 52px; }
+        /* Hide the browser's own password-reveal control so it can't overlap ours. */
+        .login-input.has-toggle::-ms-reveal,
+        .login-input.has-toggle::-ms-clear { display: none; }
         .pw-toggle {
             position: absolute;
             top: 50%;
-            right: 12px;
+            right: 6px;
             transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
             background: none;
             border: 0;
-            padding: 6px;
+            padding: 0;
             margin: 0;
             cursor: pointer;
-            color: rgba(255, 255, 255, 0.55);
+            color: #5A5A5E;
             line-height: 0;
-            border-radius: 4px;
-            transition: color 0.2s ease;
+            border-radius: 6px;
+            transition: color 0.2s ease, background 0.2s ease;
         }
-        .pw-toggle:hover { color: rgba(255, 255, 255, 0.92); }
-        .pw-toggle:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.5); }
+        .pw-toggle:hover { color: var(--teal); background: rgba(54, 179, 175, 0.10); }
+        .pw-toggle:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+        /* Clicks always land on the button, never get swallowed by the icon paths. */
         .pw-toggle svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             display: block;
+            pointer-events: none;
             fill: none;
             stroke: currentColor;
             stroke-width: 1.7;
@@ -1930,7 +1940,7 @@
             </div>
             <div class="login-error" id="loginError">Invalid login</div>
             <button type="submit" class="login-btn" id="loginBtn">Enter</button>
-            <div class="login-helper" id="loginHelper">Use the email and password from your HUB invite.</div>
+            <div class="login-helper" id="loginHelper">Sign in with your Google account, or the email and password from your Hub invite. Tap the eye to check your password.</div>
             <div class="login-actions">
                 <button class="setup-toggle" type="button" onclick="toggleResetPanel()">Forgot password?</button>
                 <button class="setup-toggle firebase-only" id="createAccountToggle" type="button" onclick="handleCreateAccount()">Create account</button>
@@ -2357,7 +2367,7 @@ function setupAuthModeUi() {
     if (allowPublicSignup) document.getElementById('createAccountToggle').classList.add('visible');
     document.getElementById('setupCodeToggle').classList.add('hidden');
     document.getElementById('loginBtn').textContent = 'Sign In';
-    document.getElementById('loginHelper').textContent = 'Use Google or your Hub email/password after an Owner has added your account.';
+    document.getElementById('loginHelper').textContent = 'Sign in with your Google account, or your Hub email and password. Tap the eye icon to check your password.';
     document.getElementById('resetCopy').textContent = 'Enter your email above and Firebase will email you a private password reset link.';
     document.getElementById('resetBtn').textContent = 'Email Reset Link';
 }
