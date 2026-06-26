@@ -16,11 +16,18 @@ window.FRATELLO_FIREBASE_CONFIG = {
     measurementId: ''
 };
 
+// Microsoft 365 "Directory (tenant) ID" for Fratello. When set, only accounts
+// from this company tenant can sign in with Microsoft (no personal/outside
+// accounts).
+window.FRATELLO_MICROSOFT_TENANT = 'aa750b1e-939c-45e9-b883-4d95ae31b90f';
+
 window.FRATELLO_OWNER_EMAILS = [
     'prefontainech@gmail.com',
     'russ@fratellocoffee.com'
 ];
 
+// Microsoft is ON: the Entra app registration is connected to Firebase and
+// sign-in is locked to the Fratello tenant (FRATELLO_MICROSOFT_TENANT above).
 window.FRATELLO_AUTH_PROVIDERS = {
     email: true,
     google: true,

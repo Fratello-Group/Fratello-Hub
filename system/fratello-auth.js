@@ -321,8 +321,10 @@ export async function signInWithMicrosoft() {
     provider.addScope('email');
     provider.addScope('openid');
     provider.addScope('profile');
-    // To restrict sign-in to the company's Microsoft 365 tenant, set:
-    // provider.setCustomParameters({ tenant: '<your-tenant-id>' });
+    // Lock sign-in to the company's Microsoft 365 tenant when its ID is set in
+    // firebase-config.js (otherwise allow any work/school account, not personal).
+    const tenant = String(window.FRATELLO_MICROSOFT_TENANT || '').trim();
+    provider.setCustomParameters({ tenant: tenant || 'organizations' });
     const credential = await signInWithPopup(auth, provider);
     return profileForUser(credential.user);
 }
