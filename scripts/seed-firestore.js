@@ -102,8 +102,8 @@ const TEAM_MEMBERS = [
         email: 'allana.contois@fratellocoffee.com',
         name: 'Allana Contois',
         department: 'Warehouse',
-        title: 'Warehouse Team Member',
-        role_tier: 'Staff',
+        title: 'Warehouse Manager',
+        role_tier: 'Manager',
         profile: 'production',
         manager_id: 'kyle.park@fratellocoffee.com'
     },
@@ -112,8 +112,8 @@ const TEAM_MEMBERS = [
         email: 'jaleisy.quintero@fratellocoffee.com',
         name: 'Jaleisy Quintero',
         department: 'Packaging',
-        title: 'Packaging Team Member',
-        role_tier: 'Staff',
+        title: 'Packaging Manager',
+        role_tier: 'Manager',
         profile: 'production',
         manager_id: 'kyle.park@fratellocoffee.com'
     },

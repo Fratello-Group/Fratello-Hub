@@ -47,8 +47,8 @@
     { "name": "Kyle Park", "firstName": "Kyle", "initials": "KP", "email": "kyle.park@fratellocoffee.com", "department": "Production", "tier": "manager", "role": "production" },
     { "name": "Samantha Stewart", "firstName": "Samantha", "initials": "SS", "email": null, "department": "Roasting", "tier": "manager", "role": "production" },
     { "name": "Oleksandr Svyrydov", "firstName": "Oleksandr", "initials": "OS", "email": "oleksandr.svyrydov@fratellocoffee.com", "department": "Roasting", "tier": "staff", "role": "production" },
-    { "name": "Jaleisy Quintero", "firstName": "Jaleisy", "initials": "JQ", "email": "jaleisy.quintero@fratellocoffee.com", "department": "Packaging", "tier": "staff", "role": "production" },
-    { "name": "Allana Contois", "firstName": "Allana", "initials": "AC", "email": "allana.contois@fratellocoffee.com", "department": "Warehouse", "tier": "staff", "role": "production" },
+    { "name": "Jaleisy Quintero", "firstName": "Jaleisy", "initials": "JQ", "email": "jaleisy.quintero@fratellocoffee.com", "department": "Packaging", "tier": "manager", "role": "production" },
+    { "name": "Allana Contois", "firstName": "Allana", "initials": "AC", "email": "allana.contois@fratellocoffee.com", "department": "Warehouse", "tier": "manager", "role": "production" },
     { "name": "Joel May", "firstName": "Joel", "initials": "JM", "email": "joel.may@fratellocoffee.com", "department": "Sales", "tier": "staff", "role": "sales" },
     { "name": "D'Arcy Watsham", "firstName": "D'Arcy", "initials": "DW", "email": "darcy.watsham@fratellocoffee.com", "department": "Sales", "tier": "staff", "role": "sales" }
   ]
