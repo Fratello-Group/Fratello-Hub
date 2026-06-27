@@ -1966,7 +1966,6 @@
         <nav class="hub-nav" aria-label="Hub sections">
             <button class="hub-nav-btn active" type="button" data-view="dashboard">Dashboard</button>
             <button class="hub-nav-btn" type="button" data-view="departments">Departments</button>
-            <button class="hub-nav-btn" type="button" data-view="resources">Resources</button>
             <button class="hub-nav-btn" type="button" data-view="owner-hub">Owner Hub</button>
             <button class="hub-nav-btn" type="button" data-section="settings">Settings</button>
         </nav>
@@ -2143,26 +2142,30 @@ const SECTIONS = {
         cards: []
     },
 
+    // Everyday personal forms + docs. These surface on the personal Dashboard
+    // (the old "Resources" page was folded in). Coming-Soon docs stay defined
+    // here so the dashboard's "Forms & Handbook" group appears automatically the
+    // moment one of them goes live.
     'employee-resources': {
         group: 'Resources',
         label: 'Resources',
         cards: [
-            { title: 'Expense Reimbursement', href: 'operations/forms/expense-report.html', badge: 'Live', quick: true },
+            { title: 'Submit an Expense', href: 'operations/forms/expense-report.html', badge: 'Live', quick: true },
             { title: 'Staff Forms', href: '#', badge: 'Coming Soon' },
-            { title: 'Employee Handbook', href: '#', badge: 'Coming Soon' },
-            { title: 'HR Forms', href: '#', badge: 'Coming Soon' }
+            { title: 'Employee Handbook', href: '#', badge: 'Coming Soon' }
         ]
     },
 
+    // Personal time-off actions. Calendar Subscriptions intentionally lives on the
+    // redesigned "My Time Off" page (vacation-tracker), not as its own tile here.
     'time-off': {
         group: 'Time Off',
         label: 'Time Off',
         cards: [
-            { title: 'Submit Vacation Request', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off', quick: true },
-            { title: 'Log Sick Day', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off', quick: true },
+            { title: 'Request Time Off', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off', quick: true },
+            { title: 'Log a Sick Day', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off', quick: true },
             { title: 'My Time Off', href: 'hr/time-off/vacation-tracker.html?view=my-requests', badge: 'Time Off', quick: true },
-            { title: 'Calendar Subscriptions', href: 'hr/time-off/calendar-subscribe.html', badge: 'Calendar' },
-            { title: 'Approvals Queue', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], attention: true },
+            { title: 'Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], attention: true },
             { title: 'Team Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] }
         ]
     },
@@ -2219,7 +2222,7 @@ const ROLE_SECTION_MAP = {
     owner: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'],
     controller: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
     marketing: ['marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
-    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
+    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
     sales: ['sales', 'marketing', 'food-safety', 'employee-resources', 'time-off'],
     staff: ['food-safety', 'employee-resources', 'time-off']
 };
@@ -2227,13 +2230,6 @@ const ROLE_SECTION_MAP = {
 const FALLBACK_HUB_DATA = {
     attention: [],
     notes: [],
-    quickActions: [
-        { id: 'qa_vacation', label: 'Submit vacation', icon: 'plane', href: '/hr/time-off/vacation-tracker.html?view=submit', group: 'submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 1, owner: 1 } },
-        { id: 'qa_sick', label: 'Log a sick day', icon: 'thermometer', href: '/hr/time-off/sick-day-logger.html', group: 'submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 2, manager: 2, owner: 2 } },
-        { id: 'qa_expense', label: 'Submit an expense', icon: 'dollar', href: '/operations/forms/expense-report.html', group: 'submit', tiers: ['staff', 'manager', 'owner'], order: { staff: 3, manager: 3, owner: 3 } },
-        { id: 'qa_calendar', label: 'Calendar', icon: 'calendar', href: '/hr/time-off/vacation-tracker.html?view=my-requests', group: 'review', tiers: ['staff', 'manager', 'owner'], order: { staff: 1, manager: 2, owner: 2 } },
-        { id: 'qa_approvals', label: 'Approvals queue', icon: 'check-square', href: '/hr/time-off/vacation-tracker.html?view=approvals', group: 'review', tiers: ['manager', 'owner'], order: { manager: 1, owner: 1 } }
-    ],
     users: {
         roleDefaults: {
             owner: { name: 'Chris Prefontaine', firstName: 'Chris', initials: 'CP', email: 'prefontainech@gmail.com' },
@@ -2278,10 +2274,9 @@ function loadHubData() {
         hubDataPromise = Promise.all([
             fetchJson('/data/attention.json', FALLBACK_HUB_DATA.attention),
             fetchJson('/data/notes.json', FALLBACK_HUB_DATA.notes),
-            fetchJson('/data/quick-actions.json', FALLBACK_HUB_DATA.quickActions),
             fetchJson('/data/users.json', FALLBACK_HUB_DATA.users)
-        ]).then(([attention, notes, quickActions, users]) => {
-            hubData = { attention, notes, quickActions, users };
+        ]).then(([attention, notes, users]) => {
+            hubData = { attention, notes, users };
             return hubData;
         });
     }
@@ -2738,10 +2733,11 @@ function setActiveNav(view, sectionKey = '') {
     document.querySelectorAll('.hub-nav-btn').forEach(btn => {
         const isDirectView = btn.dataset.view && btn.dataset.view === view;
         const isDepartmentSection = btn.dataset.view === 'departments' && section && section.group === 'Departments';
-        const isResourceSection = btn.dataset.view === 'resources' && section && ['Resources', 'Time Off'].includes(section.group);
         const isOwnerHubSection = btn.dataset.view === 'owner-hub' && section && section.group === 'Owner/Admin';
         const isSection = btn.dataset.section && btn.dataset.section === sectionKey;
-        btn.classList.toggle('active', isDirectView || isDepartmentSection || isResourceSection || isOwnerHubSection || isSection);
+        // Coerce to a real boolean: a bare `undefined`/`null` here makes
+        // classList.toggle flip the class instead of clearing it.
+        btn.classList.toggle('active', Boolean(isDirectView || isDepartmentSection || isOwnerHubSection || isSection));
     });
 }
 
@@ -2785,11 +2781,6 @@ function renderHub(role, view = 'dashboard', sectionKey = '', push = true) {
         return;
     }
 
-    if (view === 'resources') {
-        renderResourcesIndex(role);
-        return;
-    }
-
     if (sectionKey) {
         renderSectionPage(role, sectionKey);
         return;
@@ -2813,7 +2804,12 @@ function initialHubRoute(role) {
     const hash = decodeURIComponent((location.hash || '').replace(/^#/, '')).trim();
     if (!hash || hash === 'dashboard') return { view: 'dashboard', sectionKey: '' };
     if (hash === 'departments') return { view: 'departments', sectionKey: '' };
-    if (hash === 'resources') return { view: 'resources', sectionKey: '' };
+
+    // The old Resources page (and its time-off / employee-resources sections) now
+    // live on the personal Dashboard — redirect those legacy hashes/bookmarks home.
+    if (['resources', 'time-off', 'employee-resources'].includes(hash)) {
+        return { view: 'dashboard', sectionKey: '' };
+    }
 
     const sectionAliases = {
         'owner-hub': 'owner-admin'
@@ -2828,9 +2824,6 @@ function initialHubRoute(role) {
 
 function setupHubNav(role) {
     const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
-    const resourcesSections = ['time-off', 'employee-resources']
-        .map(key => visibleSection(role, key))
-        .filter(Boolean);
     const ownerSection = visibleSection(role, 'owner-admin');
 
     // Each menu button simply opens its own page — no dropdowns.
@@ -2843,7 +2836,6 @@ function setupHubNav(role) {
 
     wireNav('.hub-nav-btn[data-view="dashboard"]', true, () => renderHub(role, 'dashboard'));
     wireNav('.hub-nav-btn[data-view="departments"]', departmentSections.length > 0, () => renderHub(role, 'departments'));
-    wireNav('.hub-nav-btn[data-view="resources"]', resourcesSections.length > 0, () => renderHub(role, 'resources'));
     wireNav('.hub-nav-btn[data-view="owner-hub"]', Boolean(ownerSection), () => renderHub(role, 'section', 'owner-admin'));
 
     document.querySelectorAll('.hub-nav-btn[data-section]').forEach(btn => {
@@ -2975,12 +2967,6 @@ function visibleAttention(items, role) {
     });
 }
 
-function visibleQuickActions(items, tier) {
-    return items
-        .filter(item => (item.tiers || []).includes(tier))
-        .sort((a, b) => (a.order?.[tier] || 99) - (b.order?.[tier] || 99));
-}
-
 function visibleNotes(items) {
     return [...items]
         .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -3003,30 +2989,26 @@ function formatNoteDate(value) {
     return new Date(`${value}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
 }
 
+// The greeting subtitle: a friendly one-liner that says what this page IS,
+// with the live status (alerts / new notes) folded in only when relevant.
 function briefing(tier, counts) {
     const { attentionOpen, notesNew } = counts;
+    const notePart = notesNew === 0 ? '' : ` ${notesNew} new company note${notesNew === 1 ? '' : 's'} below.`;
 
     if (tier === 'staff') {
-        if (notesNew === 0) return 'Your quick actions are ready. No company notes have been posted yet.';
-        if (notesNew === 1) return 'One company note is posted. Your quick actions are ready.';
-        return `${notesNew} company notes are posted. Your quick actions are ready.`;
+        return `Your home base — time off, expenses, and the tools you need, all in one place.${notePart}`;
     }
 
-    if (tier === 'manager') {
-        const attention = attentionOpen === 0 ? 'No live alerts need your attention right now' : `${attentionOpen === 1 ? '1 item' : `${attentionOpen} items`} need your attention`;
-        if (notesNew === 0) return `${attention}. No company notes have been posted yet.`;
-        return `${attention}. ${notesNew} company note${notesNew === 1 ? '' : 's'} posted.`;
-    }
-
-    const attention = attentionOpen === 0 ? 'No live alerts need your attention right now' : `${attentionOpen === 1 ? '1 item' : `${attentionOpen} items`} need your attention`;
-    const notes = notesNew === 0 ? 'No company notes have been posted yet' : `${notesNew} company note${notesNew === 1 ? '' : 's'} posted`;
-    return `${attention}. ${notes}.`;
+    const alertPart = attentionOpen === 0
+        ? ''
+        : ` ${attentionOpen === 1 ? '1 item needs' : `${attentionOpen} items need`} your attention.`;
+    return `Your home base — everyday actions, approvals, and your team's tools in one place.${alertPart}${notePart}`;
 }
 
 function iconSvg(key) {
     const icons = {
         'calendar-plus': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v15H3V6a2 2 0 0 1 2-2z"/><path d="M12 14v5M9.5 16.5h5"/></svg>',
-        thermometer: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.76V5a4 4 0 0 0-8 0v9.76A6 6 0 1 0 14 14.76z"/><path d="M10 17V8"/></svg>',
+        pulse: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg>',
         receipt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2z"/><path d="M8 7h8M8 12h8M8 16h5"/></svg>',
         clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
         'check-square': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m8 12 3 3 6-7"/></svg>',
@@ -3046,23 +3028,6 @@ function iconSvg(key) {
         shield: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 2.5v5.2c0 4.4-3 7.6-7 9.3-4-1.7-7-4.9-7-9.3V5.5z"/><path d="M9 12l2 2 4-4"/></svg>'
     };
     return icons[key] || icons.calendar;
-}
-
-function createQuickActionCard(action, index, accent) {
-    const card = document.createElement('a');
-    card.className = 'qa-card fade-in' + (accent === 'gold' ? ' qa-card--gold' : '');
-    card.href = action.href;
-    card.innerHTML = `
-        <span class="qa-top">
-            <span class="qa-chip">${iconSvg(action.icon)}</span>
-            <span class="qa-serial">${String(index + 1).padStart(2, '0')}</span>
-        </span>
-        <span class="qa-label">
-            <span>${action.label}</span>
-            <span class="qa-arrow">→</span>
-        </span>
-    `;
-    return card;
 }
 
 function createAttentionRow(item) {
@@ -3134,7 +3099,6 @@ function renderDashboardHome(role) {
     const person = personForRole(role);
     const attentionItems = visibleAttention(hubData.attention || [], role);
     const notes = visibleNotes(hubData.notes || []);
-    const quickActions = visibleQuickActions(hubData.quickActions || [], tier);
     const newNotesCount = notes.filter(note => note.isNew).length;
 
     addGreeting(main, role, person, {
@@ -3158,29 +3122,11 @@ function renderDashboardHome(role) {
         main.appendChild(section);
     }
 
-    const submitActions = quickActions.filter(action => (action.group || 'submit') === 'submit');
-    const reviewActions = quickActions.filter(action => action.group === 'review');
+    // Personal everyday tools (the folded-in "Resources"), grouped by intent.
+    appendPersonalToolGroups(main, role);
 
-    const buildQuickSection = (title, meta, actions, accent) => {
-        if (!actions.length) return;
-        const section = document.createElement('section');
-        section.className = 'workbench-section fade-in';
-        section.innerHTML = `
-            <div class="workbench-head">
-                <h2 class="workbench-title">${title}</h2>
-                <span class="workbench-meta">${meta}</span>
-            </div>
-        `;
-        const grid = document.createElement('div');
-        grid.className = 'qa-grid';
-        grid.style.setProperty('--qa-columns', String(Math.min(Math.max(actions.length, 1), 6)));
-        actions.forEach((action, index) => grid.appendChild(createQuickActionCard(action, index, accent)));
-        section.appendChild(grid);
-        main.appendChild(section);
-    };
-
-    buildQuickSection('Submit', 'Everyone', submitActions, 'teal');
-    buildQuickSection('Review', 'View what’s there', reviewActions, 'gold');
+    // Quick launch into the department area(s) this person can access.
+    appendYourAreas(main, role);
 
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
@@ -3207,6 +3153,44 @@ function renderDashboardHome(role) {
     main.appendChild(notesSection);
 }
 
+// Icon per department, shared by the Departments page and the dashboard's "Your Areas".
+const DEPT_ICONS = {
+    'finance': 'finance',
+    'production-roasting': 'roasting',
+    'production-packaging': 'packaging',
+    'production-warehouse': 'warehouse',
+    'sales': 'sales',
+    'marketing': 'marketing',
+    'food-safety': 'shield',
+    'hr-people': 'people'
+};
+
+// Builds one clickable department row (used by Departments page + "Your Areas").
+function createDeptRow(role, section) {
+    const row = document.createElement('article');
+    row.className = 'dept-row fade-in';
+    row.tabIndex = 0;
+    const subtitle = section.directLink
+        ? 'Open the full dashboard'
+        : `${section.cards.length} item${section.cards.length === 1 ? '' : 's'}`;
+    row.innerHTML = `
+        <span class="dept-icon">${iconSvg(DEPT_ICONS[section.key] || 'calendar')}</span>
+        <span class="dept-copy">
+            <span class="dept-title">${section.label}</span>
+            <span class="dept-count">${subtitle}</span>
+        </span>
+        <span class="dept-arrow">→</span>
+    `;
+    const go = section.directLink
+        ? () => { window.location.href = section.directLink; }
+        : () => renderHub(role, 'section', section.key);
+    row.onclick = go;
+    row.onkeydown = event => {
+        if (event.key === 'Enter' || event.key === ' ') go();
+    };
+    return row;
+}
+
 function renderDepartmentsIndex(role) {
     const main = document.getElementById('mainContent');
     main.innerHTML = '';
@@ -3221,60 +3205,23 @@ function renderDepartmentsIndex(role) {
     `;
     main.appendChild(header);
 
-    const deptIcons = {
-        'finance': 'finance',
-        'production-roasting': 'roasting',
-        'production-packaging': 'packaging',
-        'production-warehouse': 'warehouse',
-        'sales': 'sales',
-        'marketing': 'marketing',
-        'food-safety': 'shield',
-        'hr-people': 'people'
-    };
-
     const list = document.createElement('div');
     list.className = 'dept-list';
-    departmentSections.forEach(section => {
-        const row = document.createElement('article');
-        row.className = 'dept-row fade-in';
-        row.tabIndex = 0;
-        const subtitle = section.directLink
-            ? 'Open the full dashboard'
-            : `${section.cards.length} item${section.cards.length === 1 ? '' : 's'}`;
-        row.innerHTML = `
-            <span class="dept-icon">${iconSvg(deptIcons[section.key] || 'calendar')}</span>
-            <span class="dept-copy">
-                <span class="dept-title">${section.label}</span>
-                <span class="dept-count">${subtitle}</span>
-            </span>
-            <span class="dept-arrow">→</span>
-        `;
-        const go = section.directLink
-            ? () => { window.location.href = section.directLink; }
-            : () => renderHub(role, 'section', section.key);
-        row.onclick = go;
-        row.onkeydown = event => {
-            if (event.key === 'Enter' || event.key === ' ') go();
-        };
-        list.appendChild(row);
-    });
+    departmentSections.forEach(section => list.appendChild(createDeptRow(role, section)));
     main.appendChild(list);
 }
 
-// Group + icon for each Resources tool, so the page reads like the dashboard:
+// Group + icon for each personal tool, so the dashboard reads by intent:
 // what you DO (Submit), what you CHECK (Review), and reference material (Forms).
 const RESOURCE_META = {
-    'Submit Vacation Request': { group: 'submit', icon: 'plane' },
-    'Log Sick Day':            { group: 'submit', icon: 'thermometer' },
-    'Expense Reimbursement':   { group: 'submit', icon: 'dollar' },
-    'My Time Off':             { group: 'review', icon: 'calendar' },
-    'Team Calendar':           { group: 'review', icon: 'people' },
-    'Approvals Queue':         { group: 'review', icon: 'check-square' },
-    'Calendar Subscriptions':  { group: 'review', icon: 'feed' },
-    'Staff Forms':             { group: 'forms',  icon: 'document' },
-    'SOPs & Manuals':          { group: 'forms',  icon: 'book' },
-    'Employee Handbook':       { group: 'forms',  icon: 'book' },
-    'HR Forms':                { group: 'forms',  icon: 'document' }
+    'Request Time Off':  { group: 'submit', icon: 'plane' },
+    'Log a Sick Day':    { group: 'submit', icon: 'pulse' },
+    'Submit an Expense': { group: 'submit', icon: 'dollar' },
+    'My Time Off':       { group: 'review', icon: 'calendar' },
+    'Team Calendar':     { group: 'review', icon: 'people' },
+    'Approvals':         { group: 'review', icon: 'check-square' },
+    'Staff Forms':       { group: 'forms',  icon: 'document' },
+    'Employee Handbook': { group: 'forms',  icon: 'book' }
 };
 const RESOURCE_FALLBACK = { group: 'forms', icon: 'document' };
 
@@ -3298,7 +3245,7 @@ function createResourceCard(card, index, accent, icon) {
         if (isExternal) { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
         el.addEventListener('click', () => {
             try {
-                logActivity('tool_open', { toolName: card.title, details: { section: 'Resources', href: card.href || '' }, keepalive: true });
+                logActivity('tool_open', { toolName: card.title, details: { section: 'Dashboard', href: card.href || '' }, keepalive: true });
             } catch (error) {
                 // best-effort logging
             }
@@ -3307,36 +3254,39 @@ function createResourceCard(card, index, accent, icon) {
     return el;
 }
 
-function renderResourcesIndex(role) {
-    const main = document.getElementById('mainContent');
-    main.innerHTML = '';
-
+// Appends the personal everyday tools to the dashboard, grouped by intent:
+// Submit (do) · Review (check) · Forms & Handbook (reference). Sourced from the
+// time-off + employee-resources sections — the content the old Resources page held.
+function appendPersonalToolGroups(main, role) {
     const allCards = ['time-off', 'employee-resources']
         .map(key => visibleSection(role, key))
         .filter(Boolean)
         .flatMap(section => section.cards.filter(card => cardIsVisible(card, role)));
 
-    const header = document.createElement('section');
-    header.className = 'tool-view-header fade-in';
-    header.innerHTML = `
-        <div class="section-kicker">Resources</div>
-        <h1 class="tool-view-title">Resources.</h1>
-        <p class="tool-view-note">Time off, calendars, and shared forms — grouped by what you're trying to do.</p>
-    `;
-    main.appendChild(header);
-
     const groups = [
         { key: 'submit', title: 'Submit', meta: 'Add or request', accent: 'teal' },
-        { key: 'review', title: 'Review', meta: 'View what’s there', accent: 'gold' },
-        { key: 'forms',  title: 'Forms & Docs', meta: 'Reference', accent: 'teal' }
+        { key: 'review', title: 'Review', meta: 'Check status', accent: 'gold' },
+        { key: 'forms',  title: 'Forms & Handbook', meta: 'Reference', accent: 'teal' }
     ];
 
-    let rendered = 0;
-    groups.forEach(group => {
-        const cards = allCards.filter(card => (RESOURCE_META[card.title] || RESOURCE_FALLBACK).group === group.key);
-        if (!cards.length) return;
-        rendered += cards.length;
+    // Resolve each group's cards. "Forms & Handbook" stays hidden until at least
+    // one doc is live, so a new staff member isn't greeted by a wall of "Soon".
+    const resolved = groups
+        .map(group => ({
+            ...group,
+            cards: allCards.filter(card => (RESOURCE_META[card.title] || RESOURCE_FALLBACK).group === group.key)
+        }))
+        .filter(group => {
+            if (!group.cards.length) return false;
+            if (group.key === 'forms') return group.cards.some(card => card.href && card.href !== '#');
+            return true;
+        });
 
+    // Shared column rhythm across groups so a single-item group (e.g. staff
+    // "Review") sits left-aligned instead of stretching the full width.
+    const columns = Math.min(Math.max(...resolved.map(group => group.cards.length), 1), 4);
+
+    resolved.forEach(group => {
         const section = document.createElement('section');
         section.className = 'workbench-section fade-in';
         section.innerHTML = `
@@ -3347,21 +3297,36 @@ function renderResourcesIndex(role) {
         `;
         const grid = document.createElement('div');
         grid.className = 'qa-grid';
-        grid.style.setProperty('--qa-columns', String(Math.min(Math.max(cards.length, 1), 4)));
-        cards.forEach((card, index) => {
+        grid.style.setProperty('--qa-columns', String(columns));
+        group.cards.forEach((card, index) => {
             const icon = (RESOURCE_META[card.title] || RESOURCE_FALLBACK).icon;
             grid.appendChild(createResourceCard(card, index, group.accent, icon));
         });
         section.appendChild(grid);
         main.appendChild(section);
     });
+}
 
-    if (!rendered) {
-        const empty = document.createElement('p');
-        empty.className = 'tool-view-note fade-in';
-        empty.textContent = 'No resources are available for your access level yet.';
-        main.appendChild(empty);
-    }
+// Compact launcher into the department area(s) this person can access, so the
+// dashboard is a complete starting point. Anything area-specific lives in here.
+function appendYourAreas(main, role) {
+    const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
+    if (!departmentSections.length) return;
+
+    const section = document.createElement('section');
+    section.className = 'workbench-section fade-in';
+    section.innerHTML = `
+        <div class="workbench-head">
+            <h2 class="workbench-title">Your Areas</h2>
+            <span class="workbench-meta">Open your department tools</span>
+        </div>
+    `;
+    const list = document.createElement('div');
+    list.className = 'dept-list';
+    list.style.marginTop = '0';
+    departmentSections.forEach(deptSection => list.appendChild(createDeptRow(role, deptSection)));
+    section.appendChild(list);
+    main.appendChild(section);
 }
 
 function renderSectionPage(role, sectionKey) {
