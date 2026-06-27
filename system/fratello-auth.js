@@ -180,11 +180,15 @@ function providerLabel(providerIds) {
 function roleFromProfile(id, data) {
     const profileKey = data.profile || 'staff';
     const profile = PROFILE_DEFINITIONS[profileKey] || PROFILE_DEFINITIONS.staff;
+    const tierLabel = data.role_tier || timeOffRoleTier(profileKey);
     return {
         key: profile.key,
         label: profile.label,
         sections: profile.sections,
-        roleTier: data.role_tier || timeOffRoleTier(profileKey),
+        roleTier: tierLabel,
+        // Two-axis access model: the hub derives what's visible from tier + department.
+        tier: String(tierLabel).toLowerCase(),
+        department: data.department || timeOffDepartment(profileKey),
         user: {
             id,
             name: data.name || displayNameFromEmail(data.email),

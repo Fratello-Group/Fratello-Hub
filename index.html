@@ -2165,7 +2165,7 @@ const SECTIONS = {
             { title: 'Request Time Off', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off', quick: true },
             { title: 'Log a Sick Day', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off', quick: true },
             { title: 'My Time Off', href: 'hr/time-off/vacation-tracker.html?view=my-requests', badge: 'Time Off', quick: true },
-            { title: 'Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], attention: true }
+            { title: 'Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', managerOnly: true, attention: true }
         ]
     },
 
@@ -2217,14 +2217,72 @@ const SECTIONS = {
     }
 };
 
+// ── ACCESS MODEL ──
+// A person's access is derived from TWO things:
+//   tier:       owner · controller · manager · staff
+//   department: finance · sales · marketing · roasting · packaging · warehouse
+//               (production = all three of roasting/packaging/warehouse combined)
+// sectionsForRole() below is the single source of truth. ROLE_SECTION_MAP is kept
+// only as a fallback for legacy sessions/users that predate the department field.
+
 const ROLE_SECTION_MAP = {
     owner: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'],
-    controller: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
+    controller: ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
     marketing: ['marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
-    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
-    sales: ['sales', 'marketing', 'food-safety', 'employee-resources', 'time-off'],
+    production: ['production-roasting', 'production-packaging', 'production-warehouse', 'food-safety', 'hr-people', 'employee-resources', 'time-off'],
+    sales: ['sales', 'food-safety', 'employee-resources', 'time-off'],
     staff: ['food-safety', 'employee-resources', 'time-off']
 };
+
+// Everyone gets these, regardless of tier or department.
+const PERSONAL_SECTIONS = ['food-safety', 'employee-resources', 'time-off'];
+
+// Department → the hub section(s) for that area. "production" rolls up its 3 teams.
+const DEPARTMENT_SECTIONS = {
+    finance: ['finance'],
+    sales: ['sales'],
+    marketing: ['marketing'],
+    roasting: ['production-roasting'],
+    packaging: ['production-packaging'],
+    warehouse: ['production-warehouse'],
+    production: ['production-roasting', 'production-packaging', 'production-warehouse']
+};
+
+function normalizeTier(value) {
+    const s = String(value || '').toLowerCase().trim();
+    if (s === 'owner' || s === 'controller' || s === 'manager' || s === 'staff') return s;
+    if (['marketing', 'production', 'sales'].includes(s)) return 'manager'; // legacy flat keys
+    return 'staff';
+}
+
+function normalizeDept(value) {
+    const s = String(value || '').toLowerCase().trim();
+    const map = {
+        management: 'leadership', leadership: 'leadership',
+        admin: 'finance', finance: 'finance',
+        production: 'production', roasting: 'roasting', packaging: 'packaging', warehouse: 'warehouse',
+        sales: 'sales', marketing: 'marketing'
+    };
+    return map[s] || '';
+}
+
+// THE single source of truth for what each person sees in the hub.
+function sectionsForRole(tier, department, legacyKey) {
+    if (tier === 'owner') {
+        return ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off', 'owner-admin', 'settings'];
+    }
+    if (tier === 'controller') {
+        // Every department + HR + Food Safety — but NOT Settings or the Owner Hub.
+        return ['finance', 'production-roasting', 'production-packaging', 'production-warehouse', 'sales', 'marketing', 'food-safety', 'hr-people', 'employee-resources', 'time-off'];
+    }
+    const deptSections = DEPARTMENT_SECTIONS[department];
+    if (!deptSections) {
+        return ROLE_SECTION_MAP[legacyKey] || [...PERSONAL_SECTIONS]; // legacy / unknown dept
+    }
+    const sections = [...deptSections, ...PERSONAL_SECTIONS];
+    if (tier === 'manager') sections.push('hr-people'); // hiring + team tools
+    return sections;
+}
 
 const FALLBACK_HUB_DATA = {
     attention: [],
@@ -2248,13 +2306,15 @@ function normalizeRole(role) {
     if (!role || !role.label) return role;
 
     const key = role.key || role.label.toLowerCase();
-    const sections = ROLE_SECTION_MAP[key];
-    if (!sections) return role;
+    const tier = normalizeTier(role.tier || role.roleTier || key);
+    const department = normalizeDept(role.department);
 
     return {
         ...role,
         key,
-        sections
+        tier,
+        department,
+        sections: sectionsForRole(tier, department, key)
     };
 }
 
@@ -2284,9 +2344,9 @@ function loadHubData() {
 }
 
 function tierOf(role) {
-    const key = role?.key || role;
-    if (key === 'owner' || key === 'controller') return 'owner';
-    if (['marketing', 'production', 'sales'].includes(key)) return 'manager';
+    const tier = (role && role.tier) ? role.tier : normalizeTier(role?.key || role);
+    if (tier === 'owner' || tier === 'controller') return 'owner';
+    if (tier === 'manager') return 'manager';
     return 'staff';
 }
 
@@ -2693,7 +2753,9 @@ function greetingWord(now = new Date()) {
 }
 
 function isManagerRole(role) {
-    return Boolean(role) && (role.key === 'owner' || role.key === 'controller' || String(role.roleTier || '').toLowerCase() === 'manager');
+    if (!role) return false;
+    const tier = role.tier || normalizeTier(role.roleTier || role.key);
+    return tier === 'owner' || tier === 'controller' || tier === 'manager';
 }
 
 function cardIsVisible(card, role) {
