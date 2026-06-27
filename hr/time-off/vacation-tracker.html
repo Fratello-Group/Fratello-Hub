@@ -223,8 +223,18 @@
             catch { return null; }
         }
         function roleKey() { return String(role?.key || role?.label || '').toLowerCase(); }
-        function isManager() { return MANAGER_KEYS.has(roleKey()); }
-        function isAdmin() { return ADMIN_KEYS.has(roleKey()); }
+        // Manager status comes from the access tier (owner/controller/manager), not the
+        // department name — so e.g. a Marketing *staffer* is not treated as a manager.
+        // Falls back to the legacy key map for older sessions without a tier.
+        function roleTierValue() {
+            const t = String(role?.tier || role?.roleTier || '').toLowerCase();
+            if (t === 'owner' || t === 'controller' || t === 'manager' || t === 'staff') return t;
+            const k = roleKey();
+            if (k === 'owner' || k === 'controller') return k;
+            return MANAGER_KEYS.has(k) ? 'manager' : 'staff';
+        }
+        function isManager() { const t = roleTierValue(); return t === 'owner' || t === 'controller' || t === 'manager'; }
+        function isAdmin() { const t = roleTierValue(); return t === 'owner' || t === 'controller'; }
         function iso(value) {
             if (!value) return '';
             if (typeof value?.toDate === 'function') value = value.toDate();
@@ -271,7 +281,9 @@
             return client[name](...args);
         }
         function fallbackUser() {
-            return { id: role?.user?.email || 'prototype-user', email: role?.user?.email || '', name: role?.user?.name || 'Signed-in user', role_tier: roleKey() === 'owner' ? 'Owner' : roleKey() === 'controller' ? 'Controller' : isManager() ? 'Manager' : 'Staff', department: role?.label || 'Team', manager_id: '' };
+            const tier = roleTierValue();
+            const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
+            return { id: role?.user?.email || 'prototype-user', email: role?.user?.email || '', name: role?.user?.name || 'Signed-in user', role_tier: tierLabel, department: role?.department || role?.label || 'Team', manager_id: '' };
         }
         async function loadData() {
             await loadClient();
