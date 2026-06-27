@@ -3124,9 +3124,6 @@ function renderDashboardHome(role) {
     // Personal everyday tools (the folded-in "Resources"), grouped by intent.
     appendPersonalToolGroups(main, role);
 
-    // Quick launch into the department area(s) this person can access.
-    appendYourAreas(main, role);
-
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
     const notesMeta = newNotesCount ? `${newNotesCount} posted` : 'None posted';
@@ -3152,7 +3149,7 @@ function renderDashboardHome(role) {
     main.appendChild(notesSection);
 }
 
-// Icon per department, shared by the Departments page and the dashboard's "Your Areas".
+// Icon per department, used by the Departments page rows.
 const DEPT_ICONS = {
     'finance': 'finance',
     'production-roasting': 'roasting',
@@ -3164,7 +3161,7 @@ const DEPT_ICONS = {
     'hr-people': 'people'
 };
 
-// Builds one clickable department row (used by Departments page + "Your Areas").
+// Builds one clickable department row for the Departments page.
 function createDeptRow(role, section) {
     const row = document.createElement('article');
     row.className = 'dept-row fade-in';
@@ -3305,28 +3302,6 @@ function appendPersonalToolGroups(main, role) {
     });
 }
 
-// Compact launcher into the department area(s) this person can access, so the
-// dashboard is a complete starting point. Anything area-specific lives in here.
-function appendYourAreas(main, role) {
-    const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
-    if (!departmentSections.length) return;
-
-    const section = document.createElement('section');
-    section.className = 'workbench-section fade-in';
-    section.innerHTML = `
-        <div class="workbench-head">
-            <h2 class="workbench-title">Your Areas</h2>
-            <span class="workbench-meta">Open your department tools</span>
-        </div>
-    `;
-    const list = document.createElement('div');
-    list.className = 'dept-list';
-    list.style.marginTop = '0';
-    departmentSections.forEach(deptSection => list.appendChild(createDeptRow(role, deptSection)));
-    section.appendChild(list);
-    main.appendChild(section);
-}
-
 function renderSectionPage(role, sectionKey) {
     const section = visibleSection(role, sectionKey);
     if (section && section.directLink) { window.location.href = section.directLink; return; }
@@ -3354,16 +3329,9 @@ function renderSectionPage(role, sectionKey) {
     `;
     main.appendChild(header);
 
-    // Team Calendar is a team/department view (not a personal-dashboard item), so it
-    // lives on the department page — shown to that area's manager (and owner).
-    const cards = [...section.cards];
-    if (section.group === 'Departments' && isManagerRole(role)) {
-        cards.unshift({ title: 'Team Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Coverage' });
-    }
-
     const list = document.createElement('div');
     list.className = 'tool-view-list fade-in';
-    cards.forEach(card => list.appendChild(createToolLink(card, section.label)));
+    section.cards.forEach(card => list.appendChild(createToolLink(card, section.label)));
     main.appendChild(list);
 }
 
