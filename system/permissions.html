@@ -740,17 +740,14 @@
                         <label for="inviteTitle">Job title</label>
                         <input class="text-input" id="inviteTitle" type="text" placeholder="Sales Manager" autocomplete="organization-title">
                     </div>
-                    <div class="field">
-                        <label for="inviteProfile">Access profile</label>
-                        <select id="inviteProfile"></select>
-                    </div>
+                    <input type="hidden" id="inviteProfile">
                     <div class="field">
                         <label for="inviteDepartment">Department</label>
-                        <select id="inviteDepartment"></select>
+                        <select id="inviteDepartment" onchange="syncDerivedProfile()"></select>
                     </div>
                     <div class="field">
-                        <label for="inviteRoleTier">Role tier</label>
-                        <select id="inviteRoleTier"></select>
+                        <label for="inviteRoleTier">Level</label>
+                        <select id="inviteRoleTier" onchange="syncDerivedProfile()"></select>
                     </div>
                     <div class="field">
                         <label for="inviteManager">Manager</label>
@@ -786,7 +783,7 @@
                     <thead>
                         <tr>
                             <th>Person</th>
-                            <th>Access Profile</th>
+                            <th>Department &amp; Level</th>
                             <th>Visible Areas</th>
                             <th>Status</th>
                         </tr>
@@ -878,16 +875,57 @@
             }
         };
 
-        const DEPARTMENTS = ['Leadership', 'Finance', 'Production', 'Roasting', 'Packaging', 'Warehouse', 'Sales', 'Marketing', 'Operations', 'HR', 'Staff'];
-        const ROLE_TIERS = ['Owner', 'Controller', 'Manager', 'Staff'];
+        // Departments a person can belong to (one each). "Production" is the umbrella
+        // a Production manager oversees (Roasting + Packaging + Warehouse combined).
+        const DEPARTMENTS = ['Finance', 'Sales', 'Marketing', 'Roasting', 'Packaging', 'Warehouse', 'Production', 'Leadership'];
+        const LEVELS = ['Owner', 'Controller', 'Manager', 'Staff'];
+        const ROLE_TIERS = LEVELS;
         const PROFILE_DEFAULTS = {
             owner: { department: 'Leadership', role_tier: 'Owner', manager_id: '' },
             controller: { department: 'Finance', role_tier: 'Controller', manager_id: 'prefontainech@gmail.com' },
             production: { department: 'Production', role_tier: 'Manager', manager_id: 'prefontainech@gmail.com' },
             marketing: { department: 'Marketing', role_tier: 'Manager', manager_id: 'prefontainech@gmail.com' },
             sales: { department: 'Sales', role_tier: 'Manager', manager_id: 'russ@fratellocoffee.com' },
-            staff: { department: 'Staff', role_tier: 'Staff', manager_id: 'prefontainech@gmail.com' }
+            staff: { department: 'Finance', role_tier: 'Staff', manager_id: 'prefontainech@gmail.com' }
         };
+
+        // The Firestore "profile" key is DERIVED from Level + Department (it still
+        // powers the security rules + tool-page checks). Admins only choose the two.
+        function deriveProfile(level, department) {
+            const t = String(level || '').toLowerCase();
+            if (t === 'owner') return 'owner';
+            if (t === 'controller') return 'controller';
+            const d = String(department || '').toLowerCase();
+            if (d === 'marketing') return 'marketing';
+            if (d === 'sales') return 'sales';
+            if (['production', 'roasting', 'packaging', 'warehouse'].includes(d)) return 'production';
+            return 'staff';
+        }
+
+        // Plain-language summary of what a Level + Department combination can see.
+        function accessAreasFor(level, department) {
+            const t = String(level || '').toLowerCase();
+            if (t === 'owner') return ['Everything', 'Settings', 'Owner Hub'];
+            if (t === 'controller') return ['All departments', 'HR & People', 'Food Safety'];
+            const d = String(department || '');
+            const areas = [];
+            if (d === 'Production') areas.push('Roasting', 'Packaging', 'Warehouse');
+            else if (d && d !== 'Leadership') areas.push(d);
+            areas.push('Food Safety', 'Time Off');
+            if (t === 'manager') areas.push('Hiring');
+            return areas;
+        }
+
+        function accessTagsFor(level, department) {
+            return accessAreasFor(level, department).map(item => `<span class="tag">${escapeHtml(item)}</span>`).join('');
+        }
+
+        // Whether the signed-in admin may create/change managers. Owner = yes;
+        // Controller = staff only. Set by requireAccess() at load.
+        let CAN_EDIT_ALL = true;
+        function levelOptionsForAdmin() {
+            return CAN_EDIT_ALL ? LEVELS : ['Staff'];
+        }
 
         let STAFF = [];
         let LAST_GENERATED_LINK = '';
@@ -997,44 +1035,52 @@
             return `<option value="" ${selected ? '' : 'selected'}>None</option>${options}`;
         }
 
+        // Keep the hidden profile field in sync with the chosen Level + Department.
+        function syncDerivedProfile() {
+            const dept = document.getElementById('inviteDepartment');
+            const level = document.getElementById('inviteRoleTier');
+            const profile = document.getElementById('inviteProfile');
+            if (profile && dept && level) profile.value = deriveProfile(level.value, dept.value);
+        }
+
         function refreshRosterSelects() {
             const department = document.getElementById('inviteDepartment');
             const roleTier = document.getElementById('inviteRoleTier');
             const manager = document.getElementById('inviteManager');
             if (!department || !roleTier || !manager) return;
 
-            const currentDepartment = department.value || profileDefaults(document.getElementById('inviteProfile').value).department;
-            const currentRoleTier = roleTier.value || profileDefaults(document.getElementById('inviteProfile').value).role_tier;
-            const currentManager = manager.value || profileDefaults(document.getElementById('inviteProfile').value).manager_id;
+            const currentDepartment = department.value || 'Finance';
+            const currentRoleTier = roleTier.value || 'Staff';
+            const currentManager = manager.value;
 
             department.innerHTML = optionList(DEPARTMENTS, currentDepartment);
-            roleTier.innerHTML = optionList(ROLE_TIERS, currentRoleTier);
+            roleTier.innerHTML = optionList(levelOptionsForAdmin(), currentRoleTier);
             manager.innerHTML = managerOptions(currentManager);
+            syncDerivedProfile();
         }
 
         function applyProfileDefaults(force = false) {
-            const profile = document.getElementById('inviteProfile').value || 'staff';
-            const defaults = profileDefaults(profile);
             const department = document.getElementById('inviteDepartment');
             const roleTier = document.getElementById('inviteRoleTier');
             const manager = document.getElementById('inviteManager');
             if (!department || !roleTier || !manager) return;
 
-            if (force || !department.value) department.value = defaults.department;
-            if (force || !roleTier.value) roleTier.value = defaults.role_tier;
+            if (force || !department.value) department.value = 'Finance';
+            if (force || !roleTier.value) roleTier.value = 'Staff';
             refreshRosterSelects();
-            if (force || !manager.value) manager.value = emailKey(defaults.manager_id);
+            if (force) manager.value = '';
         }
 
         function invitePayloadFromForm() {
-            const profile = document.getElementById('inviteProfile').value;
+            const department = document.getElementById('inviteDepartment').value;
+            const roleTier = document.getElementById('inviteRoleTier').value;
             return {
                 name: document.getElementById('inviteName').value.trim(),
                 email: document.getElementById('inviteEmail').value.trim(),
                 title: document.getElementById('inviteTitle').value.trim(),
-                profile,
-                department: document.getElementById('inviteDepartment').value,
-                roleTier: document.getElementById('inviteRoleTier').value,
+                profile: deriveProfile(roleTier, department),
+                department,
+                roleTier,
                 managerId: document.getElementById('inviteManager').value,
                 hireDate: document.getElementById('inviteHireDate').value,
                 active: document.getElementById('inviteActive').value === 'true'
@@ -1129,10 +1175,14 @@
         function requireOwner() {
             const role = currentRole();
             const hasLogin = USE_FIREBASE_AUTH || sessionToken();
-            const isOwner = hasLogin && role && (role.key === 'owner' || role.label === 'Owner');
-            document.getElementById('pageShell').style.display = isOwner ? 'flex' : 'none';
-            document.getElementById('lockedState').style.display = isOwner ? 'none' : 'flex';
-            return isOwner;
+            const tier = String(role?.tier || role?.roleTier || role?.key || '').toLowerCase();
+            const isOwner = hasLogin && role && (tier === 'owner' || role.label === 'Owner');
+            const isController = hasLogin && role && tier === 'controller';
+            const allowed = isOwner || isController;
+            CAN_EDIT_ALL = isOwner;   // Controllers may add/edit staff only — not managers.
+            document.getElementById('pageShell').style.display = allowed ? 'flex' : 'none';
+            document.getElementById('lockedState').style.display = allowed ? 'none' : 'flex';
+            return allowed;
         }
 
         async function refreshOwnerSession() {
@@ -1177,15 +1227,17 @@
 
         function renderProfiles() {
             const grid = document.getElementById('profileGrid');
-            grid.innerHTML = Object.entries(PROFILES).map(([key, profile]) => `
+            const legend = [
+                { label: 'Owner', desc: 'Everything, plus Settings and the Owner Hub.' },
+                { label: 'Controller', desc: 'Sees every department + HR. No Settings or Owner Hub. Can add staff only.' },
+                { label: 'Manager', desc: 'Runs their department: its tools, approvals, hiring, and the team calendar.' },
+                { label: 'Staff', desc: 'Their department’s everyday tools, plus their personal dashboard.' }
+            ];
+            grid.innerHTML = legend.map(item => `
                 <div class="access-profile">
-                    <div class="profile-name">${escapeHtml(profile.label)}</div>
-                    <div class="profile-access">${accessTags(key)}</div>
+                    <div class="profile-name">${escapeHtml(item.label)}</div>
+                    <div class="profile-access" style="font-size:12px; color:var(--slate); text-transform:none; letter-spacing:0; font-weight:500; line-height:1.5;">${escapeHtml(item.desc)}</div>
                 </div>
-            `).join('');
-
-            document.getElementById('inviteProfile').innerHTML = Object.entries(PROFILES).map(([key, profile]) => `
-                <option value="${escapeHtml(key)}">${escapeHtml(profile.label)}</option>
             `).join('');
             refreshRosterSelects();
             applyProfileDefaults();
@@ -1252,10 +1304,11 @@
                 const needsInvite = USE_FIREBASE_AUTH && person.status !== 'active';
                 const department = personDepartment(person);
                 const tier = personRoleTier(person);
-                const isSeniorProfile = person.profile === 'owner' || person.profile === 'controller';
-                const isManagerTier = ['Owner', 'Controller', 'Manager'].includes(tier);
+                const canEditPerson = CAN_EDIT_ALL || tier === 'Staff';
+                const rowLevels = canEditPerson ? levelOptionsForAdmin() : [tier];
                 const manager = managerName(personManagerId(person));
                 const hireDate = person.hire_date ? ` · Hire date: ${person.hire_date}` : '';
+                const lockNote = canEditPerson ? '' : ' title="Only an Owner can change a manager or controller."';
                 return `
                 <tr>
                     <td>
@@ -1263,19 +1316,16 @@
                         <span class="person-title">${escapeHtml(person.title || 'No title listed')}<br>${escapeHtml(person.email)}</span>
                         <span class="person-meta">${escapeHtml(department)} · ${escapeHtml(tier)} · Manager: ${escapeHtml(manager)}${escapeHtml(hireDate)}</span>
                     </td>
-                    <td>
-                        <select data-person="${safeId}" onchange="updateProfile(event)">
-                            ${Object.entries(PROFILES).map(([key, profile]) => `
-                                <option value="${escapeHtml(key)}" ${person.profile === key ? 'selected' : ''}>${escapeHtml(profile.label)}</option>
-                            `).join('')}
+                    <td${lockNote}>
+                        <select data-person="${safeId}" data-kind="dept" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'} style="margin-bottom:8px;">
+                            ${optionList(DEPARTMENTS, department)}
                         </select>
-                        <label class="mgr-toggle" style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--slate); cursor:${isSeniorProfile ? 'default' : 'pointer'};" title="${isSeniorProfile ? 'Owners and Controllers are always managers.' : 'Managers can use manager tools like the Hiring Document Generator.'}">
-                            <input type="checkbox" data-person="${safeId}" ${isManagerTier ? 'checked' : ''} ${isSeniorProfile ? 'disabled' : ''} onchange="toggleManager(this.dataset.person, this.checked)" style="width:auto; min-height:auto;">
-                            Manager
-                        </label>
+                        <select data-person="${safeId}" data-kind="level" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'}>
+                            ${optionList(rowLevels, tier)}
+                        </select>
                     </td>
                     <td>
-                        <div class="profile-access" id="access-${safeId}">${accessTags(person.profile)}</div>
+                        <div class="profile-access" id="access-${safeId}">${accessTagsFor(tier, department)}</div>
                     </td>
                     <td>
                         <span class="status ${escapeHtml(status.className)}">${escapeHtml(status.label)}</span>
@@ -1480,19 +1530,31 @@
             }
         }
 
-        async function updateProfile(event) {
-            const personId = event.target.dataset.person;
-            const nextProfile = event.target.value;
+        async function updateAccess(personId) {
             const person = STAFF.find(item => item.id === personId);
-            if (USE_FIREBASE_AUTH) {
-                await updateHubUser(person, nextProfile);
-            } else {
-                await authRequest({ action: 'users:update', id: personId, profile: nextProfile });
+            if (!person) return;
+            const deptSel = document.querySelector(`select[data-person="${CSS.escape(personId)}"][data-kind="dept"]`);
+            const levelSel = document.querySelector(`select[data-person="${CSS.escape(personId)}"][data-kind="level"]`);
+            const department = deptSel ? deptSel.value : personDepartment(person);
+            const level = levelSel ? levelSel.value : personRoleTier(person);
+            const nextProfile = deriveProfile(level, department);
+            person.department = department;
+            person.role_tier = level;
+            try {
+                if (USE_FIREBASE_AUTH) {
+                    await updateHubUser(person, nextProfile);
+                } else {
+                    await authRequest({ action: 'users:update', id: personId, profile: nextProfile, department, role_tier: level });
+                }
+                const access = document.getElementById(`access-${personId}`);
+                if (access) access.innerHTML = accessTagsFor(level, department);
+                document.getElementById('saveState').textContent = `${person.name}: ${department} · ${level}.`;
+                audit('profile_changed', { target_email: person.email, profile: nextProfile, department, role_tier: level });
+                await loadUsers();
+            } catch (error) {
+                document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+                await loadUsers();
             }
-            document.getElementById(`access-${personId}`).innerHTML = accessTags(nextProfile);
-            document.getElementById('saveState').textContent = 'Profile updated.';
-            audit('profile_changed', { target_email: person && person.email, profile: nextProfile });
-            await loadUsers();
         }
 
         async function resetPassword(personId) {
@@ -1629,10 +1691,10 @@
 
         window.inviteUser = inviteUser;
         window.sendInviteForPerson = sendInviteForPerson;
-        window.updateProfile = updateProfile;
+        window.updateAccess = updateAccess;
+        window.syncDerivedProfile = syncDerivedProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;
-        window.toggleManager = toggleManager;
         window.deleteUser = deleteUser;
         window.copyGeneratedLink = copyGeneratedLink;
     </script>

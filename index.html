@@ -3428,7 +3428,8 @@ function populateProfileMenu(role, person) {
     document.getElementById('profileMenuEmail').textContent = user.email || person.email || '—';
     document.getElementById('profileMenuRole').textContent = role.label || '—';
     document.getElementById('profileMenuProvider').textContent = user.provider || 'Email & password';
-    document.getElementById('profileMenuManage').style.display = role.key === 'owner' ? '' : 'none';
+    // Owner and Controller can manage people (Controller is limited to staff in the page itself).
+    document.getElementById('profileMenuManage').style.display = (role.tier === 'owner' || role.tier === 'controller' || role.key === 'owner' || role.key === 'controller') ? '' : 'none';
 
     if (!window.__fratelloProfileMenuBound) {
         document.addEventListener('click', event => {
