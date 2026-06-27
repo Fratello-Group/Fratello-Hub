@@ -2165,8 +2165,7 @@ const SECTIONS = {
             { title: 'Request Time Off', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off', quick: true },
             { title: 'Log a Sick Day', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off', quick: true },
             { title: 'My Time Off', href: 'hr/time-off/vacation-tracker.html?view=my-requests', badge: 'Time Off', quick: true },
-            { title: 'Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], attention: true },
-            { title: 'Team Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'] }
+            { title: 'Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', roles: ['owner', 'controller', 'production', 'marketing', 'sales'], attention: true }
         ]
     },
 
@@ -3218,7 +3217,6 @@ const RESOURCE_META = {
     'Log a Sick Day':    { group: 'submit', icon: 'pulse' },
     'Submit an Expense': { group: 'submit', icon: 'dollar' },
     'My Time Off':       { group: 'review', icon: 'calendar' },
-    'Team Calendar':     { group: 'review', icon: 'people' },
     'Approvals':         { group: 'review', icon: 'check-square' },
     'Staff Forms':       { group: 'forms',  icon: 'document' },
     'Employee Handbook': { group: 'forms',  icon: 'book' }
@@ -3356,9 +3354,16 @@ function renderSectionPage(role, sectionKey) {
     `;
     main.appendChild(header);
 
+    // Team Calendar is a team/department view (not a personal-dashboard item), so it
+    // lives on the department page — shown to that area's manager (and owner).
+    const cards = [...section.cards];
+    if (section.group === 'Departments' && isManagerRole(role)) {
+        cards.unshift({ title: 'Team Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Coverage' });
+    }
+
     const list = document.createElement('div');
     list.className = 'tool-view-list fade-in';
-    section.cards.forEach(card => list.appendChild(createToolLink(card, section.label)));
+    cards.forEach(card => list.appendChild(createToolLink(card, section.label)));
     main.appendChild(list);
 }
 
