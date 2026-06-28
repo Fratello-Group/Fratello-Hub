@@ -2170,7 +2170,7 @@ const SECTIONS = {
         ]
     },
 
-    // ── HR & People (Hiring access excludes Sales) ──
+    // ── HR & People — managers and up only (Manager / Controller / Owner) ──
 
     'hr-people': {
         group: 'Departments',
@@ -2180,7 +2180,6 @@ const SECTIONS = {
             {
                 title: 'Hiring Document Generator',
                 href: 'hr/hiring/hiring-document-generator.html',
-                roles: ['owner', 'controller', 'production', 'marketing', 'sales'],
                 managerOnly: true,
                 badge: 'Live',
                 quick: true
