@@ -70,6 +70,21 @@
         .holiday { display: block; margin-top: 4px; color: var(--brewing-blue-dark); font-size: 10px; font-weight: 800; }
         .chip { display: block; margin-top: 6px; border-radius: var(--radius-sm); padding: 5px 6px; background: var(--brewing-blue-subtle); color: var(--bean-black); font-size: 10px; font-weight: 800; line-height: 1.25; }
         .chip.pending { background: repeating-linear-gradient(45deg, rgba(54,179,175,.2), rgba(54,179,175,.2) 6px, rgba(255,255,255,.75) 6px, rgba(255,255,255,.75) 12px); }
+        /* Clash heads-up: 2+ teammates off the same day */
+        .day.clash { background: var(--crema-soft, #FAF1E2); }
+        .day-clash { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; background: var(--crema-deep, #B5780F); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .5px; }
+        /* Today */
+        .day.today { box-shadow: inset 0 0 0 2px var(--brewing-blue); }
+        .day.today .date-num { color: var(--brewing-blue-dark); }
+        /* Legend + folded section heading */
+        .cal-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: var(--space-md); color: var(--warm-gray-600); font-size: 12px; font-weight: 600; }
+        .cal-legend .lg { display: inline-flex; align-items: center; gap: 7px; }
+        .cal-legend .sw { width: 16px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
+        .sw-appr { background: var(--brewing-blue-subtle); border: 1px solid var(--brewing-blue); }
+        .sw-pend { background: repeating-linear-gradient(45deg, rgba(54,179,175,.25), rgba(54,179,175,.25) 4px, #fff 4px, #fff 8px); border: 1px solid var(--brewing-blue); }
+        .sw-clash { background: var(--crema-deep, #B5780F); }
+        .sw-today { background: #fff; box-shadow: inset 0 0 0 2px var(--brewing-blue); }
+        .cal-section-title { margin: var(--space-xl) 0 var(--space-sm); font-size: 13px; font-weight: 800; letter-spacing: .3px; color: var(--bean-black); }
         .timeline { overflow-x: auto; border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); background: var(--fratello-white); }
         .timeline-row { display: grid; grid-template-columns: 180px repeat(30, 36px); min-width: 1260px; border-bottom: 1px solid var(--warm-gray-200); }
         .timeline-row:last-child { border-bottom: none; }
@@ -123,8 +138,7 @@
         <div id="appContent" hidden>
             <nav class="tabs" aria-label="Vacation tracker tabs">
                 <button class="tab" type="button" data-view="submit">Submit Request</button>
-                <button class="tab" type="button" data-view="calendar">Month Calendar</button>
-                <button class="tab" type="button" data-view="timeline">Team Timeline</button>
+                <button class="tab" type="button" data-view="calendar">Calendar</button>
                 <button class="tab" type="button" data-view="my-requests">My Requests</button>
                 <button class="tab manager-only" type="button" data-view="approvals">Approvals Queue</button>
             </nav>
@@ -173,16 +187,14 @@
                 </div>
                 <div class="cal-filters" id="calendarFilters"></div>
                 <div class="calendar" id="calendarGrid"></div>
-            </section>
-
-            <section class="view" id="view-timeline">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Next 30 days</h2>
-                        <p class="panel-note">Vacation bars only. Pending requests use the same list but remain marked pending in the cards.</p>
-                    </div>
-                    <div class="timeline" id="timeline"></div>
+                <div class="cal-legend">
+                    <span class="lg"><i class="sw sw-appr"></i>Approved</span>
+                    <span class="lg"><i class="sw sw-pend"></i>Pending</span>
+                    <span class="lg"><i class="sw sw-clash"></i>2+ off — same team</span>
+                    <span class="lg"><i class="sw sw-today"></i>Today</span>
                 </div>
+                <div class="cal-section-title">Next 30 days</div>
+                <div class="timeline" id="timeline"></div>
             </section>
 
             <section class="view" id="view-my-requests">
@@ -201,6 +213,7 @@
         const ADMIN_KEYS = new Set(['owner', 'controller']);
         const todayIso = new Date().toISOString().slice(0, 10);
         let activeView = new URLSearchParams(location.search).get('view') || 'submit';
+        if (activeView === 'timeline') activeView = 'calendar';   // Timeline folded into Calendar
         let monthCursor = new Date();
         let role = null;
         let currentUser = null;
@@ -261,6 +274,8 @@
         function department(id) { return users.find(user => user.id === id || user.email === id)?.department || 'Team'; }
         // Prefer the name stored on the request (teammates can't read each other's user records).
         function reqName(req) { return (req && req.user_name) || userName(req && req.user_id); }
+        // Which team a request belongs to (for spotting same-team clashes).
+        function teamOf(req) { return (req && req.vacation_team) || department(req && req.user_id) || 'Team'; }
         // Calendar filter state: a Set of hidden keys (department names for admins, people otherwise).
         const calFilter = { hidden: new Set() };
         function filterKeyFor(req) { return isAdmin() ? (department(req.user_id) || 'Team') : (req.user_id || reqName(req)); }
@@ -317,6 +332,9 @@
                 approvals = isManager() ? (await call('getRequestsForApproval', { status: 'pending' }) || []) : [];
                 holidays = await call('getHolidays') || [];
                 els.connectionStatus.textContent = client ? 'Connected to Firestore' : 'Prototype mode';
+                // When everything's connected there's nothing the user needs to act on — hide the status card.
+                const statusCard = els.connectionStatus.closest('.status-card');
+                if (statusCard) statusCard.hidden = Boolean(client);
             } catch (error) {
                 currentUser = fallbackUser();
                 users = [currentUser];
@@ -325,6 +343,8 @@
                 approvals = [];
                 holidays = [];
                 els.connectionStatus.textContent = error.message || 'Prototype mode';
+                const sc = els.connectionStatus.closest('.status-card');
+                if (sc) sc.hidden = false;
             }
         }
         function renderTabs() {
@@ -441,8 +461,15 @@
                 const muted = d.getUTCMonth() !== month;
                 const holiday = holidays.find(item => iso(item.observed_date || item.date) === dayIso);
                 const dayRequests = requests.filter(req => req.type === 'vacation' && req.status !== 'cancelled' && visibleReq(req) && iso(req.start_date) <= dayIso && dayIso <= iso(req.end_date));
-                cells.push(`<div class="day ${muted ? 'muted' : ''}">
+                // Clash = 2+ distinct people from the same team off on this day.
+                const teamCounts = {};
+                dayRequests.forEach(req => { (teamCounts[teamOf(req)] = teamCounts[teamOf(req)] || new Set()).add(req.user_id || reqName(req)); });
+                const clashCount = Object.values(teamCounts).reduce((max, set) => Math.max(max, set.size), 0);
+                const isClash = !muted && clashCount >= 2;
+                const isToday = dayIso === todayIso;
+                cells.push(`<div class="day ${muted ? 'muted' : ''}${isClash ? ' clash' : ''}${isToday ? ' today' : ''}">
                     <span class="date-num">${d.getUTCDate()}</span>
+                    ${isClash ? `<span class="day-clash" title="${clashCount} teammates off — watch coverage">${clashCount} away</span>` : ''}
                     ${holiday ? `<span class="holiday">${escapeHtml(holiday.name)}</span>` : ''}
                     ${dayRequests.map(req => `<span class="chip ${req.status === 'pending' ? 'pending' : ''}" title="${escapeHtml(reqName(req))}">${escapeHtml(reqName(req))}</span>`).join('')}
                 </div>`);
