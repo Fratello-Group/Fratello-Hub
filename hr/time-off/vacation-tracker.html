@@ -56,6 +56,12 @@
         .summary-row { display: flex; justify-content: space-between; gap: var(--space-md); border-bottom: 1px solid var(--warm-gray-200); padding-bottom: var(--space-sm); color: var(--warm-gray-700); font-size: 13px; }
         .summary-row strong { color: var(--bean-black); }
         .toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-md); }
+        .cal-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: var(--space-md); }
+        .cal-filters:empty { display: none; }
+        .cal-filter-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--warm-gray-500); margin-right: 4px; }
+        .cal-chip { border: 1px solid var(--brewing-blue); background: var(--brewing-blue-subtle); color: var(--bean-black); border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .cal-chip.off { background: var(--fratello-white); color: var(--warm-gray-500); border-color: var(--warm-gray-200); text-decoration: line-through; }
+        .cal-chip-all { border-style: dashed; background: var(--fratello-white); }
         .calendar { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); overflow: auto; background: var(--warm-gray-200); }
         .day-head, .day { min-height: 112px; padding: var(--space-sm); background: var(--fratello-white); border: 1px solid var(--warm-gray-200); }
         .day-head { min-height: 38px; color: var(--warm-gray-500); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
@@ -164,6 +170,7 @@
                     <h2 class="panel-title" id="monthTitle"></h2>
                     <button class="btn" type="button" id="nextMonth">Next</button>
                 </div>
+                <div class="cal-filters" id="calendarFilters"></div>
                 <div class="calendar" id="calendarGrid"></div>
             </section>
 
@@ -251,6 +258,13 @@
         }
         function userName(id) { return users.find(user => user.id === id || user.email === id)?.name || id || 'Team member'; }
         function department(id) { return users.find(user => user.id === id || user.email === id)?.department || 'Team'; }
+        // Prefer the name stored on the request (teammates can't read each other's user records).
+        function reqName(req) { return (req && req.user_name) || userName(req && req.user_id); }
+        // Calendar filter state: a Set of hidden keys (department names for admins, people otherwise).
+        const calFilter = { hidden: new Set() };
+        function filterKeyFor(req) { return isAdmin() ? (department(req.user_id) || 'Team') : (req.user_id || reqName(req)); }
+        function filterLabelFor(req) { return isAdmin() ? (department(req.user_id) || 'Team') : reqName(req); }
+        function visibleReq(req) { return !calFilter.hidden.has(filterKeyFor(req)); }
         function overlaps(a, b) { return iso(a.start_date) <= iso(b.end_date) && iso(b.start_date) <= iso(a.end_date); }
         function businessDays(start, end, halfStart, halfEnd) {
             let date = new Date(`${start}T00:00:00Z`);
@@ -294,9 +308,11 @@
                     users = await call('getActiveUsers') || [currentUser];
                 }
                 myRequests = await call('getMyRequests') || [];
+                // Admins see everyone; everyone else sees their own team's vacation
+                // (Production = all three sub-teams) so they can spot clashes.
                 requests = isAdmin()
                     ? (await call('getTeamRequests', { include_sick: false }) || myRequests)
-                    : (isManager() ? (await call('getRequestsForApproval') || myRequests) : myRequests);
+                    : (await call('getTeamVacation') || myRequests);
                 approvals = isManager() ? (await call('getRequestsForApproval', { status: 'pending' }) || []) : [];
                 holidays = await call('getHolidays') || [];
                 els.connectionStatus.textContent = client ? 'Connected to Firestore' : 'Prototype mode';
@@ -383,6 +399,31 @@
                 document.getElementById('submitButton').disabled = false;
             }
         }
+        // One calendar, filter toggles: admins toggle whole departments; everyone
+        // else toggles individual teammates. Click a chip to hide/show that group.
+        function renderFilters() {
+            const wrap = document.getElementById('calendarFilters');
+            if (!wrap) return;
+            const seen = new Map();
+            requests.filter(req => req.type === 'vacation' && req.status !== 'cancelled').forEach(req => {
+                const key = filterKeyFor(req);
+                if (!seen.has(key)) seen.set(key, filterLabelFor(req));
+            });
+            if (seen.size <= 1) { wrap.innerHTML = ''; return; }
+            const chips = [...seen.entries()]
+                .sort((a, b) => String(a[1]).localeCompare(String(b[1])))
+                .map(([key, label]) => `<button type="button" class="cal-chip ${calFilter.hidden.has(key) ? 'off' : ''}" data-key="${escapeHtml(key)}">${escapeHtml(label)}</button>`)
+                .join('');
+            wrap.innerHTML = `<span class="cal-filter-label">${isAdmin() ? 'Show departments' : 'Show team'}</span>${chips}<button type="button" class="cal-chip cal-chip-all" data-all="1">Show all</button>`;
+            wrap.querySelectorAll('.cal-chip[data-key]').forEach(btn => btn.onclick = () => {
+                const key = btn.dataset.key;
+                if (calFilter.hidden.has(key)) calFilter.hidden.delete(key); else calFilter.hidden.add(key);
+                renderFilters(); renderCalendar(); renderTimeline();
+            });
+            const allBtn = wrap.querySelector('[data-all]');
+            if (allBtn) allBtn.onclick = () => { calFilter.hidden.clear(); renderFilters(); renderCalendar(); renderTimeline(); };
+        }
+
         function renderCalendar() {
             const year = monthCursor.getFullYear();
             const month = monthCursor.getMonth();
@@ -398,11 +439,11 @@
                 const dayIso = d.toISOString().slice(0, 10);
                 const muted = d.getUTCMonth() !== month;
                 const holiday = holidays.find(item => iso(item.observed_date || item.date) === dayIso);
-                const dayRequests = requests.filter(req => req.type === 'vacation' && req.status !== 'cancelled' && iso(req.start_date) <= dayIso && dayIso <= iso(req.end_date));
+                const dayRequests = requests.filter(req => req.type === 'vacation' && req.status !== 'cancelled' && visibleReq(req) && iso(req.start_date) <= dayIso && dayIso <= iso(req.end_date));
                 cells.push(`<div class="day ${muted ? 'muted' : ''}">
                     <span class="date-num">${d.getUTCDate()}</span>
                     ${holiday ? `<span class="holiday">${escapeHtml(holiday.name)}</span>` : ''}
-                    ${dayRequests.map(req => `<span class="chip ${req.status === 'pending' ? 'pending' : ''}" title="${escapeHtml(userName(req.user_id))}">${escapeHtml(userName(req.user_id))}</span>`).join('')}
+                    ${dayRequests.map(req => `<span class="chip ${req.status === 'pending' ? 'pending' : ''}" title="${escapeHtml(reqName(req))}">${escapeHtml(reqName(req))}</span>`).join('')}
                 </div>`);
             }
             els.calendarGrid.innerHTML = heads.concat(cells).join('');
@@ -413,23 +454,27 @@
                 date.setDate(date.getDate() + i);
                 return date.toISOString().slice(0, 10);
             });
-            const visibleUsers = users.filter(user => requests.some(req => req.type === 'vacation' && req.status !== 'cancelled' && req.user_id === user.id));
+            const peopleMap = new Map();
+            requests.filter(req => req.type === 'vacation' && req.status !== 'cancelled' && visibleReq(req)).forEach(req => {
+                if (!peopleMap.has(req.user_id)) peopleMap.set(req.user_id, reqName(req));
+            });
+            const people = [...peopleMap.entries()].map(([id, name]) => ({ id, name }));
             els.timeline.innerHTML = [
                 `<div class="timeline-row"><div class="timeline-name">Team</div>${days.map(d => `<div class="timeline-cell"><span style="font-size:10px;font-weight:800;color:var(--warm-gray-500)">${d.slice(5)}</span></div>`).join('')}</div>`,
-                ...(visibleUsers.length ? visibleUsers : users).map(user => `<div class="timeline-row">
-                    <div class="timeline-name">${escapeHtml(user.name)}</div>
+                ...(people.length ? people.map(person => `<div class="timeline-row">
+                    <div class="timeline-name">${escapeHtml(person.name)}</div>
                     ${days.map(day => {
-                        const has = requests.some(req => req.type === 'vacation' && req.status !== 'cancelled' && req.user_id === user.id && iso(req.start_date) <= day && day <= iso(req.end_date));
+                        const has = requests.some(req => req.type === 'vacation' && req.status !== 'cancelled' && visibleReq(req) && req.user_id === person.id && iso(req.start_date) <= day && day <= iso(req.end_date));
                         return `<div class="timeline-cell">${has ? '<div class="timeline-bar"></div>' : ''}</div>`;
                     }).join('')}
-                </div>`)
+                </div>`) : [`<div class="timeline-row"><div class="timeline-name" style="color:var(--warm-gray-500)">No vacation booked in the next 30 days</div></div>`])
             ].join('');
         }
         function requestCard(req, approval = false) {
             return `<article class="request-card">
                 <div class="card-top">
                     <div>
-                        <div class="card-title">${escapeHtml(approval ? userName(req.user_id) : `${fmt(req.start_date)} to ${fmt(req.end_date || req.start_date)}`)}</div>
+                        <div class="card-title">${escapeHtml(approval ? reqName(req) : `${fmt(req.start_date)} to ${fmt(req.end_date || req.start_date)}`)}</div>
                         <div class="card-meta">${approval ? `${fmt(req.start_date)} to ${fmt(req.end_date || req.start_date)}` : escapeHtml(req.notes || 'No notes')}</div>
                     </div>
                     <span class="badge">${escapeHtml(req.status || 'pending')}</span>
@@ -454,6 +499,7 @@
         async function refresh() {
             await loadData();
             renderPreview();
+            renderFilters();
             renderCalendar();
             renderTimeline();
             renderLists();
