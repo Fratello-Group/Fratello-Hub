@@ -91,6 +91,8 @@
         ".fh-crumbs a:hover{text-decoration:underline;}",
         ".fh-crumb-sep{color:#C4C3C0;font-weight:600;}",
         ".fh-crumb-current{color:#4A4A4A;font-weight:600;}",
+        ".fh-subnav-actions{margin-left:auto;display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;}",
+        ".fh-subnav-actions .btn{height:34px;padding:0 16px;display:inline-flex;align-items:center;border-radius:999px;font-size:13px;font-weight:700;margin:0;}",
         "@media (max-width:560px){",
         ".fh-bar{padding:12px 14px;gap:10px;}",
         ".fh-logo{height:26px;}",
@@ -188,6 +190,7 @@
         var crumbs;
         if (existing) {
             crumbs = existing;                       // reuse the page's own trail
+            crumbs.style.margin = '0';               // ships as a pill w/ margin-bottom; kill it so it sits inline with Back
             var links = existing.querySelectorAll('a[href]');
             if (links.length) backHref = links[links.length - 1].getAttribute('href');
         } else {
@@ -205,10 +208,26 @@
         return sub;
     }
 
+    // The CFIA pages ship their own title bar (.cfia-bar) that now just duplicates
+    // the unified header + page hero. Lift its primary action (Food Safety
+    // Dashboard) into the Back/breadcrumb row and drop the redundant bar — saves
+    // a whole row and keeps the action on the persistent nav line.
+    function liftCfiaActions(sub) {
+        var cbar = document.querySelector('.cfia-bar');
+        if (!cbar) return;
+        var actions = cbar.querySelector('.actions');
+        if (actions && !actions.classList.contains('fh-subnav-actions')) {
+            actions.classList.add('fh-subnav-actions');
+            sub.appendChild(actions);                  // move the live button(s), links intact
+        }
+        cbar.style.display = 'none';
+    }
+
     function mountSubnav(bar) {
         var sub = document.querySelector('.fh-subnav');
         if (!sub) sub = buildSubnav();
         bar.insertAdjacentElement('afterend', sub);   // keep it directly under the bar
+        liftCfiaActions(sub);
     }
 
     function wire(bar) {

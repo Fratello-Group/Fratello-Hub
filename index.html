@@ -2577,6 +2577,8 @@ function cachedHubRole() {
 // in 'fratello-view-as' as the escape hatch. A preview never survives a full
 // page reload (init() restores the real role first), so it can never strand you.
 const VIEW_AS_KEY = 'fratello-view-as';
+// The preview switcher is restricted to the two principals — Chris + Russ.
+const VIEW_AS_OWNER_EMAILS = ['prefontainech@gmail.com', 'russ@fratellocoffee.com'];
 
 const VIEW_AS_PERSONAS = [
     { id: 'controller',  label: 'Controller',         tier: 'controller', department: 'finance',    key: 'controller', user: { name: 'Chris McGhee',    firstName: 'Chris', initials: 'CM' } },
@@ -2599,10 +2601,14 @@ function realRole() {
     return activeRole || cachedHubRole();
 }
 
-// Only the genuine Owner ever sees or controls the preview switcher.
+// Only Chris + Russ ever see or control the preview switcher — by email, with
+// Owner-tier as a fallback so it survives an email change on an owner account.
 function isRealOwner() {
     const r = realRole();
-    return Boolean(r && normalizeTier(r.tier || r.roleTier || r.key) === 'owner');
+    if (!r) return false;
+    const email = String((r.user && r.user.email) || r.email || '').toLowerCase().trim();
+    if (VIEW_AS_OWNER_EMAILS.includes(email)) return true;
+    return normalizeTier(r.tier || r.roleTier || r.key) === 'owner';
 }
 
 function enterViewAs(personaId) {
