@@ -1436,6 +1436,28 @@
 
         .qa-card:hover .qa-chip { transform: scale(1.04); }
 
+        /* Unread-style approval count on the Time Off Calendar tile */
+        .qa-chip { position: relative; }
+        .qa-badge {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            min-width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #B5780F;
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1;
+            border: 2px solid var(--surface, #FFFFFF);
+            box-shadow: 0 1px 3px rgba(16, 38, 46, .25);
+        }
+
         .qa-chip svg {
             width: 21px;
             height: 21px;
@@ -2165,8 +2187,7 @@ const SECTIONS = {
         cards: [
             { title: 'Request Time Off', href: 'hr/time-off/vacation-tracker.html?view=submit', badge: 'Time Off', quick: true },
             { title: 'Log a Sick Day', href: 'hr/time-off/sick-day-logger.html', badge: 'Time Off', quick: true },
-            { title: 'Time Off Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Time Off', quick: true },
-            { title: 'Approvals', href: 'hr/time-off/vacation-tracker.html?view=approvals', badge: 'Manager', managerOnly: true, attention: true }
+            { title: 'Time Off Calendar', href: 'hr/time-off/vacation-tracker.html?view=calendar', badge: 'Time Off', quick: true, approvalsBadge: true }
         ]
     },
 
@@ -3232,6 +3253,7 @@ function renderDashboardHome(role) {
 
     // Personal everyday tools (the folded-in "Resources"), grouped by intent.
     appendPersonalToolGroups(main, role);
+    updateApprovalsBadge(role);
 
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
@@ -3327,7 +3349,6 @@ const RESOURCE_META = {
     'Log a Sick Day':    { group: 'submit', icon: 'pulse' },
     'Submit an Expense': { group: 'submit', icon: 'dollar' },
     'Time Off Calendar': { group: 'review', icon: 'calendar' },
-    'Approvals':         { group: 'review', icon: 'check-square' },
     'Staff Forms':       { group: 'forms',  icon: 'document' },
     'Employee Handbook': { group: 'forms',  icon: 'book' }
 };
@@ -3337,6 +3358,7 @@ function createResourceCard(card, index, accent, icon) {
     const active = Boolean(card.href) && card.href !== '#';
     const el = document.createElement(active ? 'a' : 'div');
     el.className = 'qa-card fade-in' + (accent === 'gold' ? ' qa-card--gold' : '') + (active ? '' : ' qa-card--soon');
+    if (card.approvalsBadge) el.dataset.approvalsBadge = '1';
     if (active) el.href = card.href;
     el.innerHTML = `
         <span class="qa-top">
@@ -3360,6 +3382,27 @@ function createResourceCard(card, index, accent, icon) {
         });
     }
     return el;
+}
+
+// Badge the Time Off Calendar tile with how many requests are waiting on this
+// person to approve — an unread-style count, so managers notice without opening it.
+async function updateApprovalsBadge(role) {
+    if (tierOf(role) === 'staff') return;            // only approvers have a queue
+    let count = 0;
+    try {
+        const mod = await import('./system/api/firestore-client.js');
+        const pending = await mod.getRequestsForApproval({ status: 'pending' });
+        count = Array.isArray(pending) ? pending.length : 0;
+    } catch (error) {
+        return;                                       // no Firestore / not signed in: skip quietly
+    }
+    if (!count) return;
+    const chip = document.querySelector('.qa-card[data-approvals-badge] .qa-chip');
+    if (!chip) return;                                // dashboard view changed while loading
+    let badge = chip.querySelector('.qa-badge');
+    if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
+    badge.textContent = count > 9 ? '9+' : String(count);
+    badge.setAttribute('aria-label', `${count} awaiting your approval`);
 }
 
 // Appends the personal everyday tools to the dashboard, grouped by intent:
