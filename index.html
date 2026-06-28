@@ -1458,6 +1458,47 @@
             box-shadow: 0 1px 3px rgba(255, 59, 48, .4);
         }
 
+        /* Top-of-dashboard approvals alert — only rendered when action is needed */
+        .dash-approvals {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding: 15px 18px;
+            border-radius: var(--r-card, 18px);
+            background: #FFECEB;
+            border: 1.5px solid #FF3B30;
+            text-decoration: none;
+        }
+        .dash-approvals:hover { background: #FFE2E0; }
+        .dash-approvals-dot {
+            flex: 0 0 auto;
+            display: inline-grid;
+            place-items: center;
+            min-width: 30px;
+            height: 30px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: #FF3B30;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 0 1px 3px rgba(255, 59, 48, .4);
+        }
+        .dash-approvals-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .dash-approvals-copy strong { color: #B3261E; font-size: 15px; font-weight: 800; }
+        .dash-approvals-copy span { color: #A85248; font-size: 13px; }
+        .dash-approvals-cta {
+            margin-left: auto;
+            flex: 0 0 auto;
+            background: #FF3B30;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 9px 16px;
+            border-radius: 999px;
+        }
+
         .qa-chip svg {
             width: 21px;
             height: 21px;
