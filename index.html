@@ -3156,6 +3156,50 @@ function createToolPanel(title, countLabel, cards, emptyText) {
     return panel;
 }
 
+// A back button + breadcrumb trail for the Hub's inner views (the dashboard
+// home is the root, so it gets none). `trail` is an array of { label, view?,
+// sectionKey? }; entries with a view/section are clickable, the last is current.
+function hubCrumbBar(role, trail, back) {
+    const bar = document.createElement('nav');
+    bar.className = 'hub-crumbbar fade-in';
+    bar.setAttribute('aria-label', 'Page navigation');
+
+    const backBtn = document.createElement('button');
+    backBtn.type = 'button';
+    backBtn.className = 'hub-back';
+    backBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">' +
+        '<path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Back</span>';
+    backBtn.onclick = () => renderHub(role, back.view, back.sectionKey || '');
+    bar.appendChild(backBtn);
+
+    const crumbs = document.createElement('span');
+    crumbs.className = 'hub-crumbs';
+    trail.forEach((c, i) => {
+        if (i) {
+            const sep = document.createElement('span');
+            sep.className = 'hub-crumb-sep';
+            sep.textContent = '›';
+            crumbs.appendChild(sep);
+        }
+        const last = i === trail.length - 1;
+        if (last || !c.view) {
+            const cur = document.createElement('span');
+            cur.className = 'hub-crumb-current';
+            cur.textContent = c.label;
+            crumbs.appendChild(cur);
+        } else {
+            const link = document.createElement('button');
+            link.type = 'button';
+            link.className = 'hub-crumb-link';
+            link.textContent = c.label;
+            link.onclick = () => renderHub(role, c.view, c.sectionKey || '');
+            crumbs.appendChild(link);
+        }
+    });
+    bar.appendChild(crumbs);
+    return bar;
+}
+
 function renderDashboardHome(role) {
     const main = document.getElementById('mainContent');
     main.innerHTML = '';
@@ -3256,6 +3300,10 @@ function createDeptRow(role, section) {
 function renderDepartmentsIndex(role) {
     const main = document.getElementById('mainContent');
     main.innerHTML = '';
+
+    main.appendChild(hubCrumbBar(role,
+        [{ label: 'Hub', view: 'dashboard' }, { label: 'Departments' }],
+        { view: 'dashboard' }));
 
     const departmentSections = visibleSectionsForRole(role).filter(section => section.group === 'Departments');
     const header = document.createElement('section');
@@ -3386,6 +3434,18 @@ function renderSectionPage(role, sectionKey) {
         'time-off': 'Vacation, sick days, calendars, and manager review tools.',
         'employee-resources': 'Shared forms and everyday resources for the team.'
     };
+
+    // Departments sit under the Departments index; everything else sits directly
+    // under the Hub. Back follows the same parent.
+    if (section.group === 'Departments') {
+        main.appendChild(hubCrumbBar(role,
+            [{ label: 'Hub', view: 'dashboard' }, { label: 'Departments', view: 'departments' }, { label: section.label }],
+            { view: 'departments' }));
+    } else {
+        main.appendChild(hubCrumbBar(role,
+            [{ label: 'Hub', view: 'dashboard' }, { label: section.label }],
+            { view: 'dashboard' }));
+    }
 
     const header = document.createElement('section');
     header.className = 'tool-view-header fade-in';

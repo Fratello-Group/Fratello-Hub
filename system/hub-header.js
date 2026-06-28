@@ -60,11 +60,22 @@
         ".fh-navmenu[hidden]{display:none;}",
         ".fh-navmenu a{display:block;padding:12px 18px;color:#1A1A1A;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.3px;}",
         ".fh-navmenu a:hover{background:rgba(54,179,175,.1);color:#1f7a76;}",
+        // Back + breadcrumb subnav (appears on every page that loads this header)
+        ".fh-subnav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:11px 28px;background:#fff;border-bottom:1px solid #ECEEEC;box-sizing:border-box;font-family:'Inter',-apple-system,'Segoe UI',sans-serif;}",
+        ".fh-back{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border:1px solid #ECEEEC;border-radius:999px;background:#fff;color:#16262E;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;flex:0 0 auto;}",
+        ".fh-back:hover{border-color:#2FA9A0;color:#1E7E77;}",
+        ".fh-back svg{display:block;}",
+        ".fh-crumbs{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12.5px;color:#8B949B;min-width:0;}",
+        ".fh-crumbs a{color:#1E7E77;text-decoration:none;font-weight:600;}",
+        ".fh-crumbs a:hover{text-decoration:underline;}",
+        ".fh-crumb-sep{color:#C4C3C0;font-weight:600;}",
+        ".fh-crumb-current{color:#4A4A4A;font-weight:600;}",
         "@media (max-width:560px){",
         ".fh-bar{padding:12px 16px;}",
         ".fh-copy .fh-access{display:none;}",
         ".fh-burger-text{display:none;}",
         ".fh-burger{padding:0 11px;}",
+        ".fh-subnav{padding:9px 16px;gap:10px;}",
         "}"
     ].join('');
 
@@ -125,6 +136,54 @@
             '<a class="fh-logo-link" href="/index.html" aria-label="Fratello Hub"><img class="fh-logo" src="/assets/Fratello_Logo_Black.png" alt="Fratello"></a>' +
             '<div class="fh-right">' + account + nav + '</div>';
         return bar;
+    }
+
+    function pageTitleLabel() {
+        var t = (document.title || '').trim();
+        t = t.replace(/^Fratello\s*(Ops\s+)?(Hub\s*)?[-–—|:]\s*/i, '');
+        return t || 'This page';
+    }
+
+    // A slim row under the header: a Back button + breadcrumbs, on every page.
+    // If the page already ships its own breadcrumb (e.g. the CFIA module), we
+    // relocate that live node into the subnav so dynamic labels keep updating.
+    function buildSubnav() {
+        var sub = document.createElement('nav');
+        sub.className = 'fh-subnav';
+        sub.setAttribute('aria-label', 'Page navigation');
+
+        var back = document.createElement('a');
+        back.className = 'fh-back';
+        back.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">' +
+            '<path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '<span>Back</span>';
+
+        var existing = document.querySelector('.crumbs, nav[aria-label="Breadcrumb"]');
+        var backHref = '/index.html';
+        var crumbs;
+        if (existing) {
+            crumbs = existing;                       // reuse the page's own trail
+            var links = existing.querySelectorAll('a[href]');
+            if (links.length) backHref = links[links.length - 1].getAttribute('href');
+        } else {
+            crumbs = document.createElement('span');
+            crumbs.className = 'fh-crumbs';
+            crumbs.innerHTML =
+                '<a href="/index.html">Hub</a>' +
+                '<span class="fh-crumb-sep">›</span>' +
+                '<span class="fh-crumb-current">' + escapeHtml(pageTitleLabel()) + '</span>';
+        }
+        back.setAttribute('href', backHref);
+
+        sub.appendChild(back);
+        sub.appendChild(crumbs);
+        return sub;
+    }
+
+    function mountSubnav(bar) {
+        var sub = document.querySelector('.fh-subnav');
+        if (!sub) sub = buildSubnav();
+        bar.insertAdjacentElement('afterend', sub);   // keep it directly under the bar
     }
 
     function wire(bar) {
@@ -205,6 +264,7 @@
             if (slot) { slot.replaceWith(bar); }
             else { document.body.insertBefore(bar, document.body.firstChild); }
         }
+        mountSubnav(bar);
         wire(bar);
         bindOutside();
     }
