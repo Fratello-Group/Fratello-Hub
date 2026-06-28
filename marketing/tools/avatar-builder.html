@@ -434,10 +434,11 @@
   .segbtn:hover{border-color:var(--teal)}
   .segbtn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
   /* picker menus */
-  .menubtn{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:10px;padding:11px 14px;
-    border:1px solid var(--line);background:var(--surface2);border-radius:12px;color:var(--ink);font-size:13px;
-    font-weight:600;cursor:pointer;font-family:inherit;transition:.12s}
-  .menubtn:hover{background:var(--surface);border-color:var(--teal)}
+  .menubtn{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:10px;padding:13px 18px;
+    border:1.5px solid var(--teal);background:var(--teal-soft);border-radius:999px;color:var(--teal-deep);font-size:13.5px;
+    font-weight:700;cursor:pointer;font-family:inherit;transition:.12s}
+  .menubtn:hover{background:rgba(47,169,160,.2);border-color:var(--teal-deep)}
+  .menubtn .chev{color:var(--teal-deep)}
   .menubtn .chev{transition:.2s;font-size:11px}
   .menubtn.open .chev{transform:rotate(180deg)}
   .picker{display:none;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--bg);max-height:300px;overflow:auto}
