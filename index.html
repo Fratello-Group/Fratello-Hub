@@ -2504,6 +2504,9 @@ async function handleProviderLogin(provider) {
             : provider === 'microsoft'
                 ? await signInWithMicrosoft()
                 : await signInWithGoogle();
+        // On phones, sign-in continues via a full-page redirect: role is null here and
+        // the page navigates away, then onHubAuthChange finishes sign-in on the way back.
+        if (!role) return;
         localStorage.setItem('fratello-role', JSON.stringify(role));
         localStorage.removeItem('fratello-session');
         showDashboard(role);
