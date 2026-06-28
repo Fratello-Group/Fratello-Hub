@@ -3436,33 +3436,15 @@ async function updateApprovalsBadge(role) {
     } catch (error) {
         return;                                       // no Firestore / not signed in: skip quietly
     }
-    if (!count) return;                               // no approvals → no badge, no banner (like an oil-change light)
-    const display = count > 9 ? '9+' : String(count);
-
-    // Small unread-style badge on the tile.
+    if (!count) return;                               // no approvals → no badge (like an unread count)
+    // The dashboard shows ONLY the small unread-style badge on the tile; the
+    // prominent "needs approval" banner lives inside the Calendar view itself.
     const chip = document.querySelector('.qa-card[data-approvals-badge] .qa-chip');
-    if (chip) {
-        let badge = chip.querySelector('.qa-badge');
-        if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
-        badge.textContent = display;
-        badge.setAttribute('aria-label', `${count} awaiting your approval`);
-    }
-
-    // Prominent banner at the very top of the dashboard — only shown when action is needed.
-    const main = document.getElementById('mainContent');
-    if (main && !main.querySelector('.dash-approvals')) {
-        const banner = document.createElement('a');
-        banner.className = 'dash-approvals fade-in';
-        banner.href = 'hr/time-off/vacation-tracker.html?view=calendar';
-        banner.innerHTML = `
-            <span class="dash-approvals-dot">${display}</span>
-            <span class="dash-approvals-copy">
-                <strong>${count} request${count === 1 ? '' : 's'} need${count === 1 ? 's' : ''} your approval</strong>
-                <span>Open the time-off calendar to review and approve.</span>
-            </span>
-            <span class="dash-approvals-cta">Review →</span>`;
-        main.insertBefore(banner, main.firstChild);
-    }
+    if (!chip) return;
+    let badge = chip.querySelector('.qa-badge');
+    if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
+    badge.textContent = count > 9 ? '9+' : String(count);
+    badge.setAttribute('aria-label', `${count} awaiting your approval`);
 }
 
 // Appends the personal everyday tools to the dashboard, grouped by intent:
