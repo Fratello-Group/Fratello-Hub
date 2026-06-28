@@ -11,7 +11,7 @@
   {
     "id": "qa_sick",
     "label": "Log a sick day",
-    "icon": "thermometer",
+    "icon": "pulse",
     "href": "/hr/time-off/sick-day-logger.html",
     "group": "submit",
     "tiers": ["staff", "manager", "owner"],

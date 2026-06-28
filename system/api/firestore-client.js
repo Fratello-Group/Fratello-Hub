@@ -276,6 +276,15 @@ export async function getRequestById(requestId) {
 export const getTimeOffRequestById = getRequestById;
 export const getTimeOffRequest = getRequestById;
 
+// Roasting / Packaging / Warehouse roll up to one "Production" team for coverage.
+// Must stay in sync with teamGroup() in firestore.rules.
+export function teamGroupOf(department) {
+    const raw = String(department || '').trim();
+    const d = raw.toLowerCase();
+    if (['production', 'roasting', 'packaging', 'warehouse'].includes(d)) return 'Production';
+    return raw;
+}
+
 export async function submitTimeOffRequest(input = {}) {
     const { db } = requireFirestore();
     const user = input.user || await getCurrentUserRecord();
@@ -305,6 +314,11 @@ export async function submitTimeOffRequest(input = {}) {
         submitted_at: serverTimestamp(),
         approver_id: approverId || null,
         created_via: 'hub',
+        // Denormalized so teammates can see WHO is on vacation without reading each
+        // other's user records. vacation_team scopes who may read it (same team only;
+        // empty for sick days, which stay private to the person + owner/controller).
+        user_name: cleanOptionalText(user.name) || '',
+        vacation_team: sickDay ? '' : teamGroupOf(user.department),
         edit_locked_at: sickDay ? Timestamp.fromDate(editLock) : null
     };
 
@@ -371,6 +385,26 @@ export async function getTeamRequests(options = {}) {
     const items = snapshot.docs
         .map(withId)
         .filter(item => includeSick || item.type === 'vacation')
+        .filter(item => !options.status || item.status === options.status)
+        .filter(item => overlapsRange(item, options.start_date, options.end_date));
+    return sortNewestFirst(items);
+}
+
+// Vacation for the viewer's own team (Production = all three sub-teams), so staff
+// and managers can avoid two people on the same team being away at once. The query
+// is constrained to the viewer's team so every returned doc passes the security rule.
+export async function getTeamVacation(options = {}) {
+    const { db } = requireFirestore();
+    const user = options.user || await getCurrentUserRecord();
+    const team = teamGroupOf(user.department);
+    if (!team) return [];
+    const snapshot = await getDocs(query(
+        collection(db, COLLECTIONS.requests),
+        where('vacation_team', '==', team)
+    ));
+    const items = snapshot.docs
+        .map(withId)
+        .filter(item => item.status !== 'cancelled')
         .filter(item => !options.status || item.status === options.status)
         .filter(item => overlapsRange(item, options.start_date, options.end_date));
     return sortNewestFirst(items);

@@ -69,6 +69,31 @@ const HUB_PROFILES = {
     olena: { email: 'olena.zaitseva@fratellocoffee.com', profile: 'staff', status: 'active' }
 };
 
+const DEPARTMENTS = {
+    'prefontainech@gmail.com': 'Leadership',
+    'russ@fratellocoffee.com': 'Leadership',
+    'controller@fratellocoffee.com': 'Finance',
+    'kyle@fratellocoffee.com': 'Production',
+    'mateo@fratellocoffee.com': 'Marketing',
+    'allana.contois@fratellocoffee.com': 'Warehouse',
+    'jaleisy.quintero@fratellocoffee.com': 'Packaging',
+    'sungjoo.hong@fratellocoffee.com': 'Roasting',
+    'olena.zaitseva@fratellocoffee.com': 'Packaging'
+};
+
+function teamGroup(dept) {
+    return ['Roasting', 'Packaging', 'Warehouse', 'Production'].includes(dept) ? 'Production' : dept;
+}
+
+function readerTeam(requestAuth) {
+    return requestAuth ? teamGroup(DEPARTMENTS[requestAuth.email]) : '';
+}
+
+function sameTeamVacation(requestAuth, data) {
+    const vt = data.vacation_team || '';
+    return vt !== '' && Boolean(requestAuth && DEPARTMENTS[requestAuth.email]) && vt === readerTeam(requestAuth);
+}
+
 function auth(uid) {
     const profile = HUB_PROFILES[uid];
     return profile ? { uid, email: profile.email } : null;
@@ -143,7 +168,8 @@ function canListUsers(requestAuth) {
 function canReadTimeOff(requestAuth, requestDoc) {
     return isOwnerOrController(requestAuth)
         || isRequester(requestAuth, requestDoc)
-        || isVacationApprover(requestAuth, requestDoc);
+        || isVacationApprover(requestAuth, requestDoc)
+        || sameTeamVacation(requestAuth, requestDoc);
 }
 
 function canCreateTimeOff(requestAuth, data) {
@@ -151,6 +177,8 @@ function canCreateTimeOff(requestAuth, data) {
     if (!['vacation', 'sick'].includes(data.type)) return false;
     if (!isRequester(requestAuth, data)) return false;
     if (data.created_via !== 'hub') return false;
+    const vt = data.vacation_team || '';
+    if (vt !== '' && vt !== readerTeam(requestAuth)) return false;
     if (isVacation(data)) {
         return ['pending', 'approved'].includes(data.status)
             && (data.status === 'pending' || isOwner(requestAuth));
@@ -221,7 +249,17 @@ const sungjooVacation = {
     type: 'vacation',
     status: 'pending',
     approver_id: 'kyle@fratellocoffee.com',
-    created_via: 'hub'
+    created_via: 'hub',
+    vacation_team: 'Production'
+};
+
+const olenaVacation = {
+    user_id: 'olena.zaitseva@fratellocoffee.com',
+    type: 'vacation',
+    status: 'approved',
+    approver_id: 'kyle@fratellocoffee.com',
+    created_via: 'hub',
+    vacation_team: 'Production'
 };
 
 const sungjooSickDay = {
@@ -269,6 +307,15 @@ function run() {
     assert.equal(canReadTimeOff(auth('kyle'), sungjooVacation), true);
     assert.equal(canReadTimeOff(auth('sungjoo'), sungjooVacation), true);
     assert.equal(canReadTimeOff(auth('mateo'), sungjooVacation), false);
+
+    // Same-team vacation visibility: Roasting + Packaging + Warehouse = one Production team.
+    assert.equal(canReadTimeOff(auth('olena'), sungjooVacation), true);   // Packaging sees Roasting (same Production team)
+    assert.equal(canReadTimeOff(auth('sungjoo'), olenaVacation), true);   // and vice versa
+    assert.equal(canReadTimeOff(auth('mateo'), olenaVacation), false);    // Marketing cannot see Production
+    assert.equal(canReadTimeOff(auth('olena'), sungjooSickDay), false);   // sick days stay private even within a team
+    // vacation_team cannot be forged on create.
+    assert.equal(canCreateTimeOff(auth('sungjoo'), { ...sungjooVacation, status: 'pending' }), true);
+    assert.equal(canCreateTimeOff(auth('sungjoo'), { ...sungjooVacation, status: 'pending', vacation_team: 'Marketing' }), false);
 
     assert.equal(canCreateTimeOff(auth('sungjoo'), { ...sungjooVacation, status: 'pending' }), true);
     assert.equal(canCreateTimeOff(auth('sungjoo'), { ...sungjooVacation, status: 'approved' }), false);

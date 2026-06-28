@@ -7,6 +7,8 @@ import {
     sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signOut,
     onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -180,11 +182,15 @@ function providerLabel(providerIds) {
 function roleFromProfile(id, data) {
     const profileKey = data.profile || 'staff';
     const profile = PROFILE_DEFINITIONS[profileKey] || PROFILE_DEFINITIONS.staff;
+    const tierLabel = data.role_tier || timeOffRoleTier(profileKey);
     return {
         key: profile.key,
         label: profile.label,
         sections: profile.sections,
-        roleTier: data.role_tier || timeOffRoleTier(profileKey),
+        roleTier: tierLabel,
+        // Two-axis access model: the hub derives what's visible from tier + department.
+        tier: String(tierLabel).toLowerCase(),
+        department: data.department || timeOffDepartment(profileKey),
         user: {
             id,
             name: data.name || displayNameFromEmail(data.email),
@@ -300,23 +306,58 @@ export async function createEmailAccount(email, password) {
     return profileForUser(credential.user);
 }
 
-export async function signInWithGoogle() {
+// Popup sign-in is unreliable on phones (it gets blocked or cancelled —
+// "auth/cancelled-popup-request"). On touch devices we use a full-page redirect,
+// and on desktop we fall back to redirect if the popup fails for any popup reason.
+// A redirect navigates away and returns null; the result is then picked up by
+// getRedirectResult()/onAuthStateChanged on the way back.
+const POPUP_FALLBACK_CODES = new Set([
+    'auth/cancelled-popup-request',
+    'auth/popup-blocked',
+    'auth/popup-closed-by-user',
+    'auth/operation-not-supported-in-this-environment',
+    'auth/web-storage-unsupported'
+]);
+
+function prefersRedirectSignIn() {
+    try {
+        if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return true;
+        return !(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+    } catch (error) {
+        return false;
+    }
+}
+
+async function authWithProvider(provider) {
     initFirebase();
-    const credential = await signInWithPopup(auth, new GoogleAuthProvider());
-    return profileForUser(credential.user);
+    if (prefersRedirectSignIn()) {
+        await signInWithRedirect(auth, provider);
+        return null;
+    }
+    try {
+        const credential = await signInWithPopup(auth, provider);
+        return profileForUser(credential.user);
+    } catch (error) {
+        if (error && POPUP_FALLBACK_CODES.has(error.code)) {
+            await signInWithRedirect(auth, provider);
+            return null;
+        }
+        throw error;
+    }
+}
+
+export async function signInWithGoogle() {
+    return authWithProvider(new GoogleAuthProvider());
 }
 
 export async function signInWithApple() {
-    initFirebase();
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
-    const credential = await signInWithPopup(auth, provider);
-    return profileForUser(credential.user);
+    return authWithProvider(provider);
 }
 
 export async function signInWithMicrosoft() {
-    initFirebase();
     const provider = new OAuthProvider('microsoft.com');
     provider.addScope('email');
     provider.addScope('openid');
@@ -325,8 +366,7 @@ export async function signInWithMicrosoft() {
     // firebase-config.js (otherwise allow any work/school account, not personal).
     const tenant = String(window.FRATELLO_MICROSOFT_TENANT || '').trim();
     provider.setCustomParameters({ tenant: tenant || 'organizations' });
-    const credential = await signInWithPopup(auth, provider);
-    return profileForUser(credential.user);
+    return authWithProvider(provider);
 }
 
 export async function sendResetEmail(email) {
@@ -381,6 +421,10 @@ export function onHubAuthChange(callback) {
         callback(null);
         return () => {};
     }
+
+    // Surface errors from a redirect sign-in (a successful one is delivered by
+    // onAuthStateChanged below; this only reports failures like an unauthorized domain).
+    getRedirectResult(auth).catch(error => callback(null, error));
 
     return onAuthStateChanged(auth, async user => {
         if (!user) {

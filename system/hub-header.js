@@ -114,7 +114,6 @@
                 '<nav class="fh-navmenu" hidden aria-label="Hub navigation">' +
                     '<a href="/index.html">Dashboard</a>' +
                     '<a href="/index.html#departments">Departments</a>' +
-                    '<a href="/index.html#resources">Resources</a>' +
                     (isOwner ? '<a href="/index.html#owner-admin">Owner Hub</a>' : '') +
                     (isOwner ? '<a href="/index.html#settings">Settings</a>' : '') +
                 '</nav>' +
