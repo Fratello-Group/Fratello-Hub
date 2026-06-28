@@ -85,6 +85,16 @@
         .sw-clash { background: var(--crema-deep, #B5780F); }
         .sw-today { background: #fff; box-shadow: inset 0 0 0 2px var(--brewing-blue); }
         .cal-section-title { margin: var(--space-xl) 0 var(--space-sm); font-size: 13px; font-weight: 800; letter-spacing: .3px; color: var(--bean-black); }
+        /* Approvals, surfaced on the calendar instead of a separate tab */
+        .cal-approvals { margin-bottom: var(--space-md); }
+        .cal-approvals:empty { display: none; }
+        .appr-banner { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; cursor: pointer; border: 1px solid var(--crema-deep, #B5780F); background: var(--crema-soft, #FAF1E2); border-radius: var(--radius-md); padding: 13px 16px; font: inherit; }
+        .appr-count { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; background: var(--crema-deep, #B5780F); color: #fff; font-size: 13px; font-weight: 800; }
+        .appr-banner-text { font-size: 14px; font-weight: 800; color: var(--crema-text, #8A5A12); }
+        .appr-banner .chev { margin-left: auto; color: var(--crema-text, #8A5A12); font-size: 12px; transition: transform .2s; }
+        .appr-banner.open .chev { transform: rotate(180deg); }
+        .appr-list { display: grid; gap: var(--space-md); margin-top: var(--space-md); }
+        .appr-list[hidden] { display: none; }
         .timeline { overflow-x: auto; border: 1px solid var(--warm-gray-200); border-radius: var(--radius-md); background: var(--fratello-white); }
         .timeline-row { display: grid; grid-template-columns: 180px repeat(30, 36px); min-width: 1260px; border-bottom: 1px solid var(--warm-gray-200); }
         .timeline-row:last-child { border-bottom: none; }
@@ -140,7 +150,6 @@
                 <button class="tab" type="button" data-view="submit">Submit Request</button>
                 <button class="tab" type="button" data-view="calendar">Calendar</button>
                 <button class="tab" type="button" data-view="my-requests">My Requests</button>
-                <button class="tab manager-only" type="button" data-view="approvals">Approvals Queue</button>
             </nav>
 
             <section class="view" id="view-submit">
@@ -180,6 +189,7 @@
             </section>
 
             <section class="view" id="view-calendar">
+                <div class="cal-approvals" id="calApprovals"></div>
                 <div class="toolbar">
                     <button class="btn" type="button" id="prevMonth">Previous</button>
                     <h2 class="panel-title" id="monthTitle"></h2>
@@ -200,10 +210,6 @@
             <section class="view" id="view-my-requests">
                 <div class="cards" id="myRequests"></div>
             </section>
-
-            <section class="view" id="view-approvals">
-                <div class="cards" id="approvalRequests"></div>
-            </section>
         </div>
     </main>
 
@@ -213,7 +219,8 @@
         const ADMIN_KEYS = new Set(['owner', 'controller']);
         const todayIso = new Date().toISOString().slice(0, 10);
         let activeView = new URLSearchParams(location.search).get('view') || 'submit';
-        if (activeView === 'timeline') activeView = 'calendar';   // Timeline folded into Calendar
+        if (activeView === 'timeline') activeView = 'calendar';    // Timeline folded into Calendar
+        if (activeView === 'approvals') activeView = 'calendar';   // Approvals surfaced on the Calendar
         let monthCursor = new Date();
         let role = null;
         let currentUser = null;
@@ -235,8 +242,7 @@
             calendarGrid: document.getElementById('calendarGrid'),
             monthTitle: document.getElementById('monthTitle'),
             timeline: document.getElementById('timeline'),
-            myRequests: document.getElementById('myRequests'),
-            approvalRequests: document.getElementById('approvalRequests')
+            myRequests: document.getElementById('myRequests')
         };
 
         function readRole() {
@@ -348,8 +354,7 @@
             }
         }
         function renderTabs() {
-            document.querySelectorAll('.manager-only').forEach(tab => { tab.hidden = !isManager(); });
-            if (activeView === 'approvals' && !isManager()) activeView = 'submit';
+            if (activeView === 'approvals' || activeView === 'timeline') activeView = 'calendar';
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.view === activeView);
             });
@@ -512,9 +517,29 @@
         }
         function renderLists() {
             els.myRequests.innerHTML = myRequests.length ? myRequests.map(req => requestCard(req)).join('') : '<div class="empty panel">No vacation requests yet.</div>';
-            els.approvalRequests.innerHTML = approvals.length ? approvals.map(req => requestCard(req, true)).join('') : '<div class="empty panel">No pending approvals assigned to you.</div>';
-            document.querySelectorAll('[data-approve]').forEach(btn => btn.onclick = () => approvalAction(btn.dataset.approve, 'approveRequest'));
-            document.querySelectorAll('[data-deny]').forEach(btn => btn.onclick = () => approvalAction(btn.dataset.deny, 'denyRequest'));
+        }
+        // Approvals live on the Calendar now (managers only, only when there's something to do).
+        function renderCalApprovals() {
+            const wrap = document.getElementById('calApprovals');
+            if (!wrap) return;
+            if (!isManager() || !approvals.length) { wrap.innerHTML = ''; return; }
+            const n = approvals.length;
+            wrap.innerHTML = `
+                <button type="button" class="appr-banner open" id="apprToggle" aria-expanded="true">
+                    <span class="appr-count">${n}</span>
+                    <span class="appr-banner-text">${n} request${n === 1 ? '' : 's'} need${n === 1 ? 's' : ''} your approval</span>
+                    <span class="chev">▾</span>
+                </button>
+                <div class="appr-list" id="apprList">${approvals.map(req => requestCard(req, true)).join('')}</div>`;
+            const toggle = wrap.querySelector('#apprToggle');
+            const list = wrap.querySelector('#apprList');
+            toggle.onclick = () => {
+                const closed = list.hasAttribute('hidden');
+                if (closed) { list.removeAttribute('hidden'); toggle.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); }
+                else { list.setAttribute('hidden', ''); toggle.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
+            };
+            wrap.querySelectorAll('[data-approve]').forEach(btn => btn.onclick = () => approvalAction(btn.dataset.approve, 'approveRequest'));
+            wrap.querySelectorAll('[data-deny]').forEach(btn => btn.onclick = () => approvalAction(btn.dataset.deny, 'denyRequest'));
         }
         async function approvalAction(id, fn) {
             try {
@@ -531,6 +556,7 @@
             renderCalendar();
             renderTimeline();
             renderLists();
+            renderCalApprovals();
         }
         async function init() {
             role = readRole();
