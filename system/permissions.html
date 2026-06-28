@@ -434,6 +434,21 @@
             box-shadow: 0 0 0 3px rgba(47, 169, 160, .10);
             font-weight: 700;
         }
+        .emp-row {
+            display: block;
+            margin-top: 9px;
+            font-size: 11px;
+            color: var(--teal-ink, #1E7E77);
+        }
+        .emp-row .emp-label {
+            display: block;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 9.5px;
+            margin-bottom: 4px;
+        }
+        .emp-row select { font-weight: 700; }
         .field.has-error select {
             border-color: var(--error);
             box-shadow: none;
@@ -780,6 +795,15 @@
                         <select id="inviteRoleTier" onchange="syncDerivedProfile()"></select>
                         <div class="field-error" id="inviteRoleTierError"></div>
                     </div>
+                    <div class="field field--access" id="fieldInviteEmployment">
+                        <label for="inviteEmployment">Pay type <span class="access-flag">Required</span></label>
+                        <select id="inviteEmployment">
+                            <option value="">Select pay type…</option>
+                            <option value="salaried">Salaried</option>
+                            <option value="hourly">Hourly — uses the time clock</option>
+                        </select>
+                        <div class="field-error" id="inviteEmploymentError"></div>
+                    </div>
                     <div class="field">
                         <label for="inviteManager">Manager</label>
                         <select id="inviteManager"></select>
@@ -842,6 +866,7 @@
             sendHubInviteEmail,
             sendResetEmail,
             setHubUserDisabled,
+            setHubUserHourly,
             updateHubUser
         } from './fratello-auth.js';
         import { logActivity } from './api/activity-logger.js';
@@ -1125,7 +1150,9 @@
                 roleTier,
                 managerId: document.getElementById('inviteManager').value,
                 hireDate: document.getElementById('inviteHireDate').value,
-                active: document.getElementById('inviteActive').value === 'true'
+                active: document.getElementById('inviteActive').value === 'true',
+                employment: document.getElementById('inviteEmployment').value,
+                hourly: document.getElementById('inviteEmployment').value === 'hourly'
             };
         }
 
@@ -1135,6 +1162,7 @@
             document.getElementById('inviteTitle').value = '';
             document.getElementById('inviteHireDate').value = '';
             document.getElementById('inviteActive').value = 'true';
+            document.getElementById('inviteEmployment').value = '';
             applyProfileDefaults(true);
         }
 
@@ -1201,6 +1229,7 @@
             setFieldError('InviteEmail', '');
             setFieldError('InviteDepartment', '');
             setFieldError('InviteRoleTier', '');
+            setFieldError('InviteEmployment', '');
             document.getElementById('inviteOutput').classList.remove('warning');
         }
 
@@ -1370,6 +1399,14 @@
                         <select data-person="${safeId}" data-kind="level" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'}>
                             ${optionList(rowLevels, tier)}
                         </select>
+                        ${(canEditPerson && USE_FIREBASE_AUTH) ? `
+                        <label class="emp-row" title="Hourly staff get the dashboard time clock and report to the timesheet">
+                            <span class="emp-label">Pay type</span>
+                            <select data-person="${safeId}" data-kind="employment" onchange="setHourly(this.dataset.person, this.value === 'hourly')">
+                                <option value="salaried" ${person.hourly ? '' : 'selected'}>Salaried</option>
+                                <option value="hourly" ${person.hourly ? 'selected' : ''}>Hourly · time clock</option>
+                            </select>
+                        </label>` : ''}
                     </td>
                     <td>
                         <div class="profile-access" id="access-${safeId}">${accessTagsFor(tier, department)}</div>
@@ -1500,6 +1537,13 @@
                 document.getElementById('adminMessage').textContent = 'Set the Department before inviting — it controls their permissions.';
                 return;
             }
+            // Pay type (salaried vs hourly) is required for every new person.
+            if (!payload.employment) {
+                setFieldError('InviteEmployment', 'Choose salaried or hourly.');
+                document.getElementById('inviteEmployment').focus();
+                document.getElementById('adminMessage').textContent = 'Set the pay type before inviting — salaried or hourly.';
+                return;
+            }
 
             output.style.display = 'none';
             button.disabled = true;
@@ -1521,7 +1565,11 @@
                     renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
                     document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it to the person.';
                 }
-                audit('invite_sent', { target_email: payload.email, target_name: payload.name, profile: payload.profile });
+                // Stamp the pay type onto the user record (merge-safe, owner/controller allowed).
+                if (USE_FIREBASE_AUTH) {
+                    try { await setHubUserHourly(payload.email, payload.hourly); } catch (e) { /* non-fatal */ }
+                }
+                audit('invite_sent', { target_email: payload.email, target_name: payload.name, profile: payload.profile, hourly: payload.hourly });
                 clearInviteForm();
                 await loadUsers();
             } catch (error) {
@@ -1615,6 +1663,23 @@
                 await loadUsers();
             } catch (error) {
                 document.getElementById('adminMessage').textContent = USE_FIREBASE_AUTH ? friendlyAuthError(error) : error.message;
+                await loadUsers();
+            }
+        }
+
+        async function setHourly(personId, checked) {
+            const person = STAFF.find(item => item.id === personId);
+            if (!person) return;
+            person.hourly = checked;
+            try {
+                await setHubUserHourly(person.email || personId, checked);
+                document.getElementById('saveState').textContent =
+                    `${person.name}: ${checked ? 'now hourly — time clock is on' : 'no longer hourly'}.`;
+                audit('hourly_changed', { target_email: person.email, hourly: checked });
+            } catch (error) {
+                person.hourly = !checked;
+                document.getElementById('adminMessage').textContent =
+                    USE_FIREBASE_AUTH ? friendlyAuthError(error) : (error.message || 'Could not update hourly status.');
                 await loadUsers();
             }
         }
@@ -1754,6 +1819,7 @@
         window.inviteUser = inviteUser;
         window.sendInviteForPerson = sendInviteForPerson;
         window.updateAccess = updateAccess;
+        window.setHourly = setHourly;
         window.syncDerivedProfile = syncDerivedProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;

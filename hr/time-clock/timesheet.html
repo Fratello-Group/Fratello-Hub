@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Hourly Timesheet</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../system/fratello-ui.css">
+    <style>
+        :root{
+            --teal:#2FA9A0; --teal-dark:#1E7E77; --teal-soft:#E8F4F2;
+            --amber:#E0A23D; --amber-dark:#B5780F; --amber-soft:#FAF1E2;
+            --ok:#1F7A57; --ok-soft:#E4F6EF;
+            --ink:#16262E; --sub:#6A7A7A; --bg:#F5F6F5; --line:#ECEEEC; --surface:#fff;
+            --font:'Inter',-apple-system,'Segoe UI',sans-serif;
+            --head:'Poppins',-apple-system,'Segoe UI',sans-serif;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+        button,input,textarea,select{font:inherit}
+        main{width:min(1060px,calc(100% - 36px));margin:0 auto;padding:34px 0 64px}
+        .eyebrow{color:var(--teal-dark);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+        h1{font-family:var(--head);font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.01em;margin:8px 0 6px}
+        .lede{color:var(--sub);font-size:15px;line-height:1.6;max-width:680px}
+
+        .controls{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:24px 0 6px}
+        .toggle{display:flex;background:#F0F2F1;border-radius:999px;padding:4px}
+        .toggle button{border:none;background:none;font-weight:600;font-size:14px;color:var(--sub);padding:9px 18px;border-radius:999px;cursor:pointer}
+        .toggle button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+        .export{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:none;font-weight:600;font-size:14px;padding:11px 18px;border-radius:999px;cursor:pointer}
+        .export:hover{opacity:.92}
+        .scope-note{color:var(--sub);font-size:13px;margin-top:2px}
+
+        .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 30px rgba(15,30,30,.05);padding:8px 24px 14px;margin-top:18px}
+        .sect{margin-top:18px}
+        .sect:first-child{margin-top:8px}
+        .sect-h{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;padding-top:6px}
+        .sect-h .n{color:var(--sub);font-weight:500;font-size:13px}
+        .rule{height:2px;border-radius:2px;margin:9px 0 2px}
+        .rule.t{background:var(--teal)} .rule.a{background:var(--amber)} .rule.g{background:var(--ok)}
+        .row{display:flex;align-items:center;gap:14px;padding:14px 2px;border-bottom:1px solid #F4F6F5;cursor:pointer}
+        .row:last-child{border-bottom:none}
+        .row:hover{background:#FAFBFB}
+        .ava{width:38px;height:38px;border-radius:99px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-weight:800;font-size:13px;color:var(--teal-dark);background:var(--teal-soft)}
+        .ava.brk{background:var(--amber-soft);color:var(--amber-dark)}
+        .ava.done{background:#EEF1F0;color:#90999a}
+        .who{flex:1;min-width:0}
+        .who .nm{font-weight:700;font-size:15px}
+        .who .mt{color:var(--sub);font-size:13px;margin-top:2px}
+        .hrs{background:var(--teal-soft);color:var(--teal-dark);font-weight:700;font-family:var(--head);font-size:15px;padding:7px 13px;border-radius:11px;white-space:nowrap}
+        .approve{background:#fff;border:1.5px solid var(--teal);color:var(--teal-dark);font-weight:700;font-size:14px;padding:9px 18px;border-radius:999px;cursor:pointer;white-space:nowrap}
+        .approve:hover{background:var(--teal-soft)}
+        .chip-ok{display:inline-flex;align-items:center;gap:6px;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:13px;padding:8px 13px;border-radius:999px;white-space:nowrap}
+        .row-actions{display:flex;align-items:center;gap:10px}
+        .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:8px;padding:16px 0 6px;font-weight:700;font-size:16px}
+        .foot .big{font-family:var(--head);font-size:19px}
+        .empty{color:var(--sub);font-size:14px;padding:22px 2px}
+        .note-flag{display:inline-block;margin-left:8px;background:var(--amber-soft);color:var(--amber-dark);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+
+        .state{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:22px;color:var(--sub);font-size:15px}
+        .state a{color:var(--teal-dark);font-weight:700}
+
+        /* edit modal */
+        .scrim{position:fixed;inset:0;background:rgba(15,25,25,.45);z-index:2100;display:flex;align-items:center;justify-content:center;padding:18px}
+        .scrim[hidden]{display:none}
+        .modal{background:#fff;width:100%;max-width:440px;border-radius:22px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+        .modal h2{font-family:var(--head);font-weight:600;font-size:22px}
+        .modal .msub{color:var(--sub);font-size:14px;margin-top:2px}
+        .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+        .field label{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);margin-bottom:6px}
+        .field input,.field textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--ink)}
+        .field input:focus,.field textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,169,160,.12)}
+        .field.full{grid-column:1 / -1}
+        .modal-actions{display:flex;gap:10px;margin-top:20px}
+        .btn{flex:1;border:none;border-radius:14px;padding:14px;font-weight:800;font-size:15px;cursor:pointer}
+        .btn-ghost{background:#F0F2F1;color:var(--ink)}
+        .btn-save{background:#fff;border:1.5px solid var(--teal);color:var(--teal-dark)}
+        .btn-approve{background:var(--teal);color:#fff}
+        .merr{color:#b3261e;font-size:13px;margin-top:12px;min-height:2px}
+        .meta-line{margin-top:14px;color:var(--sub);font-size:12.5px;line-height:1.5}
+    </style>
+</head>
+<body>
+    <div id="fratello-hub-header"></div>
+
+    <main>
+        <div class="eyebrow">Hourly Timesheet</div>
+        <h1>Team time clock.</h1>
+        <p class="lede">Review hours as they happen, fix a forgotten punch, add a note, and approve. Only approved hours are reported — export a detailed, timestamped CSV for the Controller any time.</p>
+
+        <div id="gateOk" hidden>
+            <div class="controls">
+                <div class="toggle">
+                    <button id="tabToday" class="on" type="button">Today</button>
+                    <button id="tabWeek" type="button">This week</button>
+                </div>
+                <button class="export" id="exportBtn" type="button">↓ Export CSV</button>
+            </div>
+            <div class="scope-note" id="scopeNote">Loading…</div>
+
+            <div class="card" id="sheetBody"></div>
+        </div>
+
+        <div class="state" id="gateDenied" hidden>
+            This timesheet is for Production managers, the Owner, and the Controller.
+            <a href="../../index.html">Back to the Hub →</a>
+        </div>
+
+        <div class="state" id="loadingState">Loading the timesheet…</div>
+    </main>
+
+    <!-- Edit / approve modal -->
+    <div class="scrim" id="editScrim" hidden>
+        <div class="modal">
+            <h2 id="mTitle">Edit hours</h2>
+            <div class="msub" id="mSub">—</div>
+            <div class="frow">
+                <div class="field"><label>Clock in</label><input type="time" id="mIn"></div>
+                <div class="field"><label>Clock out</label><input type="time" id="mOut"></div>
+                <div class="field"><label>Break (minutes)</label><input type="number" id="mBreak" min="0" step="1"></div>
+                <div class="field"><label>Worked</label><input type="text" id="mWorked" readonly></div>
+                <div class="field full"><label>Note (rides along in the export)</label><textarea id="mNote" rows="2" placeholder="e.g. Left early — approved by Kyle"></textarea></div>
+            </div>
+            <div class="merr" id="mErr"></div>
+            <div class="meta-line" id="mMeta"></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="mCancel" type="button">Cancel</button>
+                <button class="btn btn-save" id="mSave" type="button">Save</button>
+                <button class="btn btn-approve" id="mApprove" type="button">Save &amp; approve</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/system/hub-header.js"></script>
+    <script type="module">
+        const $ = id => document.getElementById(id);
+
+        function readRole() {
+            try { return JSON.parse(localStorage.getItem('fratello-role') || 'null'); }
+            catch (e) { return null; }
+        }
+
+        let client = null;
+        async function api() {
+            if (client) return client;
+            client = window.__TS_STUB || await import('../../system/api/firestore-client.js');
+            return client;
+        }
+
+        // ── time helpers ──
+        function dOf(v) {
+            if (!v) return null;
+            if (v instanceof Date) return v;
+            if (typeof v.toDate === 'function') return v.toDate();
+            if (typeof v.seconds === 'number') return new Date(v.seconds * 1000);
+            const d = new Date(v); return isNaN(d.getTime()) ? null : d;
+        }
+        function fmtHM(sec) {
+            sec = Math.max(0, Math.round(sec || 0));
+            return `${Math.floor(sec/3600)}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}`;
+        }
+        function fmtClock(v) {
+            const d = dOf(v); if (!d) return '—';
+            return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+        }
+        function fmtStamp(v) {
+            const d = dOf(v); if (!d) return '';
+            return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+        function fmtDayLabel(dateKey) {
+            const d = new Date(`${dateKey}T12:00:00`);
+            return isNaN(d.getTime()) ? dateKey : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+        function initialsOf(name) {
+            return (name || '?').split(/\s+/).filter(Boolean).slice(0,2).map(p => p[0].toUpperCase()).join('') || '?';
+        }
+        // Live worked/break for an in-progress day.
+        function live(day) {
+            if (day.status === 'done' || day.status === 'approved') {
+                return { worked: day.worked_seconds || 0, brk: day.break_seconds || 0 };
+            }
+            const inD = dOf(day.clock_in);
+            let brk = day.break_seconds || 0;
+            if (day.status === 'break' && day.break_started_at) {
+                const bs = dOf(day.break_started_at);
+                if (bs) brk += Math.floor((Date.now() - bs.getTime())/1000);
+            }
+            const worked = inD ? Math.max(0, Math.floor((Date.now() - inD.getTime())/1000) - brk) : 0;
+            return { worked, brk };
+        }
+
+        // ── data ──
+        let MODE = 'today';
+        let ROWS = [];
+
+        function weekStartKey() {
+            const d = new Date();
+            const dow = (d.getDay() + 6) % 7;   // Monday = 0
+            d.setDate(d.getDate() - dow);
+            return d.toISOString().slice(0, 10);
+        }
+        function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+        async function load() {
+            const c = await api();
+            const opts = MODE === 'today'
+                ? { date: new Date() }
+                : { start_date: weekStartKey(), end_date: todayKey() };
+            ROWS = await c.getTeamClock(opts);
+            render();
+        }
+
+        function rowMeta(day) {
+            const datePart = MODE === 'week' ? `${fmtDayLabel(day.date)} · ` : '';
+            if (day.status === 'break') return `${datePart}On break since ${fmtClock(day.break_started_at)}`;
+            if (day.status === 'active') return `${datePart}In ${fmtClock(day.clock_in)} · ${fmtHM(live(day).brk)} break`;
+            const brk = day.break_seconds || 0;
+            return `${datePart}${fmtClock(day.clock_in)} – ${fmtClock(day.clock_out)} · ${fmtHM(brk)} break`;
+        }
+
+        function rowEl(day) {
+            const l = live(day);
+            const el = document.createElement('div');
+            el.className = 'row';
+            const avaClass = day.status === 'break' ? 'brk' : (day.status === 'done' || day.status === 'approved') ? 'done' : '';
+            const noteFlag = day.note ? '<span class="note-flag">note</span>' : '';
+            let right;
+            if (day.status === 'approved') {
+                right = `<span class="hrs">${fmtHM(l.worked)}</span><span class="chip-ok">✓ ${escapeHtml(day.approved_by_name || 'Approved')}</span>`;
+            } else if (day.status === 'done') {
+                right = `<span class="hrs">${fmtHM(l.worked)}</span><button class="approve" data-approve="${escapeAttr(day.id)}">Approve</button>`;
+            } else {
+                right = `<span class="hrs">${fmtHM(l.worked)}</span>`;
+            }
+            el.innerHTML = `
+                <span class="ava ${avaClass}">${initialsOf(day.user_name)}</span>
+                <span class="who"><span class="nm">${escapeHtml(day.user_name || day.user_email || 'Teammate')}${noteFlag}</span>
+                    <span class="mt">${escapeHtml(rowMeta(day))}</span></span>
+                <span class="row-actions">${right}</span>`;
+            el.addEventListener('click', e => {
+                if (e.target.closest('[data-approve]')) { e.stopPropagation(); quickApprove(day); return; }
+                openEdit(day);
+            });
+            return el;
+        }
+
+        function section(title, ruleClass, days, countLabel) {
+            const wrap = document.createElement('div');
+            wrap.className = 'sect';
+            wrap.innerHTML = `<div class="sect-h">${title} <span class="n">${countLabel}</span></div><div class="rule ${ruleClass}"></div>`;
+            days.forEach(d => wrap.appendChild(rowEl(d)));
+            return wrap;
+        }
+
+        function render() {
+            $('loadingState').hidden = true;
+            $('scopeNote').textContent = MODE === 'today'
+                ? `Production · ${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}`
+                : `Production · week of ${fmtDayLabel(weekStartKey())}`;
+
+            const onClock = ROWS.filter(r => r.status === 'active' || r.status === 'break');
+            const needs = ROWS.filter(r => r.status === 'done');
+            const approved = ROWS.filter(r => r.status === 'approved');
+
+            const body = $('sheetBody');
+            body.innerHTML = '';
+            if (!ROWS.length) {
+                body.innerHTML = '<div class="empty">No hours logged in this period yet.</div>';
+                return;
+            }
+            if (onClock.length) body.appendChild(section('On the clock', 't', onClock, `${onClock.length} now`));
+            body.appendChild(section('Needs your approval', 'a', needs, needs.length ? `${needs.length} waiting` : 'all clear'));
+            if (!needs.length) body.lastChild.appendChild(Object.assign(document.createElement('div'), { className: 'empty', textContent: 'Nothing waiting — you’re caught up.' }));
+            if (approved.length) body.appendChild(section('Approved', 'g', approved, String(approved.length)));
+
+            const approvedSecs = approved.reduce((s, r) => s + (r.worked_seconds || 0), 0);
+            const foot = document.createElement('div');
+            foot.className = 'foot';
+            foot.innerHTML = `<span>Approved hours · ${MODE === 'today' ? 'today' : 'this week'}</span><span class="big">${fmtHM(approvedSecs)}</span>`;
+            body.appendChild(foot);
+        }
+
+        async function quickApprove(day) {
+            try {
+                const c = await api();
+                const updated = await c.approveClockDay(day.id, { note: day.note || '' });
+                mergeRow(updated || { ...day, status: 'approved', approved_by_name: 'You', worked_seconds: live(day).worked });
+                render();
+            } catch (e) {
+                alert((e && e.message) || 'Could not approve.');
+            }
+        }
+
+        function mergeRow(updated) {
+            const i = ROWS.findIndex(r => r.id === updated.id);
+            if (i >= 0) ROWS[i] = { ...ROWS[i], ...updated };
+        }
+
+        // ── edit modal ──
+        let editing = null;
+        function timeInputValue(v) {
+            const d = dOf(v); if (!d) return '';
+            return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+        function recomputeWorked() {
+            const day = editing; if (!day) return;
+            const base = day.date || todayKey();
+            const inV = $('mIn').value, outV = $('mOut').value;
+            const brkMin = Math.max(0, parseInt($('mBreak').value || '0', 10));
+            if (!inV) { $('mWorked').value = '—'; return; }
+            const inD = new Date(`${base}T${inV}:00`);
+            const outD = outV ? new Date(`${base}T${outV}:00`) : null;
+            if (!outD) { $('mWorked').value = 'in progress'; return; }
+            let secs = Math.max(0, (outD - inD)/1000 - brkMin*60);
+            $('mWorked').value = fmtHM(secs);
+        }
+        function openEdit(day) {
+            editing = day;
+            $('mTitle').textContent = `${day.user_name || day.user_email || 'Teammate'} · ${fmtDayLabel(day.date)}`;
+            $('mSub').textContent = day.status === 'approved'
+                ? `Approved by ${day.approved_by_name || '—'} · ${fmtStamp(day.approved_at)}`
+                : (day.status === 'active' || day.status === 'break') ? 'Still on the clock — edits apply when they finish.' : 'Fix the numbers, add a note, then approve.';
+            $('mIn').value = timeInputValue(day.clock_in);
+            $('mOut').value = timeInputValue(day.clock_out);
+            $('mBreak').value = Math.round((day.break_seconds || 0)/60);
+            $('mNote').value = day.note || '';
+            $('mErr').textContent = '';
+            $('mMeta').textContent = day.edited_at ? `Last edited ${fmtStamp(day.edited_at)} by ${day.edited_by || '—'}.` : '';
+            $('mApprove').style.display = day.status === 'approved' ? 'none' : '';
+            recomputeWorked();
+            $('editScrim').hidden = false;
+        }
+        function closeEdit() { $('editScrim').hidden = true; editing = null; }
+
+        function patchFromForm() {
+            const day = editing;
+            const base = day.date || todayKey();
+            const inV = $('mIn').value, outV = $('mOut').value;
+            const brkMin = Math.max(0, parseInt($('mBreak').value || '0', 10));
+            const patch = { note: $('mNote').value, break_seconds: brkMin * 60 };
+            if (inV) patch.clock_in = new Date(`${base}T${inV}:00`).toISOString();
+            if (outV) {
+                patch.clock_out = new Date(`${base}T${outV}:00`).toISOString();
+                const inD = new Date(`${base}T${(inV||'00:00')}:00`);
+                patch.worked_seconds = Math.max(0, (new Date(`${base}T${outV}:00`) - inD)/1000 - brkMin*60);
+            }
+            return patch;
+        }
+        async function saveEdit(thenApprove) {
+            const day = editing; if (!day) return;
+            $('mErr').textContent = '';
+            ['mSave','mApprove','mCancel'].forEach(id => $(id).disabled = true);
+            try {
+                const c = await api();
+                let updated = await c.editClockDay(day.id, patchFromForm());
+                if (thenApprove) updated = await c.approveClockDay(day.id, { note: $('mNote').value });
+                mergeRow(updated || day);
+                closeEdit();
+                render();
+            } catch (e) {
+                $('mErr').textContent = (e && e.message) || 'Could not save.';
+            } finally {
+                ['mSave','mApprove','mCancel'].forEach(id => $(id).disabled = false);
+            }
+        }
+
+        // ── CSV ──
+        function csvCell(v) {
+            const s = String(v == null ? '' : v);
+            return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+        }
+        function exportCsv() {
+            const cols = ['Name','Department','Date','Clock in','Clock out','Breaks','Break time','Worked','Status','Note','Approved by','Approved at'];
+            const lines = [cols.join(',')];
+            ROWS.forEach(r => {
+                const l = live(r);
+                const statusLabel = r.status === 'approved' ? 'Approved' : r.status === 'done' ? 'Awaiting approval' : r.status === 'break' ? 'On break' : 'On the clock';
+                lines.push([
+                    r.user_name || '', r.department || 'Production', r.date || '',
+                    fmtClock(r.clock_in), r.clock_out ? fmtClock(r.clock_out) : '',
+                    r.breaks_count || 0, fmtHM(l.brk), fmtHM(l.worked),
+                    statusLabel, r.note || '',
+                    r.approved_by_name || '', r.approved_at ? fmtStamp(r.approved_at) : ''
+                ].map(csvCell).join(','));
+            });
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fratello-timesheet-${MODE === 'today' ? todayKey() : 'week-' + weekStartKey()}.csv`;
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        // ── escaping ──
+        function escapeHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+        function escapeAttr(v){return escapeHtml(v);}
+
+        // ── access gate + boot ──
+        function canSee(role) {
+            if (!role) return false;
+            const tier = String(role.tier || '').toLowerCase();
+            if (tier === 'owner' || tier === 'controller') return true;
+            const dept = String(role.department || '').toLowerCase();
+            return tier === 'manager' && ['production','roasting','packaging','warehouse'].includes(dept);
+        }
+
+        function setTab(mode) {
+            MODE = mode;
+            $('tabToday').classList.toggle('on', mode === 'today');
+            $('tabWeek').classList.toggle('on', mode === 'week');
+            $('sheetBody').innerHTML = '';
+            $('scopeNote').textContent = 'Loading…';
+            load().catch(err => { $('scopeNote').textContent = (err && err.message) || 'Could not load.'; });
+        }
+
+        (function init() {
+            const role = readRole();
+            if (!canSee(role)) {
+                $('loadingState').hidden = true;
+                $('gateDenied').hidden = false;
+                return;
+            }
+            $('gateOk').hidden = false;
+            $('tabToday').addEventListener('click', () => setTab('today'));
+            $('tabWeek').addEventListener('click', () => setTab('week'));
+            $('exportBtn').addEventListener('click', exportCsv);
+            $('mCancel').addEventListener('click', closeEdit);
+            $('mSave').addEventListener('click', () => saveEdit(false));
+            $('mApprove').addEventListener('click', () => saveEdit(true));
+            ['mIn','mOut','mBreak'].forEach(id => $(id).addEventListener('input', recomputeWorked));
+            $('editScrim').addEventListener('click', e => { if (e.target === $('editScrim')) closeEdit(); });
+            load().catch(err => {
+                $('loadingState').hidden = true;
+                $('scopeNote').textContent = (err && err.message) || 'Could not load the timesheet — check your connection or sign in again.';
+            });
+        })();
+    </script>
+</body>
+</html>

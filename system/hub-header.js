@@ -8,11 +8,17 @@
 // If the placeholder div is omitted, the header is prepended to <body>.
 (function () {
     var ROLE_KEY = 'fratello-role';
+    var VIEW_AS_KEY = 'fratello-view-as';
     var styled = false;
     var outsideBound = false;
 
     function readRole() {
         try { return JSON.parse(localStorage.getItem(ROLE_KEY) || 'null'); }
+        catch (error) { return null; }
+    }
+
+    function readViewAs() {
+        try { return JSON.parse(localStorage.getItem(VIEW_AS_KEY) || 'null'); }
         catch (error) { return null; }
     }
 
@@ -31,6 +37,12 @@
 
     var CSS = [
         ".fh-bar{position:sticky;top:0;z-index:500;display:flex;align-items:center;gap:18px;padding:13px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #ECEEEC;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Inter',-apple-system,'Segoe UI',sans-serif;box-sizing:border-box;}",
+        ".fh-viewas{position:sticky;top:0;z-index:600;display:flex;align-items:center;gap:12px;min-height:40px;box-sizing:border-box;padding:9px 22px;background:linear-gradient(90deg,#1E7E77,#2FA9A0);color:#fff;font-family:'Inter',-apple-system,'Segoe UI',sans-serif;font-size:13px;font-weight:600;}",
+        ".fh-viewas .vatext{flex:1;}",
+        ".fh-viewas strong{font-weight:800;}",
+        ".fh-viewas .vaexit{border:1px solid rgba(255,255,255,.65);background:rgba(255,255,255,.18);color:#fff;font-family:inherit;font-weight:800;font-size:12px;padding:6px 15px;border-radius:999px;cursor:pointer;white-space:nowrap;}",
+        ".fh-viewas .vaexit:hover{background:rgba(255,255,255,.3);}",
+        "body.fh-view-as .fh-bar{top:40px;}",
         ".fh-logo-link{flex:0 0 auto;display:block;}",
         ".fh-logo{height:30px;width:auto;display:block;}",
         // Primary nav: a dropdown under the bar on mobile, a pill track on desktop
@@ -79,6 +91,8 @@
         ".fh-crumbs a:hover{text-decoration:underline;}",
         ".fh-crumb-sep{color:#C4C3C0;font-weight:600;}",
         ".fh-crumb-current{color:#4A4A4A;font-weight:600;}",
+        ".fh-subnav-actions{margin-left:auto;display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;}",
+        ".fh-subnav-actions .btn{height:34px;padding:0 16px;display:inline-flex;align-items:center;border-radius:999px;font-size:13px;font-weight:700;margin:0;}",
         "@media (max-width:560px){",
         ".fh-bar{padding:12px 14px;gap:10px;}",
         ".fh-logo{height:26px;}",
@@ -176,6 +190,7 @@
         var crumbs;
         if (existing) {
             crumbs = existing;                       // reuse the page's own trail
+            crumbs.style.margin = '0';               // ships as a pill w/ margin-bottom; kill it so it sits inline with Back
             var links = existing.querySelectorAll('a[href]');
             if (links.length) backHref = links[links.length - 1].getAttribute('href');
         } else {
@@ -193,10 +208,26 @@
         return sub;
     }
 
+    // The CFIA pages ship their own title bar (.cfia-bar) that now just duplicates
+    // the unified header + page hero. Lift its primary action (Food Safety
+    // Dashboard) into the Back/breadcrumb row and drop the redundant bar — saves
+    // a whole row and keeps the action on the persistent nav line.
+    function liftCfiaActions(sub) {
+        var cbar = document.querySelector('.cfia-bar');
+        if (!cbar) return;
+        var actions = cbar.querySelector('.actions');
+        if (actions && !actions.classList.contains('fh-subnav-actions')) {
+            actions.classList.add('fh-subnav-actions');
+            sub.appendChild(actions);                  // move the live button(s), links intact
+        }
+        cbar.style.display = 'none';
+    }
+
     function mountSubnav(bar) {
         var sub = document.querySelector('.fh-subnav');
         if (!sub) sub = buildSubnav();
         bar.insertAdjacentElement('afterend', sub);   // keep it directly under the bar
+        liftCfiaActions(sub);
     }
 
     function wire(bar) {
@@ -265,6 +296,37 @@
         });
     }
 
+    // While the Owner is previewing the Hub "as" another role, show a slim banner
+    // on every sub-page too, with a one-tap way back to their own view.
+    function exitViewAsPage() {
+        var real = readViewAs();
+        try { localStorage.removeItem(VIEW_AS_KEY); } catch (e) {}
+        if (real) { try { localStorage.setItem(ROLE_KEY, JSON.stringify(real)); } catch (e) {} }
+        window.location.reload();
+    }
+
+    function mountViewAsBanner() {
+        var existing = document.querySelector('.fh-viewas');
+        if (!readViewAs()) {
+            if (existing) existing.remove();
+            document.body.classList.remove('fh-view-as');
+            return;
+        }
+        var persona = readRole();
+        var label = (persona && persona.label) ? persona.label : 'a teammate';
+        var who = (persona && persona.user && persona.user.firstName) ? persona.user.firstName + ' · ' : '';
+        if (!existing) {
+            existing = document.createElement('div');
+            existing.className = 'fh-viewas';
+            document.body.insertBefore(existing, document.body.firstChild);
+        }
+        existing.innerHTML = '<span aria-hidden="true">👁</span>' +
+            '<span class="vatext">Previewing as <strong>' + escapeHtml(who + label) + '</strong> — only you can see this</span>' +
+            '<button type="button" class="vaexit">Back to my view</button>';
+        existing.querySelector('.vaexit').addEventListener('click', exitViewAsPage);
+        document.body.classList.add('fh-view-as');
+    }
+
     function mount(role) {
         if (!styled) {
             var style = document.createElement('style');
@@ -284,6 +346,7 @@
         mountSubnav(bar);
         wire(bar);
         bindOutside();
+        mountViewAsBanner();
     }
 
     function hasName(role) {
