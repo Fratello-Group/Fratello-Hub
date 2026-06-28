@@ -434,6 +434,17 @@
             box-shadow: 0 0 0 3px rgba(47, 169, 160, .10);
             font-weight: 700;
         }
+        .hourly-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--teal-ink, #1E7E77);
+            cursor: pointer;
+        }
+        .hourly-toggle input { width: 16px; height: 16px; accent-color: var(--teal, #2FA9A0); cursor: pointer; }
         .field.has-error select {
             border-color: var(--error);
             box-shadow: none;
@@ -842,6 +853,7 @@
             sendHubInviteEmail,
             sendResetEmail,
             setHubUserDisabled,
+            setHubUserHourly,
             updateHubUser
         } from './fratello-auth.js';
         import { logActivity } from './api/activity-logger.js';
@@ -1370,6 +1382,11 @@
                         <select data-person="${safeId}" data-kind="level" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'}>
                             ${optionList(rowLevels, tier)}
                         </select>
+                        ${(!deptIsNA && canEditPerson && USE_FIREBASE_AUTH) ? `
+                        <label class="hourly-toggle" title="Paid hourly — gives them the dashboard time clock and reports to the timesheet">
+                            <input type="checkbox" data-person="${safeId}" ${person.hourly ? 'checked' : ''} onchange="setHourly(this.dataset.person, this.checked)">
+                            <span>Hourly · time clock</span>
+                        </label>` : ''}
                     </td>
                     <td>
                         <div class="profile-access" id="access-${safeId}">${accessTagsFor(tier, department)}</div>
@@ -1619,6 +1636,23 @@
             }
         }
 
+        async function setHourly(personId, checked) {
+            const person = STAFF.find(item => item.id === personId);
+            if (!person) return;
+            person.hourly = checked;
+            try {
+                await setHubUserHourly(person.email || personId, checked);
+                document.getElementById('saveState').textContent =
+                    `${person.name}: ${checked ? 'now hourly — time clock is on' : 'no longer hourly'}.`;
+                audit('hourly_changed', { target_email: person.email, hourly: checked });
+            } catch (error) {
+                person.hourly = !checked;
+                document.getElementById('adminMessage').textContent =
+                    USE_FIREBASE_AUTH ? friendlyAuthError(error) : (error.message || 'Could not update hourly status.');
+                await loadUsers();
+            }
+        }
+
         async function resetPassword(personId) {
             const output = document.getElementById('inviteOutput');
             output.style.display = 'none';
@@ -1754,6 +1788,7 @@
         window.inviteUser = inviteUser;
         window.sendInviteForPerson = sendInviteForPerson;
         window.updateAccess = updateAccess;
+        window.setHourly = setHourly;
         window.syncDerivedProfile = syncDerivedProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;

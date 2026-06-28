@@ -22,7 +22,8 @@ const COLLECTIONS = {
     holidays: 'holidays',
     settings: 'settings',
     profiles: 'hubProfiles',
-    avatarLogs: 'avatar_logs'
+    avatarLogs: 'avatar_logs',
+    timeClock: 'time_clock'
 };
 
 const APPROVAL_ENDPOINT = '/.netlify/functions/time-off-approval-action';
@@ -473,6 +474,199 @@ export async function getApprovalsForRequest(requestId) {
         .sort((a, b) => timestampMillis(a.timestamp) - timestampMillis(b.timestamp));
 }
 
+// ════════════════════════════════════════════════
+// HOURLY TIME CLOCK
+// ════════════════════════════════════════════════
+// One document per person-day (id = email_YYYY-MM-DD). Staff punch only their
+// own day; Production managers + Owner + Controller read, edit and approve their
+// team. clock_in / clock_out are server timestamps; worked + break seconds are
+// stamped so the export to the Controller is a real, timestamped audit trail.
+
+function clockDateKey(value) {
+    const d = value ? asDate(value, new Date()) : new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function clockDocId(email, dateKey) {
+    return `${docIdForEmail(email)}_${dateKey}`;
+}
+
+function elapsedSeconds(fromValue) {
+    const from = asDate(fromValue);
+    if (!from) return 0;
+    return Math.max(0, Math.round((Date.now() - from.getTime()) / 1000));
+}
+
+export async function getMyClockDay(options = {}) {
+    const { db } = requireFirestore();
+    const user = options.user || await getCurrentUserRecord();
+    const dateKey = options.date ? clockDateKey(options.date) : clockDateKey();
+    const ref = doc(db, COLLECTIONS.timeClock, clockDocId(user.id, dateKey));
+    return withId(await getDoc(ref));
+}
+
+export async function clockIn(options = {}) {
+    const { db } = requireFirestore();
+    const user = options.user || await getCurrentUserRecord();
+    const dateKey = clockDateKey();
+    const ref = doc(db, COLLECTIONS.timeClock, clockDocId(user.id, dateKey));
+    const existing = withId(await getDoc(ref));
+    // Already punched in (and not yet finished) today — just return it.
+    if (existing && existing.status !== 'done' && existing.status !== 'approved') {
+        return existing;
+    }
+    const record = {
+        user_id: user.id,
+        user_email: normalizeEmail(user.email || user.id),
+        user_name: cleanOptionalText(user.name) || '',
+        department: cleanOptionalText(user.department) || '',
+        team: teamGroupOf(user.department) || '',
+        date: dateKey,
+        status: 'active',
+        clock_in: serverTimestamp(),
+        clock_out: null,
+        break_started_at: null,
+        break_seconds: 0,
+        breaks_count: 0,
+        worked_seconds: 0,
+        note: '',
+        approver_id: cleanOptionalText(user.manager_id) || null,
+        approved_by: null,
+        approved_by_name: '',
+        approved_at: null,
+        edited_by: '',
+        edited_at: null,
+        created_via: 'hub-timeclock'
+    };
+    await setDoc(ref, record);
+    return withId(await getDoc(ref));
+}
+
+export async function startBreak(options = {}) {
+    const { db } = requireFirestore();
+    const day = options.day || await getMyClockDay(options);
+    if (!day || day.status !== 'active') throw new Error('You are not clocked in.');
+    const ref = doc(db, COLLECTIONS.timeClock, day.id);
+    await updateDoc(ref, {
+        status: 'break',
+        break_started_at: serverTimestamp(),
+        breaks_count: (day.breaks_count || 0) + 1
+    });
+    return withId(await getDoc(ref));
+}
+
+export async function endBreak(options = {}) {
+    const { db } = requireFirestore();
+    const day = options.day || await getMyClockDay(options);
+    if (!day || day.status !== 'break') throw new Error('You are not on a break.');
+    const ref = doc(db, COLLECTIONS.timeClock, day.id);
+    const added = elapsedSeconds(day.break_started_at);
+    await updateDoc(ref, {
+        status: 'active',
+        break_started_at: null,
+        break_seconds: (day.break_seconds || 0) + added
+    });
+    return withId(await getDoc(ref));
+}
+
+export async function clockOut(options = {}) {
+    const { db } = requireFirestore();
+    const day = options.day || await getMyClockDay(options);
+    if (!day || (day.status !== 'active' && day.status !== 'break')) {
+        throw new Error('You are not clocked in.');
+    }
+    const ref = doc(db, COLLECTIONS.timeClock, day.id);
+    let breakSeconds = day.break_seconds || 0;
+    if (day.status === 'break') breakSeconds += elapsedSeconds(day.break_started_at);
+    const worked = Math.max(0, elapsedSeconds(day.clock_in) - breakSeconds);
+    await updateDoc(ref, {
+        status: 'done',
+        clock_out: serverTimestamp(),
+        break_started_at: null,
+        break_seconds: breakSeconds,
+        worked_seconds: worked
+    });
+    return withId(await getDoc(ref));
+}
+
+// Team timesheet for a Production manager (their team) or Owner/Controller (all).
+export async function getTeamClock(options = {}) {
+    const { db } = requireFirestore();
+    const user = options.user || await getCurrentUserRecord();
+    const constraints = [];
+    if (!isOwnerOrController(user)) {
+        // Scope a manager's query to their own team so every doc passes the rule.
+        const team = teamGroupOf(user.department) || 'Production';
+        constraints.push(where('team', '==', team));
+    }
+    const snapshot = await getDocs(query(collection(db, COLLECTIONS.timeClock), ...constraints));
+    let items = snapshot.docs.map(withId).filter(Boolean);
+    if (options.date) {
+        const key = clockDateKey(options.date);
+        items = items.filter(item => item.date === key);
+    } else if (options.start_date || options.end_date) {
+        const start = options.start_date ? clockDateKey(options.start_date) : '0000-00-00';
+        const end = options.end_date ? clockDateKey(options.end_date) : '9999-99-99';
+        items = items.filter(item => item.date >= start && item.date <= end);
+    }
+    if (options.status) items = items.filter(item => item.status === options.status);
+    return items.sort((a, b) =>
+        a.date < b.date ? 1 : a.date > b.date ? -1 : String(a.user_name || '').localeCompare(String(b.user_name || '')));
+}
+
+export async function approveClockDay(dayId, options = {}) {
+    const { db } = requireFirestore();
+    const approver = options.user || await getCurrentUserRecord();
+    const ref = doc(db, COLLECTIONS.timeClock, dayId);
+    const updates = {
+        status: 'approved',
+        approved_by: normalizeEmail(approver.email || approver.id),
+        approved_by_name: cleanOptionalText(approver.name) || '',
+        approved_at: serverTimestamp(),
+        edited_by: normalizeEmail(approver.email || approver.id),
+        edited_at: serverTimestamp()
+    };
+    if (options.note !== undefined) updates.note = cleanOptionalText(options.note);
+    await updateDoc(ref, updates);
+    return withId(await getDoc(ref));
+}
+
+export async function unapproveClockDay(dayId, options = {}) {
+    const { db } = requireFirestore();
+    const editor = options.user || await getCurrentUserRecord();
+    const ref = doc(db, COLLECTIONS.timeClock, dayId);
+    await updateDoc(ref, {
+        status: 'done',
+        approved_by: null,
+        approved_by_name: '',
+        approved_at: null,
+        edited_by: normalizeEmail(editor.email || editor.id),
+        edited_at: serverTimestamp()
+    });
+    return withId(await getDoc(ref));
+}
+
+// Manager fixes the numbers (forgotten clock-out, etc.) and/or adds a note.
+export async function editClockDay(dayId, patch = {}, options = {}) {
+    const { db } = requireFirestore();
+    const editor = options.user || await getCurrentUserRecord();
+    const ref = doc(db, COLLECTIONS.timeClock, dayId);
+    const updates = {
+        edited_by: normalizeEmail(editor.email || editor.id),
+        edited_at: serverTimestamp()
+    };
+    if (patch.clock_in !== undefined) updates.clock_in = patch.clock_in ? asTimestamp(patch.clock_in) : null;
+    if (patch.clock_out !== undefined) updates.clock_out = patch.clock_out ? asTimestamp(patch.clock_out) : null;
+    if (patch.break_seconds !== undefined) updates.break_seconds = Math.max(0, Math.round(Number(patch.break_seconds) || 0));
+    if (patch.worked_seconds !== undefined) updates.worked_seconds = Math.max(0, Math.round(Number(patch.worked_seconds) || 0));
+    if (patch.note !== undefined) updates.note = cleanOptionalText(patch.note);
+    await updateDoc(ref, updates);
+    return withId(await getDoc(ref));
+}
+
 export async function upsertUser(user = {}) {
     const { db } = requireFirestore();
     const id = docIdForEmail(user.email || user.id);
@@ -487,6 +681,7 @@ export async function upsertUser(user = {}) {
         role_tier: cleanOptionalText(user.role_tier || user.roleTier || 'Staff'),
         manager_id: cleanOptionalText(user.manager_id || user.managerId),
         backup_approver_id: cleanOptionalText(user.backup_approver_id || user.backupApproverId),
+        hourly: Boolean(user.hourly),
         active: user.active !== false,
         hire_date: user.hire_date ? asTimestamp(user.hire_date) : null,
         vacation_days_allotted: user.vacation_days_allotted ?? null,
@@ -512,6 +707,7 @@ export async function updateUser(userOrId, patch = {}) {
     if (patch.manager_id !== undefined) updates.manager_id = cleanOptionalText(patch.manager_id);
     if (patch.role_tier !== undefined) updates.role_tier = cleanOptionalText(patch.role_tier);
     if (patch.department !== undefined) updates.department = cleanOptionalText(patch.department);
+    if (patch.hourly !== undefined) updates.hourly = Boolean(patch.hourly);
     if (patch.calendar_tokens !== undefined) updates.calendar_tokens = patch.calendar_tokens || {};
 
     const ref = doc(db, COLLECTIONS.users, userOrId);

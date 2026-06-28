@@ -218,6 +218,7 @@ function publicUserFromProfile(id, data) {
         department: data.department || '',
         role_tier: data.role_tier || '',
         manager_id: data.manager_id || '',
+        hourly: data.hourly === true,
         hire_date: dateToInputValue(data.hire_date),
         active: data.active !== false,
         status: data.status || 'active',
@@ -458,6 +459,7 @@ export async function listHubUsers() {
             department: data.department || '',
             role_tier: data.role_tier || '',
             manager_id: normalizeEmail(data.manager_id || ''),
+            hourly: data.hourly === true,
             hire_date: dateToInputValue(data.hire_date),
             active: data.active !== false
         });
@@ -502,6 +504,22 @@ export async function listHubUsers() {
     });
 
     return Array.from(deduped.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Flag a person as paid hourly (shows them the dashboard time clock). Stored on
+// the users record (merge), so it survives profile/department edits.
+export async function setHubUserHourly(emailOrPerson, hourly) {
+    initFirebase();
+    const email = normalizeEmail(typeof emailOrPerson === 'string'
+        ? emailOrPerson
+        : (emailOrPerson && (emailOrPerson.email || emailOrPerson.id)));
+    if (!email) throw new Error('A user email is required.');
+    await setDoc(doc(db, 'users', email), {
+        email,
+        hourly: Boolean(hourly),
+        updated_at: serverTimestamp()
+    }, { merge: true });
+    return { email, hourly: Boolean(hourly) };
 }
 
 export async function saveHubInvite({ name, email, title, profile, department, role_tier, manager_id, hire_date, active = true }) {

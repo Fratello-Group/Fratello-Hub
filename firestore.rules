@@ -173,6 +173,42 @@ service cloud.firestore {
         );
     }
 
+    // ── Hourly time clock ──
+    // Staff punch only their own day; a Production manager (profile 'production')
+    // plus Owner / Controller read, edit and approve their team's punches.
+    function isClockSelf(data) {
+      return signedIn() && data.user_email == signedInEmail();
+    }
+    function isClockManager(data) {
+      return isOwnerOrController()
+        || (hasActiveProfile('production') && data.get('team', '') == 'Production');
+    }
+    function clockIdentityLocked(before, after) {
+      return after.user_email == before.user_email
+        && after.user_id == before.user_id
+        && after.get('team', '') == before.get('team', '')
+        && after.created_via == before.created_via;
+    }
+    function validClockCreate(d) {
+      return isClockSelf(d)
+        && d.created_via == 'hub-timeclock'
+        && d.clock_in == request.time
+        && d.status == 'active'
+        && d.get('approved_at', null) == null
+        && d.get('approved_by', null) == null;
+    }
+    // A person can advance their own punch (break / back / clock out) but can
+    // never approve it, change who they are, or touch it once it's approved.
+    function staffClockUpdateOk(before, after) {
+      return isClockSelf(before)
+        && clockIdentityLocked(before, after)
+        && after.clock_in == before.clock_in
+        && before.get('approved_at', null) == null
+        && after.get('approved_at', null) == null
+        && after.get('approved_by', null) == null
+        && after.status in ['active', 'break', 'done'];
+    }
+
     function selfProfileFieldsDoNotEscalate(uid) {
       return request.auth.uid == uid
         && resource.data.status == 'active'
@@ -271,6 +307,22 @@ service cloud.firestore {
       allow get, list: if canReadTimeOffRequest(resource.data);
       allow create: if isOwnerOrController() || validUserTimeOffCreate(request.resource.data);
       allow update: if isOwnerOrController() || validUserTimeOffUpdate(resource.data, request.resource.data);
+      allow delete: if false;
+    }
+
+    match /time_clock/{punchId} {
+      allow get, list: if isOwnerOrController()
+        || isClockSelf(resource.data)
+        || isClockManager(resource.data);
+      allow create: if validClockCreate(request.resource.data);
+      // Managers (not the punch owner) may fix the numbers + note + approve;
+      // a person may only advance their own day and never self-approve.
+      allow update: if (
+          isClockManager(resource.data)
+          && resource.data.user_email != signedInEmail()
+          && clockIdentityLocked(resource.data, request.resource.data)
+        )
+        || staffClockUpdateOk(resource.data, request.resource.data);
       allow delete: if false;
     }
 

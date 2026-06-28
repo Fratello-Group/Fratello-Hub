@@ -1263,6 +1263,63 @@
         .view-as-banner .va-exit:hover { background: rgba(255,255,255,.3); }
         body.view-as-on .masthead { top: 40px; }
 
+        /* ── Hourly time clock ── */
+        .tc-tile {
+            display: flex; align-items: center; gap: 16px; width: 100%; text-align: left;
+            cursor: pointer; background: var(--surface); border: 1px solid var(--rule);
+            border-radius: 18px; padding: 18px 20px; font-family: inherit;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        .tc-tile:hover { border-color: var(--teal); box-shadow: 0 8px 22px rgba(47,169,160,.12); }
+        .tc-tile .tc-copy { flex: 1; min-width: 0; }
+        .tc-tile .tc-status { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 18px; color: var(--text); }
+        .tc-tile .tc-sub { font-size: 13px; color: var(--subtext); margin-top: 3px; }
+        .tc-tile .tc-cta { font-weight: 800; font-size: 13px; color: var(--teal-deep); white-space: nowrap; }
+        .tc-dot { display: inline-block; width: 9px; height: 9px; border-radius: 99px; background: var(--teal); flex: 0 0 auto; }
+        .tc-dot.brk { background: #E0A23D; }
+        .tc-dot.off { background: #C7CEcd; background: #C7CECD; }
+
+        .tc-scrim {
+            position: fixed; inset: 0; background: rgba(15,25,25,.45); z-index: 2100;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .tc-scrim[hidden] { display: none; }
+        @media (min-width: 620px) { .tc-scrim { align-items: center; } }
+        .tc-sheet {
+            background: #fff; width: 100%; max-width: 420px; box-sizing: border-box;
+            border-radius: 24px 24px 0 0; padding: 22px 24px 22px; box-shadow: 0 -10px 40px rgba(0,0,0,.22);
+        }
+        @media (min-width: 620px) { .tc-sheet { border-radius: 24px; } }
+        .tc-grab { width: 42px; height: 5px; border-radius: 99px; background: #E2E6E5; margin: 0 auto 14px; }
+        .tc-head { display: flex; align-items: flex-start; justify-content: space-between; }
+        .tc-h-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 22px; color: var(--text); }
+        .tc-h-date { color: var(--subtext); font-size: 14px; margin-top: 2px; }
+        .tc-x { width: 34px; height: 34px; border-radius: 99px; border: none; background: #F0EFEC; color: #8a8f8d; font-size: 17px; cursor: pointer; flex: 0 0 auto; }
+        .tc-dialwrap { display: flex; justify-content: center; margin: 16px 0 4px; }
+        .tc-dial { position: relative; width: 210px; height: 210px; }
+        .tc-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .tc-pill { display: inline-flex; align-items: center; gap: 7px; background: #E8F4F2; color: #1E7E77; font-weight: 600; font-size: 13px; padding: 5px 12px; border-radius: 99px; }
+        .tc-pill.brk { background: #FAF1E2; color: #B5780F; }
+        .tc-pill.off { background: #EEF1F0; color: #6A7A7A; }
+        .tc-pill .d { width: 8px; height: 8px; border-radius: 99px; background: #2FA9A0; }
+        .tc-pill.brk .d { background: #E0A23D; }
+        .tc-big { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 46px; line-height: 1.05; margin: 6px 0 4px; color: var(--text); }
+        .tc-onbreak { background: #FAF1E2; color: #B5780F; font-weight: 600; font-size: 13px; padding: 4px 12px; border-radius: 99px; }
+        .tc-legend { display: flex; gap: 24px; justify-content: center; margin: 12px 0 18px; }
+        .tc-legend > div { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--subtext); font-weight: 500; }
+        .tc-legend b { color: var(--text); font-weight: 700; font-family: 'Poppins', sans-serif; }
+        .tc-sw { width: 13px; height: 13px; border-radius: 5px; } .tc-sw.t { background: #2FA9A0; } .tc-sw.a { background: #E0A23D; }
+        .tc-btn { width: 100%; border: none; border-radius: 15px; padding: 16px; font-weight: 800; font-size: 16px; cursor: pointer; font-family: inherit; }
+        .tc-btn[disabled] { opacity: .55; cursor: default; }
+        .tc-btn-break { background: #FAF1E2; color: #B5780F; }
+        .tc-btn-back { background: #FAF1E2; color: #B5780F; }
+        .tc-btn-out { background: #2FA9A0; color: #fff; margin-top: 11px; box-shadow: 0 8px 18px rgba(47,169,160,.3); }
+        .tc-btn-in { background: #2FA9A0; color: #fff; box-shadow: 0 8px 18px rgba(47,169,160,.3); }
+        .tc-foot { display: flex; justify-content: space-between; color: var(--subtext); font-size: 13px; border-top: 1px solid var(--rule); margin-top: 18px; padding-top: 14px; }
+        .tc-foot b { color: var(--text); }
+        .tc-err { color: #b3261e; font-size: 13px; margin-top: 10px; text-align: center; min-height: 2px; }
+        .tc-done-note { text-align: center; color: var(--subtext); font-size: 14px; margin-top: 4px; }
+
         .signout-btn:hover {
             color: var(--text);
             border-color: var(--teal);
@@ -3441,6 +3498,11 @@ function renderDashboardHome(role) {
         main.appendChild(section);
     }
 
+    // Hourly staff get a time clock; their managers + Owner/Controller get a
+    // link into the team timesheet. Both sit above the everyday tools.
+    appendTimeClock(main, role);
+    appendTimesheetLink(main, role);
+
     // Personal everyday tools (the folded-in "Resources"), grouped by intent.
     appendPersonalToolGroups(main, role);
     updateApprovalsBadge(role);
@@ -3647,6 +3709,294 @@ function appendPersonalToolGroups(main, role) {
         section.appendChild(grid);
         main.appendChild(section);
     });
+}
+
+// ════════════════════════════════════════════════
+// HOURLY TIME CLOCK (dashboard)
+// ════════════════════════════════════════════════
+let __clockDay = null;
+let __clockTileTick = null;
+let __clockSheetTick = null;
+
+async function clockApi() {
+    return window.__FS_STUB || await import('./system/api/firestore-client.js');
+}
+
+function tcFmt(sec) {
+    sec = Math.max(0, Math.round(sec || 0));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    return `${h}:${String(m).padStart(2, '0')}`;
+}
+
+function tcDateOf(value) {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    if (typeof value.toDate === 'function') return value.toDate();
+    if (typeof value.seconds === 'number') return new Date(value.seconds * 1000);
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+// Live worked / break seconds, ticking from the server timestamps on the doc.
+function tcLive(day) {
+    if (!day || !day.clock_in) return { worked: 0, brk: 0, status: 'off' };
+    if (day.status === 'done' || day.status === 'approved') {
+        return { worked: day.worked_seconds || 0, brk: day.break_seconds || 0, status: day.status };
+    }
+    const now = Date.now();
+    const clockIn = tcDateOf(day.clock_in);
+    const inSec = clockIn ? Math.floor((now - clockIn.getTime()) / 1000) : 0;
+    let brk = day.break_seconds || 0;
+    if (day.status === 'break' && day.break_started_at) {
+        const bs = tcDateOf(day.break_started_at);
+        if (bs) brk += Math.floor((now - bs.getTime()) / 1000);
+    }
+    return { worked: Math.max(0, inSec - brk), brk, status: day.status };
+}
+
+// Should this person see a Time Clock? Preview personas carry role.hourly;
+// real staff are flagged on their user record.
+async function resolveHourly(role) {
+    if (role.hourly === true) return true;
+    if (tierOf(role) !== 'staff') return false;
+    try {
+        const api = await clockApi();
+        const me = await api.getCurrentUser();
+        return Boolean(me && me.hourly);
+    } catch (error) {
+        return false;
+    }
+}
+
+function paintClockTile() {
+    const tile = document.getElementById('tcTile');
+    if (!tile) return;
+    const live = tcLive(__clockDay);
+    let dot = 'off', status, sub, cta;
+    if (live.status === 'active') {
+        dot = ''; status = `On the clock · ${tcFmt(live.worked)}`;
+        sub = live.brk ? `${tcFmt(live.brk)} on break today.` : 'Tap to take a break or clock out.';
+        cta = 'Open';
+    } else if (live.status === 'break') {
+        dot = 'brk'; status = `On break · ${tcFmt(live.brk)}`;
+        sub = `Worked ${tcFmt(live.worked)} so far. Tap to come back.`;
+        cta = 'Open';
+    } else if (live.status === 'done' || live.status === 'approved') {
+        dot = ''; status = `Clocked out · ${tcFmt(live.worked)}`;
+        sub = live.status === 'approved' ? 'Approved by your manager.' : 'Today’s hours are in — nice work.';
+        cta = 'View';
+    } else {
+        dot = 'off'; status = 'You’re off the clock';
+        sub = 'Tap to clock in for the day.'; cta = 'Clock in';
+    }
+    tile.innerHTML = `
+        <span class="tc-dot ${dot}"></span>
+        <span class="tc-copy">
+            <span class="tc-status">${status}</span>
+            <span class="tc-sub">${sub}</span>
+        </span>
+        <span class="tc-cta">${cta} →</span>`;
+}
+
+function startTileTick() {
+    clearInterval(__clockTileTick);
+    __clockTileTick = setInterval(() => {
+        const live = tcLive(__clockDay);
+        if (live.status === 'active' || live.status === 'break') paintClockTile();
+    }, 1000);
+}
+
+async function appendTimeClock(main, role) {
+    // Placeholder inserted synchronously so the clock keeps its spot at the top;
+    // filled in once we know whether this person is hourly.
+    const section = document.createElement('section');
+    section.className = 'workbench-section fade-in';
+    section.hidden = true;
+    main.appendChild(section);
+
+    const hourly = await resolveHourly(role);
+    if (!hourly) { section.remove(); return; }
+
+    section.innerHTML = `
+        <div class="workbench-head">
+            <h2 class="workbench-title with-accent">Time Clock</h2>
+            <span class="workbench-meta">Your hours today</span>
+        </div>`;
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tc-tile';
+    tile.id = 'tcTile';
+    tile.addEventListener('click', openClockSheet);
+    section.appendChild(tile);
+    section.hidden = false;
+
+    try {
+        const api = await clockApi();
+        __clockDay = await api.getMyClockDay();
+    } catch (error) {
+        __clockDay = null;
+    }
+    paintClockTile();
+    startTileTick();
+}
+
+// Managers of Production + Owner + Controller get a link into the team timesheet.
+function appendTimesheetLink(main, role) {
+    const tier = tierOf(role);
+    const dept = String(role.department || '').toLowerCase();
+    const managesProduction = role.tier === 'manager'
+        && ['production', 'roasting', 'packaging', 'warehouse'].includes(dept);
+    if (!(tier === 'owner' || managesProduction)) return; // tierOf folds Controller into 'owner'
+
+    const section = document.createElement('section');
+    section.className = 'workbench-section fade-in';
+    section.innerHTML = `
+        <div class="workbench-head">
+            <h2 class="workbench-title">Hourly Timesheet</h2>
+            <span class="workbench-meta">Approve &amp; export</span>
+        </div>`;
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tc-tile';
+    tile.innerHTML = `
+        <span class="tc-dot"></span>
+        <span class="tc-copy">
+            <span class="tc-status">Team time clock</span>
+            <span class="tc-sub">Review hours, fix a punch, approve, and export to the Controller.</span>
+        </span>
+        <span class="tc-cta">Open →</span>`;
+    tile.addEventListener('click', () => { window.location.href = 'hr/time-clock/timesheet.html'; });
+    section.appendChild(tile);
+    main.appendChild(section);
+}
+
+function ensureClockScrim() {
+    let scrim = document.getElementById('tcScrim');
+    if (scrim) return scrim;
+    scrim = document.createElement('div');
+    scrim.className = 'tc-scrim';
+    scrim.id = 'tcScrim';
+    scrim.hidden = true;
+    scrim.innerHTML = '<div class="tc-sheet" id="tcSheet"></div>';
+    scrim.addEventListener('click', event => { if (event.target === scrim) closeClockSheet(); });
+    document.body.appendChild(scrim);
+    return scrim;
+}
+
+function tcDialSvg(live) {
+    const R = 92, C = 2 * Math.PI * R, ref = 8 * 3600;
+    const wFrac = Math.min(1, live.worked / ref);
+    const bFrac = Math.min(Math.max(0, 1 - wFrac), live.brk / ref);
+    const wLen = wFrac * C, bLen = bFrac * C;
+    return `
+        <svg width="210" height="210" viewBox="0 0 210 210">
+            <circle cx="105" cy="105" r="${R}" fill="none" stroke="#EDEFEE" stroke-width="16"/>
+            <circle cx="105" cy="105" r="${R}" fill="none" stroke="#2FA9A0" stroke-width="16" stroke-linecap="round"
+                    stroke-dasharray="${wLen.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 105 105)"/>
+            ${bLen > 0.5 ? `<circle cx="105" cy="105" r="${R}" fill="none" stroke="#E0A23D" stroke-width="16" stroke-linecap="round"
+                    stroke-dasharray="${bLen.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-(wLen + 5)).toFixed(1)}" transform="rotate(-90 105 105)"/>` : ''}
+        </svg>`;
+}
+
+function renderClockSheet() {
+    const sheet = document.getElementById('tcSheet');
+    if (!sheet) return;
+    const live = tcLive(__clockDay);
+    const today = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+
+    let center, buttons, foot;
+    if (live.status === 'off') {
+        center = `<span class="tc-pill off"><span class="d"></span>Off the clock</span>
+                  <span class="tc-big">0:00</span>`;
+        buttons = `<button class="tc-btn tc-btn-in" data-act="in">Clock in</button>`;
+        foot = `<span>Tap clock in to start your day.</span>`;
+    } else if (live.status === 'done' || live.status === 'approved') {
+        center = `<span class="tc-pill off"><span class="d"></span>Clocked out</span>
+                  <span class="tc-big">${tcFmt(live.worked)}</span>`;
+        buttons = `<p class="tc-done-note">${live.status === 'approved' ? 'Approved by your manager.' : 'You’re done for today — hours are saved.'}</p>`;
+        foot = `<span><b>${tcFmt(live.worked)}</b> worked</span><span><b>${tcFmt(live.brk)}</b> on break</span>`;
+    } else if (live.status === 'break') {
+        center = `<span class="tc-pill brk"><span class="d"></span>On a break</span>
+                  <span class="tc-big">${tcFmt(live.worked)}</span>
+                  <span class="tc-onbreak">+ ${tcFmt(live.brk)} on break</span>`;
+        buttons = `<button class="tc-btn tc-btn-back" data-act="back">I’m back</button>
+                   <button class="tc-btn tc-btn-out" data-act="out">Clock out</button>`;
+        foot = `<span>Started <b>${tcDateOf(__clockDay.clock_in) ? tcDateOf(__clockDay.clock_in).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : '—'}</b></span>
+                <span>${__clockDay.breaks_count || 0} break${(__clockDay.breaks_count || 0) === 1 ? '' : 's'} today</span>`;
+    } else {
+        center = `<span class="tc-pill"><span class="d"></span>On the clock</span>
+                  <span class="tc-big">${tcFmt(live.worked)}</span>
+                  ${live.brk ? `<span class="tc-onbreak">+ ${tcFmt(live.brk)} on break</span>` : ''}`;
+        buttons = `<button class="tc-btn tc-btn-break" data-act="break">Take a break</button>
+                   <button class="tc-btn tc-btn-out" data-act="out">Clock out</button>`;
+        foot = `<span>Started <b>${tcDateOf(__clockDay.clock_in) ? tcDateOf(__clockDay.clock_in).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : '—'}</b></span>
+                <span>${__clockDay.breaks_count || 0} break${(__clockDay.breaks_count || 0) === 1 ? '' : 's'} today</span>`;
+    }
+
+    const showLegend = live.status === 'active' || live.status === 'break' || live.status === 'done' || live.status === 'approved';
+    sheet.innerHTML = `
+        <div class="tc-grab"></div>
+        <div class="tc-head">
+            <div>
+                <div class="tc-h-title">Time Clock</div>
+                <div class="tc-h-date">${today}</div>
+            </div>
+            <button class="tc-x" data-act="close" aria-label="Close">×</button>
+        </div>
+        <div class="tc-dialwrap"><div class="tc-dial">${tcDialSvg(live)}<div class="tc-center">${center}</div></div></div>
+        ${showLegend ? `<div class="tc-legend">
+            <div><span class="tc-sw t"></span><b>${tcFmt(live.worked)}</b> worked</div>
+            <div><span class="tc-sw a"></span><b>${tcFmt(live.brk)}</b> break</div>
+        </div>` : '<div style="height:8px"></div>'}
+        ${buttons}
+        <div class="tc-err" id="tcErr"></div>
+        <div class="tc-foot">${foot}</div>`;
+
+    sheet.querySelectorAll('[data-act]').forEach(el => {
+        el.addEventListener('click', () => handleClockAction(el.dataset.act));
+    });
+}
+
+async function handleClockAction(act) {
+    if (act === 'close') { closeClockSheet(); return; }
+    const err = document.getElementById('tcErr');
+    if (err) err.textContent = '';
+    const buttons = document.querySelectorAll('#tcSheet .tc-btn');
+    buttons.forEach(b => { b.disabled = true; });
+    try {
+        const api = await clockApi();
+        if (act === 'in') __clockDay = await api.clockIn();
+        else if (act === 'break') __clockDay = await api.startBreak({ day: __clockDay });
+        else if (act === 'back') __clockDay = await api.endBreak({ day: __clockDay });
+        else if (act === 'out') __clockDay = await api.clockOut({ day: __clockDay });
+        renderClockSheet();
+        paintClockTile();
+    } catch (error) {
+        if (err) err.textContent = (error && error.message) || 'Something went wrong — try again.';
+        buttons.forEach(b => { b.disabled = false; });
+    }
+}
+
+function openClockSheet() {
+    const scrim = ensureClockScrim();
+    scrim.hidden = false;
+    renderClockSheet();
+    clearInterval(__clockSheetTick);
+    __clockSheetTick = setInterval(() => {
+        const live = tcLive(__clockDay);
+        if (live.status === 'active' || live.status === 'break') {
+            // Update just the live numbers without rebinding buttons.
+            const big = document.querySelector('#tcSheet .tc-big');
+            if (big) renderClockSheet();
+        }
+    }, 1000);
+}
+
+function closeClockSheet() {
+    const scrim = document.getElementById('tcScrim');
+    if (scrim) scrim.hidden = true;
+    clearInterval(__clockSheetTick);
 }
 
 function renderSectionPage(role, sectionKey) {
