@@ -411,6 +411,34 @@
             display: block;
         }
 
+        /* Department + Level are the fields that actually set permissions —
+           make them the visually dominant, clearly-required pair. */
+        .field--access label {
+            color: var(--teal-ink, #1E7E77);
+            font-size: 11px;
+        }
+        .access-flag {
+            display: inline-block;
+            margin-left: 7px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--teal-soft, #E8F4F2);
+            color: var(--teal-ink, #1E7E77);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            vertical-align: middle;
+        }
+        .field--access select {
+            border: 1.5px solid var(--teal, #2FA9A0);
+            box-shadow: 0 0 0 3px rgba(47, 169, 160, .10);
+            font-weight: 700;
+        }
+        .field.has-error select {
+            border-color: var(--error);
+            box-shadow: none;
+        }
+
         .field.has-error .text-input {
             border-color: var(--error);
             box-shadow: 0 0 0 2px rgba(217, 83, 61, 0.10);
@@ -742,13 +770,15 @@
                         <input class="text-input" id="inviteTitle" type="text" placeholder="Sales Manager" autocomplete="organization-title">
                     </div>
                     <input type="hidden" id="inviteProfile">
-                    <div class="field">
-                        <label for="inviteDepartment">Department</label>
+                    <div class="field field--access" id="fieldInviteDepartment">
+                        <label for="inviteDepartment">Department <span class="access-flag">Sets access</span></label>
                         <select id="inviteDepartment" onchange="syncDerivedProfile()"></select>
+                        <div class="field-error" id="inviteDepartmentError"></div>
                     </div>
-                    <div class="field">
-                        <label for="inviteRoleTier">Level</label>
+                    <div class="field field--access" id="fieldInviteRoleTier">
+                        <label for="inviteRoleTier">Level <span class="access-flag">Sets access</span></label>
                         <select id="inviteRoleTier" onchange="syncDerivedProfile()"></select>
+                        <div class="field-error" id="inviteRoleTierError"></div>
                     </div>
                     <div class="field">
                         <label for="inviteManager">Manager</label>
@@ -878,7 +908,9 @@
 
         // Departments a person can belong to (one each). "Production" is the umbrella
         // a Production manager oversees (Roasting + Packaging + Warehouse combined).
-        const DEPARTMENTS = ['Finance', 'Sales', 'Marketing', 'Roasting', 'Packaging', 'Warehouse', 'Production', 'Leadership'];
+        // Departments people are actually assigned to. (Owners/Controllers are set
+        // by Level, not a department, so "Leadership" is not a pickable option here.)
+        const DEPARTMENTS = ['Finance', 'Sales', 'Marketing', 'Roasting', 'Packaging', 'Warehouse', 'Production'];
         const LEVELS = ['Owner', 'Controller', 'Manager', 'Staff'];
         const ROLE_TIERS = LEVELS;
         const PROFILE_DEFAULTS = {
@@ -1006,6 +1038,11 @@
             `).join('');
         }
 
+        // A "must choose" placeholder shown until the admin picks a real value.
+        function placeholderOption(label, currentValue) {
+            return `<option value="" disabled hidden ${currentValue ? '' : 'selected'}>${escapeHtml(label)}</option>`;
+        }
+
         function managerOptions(selectedValue = '') {
             const selected = emailKey(selectedValue);
             const managers = new Map();
@@ -1042,6 +1079,9 @@
             const level = document.getElementById('inviteRoleTier');
             const profile = document.getElementById('inviteProfile');
             if (profile && dept && level) profile.value = deriveProfile(level.value, dept.value);
+            // Clear the "required" warnings as soon as a choice is made.
+            if (level && level.value) setFieldError('InviteRoleTier', '');
+            if (dept && dept.value) setFieldError('InviteDepartment', '');
         }
 
         function refreshRosterSelects() {
@@ -1050,12 +1090,13 @@
             const manager = document.getElementById('inviteManager');
             if (!department || !roleTier || !manager) return;
 
-            const currentDepartment = department.value || 'Finance';
-            const currentRoleTier = roleTier.value || 'Staff';
+            const currentDepartment = department.value;
+            const currentRoleTier = roleTier.value;
             const currentManager = manager.value;
 
-            department.innerHTML = optionList(DEPARTMENTS, currentDepartment);
-            roleTier.innerHTML = optionList(levelOptionsForAdmin(), currentRoleTier);
+            // No pre-selected default: the admin must consciously set these two.
+            department.innerHTML = placeholderOption('Select department…', currentDepartment) + optionList(DEPARTMENTS, currentDepartment);
+            roleTier.innerHTML = placeholderOption('Select level…', currentRoleTier) + optionList(levelOptionsForAdmin(), currentRoleTier);
             manager.innerHTML = managerOptions(currentManager);
             syncDerivedProfile();
         }
@@ -1066,8 +1107,8 @@
             const manager = document.getElementById('inviteManager');
             if (!department || !roleTier || !manager) return;
 
-            if (force || !department.value) department.value = 'Finance';
-            if (force || !roleTier.value) roleTier.value = 'Staff';
+            // Start (and reset) with Department + Level unset so they must be chosen.
+            if (force) { department.value = ''; roleTier.value = ''; }
             refreshRosterSelects();
             if (force) manager.value = '';
         }
@@ -1158,6 +1199,8 @@
         function clearInviteErrors() {
             setFieldError('InviteName', '');
             setFieldError('InviteEmail', '');
+            setFieldError('InviteDepartment', '');
+            setFieldError('InviteRoleTier', '');
             document.getElementById('inviteOutput').classList.remove('warning');
         }
 
@@ -1307,6 +1350,11 @@
                 const tier = personRoleTier(person);
                 const canEditPerson = CAN_EDIT_ALL || tier === 'Staff';
                 const rowLevels = canEditPerson ? levelOptionsForAdmin() : [tier];
+                // Owners/Controllers aren't tied to a department — show that plainly.
+                const deptIsNA = (tier === 'Owner' || tier === 'Controller');
+                const deptControl = deptIsNA
+                    ? `<select disabled style="margin-bottom:8px;"><option>${tier === 'Owner' ? 'All — Owner' : 'All departments'}</option></select>`
+                    : `<select data-person="${safeId}" data-kind="dept" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'} style="margin-bottom:8px;">${optionList(DEPARTMENTS, department)}</select>`;
                 const manager = managerName(personManagerId(person));
                 const hireDate = person.hire_date ? ` · Hire date: ${person.hire_date}` : '';
                 const lockNote = canEditPerson ? '' : ' title="Only an Owner can change a manager or controller."';
@@ -1318,9 +1366,7 @@
                         <span class="person-meta">${escapeHtml(department)} · ${escapeHtml(tier)} · Manager: ${escapeHtml(manager)}${escapeHtml(hireDate)}</span>
                     </td>
                     <td${lockNote}>
-                        <select data-person="${safeId}" data-kind="dept" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'} style="margin-bottom:8px;">
-                            ${optionList(DEPARTMENTS, department)}
-                        </select>
+                        ${deptControl}
                         <select data-person="${safeId}" data-kind="level" onchange="updateAccess(this.dataset.person)" ${canEditPerson ? '' : 'disabled'}>
                             ${optionList(rowLevels, tier)}
                         </select>
@@ -1437,6 +1483,21 @@
                 setFieldError('InviteEmail', email ? 'Enter a valid email address.' : 'Email is required.');
                 document.getElementById('inviteEmail').focus();
                 document.getElementById('adminMessage').textContent = 'Add a valid email before sending an invite.';
+                return;
+            }
+
+            // Level + Department set the person's permissions — required before any invite.
+            const lvl = String(payload.roleTier || '').toLowerCase();
+            if (!payload.roleTier) {
+                setFieldError('InviteRoleTier', 'Choose a level — this sets what they can access.');
+                document.getElementById('inviteRoleTier').focus();
+                document.getElementById('adminMessage').textContent = 'Set the Level before inviting — it controls their permissions.';
+                return;
+            }
+            if (lvl !== 'owner' && lvl !== 'controller' && !payload.department) {
+                setFieldError('InviteDepartment', 'Choose a department — this sets what they can access.');
+                document.getElementById('inviteDepartment').focus();
+                document.getElementById('adminMessage').textContent = 'Set the Department before inviting — it controls their permissions.';
                 return;
             }
 
