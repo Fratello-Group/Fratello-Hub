@@ -1458,6 +1458,47 @@
             box-shadow: 0 1px 3px rgba(255, 59, 48, .4);
         }
 
+        /* Top-of-dashboard approvals alert — only rendered when action is needed */
+        .dash-approvals {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding: 15px 18px;
+            border-radius: var(--r-card, 18px);
+            background: #FFECEB;
+            border: 1.5px solid #FF3B30;
+            text-decoration: none;
+        }
+        .dash-approvals:hover { background: #FFE2E0; }
+        .dash-approvals-dot {
+            flex: 0 0 auto;
+            display: inline-grid;
+            place-items: center;
+            min-width: 30px;
+            height: 30px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: #FF3B30;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 0 1px 3px rgba(255, 59, 48, .4);
+        }
+        .dash-approvals-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .dash-approvals-copy strong { color: #B3261E; font-size: 15px; font-weight: 800; }
+        .dash-approvals-copy span { color: #A85248; font-size: 13px; }
+        .dash-approvals-cta {
+            margin-left: auto;
+            flex: 0 0 auto;
+            background: #FF3B30;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 9px 16px;
+            border-radius: 999px;
+        }
+
         .qa-chip svg {
             width: 21px;
             height: 21px;
@@ -3363,7 +3404,6 @@ function createResourceCard(card, index, accent, icon) {
     el.innerHTML = `
         <span class="qa-top">
             <span class="qa-chip">${iconSvg(icon)}</span>
-            <span class="qa-serial">${String(index + 1).padStart(2, '0')}</span>
         </span>
         <span class="qa-label">
             <span>${card.title}</span>
@@ -3396,13 +3436,33 @@ async function updateApprovalsBadge(role) {
     } catch (error) {
         return;                                       // no Firestore / not signed in: skip quietly
     }
-    if (!count) return;
+    if (!count) return;                               // no approvals → no badge, no banner (like an oil-change light)
+    const display = count > 9 ? '9+' : String(count);
+
+    // Small unread-style badge on the tile.
     const chip = document.querySelector('.qa-card[data-approvals-badge] .qa-chip');
-    if (!chip) return;                                // dashboard view changed while loading
-    let badge = chip.querySelector('.qa-badge');
-    if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
-    badge.textContent = count > 9 ? '9+' : String(count);
-    badge.setAttribute('aria-label', `${count} awaiting your approval`);
+    if (chip) {
+        let badge = chip.querySelector('.qa-badge');
+        if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
+        badge.textContent = display;
+        badge.setAttribute('aria-label', `${count} awaiting your approval`);
+    }
+
+    // Prominent banner at the very top of the dashboard — only shown when action is needed.
+    const main = document.getElementById('mainContent');
+    if (main && !main.querySelector('.dash-approvals')) {
+        const banner = document.createElement('a');
+        banner.className = 'dash-approvals fade-in';
+        banner.href = 'hr/time-off/vacation-tracker.html?view=calendar';
+        banner.innerHTML = `
+            <span class="dash-approvals-dot">${display}</span>
+            <span class="dash-approvals-copy">
+                <strong>${count} request${count === 1 ? '' : 's'} need${count === 1 ? 's' : ''} your approval</strong>
+                <span>Open the time-off calendar to review and approve.</span>
+            </span>
+            <span class="dash-approvals-cta">Review →</span>`;
+        main.insertBefore(banner, main.firstChild);
+    }
 }
 
 // Appends the personal everyday tools to the dashboard, grouped by intent:
