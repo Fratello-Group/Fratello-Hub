@@ -227,6 +227,55 @@ input[type="date"], input[type="search"], input[type="number"], select, textarea
 }
 .hub-nav-btn { border-radius: 10px; }
 
+/* ── Hub inner-view back + breadcrumb bar ─────────────────────────────── */
+.hub-crumbbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+.hub-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 15px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+.hub-back:hover { border-color: var(--teal); color: var(--teal-ink); }
+.hub-back svg { display: block; }
+.hub-crumbs {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--subtext);
+    min-width: 0;
+}
+.hub-crumb-link {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--teal-ink);
+    cursor: pointer;
+}
+.hub-crumb-link:hover { text-decoration: underline; }
+.hub-crumb-sep { color: var(--grey-light, #C4C3C0); font-weight: 600; }
+.hub-crumb-current { color: var(--text); font-weight: 600; }
+
 /* ── Footer ───────────────────────────────────────────────────────────── */
 .footer { color: var(--subtext); }
 

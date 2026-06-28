@@ -30,41 +30,62 @@
     }
 
     var CSS = [
-        ".fh-bar{position:sticky;top:0;z-index:500;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #E2E2E4;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Montserrat',sans-serif;box-sizing:border-box;}",
+        ".fh-bar{position:sticky;top:0;z-index:500;display:flex;align-items:center;gap:18px;padding:13px 28px;background:rgba(255,255,255,.97);border-bottom:1px solid #ECEEEC;box-shadow:0 1px 2px rgba(15,17,17,.04);font-family:'Inter',-apple-system,'Segoe UI',sans-serif;box-sizing:border-box;}",
+        ".fh-logo-link{flex:0 0 auto;display:block;}",
         ".fh-logo{height:30px;width:auto;display:block;}",
-        ".fh-right{display:flex;align-items:center;gap:10px;}",
+        // Primary nav: a dropdown under the bar on mobile, a pill track on desktop
+        ".fh-nav{position:absolute;top:100%;left:0;right:0;display:none;flex-direction:column;gap:2px;padding:8px 14px;background:#fff;border-bottom:1px solid #ECEEEC;box-shadow:0 14px 34px rgba(0,0,0,.12);z-index:480;}",
+        ".fh-bar.fh-nav-open .fh-nav{display:flex;}",
+        ".fh-nav-btn{display:block;text-align:left;padding:12px 14px;border:0;border-radius:10px;background:transparent;color:#16262E;font:inherit;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;cursor:pointer;}",
+        ".fh-nav-btn:hover{background:rgba(47,169,160,.10);color:#1E7E77;}",
+        ".fh-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex:0 0 auto;}",
         ".fh-account{position:relative;}",
-        ".fh-chip{display:inline-flex;align-items:center;gap:9px;padding:5px 10px 5px 5px;border:1px solid #E2E2E4;border-radius:6px;background:#fff;cursor:pointer;font:inherit;}",
-        ".fh-avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:3px;background:rgba(54,179,175,.12);border:1px solid rgba(54,179,175,.5);color:#1f7a76;font-size:11px;font-weight:800;letter-spacing:1px;}",
+        ".fh-chip{display:inline-flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border:1px solid #ECEEEC;border-radius:999px;background:#fff;cursor:pointer;font:inherit;}",
+        ".fh-avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:#E8F4F2;color:#1E7E77;font-size:11px;font-weight:700;letter-spacing:.5px;}",
         ".fh-copy{display:flex;flex-direction:column;line-height:1.15;text-align:left;}",
-        ".fh-name{font-size:12px;font-weight:800;color:#1A1A1A;}",
-        ".fh-access{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#1f7a76;}",
+        ".fh-name{font-size:12.5px;font-weight:700;color:#16262E;}",
+        ".fh-access{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1E7E77;}",
         ".fh-caret{font-size:9px;color:#8a8a8a;margin-left:1px;}",
-        ".fh-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:248px;background:#fff;border:1px solid #E2E2E4;box-shadow:0 14px 34px rgba(0,0,0,.14);z-index:600;}",
+        ".fh-menu{position:absolute;top:calc(100% + 8px);right:0;min-width:248px;background:#fff;border:1px solid #ECEEEC;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.14);z-index:600;overflow:hidden;}",
         ".fh-menu[hidden]{display:none;}",
-        ".fh-menu-head{padding:14px 16px;border-bottom:1px solid #E2E2E4;}",
-        ".fh-menu-name{display:block;font-size:14px;font-weight:800;color:#1A1A1A;}",
+        ".fh-menu-head{padding:14px 16px;border-bottom:1px solid #ECEEEC;}",
+        ".fh-menu-name{display:block;font-size:14px;font-weight:700;color:#16262E;}",
         ".fh-menu-email{display:block;font-size:12px;color:#5A5A5E;margin-top:2px;word-break:break-all;}",
-        ".fh-menu-rows{padding:8px 16px;border-bottom:1px solid #E2E2E4;}",
+        ".fh-menu-rows{padding:8px 16px;border-bottom:1px solid #ECEEEC;}",
         ".fh-menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 0;}",
-        ".fh-menu-row span{color:#5A5A5E;text-transform:uppercase;letter-spacing:1.2px;font-size:11px;font-weight:800;}",
-        ".fh-menu-row strong{font-size:12px;color:#1A1A1A;font-weight:700;}",
-        ".fh-menu-link,.fh-menu-signout{display:block;width:100%;text-align:left;padding:12px 16px;font-size:13px;font-weight:700;background:#fff;color:#1A1A1A;border:0;border-top:1px solid #E2E2E4;cursor:pointer;text-decoration:none;}",
-        ".fh-menu-link:hover,.fh-menu-signout:hover{background:rgba(54,179,175,.1);}",
+        ".fh-menu-row span{color:#5A5A5E;text-transform:uppercase;letter-spacing:1.2px;font-size:11px;font-weight:700;}",
+        ".fh-menu-row strong{font-size:12px;color:#16262E;font-weight:700;}",
+        ".fh-menu-link,.fh-menu-signout{display:block;width:100%;text-align:left;padding:12px 16px;font-size:13px;font-weight:600;background:#fff;color:#16262E;border:0;border-top:1px solid #ECEEEC;cursor:pointer;text-decoration:none;}",
+        ".fh-menu-link:hover,.fh-menu-signout:hover{background:rgba(47,169,160,.1);}",
         ".fh-menu-signout{color:#b3261e;}",
-        ".fh-navwrap{position:relative;}",
-        ".fh-burger{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border:1px solid #36B3AF;border-radius:6px;background:rgba(54,179,175,.12);color:#1f7a76;font:inherit;font-weight:800;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;}",
-        ".fh-burger:hover{background:rgba(54,179,175,.2);}",
+        ".fh-burger{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border:1px solid #2FA9A0;border-radius:999px;background:#E8F4F2;color:#1E7E77;font:inherit;font-weight:600;font-size:13px;letter-spacing:.3px;cursor:pointer;}",
+        ".fh-burger:hover{background:#d9ece9;}",
         ".fh-burger svg{display:block;flex:none;}",
-        ".fh-navmenu{position:absolute;top:calc(100% + 6px);right:0;min-width:220px;background:#fff;border:1px solid #E2E2E4;box-shadow:0 14px 34px rgba(0,0,0,.16);z-index:600;padding:6px 0;}",
-        ".fh-navmenu[hidden]{display:none;}",
-        ".fh-navmenu a{display:block;padding:12px 18px;color:#1A1A1A;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.3px;}",
-        ".fh-navmenu a:hover{background:rgba(54,179,175,.1);color:#1f7a76;}",
+        // Desktop: inline pill nav, hamburger hidden
+        "@media (min-width:860px){",
+        ".fh-burger{display:none;}",
+        ".fh-nav{position:static;display:inline-flex;flex-direction:row;gap:4px;width:auto;padding:5px;background:#EDEFEE;border:0;border-radius:999px;box-shadow:none;}",
+        ".fh-nav-btn{border-radius:999px;padding:9px 17px;color:#8B949B;}",
+        ".fh-nav-btn:hover{background:transparent;color:#16262E;}",
+        ".fh-nav-btn.active{background:#fff;color:#16262E;box-shadow:0 1px 2px rgba(16,38,46,.10);}",
+        "}",
+        // Back + breadcrumb subnav (appears on every page that loads this header)
+        ".fh-subnav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:11px 28px;background:#fff;border-bottom:1px solid #ECEEEC;box-sizing:border-box;font-family:'Inter',-apple-system,'Segoe UI',sans-serif;}",
+        ".fh-back{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border:1px solid #ECEEEC;border-radius:999px;background:#fff;color:#16262E;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;flex:0 0 auto;}",
+        ".fh-back:hover{border-color:#2FA9A0;color:#1E7E77;}",
+        ".fh-back svg{display:block;}",
+        ".fh-crumbs{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12.5px;color:#8B949B;min-width:0;}",
+        ".fh-crumbs a{color:#1E7E77;text-decoration:none;font-weight:600;}",
+        ".fh-crumbs a:hover{text-decoration:underline;}",
+        ".fh-crumb-sep{color:#C4C3C0;font-weight:600;}",
+        ".fh-crumb-current{color:#4A4A4A;font-weight:600;}",
         "@media (max-width:560px){",
-        ".fh-bar{padding:12px 16px;}",
+        ".fh-bar{padding:12px 14px;gap:10px;}",
+        ".fh-logo{height:26px;}",
         ".fh-copy .fh-access{display:none;}",
         ".fh-burger-text{display:none;}",
-        ".fh-burger{padding:0 11px;}",
+        ".fh-burger{padding:0;width:40px;justify-content:center;}",
+        ".fh-subnav{padding:9px 16px;gap:10px;}",
         "}"
     ].join('');
 
@@ -105,26 +126,77 @@
               '</div>'
             : '<button class="fh-menu-signout" type="button" style="border:1px solid #E2E2E4;border-radius:6px;">Sign out</button>';
 
+        // The same primary nav as the Hub: a pill track on desktop, a dropdown
+        // behind the hamburger on mobile. Links jump back into the Hub views.
         var nav =
-            '<div class="fh-navwrap">' +
-                '<button class="fh-burger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open navigation menu">' +
-                    '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>' +
-                    '<span class="fh-burger-text">Menu</span>' +
-                '</button>' +
-                '<nav class="fh-navmenu" hidden aria-label="Hub navigation">' +
-                    '<a href="/index.html">Dashboard</a>' +
-                    '<a href="/index.html#departments">Departments</a>' +
-                    (isOwner ? '<a href="/index.html#owner-admin">Owner Hub</a>' : '') +
-                    (isOwner ? '<a href="/index.html#settings">Settings</a>' : '') +
-                '</nav>' +
-            '</div>';
+            '<nav class="fh-nav" aria-label="Hub">' +
+                '<a class="fh-nav-btn" href="/index.html">Dashboard</a>' +
+                '<a class="fh-nav-btn" href="/index.html#departments">Departments</a>' +
+                (isOwner ? '<a class="fh-nav-btn" href="/index.html#owner-admin">Owner Hub</a>' : '') +
+                (isOwner ? '<a class="fh-nav-btn" href="/index.html#settings">Settings</a>' : '') +
+            '</nav>';
+
+        var burger =
+            '<button class="fh-burger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open navigation menu">' +
+                '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>' +
+                '<span class="fh-burger-text">Menu</span>' +
+            '</button>';
 
         var bar = document.createElement('header');
         bar.className = 'fh-bar';
         bar.innerHTML =
             '<a class="fh-logo-link" href="/index.html" aria-label="Fratello Hub"><img class="fh-logo" src="/assets/Fratello_Logo_Black.png" alt="Fratello"></a>' +
-            '<div class="fh-right">' + account + nav + '</div>';
+            nav +
+            '<div class="fh-right">' + account + burger + '</div>';
         return bar;
+    }
+
+    function pageTitleLabel() {
+        var t = (document.title || '').trim();
+        t = t.replace(/^Fratello\s*(Ops\s+)?(Hub\s*)?[-–—|:]\s*/i, '');
+        return t || 'This page';
+    }
+
+    // A slim row under the header: a Back button + breadcrumbs, on every page.
+    // If the page already ships its own breadcrumb (e.g. the CFIA module), we
+    // relocate that live node into the subnav so dynamic labels keep updating.
+    function buildSubnav() {
+        var sub = document.createElement('nav');
+        sub.className = 'fh-subnav';
+        sub.setAttribute('aria-label', 'Page navigation');
+
+        var back = document.createElement('a');
+        back.className = 'fh-back';
+        back.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">' +
+            '<path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '<span>Back</span>';
+
+        var existing = document.querySelector('.crumbs, nav[aria-label="Breadcrumb"]');
+        var backHref = '/index.html';
+        var crumbs;
+        if (existing) {
+            crumbs = existing;                       // reuse the page's own trail
+            var links = existing.querySelectorAll('a[href]');
+            if (links.length) backHref = links[links.length - 1].getAttribute('href');
+        } else {
+            crumbs = document.createElement('span');
+            crumbs.className = 'fh-crumbs';
+            crumbs.innerHTML =
+                '<a href="/index.html">Hub</a>' +
+                '<span class="fh-crumb-sep">›</span>' +
+                '<span class="fh-crumb-current">' + escapeHtml(pageTitleLabel()) + '</span>';
+        }
+        back.setAttribute('href', backHref);
+
+        sub.appendChild(back);
+        sub.appendChild(crumbs);
+        return sub;
+    }
+
+    function mountSubnav(bar) {
+        var sub = document.querySelector('.fh-subnav');
+        if (!sub) sub = buildSubnav();
+        bar.insertAdjacentElement('afterend', sub);   // keep it directly under the bar
     }
 
     function wire(bar) {
@@ -135,7 +207,7 @@
         window.addEventListener('resize', publishHeight);
 
         var burger = bar.querySelector('.fh-burger');
-        var navmenu = bar.querySelector('.fh-navmenu');
+        var nav = bar.querySelector('.fh-nav');
         var chip = bar.querySelector('.fh-chip');
         var menu = bar.querySelector('.fh-menu');
 
@@ -143,17 +215,19 @@
             if (menu && !menu.hidden) { menu.hidden = true; if (chip) chip.setAttribute('aria-expanded', 'false'); }
         }
         function closeNav() {
-            if (navmenu && !navmenu.hidden) { navmenu.hidden = true; if (burger) burger.setAttribute('aria-expanded', 'false'); }
+            if (bar.classList.contains('fh-nav-open')) { bar.classList.remove('fh-nav-open'); if (burger) burger.setAttribute('aria-expanded', 'false'); }
         }
 
-        if (burger && navmenu) {
+        if (burger && nav) {
             burger.addEventListener('click', function (event) {
                 event.stopPropagation();
-                var open = navmenu.hidden;
+                var open = !bar.classList.contains('fh-nav-open');
                 closeAccount();
-                navmenu.hidden = !open;
+                bar.classList.toggle('fh-nav-open', open);
                 burger.setAttribute('aria-expanded', String(open));
             });
+            // Picking a destination on mobile closes the dropdown.
+            nav.querySelectorAll('a').forEach(function (link) { link.addEventListener('click', closeNav); });
         }
 
         if (chip && menu) {
@@ -181,10 +255,12 @@
                 var chip = bar.querySelector('.fh-chip');
                 if (menu && !menu.hidden) { menu.hidden = true; if (chip) chip.setAttribute('aria-expanded', 'false'); }
             }
-            if (!event.target.closest('.fh-navwrap')) {
-                var navmenu = bar.querySelector('.fh-navmenu');
-                var burger = bar.querySelector('.fh-burger');
-                if (navmenu && !navmenu.hidden) { navmenu.hidden = true; if (burger) burger.setAttribute('aria-expanded', 'false'); }
+            if (!event.target.closest('.fh-burger') && !event.target.closest('.fh-nav')) {
+                if (bar.classList.contains('fh-nav-open')) {
+                    bar.classList.remove('fh-nav-open');
+                    var burger = bar.querySelector('.fh-burger');
+                    if (burger) burger.setAttribute('aria-expanded', 'false');
+                }
             }
         });
     }
@@ -205,6 +281,7 @@
             if (slot) { slot.replaceWith(bar); }
             else { document.body.insertBefore(bar, document.body.firstChild); }
         }
+        mountSubnav(bar);
         wire(bar);
         bindOutside();
     }
