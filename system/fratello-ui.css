@@ -1,0 +1,302 @@
+/* ============================================================================
+   Fratello UI — refined "skin" (Wave 1)
+   A shared visual layer applied AFTER each page's own styles. Pure cosmetics:
+   fonts, soft rounded cards, tinted icon tiles, hairline rows, pill buttons,
+   segmented nav. No layout logic. Load this LAST so it wins the cascade.
+   Fonts: Poppins (display) + Inter (UI). Palette stays teal + navy.
+   ========================================================================== */
+
+:root {
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-display: 'Poppins', var(--font);
+
+    /* Surfaces + lines (softer, lighter than the old chunky look) */
+    --bg: #F5F6F5;
+    --surface: #FFFFFF;
+    --text: #16262E;          /* navy ink */
+    --subtext: #8B949B;       /* calm muted */
+    --rule: #ECEEEC;
+    --rule-inner: #F0F1F0;
+    --divider-light: #ECEEEC;
+    --fog: #F0F1F0;
+
+    /* Teal (brand) + soft/ink variants for tinted chips */
+    --teal: #2FA9A0;
+    --teal-bright: #36B3AF;
+    --teal-deep: #1E7E77;
+    --teal-ink: #1E7E77;
+    --teal-soft: #E8F4F2;
+    --teal-mute: #E8F4F2;
+
+    /* Amber accent (for the "Review"/attention chips) */
+    --amber: #E0A23D;
+    --amber-ink: #B5780F;
+    --amber-soft: #FAF1E2;
+
+    /* Soft, contemporary shadows + radii */
+    --card-shadow: 0 1px 2px rgba(16,38,46,.04), 0 10px 28px rgba(16,38,46,.05);
+    --card-shadow-hover: 0 2px 6px rgba(16,38,46,.06), 0 18px 40px rgba(16,38,46,.09);
+    --r-card: 18px;
+    --r-ctrl: 12px;
+    --r-tile: 13px;
+}
+
+/* ── Base typography ───────────────────────────────────────────────────── */
+body { font-family: var(--font); background: var(--bg); color: var(--text); }
+
+.greeting,
+.tool-view-title,
+.section-heading,
+.panel-title,
+.dept-title,
+.greeting-name,
+h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.4px;
+}
+.greeting { font-weight: 700; letter-spacing: -1px; }
+.tool-view-title { font-weight: 700; letter-spacing: -1px; }
+
+/* De-chunk the loud uppercase labels into calm, tighter ones */
+.workbench-title {
+    text-transform: none;
+    letter-spacing: 0.2px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+}
+.workbench-title.with-accent::before { width: 18px; background: var(--teal); }
+.workbench-meta { text-transform: none; letter-spacing: 0.2px; font-weight: 500; font-size: 12.5px; }
+.section-kicker { letter-spacing: 1.6px; font-weight: 600; color: var(--subtext); }
+.dateline { letter-spacing: 0.4px; font-weight: 600; }
+.tool-view-note, .greeting-note { color: var(--subtext); }
+
+/* ── Surfaces: rounded + soft ─────────────────────────────────────────── */
+.qa-card,
+.panel,
+.attention-card,
+.tool-view-list,
+.empty-state,
+.section-card,
+.hub-dropdown,
+.profile-menu,
+.notes-list {
+    border-radius: var(--r-card) !important;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+}
+.qa-card { padding: 20px; }
+.qa-card:hover { box-shadow: var(--card-shadow-hover); border-color: #E2E5E3; }
+.panel.accent { border-left: 1px solid var(--rule); }
+.attention-card { overflow: hidden; }
+
+/* ── Tinted icon tiles (was a solid teal block) ───────────────────────── */
+.qa-chip {
+    background: var(--teal-soft);
+    color: var(--teal-ink);
+    border-radius: var(--r-tile);
+}
+.qa-chip svg { stroke: currentColor; }
+.qa-card:hover .qa-chip { transform: none; }
+.qa-card--gold .qa-chip { background: var(--amber-soft); color: var(--amber-ink); }
+.qa-serial { color: var(--subtext); font-weight: 600; }
+.qa-label { font-weight: 600; }
+.qa-arrow { color: var(--subtext); }
+
+.dept-icon {
+    background: var(--teal-soft);
+    color: var(--teal-ink);
+    border-radius: var(--r-tile);
+}
+.dept-icon svg { stroke: currentColor; }
+.dept-row { border-radius: var(--r-card); box-shadow: var(--card-shadow); }
+.dept-row:hover { border-color: #E2E5E3; }
+.dept-count { text-transform: none; letter-spacing: 0.2px; font-weight: 500; color: var(--subtext); }
+.dept-arrow { color: var(--subtext); }
+
+/* ── Chips / pills ────────────────────────────────────────────────────── */
+.new-pill, .panel-count {
+    background: var(--teal-soft);
+    color: var(--teal-ink);
+    border-radius: 999px;
+    padding: 4px 10px;
+    letter-spacing: 0.2px;
+    text-transform: none;
+    font-weight: 600;
+}
+.attention-tag { color: var(--amber-ink); letter-spacing: 0.4px; }
+.attention-action {
+    background: var(--teal); border-radius: 999px; letter-spacing: 0.3px;
+    text-transform: none; font-weight: 600; padding: 10px 16px;
+}
+
+/* ── Hairline list rows ───────────────────────────────────────────────── */
+.attention-row, .company-note, .tool { border-top-color: var(--rule); }
+.attention-row:hover, .tool.active:hover { background: rgba(47,169,160,.05); }
+.tool-status {
+    background: var(--teal-soft); color: var(--teal-ink);
+    border-radius: 999px; padding: 4px 11px; letter-spacing: 0.2px;
+    text-transform: none; font-weight: 600; font-size: 11px;
+}
+.note-date { letter-spacing: 0.3px; color: var(--subtext); }
+
+/* ── Buttons → pills ──────────────────────────────────────────────────── */
+.login-btn, .provider-btn, .reset-btn, .signout-btn, .setup-toggle,
+.profile-menu-signout {
+    border-radius: 999px !important;
+}
+.login-btn { background: var(--teal); font-weight: 600; letter-spacing: 0.2px; }
+.login-btn:hover { background: var(--teal-bright); }
+
+/* ── Inputs → soft rounded ────────────────────────────────────────────── */
+.login-input, .text-input, .access-code-input,
+input[type="text"], input[type="email"], input[type="password"],
+input[type="date"], input[type="search"], input[type="number"], select, textarea {
+    border-radius: var(--r-ctrl) !important;
+    border: 1px solid var(--rule);
+    background: #FBFCFB;
+}
+.login-input:focus, .text-input:focus, input:focus, select:focus, textarea:focus {
+    border-color: var(--teal);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(47,169,160,.14);
+}
+
+/* ── Profile chip + avatar ────────────────────────────────────────────── */
+.profile-chip { border-radius: 999px; }
+.avatar-initials {
+    border-radius: 999px; background: var(--teal-soft);
+    border: 1px solid transparent; color: var(--teal-ink);
+}
+.profile-role { color: var(--teal-ink); letter-spacing: 1px; }
+
+/* ── Navigation: a pill segmented bar on desktop, tidy dropdown on mobile ─ */
+@media (min-width: 860px) {
+    .masthead { gap: 18px; }
+    .hub-hamburger { display: none !important; }
+    .hub-nav {
+        position: static !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        gap: 4px;
+        width: auto !important;
+        max-height: none;
+        margin: 0 auto 0 0;
+        padding: 5px;
+        background: #EDEFEE;
+        border: 0;
+        border-radius: 999px;
+        box-shadow: none;
+        overflow: visible;
+    }
+    .hub-nav-item { width: auto; }
+    .hub-nav-btn {
+        width: auto;
+        min-height: 38px;
+        justify-content: center;
+        padding: 9px 17px !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: transparent !important;
+        color: var(--subtext) !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+    }
+    .hub-nav-btn:hover { color: var(--text) !important; }
+    .hub-nav-btn.active {
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        box-shadow: 0 1px 2px rgba(16,38,46,.10) !important;
+    }
+}
+
+/* Mobile: keep the hamburger dropdown, but make it soft + pill-ish */
+.hub-nav { border-radius: 16px; }
+.hub-hamburger {
+    border-radius: 999px;
+    border-color: var(--teal);
+    background: var(--teal-soft);
+    color: var(--teal-ink);
+    text-transform: none;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+}
+.hub-nav-btn { border-radius: 10px; }
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+.footer { color: var(--subtext); }
+
+/* ============================================================================
+   SHARED TOOL PAGES  (vacation tracker, expense, permissions, marketing, …)
+   These pages predate the Hub skin and live on one of two token vocabularies:
+   the Hub's (--teal / --font, already redefined above) or the design-tokens
+   set (--brewing-blue / --font-primary / --radius-* / --shadow-*). We remap the
+   design-tokens vocabulary onto the refined palette so a single file softens
+   both, then de-chunk the handful of shared component classes.
+   ========================================================================== */
+:root {
+    /* Re-point the design-tokens vocabulary at the refined values */
+    --font-primary: var(--font);
+    --brewing-blue: var(--teal);
+    --brewing-blue-light: var(--teal-bright);
+    --brewing-blue-dark: var(--teal-deep);
+    --brewing-blue-subtle: var(--teal-soft);
+    --bean-black: var(--text);
+    --crema: var(--amber);
+    --crema-deep: var(--amber-ink);
+    --crema-soft: var(--amber-soft);
+
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: var(--r-card);
+
+    --shadow-sm: 0 1px 2px rgba(16, 38, 46, .04);
+    --shadow-md: var(--card-shadow);
+    --shadow-lg: var(--card-shadow-hover);
+    --shadow-card-hover: var(--card-shadow-hover);
+}
+
+/* Headings → Poppins on tool pages too */
+.tool-page h1, main h1, main h2, main h3,
+.intro h1, .panel-title, .summary-title, .status-title { font-family: var(--font-display); }
+
+/* Calm the sticky masthead bar */
+.masthead { box-shadow: var(--card-shadow); border-bottom-color: var(--rule); }
+
+/* Pills: the loud uppercase 800-weight buttons/tabs/nav-links become calm pills */
+.btn, .button, .tab, .nav-link,
+.primary-button, .ghost-button, .hub-button, .btn-generate {
+    border-radius: 999px !important;
+    text-transform: none !important;
+    letter-spacing: 0.2px !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+}
+.btn.primary, .button.primary, .tab.active,
+.primary-button, .hub-button.primary, .btn-generate {
+    background: var(--teal) !important;
+    border-color: var(--teal) !important;
+    color: #fff !important;
+}
+.button.danger, .btn.danger {
+    background: var(--clay, #D9533D) !important;
+    border-color: var(--clay, #D9533D) !important;
+    color: #fff !important;
+}
+.masthead .nav-link { border-color: var(--rule); }
+
+/* Soft rounded surfaces */
+.panel, .status-card, .summary-card, .card, .tool-card, .section-card {
+    border-radius: var(--r-card) !important;
+    box-shadow: var(--card-shadow);
+    border-color: var(--rule);
+}
+
+/* Tinted status/badge chips that were solid blocks */
+.badge, .pill, .tag, .chip {
+    border-radius: 999px;
+}
