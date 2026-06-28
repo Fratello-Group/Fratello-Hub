@@ -298,3 +298,57 @@ textarea:focus-visible, .tile:focus-visible, .subtile:focus-visible, .dept-chip:
     a { color: #000; text-decoration: none; }
     table.dc th { position: static; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   REFINED SKIN (Wave 2) — soft, contemporary cosmetics over the kit.
+   Matches the Hub restyle: Poppins/Inter, pills, soft rounded surfaces.
+   Pure cosmetics layered last so it wins the cascade. No layout changes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Headings → Poppins (display) */
+h1, h2, h3,
+.bar-title, .panel-title, .tile-name, .doc-card h3, .map-group-h, .subtile-name {
+    font-family: var(--font-head);
+    letter-spacing: -0.3px;
+}
+h1 { letter-spacing: -1px; }
+
+/* De-chunk the loud uppercase kickers into calm tracked labels */
+.eyebrow, .dateline { font-weight: 600; letter-spacing: 2px; }
+
+/* Buttons → calm pills */
+.btn {
+    border-radius: 999px;
+    text-transform: none;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    font-size: 13px;
+}
+.btn-lg { font-size: 14px; }
+.btn-primary, .btn-primary:hover { color: #fff; }
+
+/* Soft rounded surfaces */
+.doc-card, .cfia-panel, .rec-list, .doc-meta, .blocked-card {
+    border-radius: var(--r-md);
+}
+.doc-card { box-shadow: var(--shadow-card); }
+.doc-card:hover { box-shadow: var(--shadow-card-hover); }
+.doc-icon { border-radius: var(--r-md); }
+.callout, .form-message { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+
+/* Inputs → soft rounded with a gentle focus ring */
+.input, .select, .textarea, .map-search {
+    border-radius: var(--r-sm);
+    background: #FBFCFB;
+}
+.input:focus, .select:focus, .textarea:focus, .map-search:focus {
+    box-shadow: 0 0 0 3px rgba(47, 169, 160, .14);
+}
+.status-opt span { border-radius: 999px; }
+
+/* Tiles / chips → softer */
+.tile, .subtile { border-radius: var(--r-lg); }
+.tile-icon { border-radius: var(--r-md); }
+
+/* Pill-tinted status chips read calmer on the new palette */
+.pill, .type-tag, .map-tag { letter-spacing: 0.3px; }
