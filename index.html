@@ -1224,6 +1224,45 @@
         .profile-menu-link:hover, .profile-menu-signout:hover { background: var(--teal-mute); }
         .profile-menu-signout { color: #b3261e; }
 
+        /* View-as preview switcher (owner-only) */
+        .profile-menu-preview { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+        .ppv-head { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--subtext); margin-bottom: 9px; }
+        .ppv-tag { color: var(--teal-deep); }
+        .ppv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .ppv-btn {
+            border: 1px solid var(--rule); background: var(--surface); color: var(--text);
+            font-family: inherit; font-size: 11.5px; font-weight: 700; text-align: left;
+            padding: 9px 10px; border-radius: 10px; cursor: pointer; line-height: 1.15;
+        }
+        .ppv-btn:hover { border-color: var(--teal); background: var(--teal-mute); }
+        .ppv-btn.active { border-color: var(--teal); background: var(--teal); color: #fff; }
+        .ppv-exit {
+            margin-top: 8px; width: 100%; border: 1px solid var(--rule); background: var(--surface);
+            color: var(--teal-deep); font-family: inherit; font-size: 12px; font-weight: 800;
+            padding: 9px; border-radius: 10px; cursor: pointer;
+        }
+        .ppv-exit:hover { border-color: var(--teal); background: var(--teal-mute); }
+
+        /* View-as banner — stacks above the (sticky) masthead while previewing */
+        .view-as-banner {
+            position: sticky; top: 0; z-index: 600;
+            display: flex; align-items: center; gap: 12px;
+            min-height: 40px; box-sizing: border-box; padding: 9px 22px;
+            background: linear-gradient(90deg, #1E7E77, #2FA9A0);
+            color: #fff; font-size: 13px; font-weight: 600;
+        }
+        .view-as-banner[hidden] { display: none; }
+        .view-as-banner .va-eye { font-size: 15px; line-height: 1; }
+        .view-as-banner .va-text { flex: 1; }
+        .view-as-banner .va-text strong { font-weight: 800; }
+        .view-as-banner .va-exit {
+            border: 1px solid rgba(255,255,255,.65); background: rgba(255,255,255,.18);
+            color: #fff; font-family: inherit; font-weight: 800; font-size: 12px;
+            padding: 6px 15px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+        }
+        .view-as-banner .va-exit:hover { background: rgba(255,255,255,.3); }
+        body.view-as-on .masthead { top: 40px; }
+
         .signout-btn:hover {
             color: var(--text);
             border-color: var(--teal);
@@ -2025,6 +2064,11 @@
      ═══════════════════════════════════════════════ -->
 
 <div class="dashboard" id="dashboard">
+    <div class="view-as-banner" id="viewAsBanner" hidden>
+        <span class="va-eye" aria-hidden="true">👁</span>
+        <span class="va-text"></span>
+        <button class="va-exit" type="button" onclick="exitViewAs()">Back to my view</button>
+    </div>
     <div class="masthead">
         <img src="assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
         <nav class="hub-nav" aria-label="Hub sections">
@@ -2051,6 +2095,11 @@
                     <div class="profile-menu-rows">
                         <div class="profile-menu-row"><span>Access</span><strong id="profileMenuRole">—</strong></div>
                         <div class="profile-menu-row"><span>Signed in with</span><strong id="profileMenuProvider">—</strong></div>
+                    </div>
+                    <div class="profile-menu-preview" id="profileMenuPreview" style="display:none">
+                        <div class="ppv-head">Preview the Hub as <span class="ppv-tag">only you</span></div>
+                        <div class="ppv-grid" id="ppvGrid"></div>
+                        <button class="ppv-exit" type="button" id="ppvExit" style="display:none" onclick="exitViewAs()">↩ Back to my owner view</button>
                     </div>
                     <a class="profile-menu-link" id="profileMenuManage" href="system/permissions.html">Manage people</a>
                     <button class="profile-menu-signout" type="button" onclick="signOut()">Sign out</button>
@@ -2459,6 +2508,106 @@ function cachedHubRole() {
     } catch (error) {
         return null;
     }
+}
+
+// ════════════════════════════════════════════════
+// VIEW AS — owner-only persona preview
+// ════════════════════════════════════════════════
+// Lets the Owner experience the Hub exactly as any role/department sees it,
+// without logging out or making a fake account. The previewed role is written
+// to 'fratello-role' so EVERY page (this SPA + sub-pages like the time-off
+// tools and Food Safety) renders as that persona. The real Owner role is parked
+// in 'fratello-view-as' as the escape hatch. A preview never survives a full
+// page reload (init() restores the real role first), so it can never strand you.
+const VIEW_AS_KEY = 'fratello-view-as';
+
+const VIEW_AS_PERSONAS = [
+    { id: 'controller',  label: 'Controller',         tier: 'controller', department: 'finance',    key: 'controller', user: { name: 'Chris McGhee',    firstName: 'Chris', initials: 'CM' } },
+    { id: 'mgr-prod',    label: 'Production Manager', tier: 'manager',    department: 'production',  key: 'production',  user: { name: 'Kyle Park',       firstName: 'Kyle',  initials: 'KP' } },
+    { id: 'mgr-sales',   label: 'Sales Manager',      tier: 'manager',    department: 'sales',       key: 'sales',      user: { name: 'Joel May',        firstName: 'Joel',  initials: 'JM' } },
+    { id: 'mgr-mkt',     label: 'Marketing Manager',  tier: 'manager',    department: 'marketing',   key: 'marketing',  user: { name: 'Mateo Corredor',  firstName: 'Mateo', initials: 'MC' } },
+    { id: 'hourly',      label: 'Hourly Staff',       tier: 'staff',      department: 'production',   key: 'staff', hourly: true, user: { name: 'Hourly Teammate', firstName: 'Sam', initials: 'ST' } },
+    { id: 'staff-sales', label: 'Sales Staff',        tier: 'staff',      department: 'sales',       key: 'staff',      user: { name: 'Sales Teammate',  firstName: 'Riley', initials: 'RT' } }
+];
+
+function isPreviewing() {
+    return Boolean(localStorage.getItem(VIEW_AS_KEY));
+}
+
+// The real signed-in role, whether or not a preview is currently active.
+function realRole() {
+    if (isPreviewing()) {
+        try { return JSON.parse(localStorage.getItem(VIEW_AS_KEY)); } catch (e) { return null; }
+    }
+    return activeRole || cachedHubRole();
+}
+
+// Only the genuine Owner ever sees or controls the preview switcher.
+function isRealOwner() {
+    const r = realRole();
+    return Boolean(r && normalizeTier(r.tier || r.roleTier || r.key) === 'owner');
+}
+
+function enterViewAs(personaId) {
+    if (!isRealOwner()) return;
+    const persona = VIEW_AS_PERSONAS.find(p => p.id === personaId);
+    if (!persona) return;
+    // Park the real Owner role once, so "Back to my view" always works.
+    if (!isPreviewing()) {
+        const real = activeRole || cachedHubRole();
+        if (real) localStorage.setItem(VIEW_AS_KEY, JSON.stringify(real));
+    }
+    const preview = normalizeRole({ ...persona });
+    localStorage.setItem('fratello-role', JSON.stringify(preview));
+    closeProfileMenu();
+    showDashboard(preview);
+}
+
+function exitViewAs() {
+    let real = null;
+    try { real = JSON.parse(localStorage.getItem(VIEW_AS_KEY)); } catch (e) {}
+    localStorage.removeItem(VIEW_AS_KEY);
+    if (!real) { closeProfileMenu(); renderViewAsBanner(); return; }
+    localStorage.setItem('fratello-role', JSON.stringify(real));
+    closeProfileMenu();
+    showDashboard(real);
+}
+
+// Slim banner across the top of the SPA whenever a preview is live.
+function renderViewAsBanner() {
+    const banner = document.getElementById('viewAsBanner');
+    if (!banner) return;
+    if (isPreviewing() && activeRole) {
+        const who = activeRole.user && activeRole.user.firstName ? activeRole.user.firstName + ' · ' : '';
+        banner.querySelector('.va-text').innerHTML =
+            'Previewing the Hub as <strong>' + who + (activeRole.label || 'a teammate') + '</strong> — only you can see this';
+        banner.hidden = false;
+        document.body.classList.add('view-as-on');
+    } else {
+        banner.hidden = true;
+        document.body.classList.remove('view-as-on');
+    }
+}
+
+// Build the owner-only persona picker inside the profile dropdown.
+function buildPreviewPicker() {
+    const wrap = document.getElementById('profileMenuPreview');
+    if (!wrap) return;
+    if (!isRealOwner()) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    const grid = document.getElementById('ppvGrid');
+    const currentId = (isPreviewing() && activeRole) ? activeRole.id : null;
+    grid.innerHTML = '';
+    VIEW_AS_PERSONAS.forEach(p => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ppv-btn' + (currentId === p.id ? ' active' : '');
+        btn.textContent = p.label;
+        btn.addEventListener('click', () => enterViewAs(p.id));
+        grid.appendChild(btn);
+    });
+    const exit = document.getElementById('ppvExit');
+    if (exit) exit.style.display = isPreviewing() ? '' : 'none';
 }
 
 function setLoginError(message) {
@@ -3548,6 +3697,7 @@ function renderSectionPage(role, sectionKey) {
 async function showDashboard(role) {
     clearLoginLockTimer();   // a lock countdown must never outlive the login screen
     role = normalizeRole(role);
+    activeRole = role;       // set early so the profile menu + view-as picker see the current role
     await loadHubData();
     const person = personForRole(role);
     storeRoleSession(role, person);
@@ -3561,6 +3711,7 @@ async function showDashboard(role) {
     document.getElementById('avatarInitials').textContent = person.initials;
     document.getElementById('avatarName').textContent = person.firstName;
     populateProfileMenu(role, person);
+    renderViewAsBanner();
     setupHubNav(role);
     const route = initialHubRoute(role);
     renderHub(role, route.view, route.sectionKey, false);
@@ -3578,6 +3729,7 @@ function populateProfileMenu(role, person) {
     document.getElementById('profileMenuProvider').textContent = user.provider || 'Email & password';
     // Owner and Controller can manage people (Controller is limited to staff in the page itself).
     document.getElementById('profileMenuManage').style.display = (role.tier === 'owner' || role.tier === 'controller' || role.key === 'owner' || role.key === 'controller') ? '' : 'none';
+    buildPreviewPicker();
 
     if (!window.__fratelloProfileMenuBound) {
         document.addEventListener('click', event => {
@@ -3639,6 +3791,14 @@ async function signOut() {
 
 (async function init() {
     document.documentElement.dataset.tone = localStorage.getItem('fratello_tone') || 'offwhite';
+    // A "View as" preview never survives a full reload — restore the real role first.
+    try {
+        const viewAsBackup = localStorage.getItem(VIEW_AS_KEY);
+        if (viewAsBackup) {
+            localStorage.setItem('fratello-role', viewAsBackup);
+            localStorage.removeItem(VIEW_AS_KEY);
+        }
+    } catch (e) { /* ignore */ }
     setupAuthModeUi();
 
     if (USE_FIREBASE_AUTH) {
@@ -3712,6 +3872,7 @@ window.handleLogin = handleLogin;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.signOut = signOut;
 window.toggleProfileMenu = toggleProfileMenu;
+window.exitViewAs = exitViewAs;
 window.toggleHubNav = toggleHubNav;
 </script>
 
