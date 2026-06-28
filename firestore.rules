@@ -103,16 +103,42 @@ service cloud.firestore {
         && isSelfUserId(data.approver_id);
     }
 
+    // Roasting / Packaging / Warehouse roll up to one "Production" team.
+    // Must stay in sync with teamGroupOf() in system/api/firestore-client.js.
+    function teamGroup(dept) {
+      return (dept == 'Roasting' || dept == 'Packaging' || dept == 'Warehouse' || dept == 'Production')
+        ? 'Production' : dept;
+    }
+
+    function readerTeam() {
+      return teamGroup(get(userPath(signedInEmail())).data.department);
+    }
+
+    // A teammate may read a VACATION request from their own team, so a team can
+    // avoid two people being away at once. vacation_team is set + validated on
+    // create and is empty for sick days, which stay private.
+    function sameTeamVacation(data) {
+      return data.get('vacation_team', '') != ''
+        && exists(userPath(signedInEmail()))
+        && data.vacation_team == readerTeam();
+    }
+
     function canReadTimeOffRequest(data) {
       return isOwnerOrController()
         || isRequester(data)
-        || (isVacation(data) && isVacationApprover(data));
+        || (isVacation(data) && isVacationApprover(data))
+        || sameTeamVacation(data);
     }
 
     function validUserTimeOffCreate(data) {
       return isKnownTimeOffType(data)
         && isRequester(data)
         && data.created_via == 'hub'
+        // vacation_team may not be forged: empty, or exactly the requester's own team.
+        && (
+          data.get('vacation_team', '') == ''
+          || (exists(userPath(signedInEmail())) && data.vacation_team == readerTeam())
+        )
         && (
           (
             isVacation(data)
