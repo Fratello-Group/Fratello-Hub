@@ -4303,6 +4303,7 @@ let __directory = [];
 
 function dirEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function dirInitials(name) { return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('') || '?'; }
+function dirFirstName(name) { return String(name || '').trim().split(/\s+/)[0] || '—'; }
 
 function dirArea(dept) {
     const d = String(dept || '').toLowerCase();
@@ -4330,7 +4331,7 @@ function dirSort(a, b) {
 }
 function dirPersonRow(p) {
     const lead = p.role_tier && p.role_tier !== 'Staff';
-    return `<div class="dir-person${lead ? ' lead' : ''}"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span class="dir-meta"><span class="nm">${dirEsc(p.name || '—')}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`;
+    return `<div class="dir-person${lead ? ' lead' : ''}"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span class="dir-meta"><span class="nm">${dirEsc(dirFirstName(p.name))}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`;
 }
 
 // Keep the all-readable directory in sync with the live roster whenever an
