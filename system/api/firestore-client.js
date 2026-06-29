@@ -23,7 +23,8 @@ const COLLECTIONS = {
     settings: 'settings',
     profiles: 'hubProfiles',
     avatarLogs: 'avatar_logs',
-    timeClock: 'time_clock'
+    timeClock: 'time_clock',
+    directory: 'directory'
 };
 
 const APPROVAL_ENDPOINT = '/.netlify/functions/time-off-approval-action';
@@ -466,6 +467,75 @@ export async function getHolidays(options = {}) {
             end_date: item.date
         }, options.start_date, options.end_date))
         .sort((a, b) => timestampMillis(a.date) - timestampMillis(b.date));
+}
+
+// ════════════════════════════════════════════════
+// EMPLOYEE DIRECTORY
+// ════════════════════════════════════════════════
+// A company-wide, all-readable projection of the live roster (name + position
+// only). Read by every signed-in person for the dashboard directory; written
+// only by Owner/Controller, kept in sync from Manage People.
+
+export async function getDirectory() {
+    const { db } = requireFirestore();
+    const snapshot = await getDocs(collection(db, COLLECTIONS.directory));
+    return snapshot.docs
+        .map(withId)
+        .filter(Boolean)
+        .filter(entry => entry.active !== false)
+        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+}
+
+export async function upsertDirectoryEntry(entry = {}) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const id = docIdForEmail(entry.email || entry.id);
+    if (!id) return null;
+    await setDoc(doc(db, COLLECTIONS.directory, id), {
+        email: id,
+        name: cleanOptionalText(entry.name),
+        title: cleanOptionalText(entry.title),
+        department: cleanOptionalText(entry.department),
+        role_tier: cleanOptionalText(entry.role_tier),
+        active: entry.active !== false,
+        updated_at: serverTimestamp()
+    }, { merge: true });
+    return id;
+}
+
+export async function removeDirectoryEntry(emailOrId) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const id = docIdForEmail(emailOrId);
+    if (!id) return;
+    await deleteDoc(doc(db, COLLECTIONS.directory, id));
+}
+
+// Make the directory exactly match a roster of live people: upsert everyone
+// present, drop anyone who's gone. Called from Manage People (Owner/Controller).
+export async function syncDirectory(people = []) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const wanted = new Map();
+    people.forEach(person => {
+        const id = docIdForEmail(person.email || person.id);
+        if (!id) return;
+        wanted.set(id, {
+            email: id,
+            name: cleanOptionalText(person.name),
+            title: cleanOptionalText(person.title),
+            department: cleanOptionalText(person.department),
+            role_tier: cleanOptionalText(person.role_tier),
+            active: person.active !== false && person.status !== 'disabled',
+            updated_at: serverTimestamp()
+        });
+    });
+    const snapshot = await getDocs(collection(db, COLLECTIONS.directory));
+    const ops = [];
+    wanted.forEach((data, id) => ops.push(setDoc(doc(db, COLLECTIONS.directory, id), data, { merge: true })));
+    snapshot.docs.forEach(snap => { if (!wanted.has(snap.id)) ops.push(deleteDoc(doc(db, COLLECTIONS.directory, snap.id))); });
+    await Promise.all(ops);
+    return wanted.size;
 }
 
 export async function getGlobalSettings() {

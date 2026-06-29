@@ -1329,6 +1329,35 @@
         .tc-err { color: #b3261e; font-size: 13px; margin-top: 10px; text-align: center; min-height: 2px; }
         .tc-done-note { text-align: center; color: var(--subtext); font-size: 14px; margin-top: 4px; }
 
+        /* ── Employee directory ── */
+        .dir-scrim { position: fixed; inset: 0; background: rgba(15,25,25,.45); z-index: 2100; display: flex; align-items: flex-end; justify-content: center; }
+        .dir-scrim[hidden] { display: none; }
+        @media (min-width: 640px) { .dir-scrim { align-items: center; padding: 24px; } }
+        .dir-sheet { background: #fff; width: 100%; max-width: 680px; max-height: 92vh; display: flex; flex-direction: column; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.22); overflow: hidden; }
+        @media (min-width: 640px) { .dir-sheet { border-radius: 24px; max-height: 88vh; } }
+        .dir-head { padding: 22px 24px 14px; border-bottom: 1px solid var(--rule); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .dir-h-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 22px; color: var(--text); }
+        .dir-h-sub { color: var(--subtext); font-size: 13px; margin-top: 2px; }
+        .dir-x { width: 34px; height: 34px; border-radius: 99px; border: none; background: #F0EFEC; color: #8a8f8d; font-size: 17px; cursor: pointer; flex: 0 0 auto; }
+        .dir-body { padding: 18px 24px 24px; overflow-y: auto; }
+        .dir-company { background: var(--teal-mute); border: 1px solid var(--rule); border-radius: 16px; padding: 16px 18px; margin-bottom: 16px; }
+        .dir-company h3 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+        .dir-cgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 18px; }
+        .dir-c { font-size: 13px; color: var(--text); }
+        .dir-c .k { color: var(--subtext); font-weight: 800; font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .dir-c a { color: var(--teal-deep); font-weight: 700; text-decoration: none; }
+        .dir-c a:hover { text-decoration: underline; }
+        .dir-search { width: 100%; border: 1.5px solid var(--rule); border-radius: 12px; padding: 11px 14px; font: inherit; margin: 4px 0 6px; box-sizing: border-box; }
+        .dir-search:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(47,169,160,.12); }
+        .dir-group { margin-top: 16px; }
+        .dir-group h4 { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--subtext); margin-bottom: 9px; }
+        .dir-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+        .dir-person { display: flex; align-items: center; gap: 11px; border: 1px solid var(--rule); border-radius: 14px; padding: 11px 13px; background: var(--surface); }
+        .dir-ava { width: 38px; height: 38px; border-radius: 99px; background: var(--teal-mute); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex: 0 0 auto; }
+        .dir-person .nm { font-weight: 700; font-size: 14px; color: var(--text); line-height: 1.2; display: block; }
+        .dir-person .ti { color: var(--subtext); font-size: 12px; margin-top: 2px; display: block; }
+        .dir-empty { color: var(--subtext); font-size: 14px; padding: 16px 2px; }
+
         .signout-btn:hover {
             color: var(--text);
             border-color: var(--teal);
@@ -3522,6 +3551,9 @@ function renderDashboardHome(role) {
     appendPersonalToolGroups(main, role);
     updateApprovalsBadge(role);
 
+    // Company-wide directory (everyone's name + position + company contact info).
+    appendDirectoryTile(main, role);
+
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
     const notesMeta = newNotesCount ? `${newNotesCount} posted` : 'None posted';
@@ -4019,6 +4051,138 @@ function closeClockSheet() {
     const scrim = document.getElementById('tcScrim');
     if (scrim) scrim.hidden = true;
     clearInterval(__clockSheetTick);
+}
+
+// ════════════════════════════════════════════════
+// EMPLOYEE DIRECTORY (dashboard)
+// ════════════════════════════════════════════════
+const FRATELLO_CONTACT = {
+    name: 'Fratello Coffee',
+    address: '4021 9 St SE, Calgary, AB T2G 3C7',
+    phone: '(403) 265-2112', phoneHref: '+14032652112',
+    tollFree: '1-800-465-7227', tollFreeHref: '+18004657227',
+    email: 'info@fratellocoffee.com',
+    website: 'fratellocoffee.com', websiteUrl: 'https://www.fratellocoffee.com',
+    hours: 'Mon–Fri · 8:00 AM – 4:00 PM MT'
+};
+let __directory = [];
+
+function dirEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function dirInitials(name) { return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('') || '?'; }
+
+function dirArea(dept) {
+    const d = String(dept || '').toLowerCase();
+    if (d.includes('lead')) return 'Leadership';
+    if (['production', 'roasting', 'packaging', 'warehouse'].some(x => d.includes(x))) return 'Production';
+    if (d.includes('sale')) return 'Sales';
+    if (d.includes('market')) return 'Marketing';
+    if (d.includes('financ') || d.includes('admin') || d.includes('office')) return 'Finance & Office';
+    return dept || 'Team';
+}
+const DIR_AREA_ORDER = ['Leadership', 'Production', 'Sales', 'Marketing', 'Finance & Office', 'Team'];
+const DIR_TIER_RANK = { Owner: 0, Controller: 1, Manager: 2, Staff: 3 };
+
+function appendDirectoryTile(main, role) {
+    const section = document.createElement('section');
+    section.className = 'workbench-section fade-in';
+    section.innerHTML = `
+        <div class="workbench-head">
+            <h2 class="workbench-title">Team Directory</h2>
+            <span class="workbench-meta">Who’s who</span>
+        </div>`;
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tc-tile';
+    tile.innerHTML = `
+        <span class="tc-dot"></span>
+        <span class="tc-copy">
+            <span class="tc-status">Team Directory</span>
+            <span class="tc-sub">Everyone’s name &amp; position, plus company contact info.</span>
+        </span>
+        <span class="tc-cta">Open →</span>`;
+    tile.addEventListener('click', openDirectory);
+    section.appendChild(tile);
+    main.appendChild(section);
+}
+
+function ensureDirScrim() {
+    let s = document.getElementById('dirScrim');
+    if (s) return s;
+    s = document.createElement('div');
+    s.className = 'dir-scrim';
+    s.id = 'dirScrim';
+    s.hidden = true;
+    s.innerHTML = '<div class="dir-sheet" id="dirSheet"></div>';
+    s.addEventListener('click', e => { if (e.target === s) closeDirectory(); });
+    document.body.appendChild(s);
+    return s;
+}
+function closeDirectory() { const s = document.getElementById('dirScrim'); if (s) s.hidden = true; }
+
+function companyCardHtml() {
+    const c = FRATELLO_CONTACT;
+    return `<div class="dir-company">
+        <h3>${dirEsc(c.name)}</h3>
+        <div class="dir-cgrid">
+            <div class="dir-c"><span class="k">Address</span>${dirEsc(c.address)}</div>
+            <div class="dir-c"><span class="k">Phone</span><a href="tel:${c.phoneHref}">${dirEsc(c.phone)}</a></div>
+            <div class="dir-c"><span class="k">Toll-free</span><a href="tel:${c.tollFreeHref}">${dirEsc(c.tollFree)}</a></div>
+            <div class="dir-c"><span class="k">General email</span><a href="mailto:${c.email}">${dirEsc(c.email)}</a></div>
+            <div class="dir-c"><span class="k">Website</span><a href="${c.websiteUrl}" target="_blank" rel="noopener">${dirEsc(c.website)}</a></div>
+            <div class="dir-c"><span class="k">Hours</span>${dirEsc(c.hours)}</div>
+        </div>
+    </div>`;
+}
+
+async function openDirectory() {
+    const scrim = ensureDirScrim();
+    scrim.hidden = false;
+    const sheet = document.getElementById('dirSheet');
+    sheet.innerHTML = `
+        <div class="dir-head">
+            <div><div class="dir-h-title">Team Directory</div><div class="dir-h-sub">Fratello Coffee</div></div>
+            <button class="dir-x" data-dir="close" aria-label="Close">×</button>
+        </div>
+        <div class="dir-body">
+            ${companyCardHtml()}
+            <input class="dir-search" id="dirSearch" type="search" placeholder="Search name or position…" autocomplete="off">
+            <div id="dirList"><div class="dir-empty">Loading the team…</div></div>
+        </div>`;
+    sheet.querySelector('[data-dir="close"]').addEventListener('click', closeDirectory);
+    sheet.querySelector('#dirSearch').addEventListener('input', e => renderDirectoryList(e.target.value));
+    try {
+        const api = await clockApi();
+        __directory = await api.getDirectory();
+    } catch (error) {
+        __directory = [];
+    }
+    renderDirectoryList('');
+}
+
+function renderDirectoryList(query) {
+    const host = document.getElementById('dirList');
+    if (!host) return;
+    const q = String(query || '').trim().toLowerCase();
+    const people = (__directory || []).filter(p =>
+        !q || `${p.name || ''} ${p.title || ''} ${p.department || ''}`.toLowerCase().includes(q));
+    if (!people.length) {
+        host.innerHTML = '<div class="dir-empty">No teammates listed yet — they’ll appear here as they’re added in Manage People.</div>';
+        return;
+    }
+    const groups = {};
+    people.forEach(p => { const a = dirArea(p.department); (groups[a] = groups[a] || []).push(p); });
+    const areas = Object.keys(groups).sort((a, b) => {
+        const ia = DIR_AREA_ORDER.indexOf(a), ib = DIR_AREA_ORDER.indexOf(b);
+        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+    });
+    host.innerHTML = areas.map(area => {
+        const list = groups[area].slice().sort((a, b) =>
+            ((DIR_TIER_RANK[a.role_tier] != null ? DIR_TIER_RANK[a.role_tier] : 9) - (DIR_TIER_RANK[b.role_tier] != null ? DIR_TIER_RANK[b.role_tier] : 9))
+            || String(a.name || '').localeCompare(String(b.name || '')));
+        return `<div class="dir-group"><h4>${dirEsc(area)} · ${list.length}</h4><div class="dir-people">${
+            list.map(p => `<div class="dir-person"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span><span class="nm">${dirEsc(p.name || '—')}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`).join('')
+        }</div></div>`;
+    }).join('');
 }
 
 function renderSectionPage(role, sectionKey) {

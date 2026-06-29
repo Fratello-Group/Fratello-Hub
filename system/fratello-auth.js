@@ -223,6 +223,7 @@ function publicUserFromProfile(id, data) {
         active: data.active !== false,
         status: data.status || 'active',
         lastLoginAt: data.lastLoginAt || '',
+        created_at: (data.createdAt && typeof data.createdAt.toMillis === 'function') ? data.createdAt.toMillis() : 0,
         passwordChangedAt: '',
         resetStatus: 'firebase-email',
         inviteStatus: data.uid ? 'accepted' : 'pending'

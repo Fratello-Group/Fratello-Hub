@@ -449,6 +449,8 @@
             margin-bottom: 4px;
         }
         .emp-row select { font-weight: 700; }
+        .roster-row { background: #FAFAF9; }
+        .roster-row .person-name { color: var(--slate, #44524f); }
         .field.has-error select {
             border-color: var(--error);
             box-shadow: none;
@@ -832,6 +834,12 @@
                 <input class="text-input" id="staffSearch" type="search" placeholder="Search name, email, or title" style="flex:1 1 220px; min-width:200px;">
                 <select id="staffProfileFilter" style="flex:0 1 200px;"><option value="">All access profiles</option></select>
                 <select id="staffAreaFilter" style="flex:0 1 200px;"><option value="">All visible areas</option></select>
+                <select id="staffSort" style="flex:0 1 200px;" title="Sort the list">
+                    <option value="owners">Sort: Owners first</option>
+                    <option value="department">Sort: Department</option>
+                    <option value="az">Sort: A–Z</option>
+                    <option value="recent">Sort: Recently added</option>
+                </select>
             </div>
             <div class="table-wrap">
                 <table>
@@ -870,6 +878,8 @@
             updateHubUser
         } from './fratello-auth.js';
         import { logActivity } from './api/activity-logger.js';
+        import { PEOPLE } from '/cfia/config/people.js';
+        import { syncDirectory } from './api/firestore-client.js';
 
         const USE_FIREBASE_AUTH = firebaseConfigured();
 
@@ -1353,7 +1363,7 @@
                 opt.textContent = area;
                 areaSel.appendChild(opt);
             });
-            ['staffSearch', 'staffProfileFilter', 'staffAreaFilter'].forEach(id => {
+            ['staffSearch', 'staffProfileFilter', 'staffAreaFilter', 'staffSort'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.addEventListener('input', renderStaff);
@@ -1363,14 +1373,100 @@
             profileSel.dataset.ready = '1';
         }
 
+        // The full company roster (2026 org chart, cfia/config/people.js). People
+        // without a Hub account yet show as "Not invited" rows so every position
+        // is visible in one place; "Set up & invite" pre-fills the form.
+        const ROSTER_DEPT_LABEL = {
+            leadership: '', production: 'Production', roasting: 'Roasting',
+            packaging: 'Packaging', warehouse: 'Warehouse', finance: 'Finance',
+            marketing: 'Marketing', sales: 'Sales'
+        };
+        function normName(value) { return String(value || '').trim().toLowerCase(); }
+
+        function rosterPlaceholders() {
+            const have = new Set(STAFF.map(p => normName(p.name)));
+            return (PEOPLE || [])
+                .filter(p => p && p.name && !/\(name tbd\)/i.test(p.name) && !have.has(normName(p.name)))
+                .map(p => {
+                    const level = profileDefaults(p.hubProfile || 'staff').role_tier || 'Staff';
+                    const department = ROSTER_DEPT_LABEL[p.dept] || '';
+                    return {
+                        id: 'roster:' + normName(p.name),
+                        source: 'roster', rosterOnly: true,
+                        name: p.name, title: p.title || '', email: p.email || '',
+                        profile: deriveProfile(level, department),
+                        department, role_tier: level,
+                        manager_id: '', hourly: false, hire_date: '',
+                        active: true, status: 'roster', created_at: 0
+                    };
+                });
+        }
+
+        const TIER_RANK = { Owner: 0, Controller: 1, Manager: 2, Staff: 3 };
+        function sortPeople(list, mode) {
+            const arr = list.slice();
+            const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''));
+            const rank = p => (TIER_RANK[personRoleTier(p)] != null ? TIER_RANK[personRoleTier(p)] : 9);
+            if (mode === 'az') return arr.sort(byName);
+            if (mode === 'recent') return arr.sort((a, b) => (b.created_at || 0) - (a.created_at || 0) || byName(a, b));
+            if (mode === 'department') {
+                return arr.sort((a, b) =>
+                    String(personDepartment(a) || 'zzz').localeCompare(String(personDepartment(b) || 'zzz'))
+                    || rank(a) - rank(b) || byName(a, b));
+            }
+            return arr.sort((a, b) => rank(a) - rank(b) || byName(a, b)); // owners first (default)
+        }
+
+        function rosterRow(person) {
+            const department = personDepartment(person);
+            const tier = personRoleTier(person);
+            return `
+                <tr class="roster-row">
+                    <td>
+                        <span class="person-name">${escapeHtml(person.name)}</span>
+                        <span class="person-title">${escapeHtml(person.title || 'No title listed')}</span>
+                        <span class="person-meta">${escapeHtml(department || '—')} · suggested level: ${escapeHtml(tier)}</span>
+                    </td>
+                    <td><span class="person-meta" style="color:var(--slate); text-transform:none; letter-spacing:0;">Set when you invite</span></td>
+                    <td><div class="profile-access">${accessTagsFor(tier, department)}</div></td>
+                    <td>
+                        <span class="status invited">Not invited</span>
+                        <span class="status-help">On the roster — not in the Hub yet</span>
+                        <div class="row-actions">
+                            <button class="ghost-button primary-button" type="button" data-roster="${escapeHtml(person.id)}" onclick="prefillInvite(this.dataset.roster)">Set up &amp; invite</button>
+                        </div>
+                    </td>
+                </tr>`;
+        }
+
+        function prefillInvite(rosterId) {
+            const p = rosterPlaceholders().find(x => x.id === rosterId);
+            if (!p) return;
+            document.getElementById('inviteName').value = p.name;
+            document.getElementById('inviteTitle').value = p.title || '';
+            document.getElementById('inviteEmail').value = p.email || '';
+            const deptSel = document.getElementById('inviteDepartment');
+            const lvlSel = document.getElementById('inviteRoleTier');
+            if (deptSel) deptSel.value = p.department || '';
+            if (lvlSel) lvlSel.value = p.role_tier || '';
+            if (typeof syncDerivedProfile === 'function') syncDerivedProfile();
+            document.getElementById('adminMessage').textContent =
+                `Finish ${p.name}'s setup — add their email + pay type, then send the invite.`;
+            document.getElementById('inviteName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('inviteEmail').focus();
+        }
+
         function renderStaff() {
             const rows = document.getElementById('staffRows');
-            const list = STAFF.filter(person => personMatchesStaffFilters(person, staffFilterValues()));
+            const merged = STAFF.concat(rosterPlaceholders());
+            const filtered = merged.filter(person => personMatchesStaffFilters(person, staffFilterValues()));
+            const list = sortPeople(filtered, document.getElementById('staffSort')?.value || 'owners');
             if (!list.length) {
                 rows.innerHTML = '<tr><td colspan="4">No people match these filters.</td></tr>';
                 return;
             }
             rows.innerHTML = list.map(person => {
+                if (person.rosterOnly) return rosterRow(person);
                 const status = statusMeta(person.status);
                 const isDisabled = person.status === 'disabled';
                 const safeId = escapeHtml(person.id);
@@ -1492,6 +1588,15 @@
                 refreshRosterSelects();
                 renderStaff();
                 document.getElementById('saveState').textContent = 'Staff permissions loaded from Firestore.';
+                // Keep the company-wide directory (on everyone's dashboard) in sync
+                // with the live roster — adds appear, removed people drop off.
+                try {
+                    await syncDirectory(STAFF.map(p => ({
+                        email: p.email || p.id, name: p.name, title: p.title || '',
+                        department: personDepartment(p), role_tier: personRoleTier(p),
+                        active: p.active !== false && p.status !== 'disabled'
+                    })));
+                } catch (error) { /* directory sync is best-effort */ }
                 return;
             }
 
@@ -1820,6 +1925,7 @@
         window.sendInviteForPerson = sendInviteForPerson;
         window.updateAccess = updateAccess;
         window.setHourly = setHourly;
+        window.prefillInvite = prefillInvite;
         window.syncDerivedProfile = syncDerivedProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;

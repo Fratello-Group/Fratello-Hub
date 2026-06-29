@@ -310,6 +310,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── Employee directory (name + position only) ──
+    // A safe, company-wide projection of the live roster: every signed-in person
+    // can read it (the dashboard directory); only Owner/Controller write it
+    // (kept in sync from Manage People). No sensitive fields are stored here.
+    match /directory/{id} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if isOwnerOrController();
+    }
+
     match /time_clock/{punchId} {
       allow get, list: if isOwnerOrController()
         || isClockSelf(resource.data)
