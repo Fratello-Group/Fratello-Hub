@@ -1294,6 +1294,24 @@
         .mpf-btn-primary { border-color: var(--teal, #2FA9A0); background: var(--teal, #2FA9A0); color: #fff; }
         .mpf-btn:disabled { opacity: .6; cursor: default; }
 
+        /* Approval-alerts opt-in banner */
+        .alert-optin {
+            display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+            margin: 0 0 20px; padding: 16px 18px;
+            border: 1px solid var(--teal, #2FA9A0); border-left: 4px solid var(--teal, #2FA9A0);
+            border-radius: 14px; background: var(--teal-mute, #E8F4F2);
+        }
+        .alert-optin-text { display: flex; flex-direction: column; gap: 3px; min-width: 200px; flex: 1 1 260px; }
+        .alert-optin-text strong { font-size: 14px; color: var(--text, #16262E); }
+        .alert-optin-text span { font-size: 12.5px; color: var(--subtext, #5A6B68); line-height: 1.45; }
+        .alert-optin-actions { display: flex; gap: 10px; flex: 0 0 auto; }
+        .alert-optin-no, .alert-optin-yes {
+            padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 800; cursor: pointer;
+            border: 1px solid var(--rule, #D9E0DE); background: #fff; color: var(--text, #16262E);
+        }
+        .alert-optin-yes { border-color: var(--teal, #2FA9A0); background: var(--teal, #2FA9A0); color: #fff; }
+        .alert-optin-yes:disabled { opacity: .6; cursor: default; }
+
         /* View-as preview switcher (owner-only) */
         .profile-menu-preview { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
         .ppv-head { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--subtext); margin-bottom: 9px; }
@@ -2339,7 +2357,8 @@ import {
     signInWithGoogle,
     signInWithMicrosoft,
     signOutHub,
-    updateOwnProfile
+    updateOwnProfile,
+    savePushSubscription
 } from './system/fratello-auth.js';
 import { logActivity, trackLogout } from './system/api/activity-logger.js';
 
@@ -3659,6 +3678,7 @@ function renderDashboardHome(role) {
     // Personal everyday tools (the folded-in "Resources"), grouped by intent.
     appendPersonalToolGroups(main, role);
     updateApprovalsBadge(role);
+    setupApprovalAlerts(role);          // offer phone push alerts to approvers
 
     // Company-wide directory (everyone's name + position + company contact info).
     appendDirectoryTile(main, role);
@@ -3794,8 +3814,17 @@ function createResourceCard(card, index, accent, icon) {
 
 // Badge the Time Off Calendar tile with how many requests are waiting on this
 // person to approve — an unread-style count, so managers notice without opening it.
+function setAppBadgeSafe(n) {
+    try {
+        if (navigator.setAppBadge) {
+            (n > 0) ? navigator.setAppBadge(n) : (navigator.clearAppBadge && navigator.clearAppBadge());
+        }
+    } catch (e) { /* badge unsupported */ }
+}
+
 async function updateApprovalsBadge(role) {
-    if (tierOf(role) === 'staff') return;            // only approvers have a queue
+    const previewing = (typeof isPreviewing === 'function') && isPreviewing();
+    if (tierOf(role) === 'staff') { if (!previewing) setAppBadgeSafe(0); return; }  // staff have no queue
     let count = 0;
     try {
         const mod = await import('./system/api/firestore-client.js');
@@ -3804,6 +3833,7 @@ async function updateApprovalsBadge(role) {
     } catch (error) {
         return;                                       // no Firestore / not signed in: skip quietly
     }
+    if (!previewing) setAppBadgeSafe(count);          // stamp the home-screen icon
     if (!count) return;                               // no approvals → no badge (like an unread count)
     // The dashboard shows ONLY the small unread-style badge on the tile; the
     // prominent "needs approval" banner lives inside the Calendar view itself.
@@ -3813,6 +3843,86 @@ async function updateApprovalsBadge(role) {
     if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
     badge.textContent = count > 9 ? '9+' : String(count);
     badge.setAttribute('aria-label', `${count} awaiting your approval`);
+}
+
+// ── Approval push alerts (banner on the phone + red app-icon badge) ──
+// Public VAPID key — safe to ship; the matching private key is a server secret.
+const VAPID_PUBLIC_KEY = 'BBl2YpShsH-f8Woinj4ebykFzSjT1N8mw5n6acPQOfWj9GJjY-30FcYy1-jz8gK2e-WIvpcDpBjqSrO6AUKk-Lg';
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return arr;
+}
+
+function pushSupported() {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+
+async function subscribeForPush() {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+        sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+    }
+    await savePushSubscription(sub);
+    return sub;
+}
+
+async function setupApprovalAlerts(role) {
+    if ((typeof isPreviewing === 'function') && isPreviewing()) return;   // not while previewing
+    if (tierOf(role) === 'staff') return;                                 // approvers only
+    if (!pushSupported()) return;
+
+    if (Notification.permission === 'granted') {
+        try { await subscribeForPush(); } catch (e) { /* keep fresh, silently */ }
+        return;
+    }
+    if (Notification.permission !== 'default') return;                    // 'denied' → don't nag
+    if (localStorage.getItem('fratello-alerts-dismissed') === '1') return;
+
+    const main = document.getElementById('mainContent');
+    if (!main || document.getElementById('alertOptIn')) return;
+    const banner = document.createElement('div');
+    banner.id = 'alertOptIn';
+    banner.className = 'alert-optin fade-in';
+    banner.innerHTML = `
+        <div class="alert-optin-text">
+            <strong>Turn on approval alerts</strong>
+            <span>Get a notification — and a red badge on the app icon — the moment something needs your approval.</span>
+        </div>
+        <div class="alert-optin-actions">
+            <button class="alert-optin-no" type="button" id="alertOptInNo">Not now</button>
+            <button class="alert-optin-yes" type="button" id="alertOptInYes">Turn on</button>
+        </div>`;
+    main.insertBefore(banner, main.firstChild);
+
+    document.getElementById('alertOptInNo').onclick = () => {
+        localStorage.setItem('fratello-alerts-dismissed', '1');
+        banner.remove();
+    };
+    document.getElementById('alertOptInYes').onclick = async () => {
+        const yes = document.getElementById('alertOptInYes');
+        yes.disabled = true; yes.textContent = 'Turning on…';
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                await subscribeForPush();
+                banner.innerHTML = '<div class="alert-optin-text"><strong>Alerts are on ✓</strong><span>You’ll get a notification and a red badge when approvals come in.</span></div>';
+                window.setTimeout(() => banner.remove(), 2800);
+            } else {
+                banner.remove();   // they chose Don't Allow — respect it
+            }
+        } catch (error) {
+            yes.disabled = false; yes.textContent = 'Turn on';
+        }
+    };
 }
 
 // Appends the personal everyday tools to the dashboard, grouped by intent:

@@ -359,6 +359,63 @@ async function patchDocument(collection, id, data) {
     return documentFromFirestore(response);
 }
 
+async function deleteDocument(collection, id) {
+    await firestoreFetch(`/${encodeURIComponent(collection)}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+// ── Web push (app-icon badge + banner) ──
+// A separate channel from email: it works even when email isn't configured.
+// No-ops cleanly if the VAPID keys aren't set yet.
+function vapidConfigured() {
+    return Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+}
+
+async function sendApprovalPush({ toEmail, title, body, url, count }) {
+    if (!vapidConfigured()) return { sent: 0, reason: 'VAPID keys not configured' };
+
+    let webpush;
+    try {
+        webpush = require('web-push');
+    } catch (error) {
+        return { sent: 0, reason: 'web-push package not installed' };
+    }
+    webpush.setVapidDetails(
+        process.env.VAPID_SUBJECT || 'mailto:hub@fratellocoffee.com',
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+    );
+
+    const target = String(toEmail || '').trim().toLowerCase();
+    if (!target) return { sent: 0, reason: 'No recipient email' };
+
+    const subs = (await listDocuments('push_subscriptions'))
+        .filter(sub => String(sub.email || '').trim().toLowerCase() === target && sub.endpoint);
+    if (!subs.length) return { sent: 0, reason: 'No subscriptions for recipient' };
+
+    const payload = JSON.stringify({
+        title: title || 'Fratello Hub',
+        body: body || 'Something needs your attention.',
+        url: url || '/',
+        count: typeof count === 'number' ? count : undefined
+    });
+
+    let sent = 0;
+    await Promise.all(subs.map(async sub => {
+        const subscription = { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } };
+        try {
+            await webpush.sendNotification(subscription, payload);
+            sent += 1;
+        } catch (error) {
+            // 404/410 mean the subscription is dead — clean it up so we don't keep trying.
+            const code = error && error.statusCode;
+            if (code === 404 || code === 410) {
+                try { await deleteDocument('push_subscriptions', sub.id); } catch (e) { /* best-effort */ }
+            }
+        }
+    }));
+    return { sent, total: subs.length };
+}
+
 async function getSettings() {
     try {
         return await getDocument('settings', 'global');
@@ -664,10 +721,13 @@ module.exports = {
     controllerUsers,
     createDocument,
     dateOnly,
+    deleteDocument,
     durationDays,
     findUser,
     getDocument,
     getSettings,
+    sendApprovalPush,
+    vapidConfigured,
     humanDate,
     humanDateRange,
     isOwnerOrController,

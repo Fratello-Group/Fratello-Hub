@@ -604,6 +604,44 @@ export async function updateOwnProfile({ name, phone, address } = {}) {
     return { name: nm, phone: ph, address: ad };
 }
 
+// ── Push subscriptions ──
+// Store the device's push subscription under the signed-in person's email
+// (exactly as the auth token reports it, so the security rule matches). One doc
+// per device, keyed by a short stable hash of the endpoint, so re-subscribing
+// updates in place instead of piling up.
+function pushDocId(endpoint) {
+    let hash = 0;
+    for (let i = 0; i < endpoint.length; i++) {
+        hash = (Math.imul(hash, 31) + endpoint.charCodeAt(i)) | 0;
+    }
+    return 'sub_' + (hash >>> 0).toString(36);
+}
+
+export async function savePushSubscription(subscription) {
+    initFirebase();
+    if (!auth.currentUser) throw new Error('Sign in again to turn on alerts.');
+    const email = auth.currentUser.email;
+    const json = (subscription && subscription.toJSON) ? subscription.toJSON() : subscription;
+    if (!json || !json.endpoint) return null;
+    const id = pushDocId(json.endpoint);
+    await setDoc(doc(db, 'push_subscriptions', id), {
+        email,
+        endpoint: json.endpoint,
+        p256dh: (json.keys && json.keys.p256dh) || '',
+        auth: (json.keys && json.keys.auth) || '',
+        ua: (typeof navigator !== 'undefined' ? navigator.userAgent : '').slice(0, 180),
+        updated_at: serverTimestamp()
+    }, { merge: true });
+    return id;
+}
+
+export async function removePushSubscription(endpoint) {
+    initFirebase();
+    if (!endpoint) return;
+    try { await deleteDoc(doc(db, 'push_subscriptions', pushDocId(endpoint))); }
+    catch (error) { /* best-effort */ }
+}
+
 export async function saveHubInvite({ name, email, title, profile, department, role_tier, manager_id, hire_date, active = true, phone, address }) {
     initFirebase();
     const normalized = normalizeEmail(email);

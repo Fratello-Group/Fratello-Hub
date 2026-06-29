@@ -14,7 +14,7 @@
  *  - Static assets (CSS/JS/icons/fonts/json) are stale-while-revalidate: served
  *    instantly from cache and refreshed in the background.
  */
-const CACHE = 'fratello-hub-v1';
+const CACHE = 'fratello-hub-v2';
 const PRECACHE = [
     '/index.html',
     '/system/fratello-ui.css',
@@ -40,6 +40,52 @@ self.addEventListener('activate', event => {
         await self.clients.claim();
     })());
 });
+
+// ── Push notifications + app-icon badge ──
+// A push arrives even when the app is closed. We show a banner and stamp the
+// red number on the home-screen icon (the count rides in the payload).
+self.addEventListener('push', event => {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; }
+    catch (e) { data = { body: event.data ? event.data.text() : '' }; }
+
+    const title = data.title || 'Fratello Hub';
+    const body = data.body || 'You have something that needs your attention.';
+    const url = data.url || '/';
+    const count = (typeof data.count === 'number') ? data.count : null;
+
+    event.waitUntil((async () => {
+        await self.registration.showNotification(title, {
+            body,
+            icon: '/assets/icon-192.png',
+            badge: '/assets/icon-192.png',
+            tag: data.tag || 'fratello-approval',
+            renotify: true,
+            data: { url }
+        });
+        if (count !== null && self.navigator && self.navigator.setAppBadge) {
+            try { count > 0 ? await self.navigator.setAppBadge(count) : await self.navigator.clearAppBadge(); }
+            catch (e) { /* badge unsupported */ }
+        }
+    })());
+});
+
+// Tapping the banner focuses the app (or opens it) on the right page.
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    const url = (event.notification.data && event.notification.data.url) || '/';
+    event.waitUntil((async () => {
+        const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const client of clientsList) {
+            try { await client.focus(); if (client.navigate) await client.navigate(url); return; }
+            catch (e) { /* fall through to openWindow */ }
+        }
+        if (self.clients.openWindow) await self.clients.openWindow(url);
+    })());
+});
+
+// If the browser rotates the subscription, the client re-subscribes on next open.
+self.addEventListener('pushsubscriptionchange', () => {});
 
 self.addEventListener('fetch', event => {
     const req = event.request;

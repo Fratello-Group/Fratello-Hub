@@ -327,6 +327,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── Push subscriptions (per-device, for approval alerts) ──
+    // A signed-in person manages only their own subscriptions; the server reads
+    // them via the Admin SDK (which bypasses these rules) to send pushes.
+    match /push_subscriptions/{id} {
+      allow read: if isOwnerOrController() || (signedIn() && resource.data.email == signedInEmail());
+      allow create, update: if signedIn() && request.resource.data.email == signedInEmail();
+      allow delete: if signedIn() && resource.data.email == signedInEmail();
+    }
+
     // ── People drafts ──
     // Pre-configured employees the Owner is setting up but hasn't invited yet
     // (no account / email required). Owner + Controller only.

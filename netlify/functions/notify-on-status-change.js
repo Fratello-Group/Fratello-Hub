@@ -14,6 +14,7 @@ const {
     renderHtmlTemplate,
     requestUserName,
     requireMethod,
+    sendApprovalPush,
     sendLoggedEmail,
     userMatchesId
 } = require('./templates/_runtime');
@@ -62,10 +63,6 @@ exports.handler = async (event) => {
             listDocuments('users')
         ]);
 
-        if (!notificationEmailsEnabled(settings)) {
-            return json(200, { sent: false, reason: 'Notification emails are disabled in settings.' });
-        }
-
         const requester = findUser(users, request.user_id);
         if (!requester || !requester.email) {
             return json(404, { error: 'Requester email was not found.' });
@@ -77,6 +74,23 @@ exports.handler = async (event) => {
         const dateRange = humanDateRange(request.start_date, request.end_date);
         const actionUrl = absoluteUrl(event, '/hr/time-off/vacation-tracker.html');
         const subject = `Your time-off request was ${status}`;
+
+        // Let the requester know on their phone (separate channel from email).
+        // No badge count here — this is an update, not an approval queue.
+        try {
+            await sendApprovalPush({
+                toEmail: requester.email,
+                title: `Time off ${status}`,
+                body: `Your request for ${dateRange} was ${status}.`,
+                url: actionUrl
+            });
+        } catch (pushError) {
+            console.error('Push notify failed:', pushError);
+        }
+
+        if (!notificationEmailsEnabled(settings)) {
+            return json(200, { emailSent: false, reason: 'Notification emails are disabled in settings.' });
+        }
 
         const html = renderHtmlTemplate('status-change', {
             subject,
