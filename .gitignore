@@ -2,3 +2,9 @@
 security/reports/*.html
 security/reports/*.json
 !security/reports/.gitkeep
+
+# Local preview/build artifacts (generated for screenshots; never committed)
+__dash-preview.html
+__vt-preview.html
+__timeclock-concept.html
+__icon.html
