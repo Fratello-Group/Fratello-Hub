@@ -1356,6 +1356,9 @@
         .dir-ava { width: 38px; height: 38px; border-radius: 99px; background: var(--teal-mute); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex: 0 0 auto; }
         .dir-person .nm { font-weight: 700; font-size: 14px; color: var(--text); line-height: 1.2; display: block; }
         .dir-person .ti { color: var(--subtext); font-size: 12px; margin-top: 2px; display: block; }
+        .dir-person.lead { border-color: var(--teal); background: var(--teal-mute); }
+        .dir-person.lead .dir-ava { background: var(--teal); color: #fff; }
+        .dir-lead-badge { display: inline-block; margin-left: 7px; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal-deep); background: #fff; border: 1px solid var(--teal); border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
         .dir-empty { color: var(--subtext); font-size: 14px; padding: 16px 2px; }
 
         .signout-btn:hover {
@@ -4180,7 +4183,10 @@ function renderDirectoryList(query) {
             ((DIR_TIER_RANK[a.role_tier] != null ? DIR_TIER_RANK[a.role_tier] : 9) - (DIR_TIER_RANK[b.role_tier] != null ? DIR_TIER_RANK[b.role_tier] : 9))
             || String(a.name || '').localeCompare(String(b.name || '')));
         return `<div class="dir-group"><h4>${dirEsc(area)} · ${list.length}</h4><div class="dir-people">${
-            list.map(p => `<div class="dir-person"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span><span class="nm">${dirEsc(p.name || '—')}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`).join('')
+            list.map(p => {
+                const lead = p.role_tier && p.role_tier !== 'Staff';
+                return `<div class="dir-person${lead ? ' lead' : ''}"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span class="dir-pmeta"><span class="nm">${dirEsc(p.name || '—')}${lead ? '<span class="dir-lead-badge">Lead</span>' : ''}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`;
+            }).join('')
         }</div></div>`;
     }).join('');
 }
