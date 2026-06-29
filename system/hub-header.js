@@ -378,6 +378,9 @@
 
     function start() {
         ensurePwaTags();
+        if ('serviceWorker' in navigator) {
+            try { navigator.serviceWorker.register('/sw.js').catch(function () {}); } catch (e) {}
+        }
         mount(readRole());
         // The login can resolve after this script runs (Firebase auth is async).
         // Fill the chip in once the role lands, then stop checking.
