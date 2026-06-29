@@ -353,7 +353,31 @@
         return Boolean(role && role.user && (role.user.name || role.user.email));
     }
 
+    // Make every sub-page installable + keep the standalone (home-screen app)
+    // experience when navigating away from the dashboard. Tags are added only
+    // if the page didn't already ship them (index.html has its own set).
+    function ensurePwaTags() {
+        var head = document.head;
+        if (!head) return;
+        function metaTag(name, content) {
+            if (document.querySelector('meta[name="' + name + '"]')) return;
+            var m = document.createElement('meta'); m.name = name; m.content = content; head.appendChild(m);
+        }
+        function linkTag(rel, href) {
+            if (document.querySelector('link[rel="' + rel + '"]')) return;
+            var l = document.createElement('link'); l.rel = rel; l.href = href; head.appendChild(l);
+        }
+        linkTag('manifest', '/manifest.webmanifest');
+        linkTag('apple-touch-icon', '/assets/apple-touch-icon.png');
+        metaTag('theme-color', '#1A1A1A');
+        metaTag('mobile-web-app-capable', 'yes');
+        metaTag('apple-mobile-web-app-capable', 'yes');
+        metaTag('apple-mobile-web-app-status-bar-style', 'black');
+        metaTag('apple-mobile-web-app-title', 'Fratello Hub');
+    }
+
     function start() {
+        ensurePwaTags();
         mount(readRole());
         // The login can resolve after this script runs (Firebase auth is async).
         // Fill the chip in once the role lands, then stop checking.
