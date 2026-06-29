@@ -329,12 +329,20 @@ function prefersRedirectSignIn() {
     }
 }
 
-async function authWithProvider(provider) {
-    initFirebase();
-    if (prefersRedirectSignIn()) {
-        await signInWithRedirect(auth, provider);
-        return null;
+// Running as an installed home-screen app (PWA standalone)? A full-page OAuth
+// redirect leaves this app's storage context on iOS and never returns the
+// session — the sign-in just loops. A popup stays in-context and posts back, so
+// in standalone we use the popup and only fall back to redirect if it's blocked.
+function isStandaloneApp() {
+    try {
+        return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+            || window.navigator.standalone === true;
+    } catch (error) {
+        return false;
     }
+}
+
+async function popupThenRedirect(provider) {
     try {
         const credential = await signInWithPopup(auth, provider);
         return profileForUser(credential.user);
@@ -345,6 +353,19 @@ async function authWithProvider(provider) {
         }
         throw error;
     }
+}
+
+async function authWithProvider(provider) {
+    initFirebase();
+    // Installed app: prefer the popup (redirect loops in iOS standalone).
+    if (isStandaloneApp()) {
+        return popupThenRedirect(provider);
+    }
+    if (prefersRedirectSignIn()) {
+        await signInWithRedirect(auth, provider);
+        return null;
+    }
+    return popupThenRedirect(provider);
 }
 
 export async function signInWithGoogle() {
