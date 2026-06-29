@@ -488,6 +488,32 @@
         }
         .row-edit:hover { background: #DCEEEB; }
 
+        /* Section headers that split people into Signed in / Invited / Not invited */
+        .group-row td {
+            padding: 22px 12px 10px;
+            border-bottom: 2px solid var(--divider-dark, #E2E7E5);
+            background: transparent;
+        }
+        tr.group-row:first-child td { padding-top: 6px; }
+        .group-dot {
+            display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+            margin-right: 9px; vertical-align: middle;
+        }
+        .group-label {
+            font-size: 13px; font-weight: 800; letter-spacing: .3px;
+            color: var(--ink, #16262E); vertical-align: middle;
+        }
+        .group-count {
+            display: inline-block; min-width: 22px; margin-left: 9px; padding: 1px 8px;
+            border-radius: 999px; background: var(--brand-soft, #E8F4F2); color: var(--brand-dark, #1E7E77);
+            font-size: 11px; font-weight: 800; text-align: center; vertical-align: middle;
+        }
+        .group-help {
+            display: block; margin-top: 5px; margin-left: 19px;
+            font-size: 11.5px; color: var(--slate, #5A6B68); font-weight: 500;
+            text-transform: none; letter-spacing: 0;
+        }
+
         /* Edit person bottom-sheet */
         .sheet-overlay {
             display: none;
@@ -1191,17 +1217,17 @@
 
         const STATUS_META = {
             active: {
-                label: 'Active',
-                help: 'Can sign in now',
+                label: 'Signed in',
+                help: 'Has logged in',
                 className: 'active'
             },
             invited: {
                 label: 'Invited',
-                help: 'Waiting for password setup',
+                help: 'Invite sent — not signed in yet',
                 className: 'invited'
             },
             disabled: {
-                label: 'Disabled',
+                label: 'Inactive',
                 help: 'Cannot sign in',
                 className: 'disabled'
             }
@@ -1217,7 +1243,12 @@
             }[character]));
         }
 
-        function statusMeta(status) {
+        function statusMeta(status, source) {
+            // An "active" person who only has an invite (no profile yet) hasn't
+            // actually signed in — show them as invited, not signed in.
+            if (status === 'active' && source && source !== 'profile') {
+                return { label: 'Invited', help: 'Invite sent — not signed in yet', className: 'invited' };
+            }
             return STATUS_META[status] || {
                 label: status || 'Invited',
                 help: 'Needs attention',
@@ -2067,6 +2098,42 @@
             await deleteUser(id, null);
         }
 
+        // Which of the three (+inactive) buckets a person belongs in. "Signed in"
+        // means a Hub profile exists — created the first time they log in. "Invited"
+        // means an invite is out but they've never signed in. Roster + drafts are
+        // people who still need an invite.
+        function personBucket(person) {
+            if (person.draftOnly || person.rosterOnly) return 'uninvited';
+            if (person.status === 'disabled') return 'inactive';
+            if (person.source === 'profile') return 'signedin';
+            return 'invited';
+        }
+
+        const STAFF_GROUPS = [
+            { key: 'signedin',  label: 'Signed in',                 help: 'Invited and have logged in at least once', dot: '#2FA9A0' },
+            { key: 'invited',   label: 'Invited — not signed in yet', help: 'Invite is out; waiting for their first sign-in', dot: '#E0A23D' },
+            { key: 'uninvited', label: 'Not invited yet',           help: 'On the roster or saved as a draft — not in the Hub yet', dot: '#9AA7A4' },
+            { key: 'inactive',  label: 'Inactive',                  help: 'Cannot sign in', dot: '#C0392B' }
+        ];
+
+        function groupHeaderRow(group, count) {
+            return `
+                <tr class="group-row">
+                    <td colspan="4">
+                        <span class="group-dot" style="background:${group.dot}"></span>
+                        <span class="group-label">${escapeHtml(group.label)}</span>
+                        <span class="group-count">${count}</span>
+                        <span class="group-help">${escapeHtml(group.help)}</span>
+                    </td>
+                </tr>`;
+        }
+
+        function rowFor(person) {
+            if (person.draftOnly) return draftRow(person);
+            if (person.rosterOnly) return rosterRow(person);
+            return liveRow(person);
+        }
+
         function renderStaff() {
             const rows = document.getElementById('staffRows');
             const merged = STAFF.concat(draftPeople()).concat(rosterPlaceholders());
@@ -2076,10 +2143,25 @@
                 rows.innerHTML = '<tr><td colspan="4">No people match these filters.</td></tr>';
                 return;
             }
-            rows.innerHTML = list.map(person => {
-                if (person.draftOnly) return draftRow(person);
-                if (person.rosterOnly) return rosterRow(person);
-                const status = statusMeta(person.status);
+            // Partition into the three (+inactive) buckets, preserving the chosen
+            // sort order within each section.
+            const buckets = {};
+            list.forEach(person => {
+                const key = personBucket(person);
+                (buckets[key] = buckets[key] || []).push(person);
+            });
+            let html = '';
+            STAFF_GROUPS.forEach(group => {
+                const people = buckets[group.key];
+                if (!people || !people.length) return;
+                html += groupHeaderRow(group, people.length);
+                html += people.map(rowFor).join('');
+            });
+            rows.innerHTML = html;
+        }
+
+        function liveRow(person) {
+                const status = statusMeta(person.status, person.source);
                 const isDisabled = person.status === 'disabled';
                 const safeId = escapeHtml(person.id);
                 const needsInvite = USE_FIREBASE_AUTH && person.status !== 'active';
@@ -2132,7 +2214,6 @@
                     </td>
                 </tr>
             `;
-            }).join('');
         }
 
         function renderGeneratedLink(kind, userName, url, options = {}) {
