@@ -1758,6 +1758,18 @@
         .dept-title { font-size: 16px; font-weight: 800; color: var(--text); }
         .dept-count { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--subtext); }
         .dept-arrow { color: var(--teal-deep); font-size: 18px; font-weight: 700; }
+        /* Personal-dashboard rows reuse the department row look. Sentence-case
+           subtitle (vs the uppercase "N items" count), link + soon variants,
+           and status tones for the live time-clock row. */
+        a.dept-row { text-decoration: none; color: inherit; }
+        button.dept-row { width: 100%; font: inherit; text-align: left; }
+        .dept-note { font-size: 12.5px; color: var(--subtext); line-height: 1.35; }
+        .dept-row.soon { opacity: .6; cursor: default; }
+        .dept-row.soon:hover { border-color: var(--rule); }
+        .dept-soon-tag { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--subtext); }
+        .dept-icon { position: relative; }
+        .dept-icon.brk { background: #E0A23D; }
+        .dept-icon.off { background: #C7CECD; }
 
         .qa-label {
             display: flex;
@@ -3451,6 +3463,7 @@ function addGreeting(main, role, person, counts) {
     greetingBlock.className = 'greeting-block fade-in';
     greetingBlock.innerHTML = `
         <div>
+            <div class="section-kicker">Personal Dashboard</div>
             <div class="dateline">${formatDateEyebrow(now)}</div>
             <h1 class="greeting">${intro}, <span class="greeting-name">${person.firstName}.</span></h1>
             <p class="greeting-note">${briefing(tierOf(role), counts)}</p>
@@ -3794,18 +3807,19 @@ const RESOURCE_FALLBACK = { group: 'forms', icon: 'document' };
 
 function createResourceCard(card, index, accent, icon) {
     const active = Boolean(card.href) && card.href !== '#';
-    const el = document.createElement(active ? 'a' : 'div');
-    el.className = 'qa-card fade-in' + (accent === 'gold' ? ' qa-card--gold' : '') + (active ? '' : ' qa-card--soon');
+    // Same row look + feel as the Departments dashboard: filled teal icon,
+    // title, a short subtitle, and an arrow (or "Soon" for coming-soon docs).
+    const el = document.createElement(active ? 'a' : 'article');
+    el.className = 'dept-row fade-in' + (active ? '' : ' soon');
     if (card.approvalsBadge) el.dataset.approvalsBadge = '1';
     if (active) el.href = card.href;
     el.innerHTML = `
-        <span class="qa-top">
-            <span class="qa-chip">${iconSvg(icon)}</span>
+        <span class="dept-icon">${iconSvg(icon)}</span>
+        <span class="dept-copy">
+            <span class="dept-title">${card.title}</span>
+            ${card.desc ? `<span class="dept-note">${card.desc}</span>` : ''}
         </span>
-        <span class="qa-label">
-            <span>${card.title}</span>
-            ${active ? '<span class="qa-arrow">→</span>' : '<span class="qa-soon-tag">Soon</span>'}
-        </span>
+        ${active ? '<span class="dept-arrow">→</span>' : '<span class="dept-soon-tag">Soon</span>'}
     `;
     if (active) {
         const isExternal = /^https?:\/\//.test(card.href);
@@ -3846,7 +3860,7 @@ async function updateApprovalsBadge(role) {
     if (!count) return;                               // no approvals → no badge (like an unread count)
     // The dashboard shows ONLY the small unread-style badge on the tile; the
     // prominent "needs approval" banner lives inside the Calendar view itself.
-    const chip = document.querySelector('.qa-card[data-approvals-badge] .qa-chip');
+    const chip = document.querySelector('.dept-row[data-approvals-badge] .dept-icon');
     if (!chip) return;
     let badge = chip.querySelector('.qa-badge');
     if (!badge) { badge = document.createElement('span'); badge.className = 'qa-badge'; chip.appendChild(badge); }
@@ -3962,10 +3976,6 @@ function appendPersonalToolGroups(main, role) {
             return true;
         });
 
-    // Shared column rhythm across groups so a single-item group (e.g. staff
-    // "Review") sits left-aligned instead of stretching the full width.
-    const columns = Math.min(Math.max(...resolved.map(group => group.cards.length), 1), 4);
-
     resolved.forEach(group => {
         const section = document.createElement('section');
         section.className = 'workbench-section fade-in';
@@ -3975,14 +3985,13 @@ function appendPersonalToolGroups(main, role) {
                 <span class="workbench-meta">${group.meta}</span>
             </div>
         `;
-        const grid = document.createElement('div');
-        grid.className = 'qa-grid';
-        grid.style.setProperty('--qa-columns', String(columns));
+        const list = document.createElement('div');
+        list.className = 'dept-list';
         group.cards.forEach((card, index) => {
             const icon = (RESOURCE_META[card.title] || RESOURCE_FALLBACK).icon;
-            grid.appendChild(createResourceCard(card, index, group.accent, icon));
+            list.appendChild(createResourceCard(card, index, group.accent, icon));
         });
-        section.appendChild(grid);
+        section.appendChild(list);
         main.appendChild(section);
     });
 }
@@ -4049,30 +4058,27 @@ function paintClockTile() {
     const tile = document.getElementById('tcTile');
     if (!tile) return;
     const live = tcLive(__clockDay);
-    let dot = 'off', status, sub, cta;
+    let tone = 'off', status, sub;
     if (live.status === 'active') {
-        dot = ''; status = `On the clock · ${tcFmt(live.worked)}`;
+        tone = ''; status = `On the clock · ${tcFmt(live.worked)}`;
         sub = live.brk ? `${tcFmt(live.brk)} on break today.` : 'Tap to take a break or clock out.';
-        cta = 'Open';
     } else if (live.status === 'break') {
-        dot = 'brk'; status = `On break · ${tcFmt(live.brk)}`;
+        tone = 'brk'; status = `On break · ${tcFmt(live.brk)}`;
         sub = `Worked ${tcFmt(live.worked)} so far. Tap to come back.`;
-        cta = 'Open';
     } else if (live.status === 'done' || live.status === 'approved') {
-        dot = ''; status = `Clocked out · ${tcFmt(live.worked)}`;
+        tone = ''; status = `Clocked out · ${tcFmt(live.worked)}`;
         sub = live.status === 'approved' ? 'Approved by your manager.' : 'Today’s hours are in — nice work.';
-        cta = 'View';
     } else {
-        dot = 'off'; status = 'You’re off the clock';
-        sub = 'Tap to clock in for the day.'; cta = 'Clock in';
+        tone = 'off'; status = 'You’re off the clock';
+        sub = 'Tap to clock in for the day.';
     }
     tile.innerHTML = `
-        <span class="tc-dot ${dot}"></span>
-        <span class="tc-copy">
-            <span class="tc-status">${status}</span>
-            <span class="tc-sub">${sub}</span>
+        <span class="dept-icon ${tone}">${iconSvg('clock')}</span>
+        <span class="dept-copy">
+            <span class="dept-title">${status}</span>
+            <span class="dept-note">${sub}</span>
         </span>
-        <span class="tc-cta">${cta} →</span>`;
+        <span class="dept-arrow">→</span>`;
 }
 
 function startTileTick() {
@@ -4101,7 +4107,7 @@ async function appendTimeClock(main, role) {
         </div>`;
     const tile = document.createElement('button');
     tile.type = 'button';
-    tile.className = 'tc-tile';
+    tile.className = 'dept-row fade-in';
     tile.id = 'tcTile';
     tile.addEventListener('click', openClockSheet);
     section.appendChild(tile);
@@ -4132,17 +4138,16 @@ function appendTimesheetLink(main, role) {
             <h2 class="workbench-title">Hourly Timesheet</h2>
             <span class="workbench-meta">Approve &amp; export</span>
         </div>`;
-    const tile = document.createElement('button');
-    tile.type = 'button';
-    tile.className = 'tc-tile';
+    const tile = document.createElement('a');
+    tile.className = 'dept-row fade-in';
+    tile.href = 'hr/time-clock/timesheet.html';
     tile.innerHTML = `
-        <span class="tc-dot"></span>
-        <span class="tc-copy">
-            <span class="tc-status">Team time clock</span>
-            <span class="tc-sub">Review hours, fix a punch, approve, and export to the Controller.</span>
+        <span class="dept-icon">${iconSvg('clock')}</span>
+        <span class="dept-copy">
+            <span class="dept-title">Team time clock</span>
+            <span class="dept-note">Review hours, fix a punch, approve, and export to the Controller.</span>
         </span>
-        <span class="tc-cta">Open →</span>`;
-    tile.addEventListener('click', () => { window.location.href = 'hr/time-clock/timesheet.html'; });
+        <span class="dept-arrow">→</span>`;
     section.appendChild(tile);
     main.appendChild(section);
 }
@@ -4358,17 +4363,18 @@ function appendDirectoryTile(main, role) {
             <h2 class="workbench-title">Team Directory</h2>
             <span class="workbench-meta">Who’s who</span>
         </div>`;
-    const tile = document.createElement('button');
-    tile.type = 'button';
-    tile.className = 'tc-tile';
+    const tile = document.createElement('article');
+    tile.className = 'dept-row fade-in';
+    tile.tabIndex = 0;
     tile.innerHTML = `
-        <span class="tc-dot"></span>
-        <span class="tc-copy">
-            <span class="tc-status">Team Directory</span>
-            <span class="tc-sub">Everyone’s name &amp; position, plus company contact info.</span>
+        <span class="dept-icon">${iconSvg('people')}</span>
+        <span class="dept-copy">
+            <span class="dept-title">Team Directory</span>
+            <span class="dept-note">Everyone’s name &amp; position, plus company contact info.</span>
         </span>
-        <span class="tc-cta">Open →</span>`;
+        <span class="dept-arrow">→</span>`;
     tile.addEventListener('click', openDirectory);
+    tile.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openDirectory(); });
     section.appendChild(tile);
     main.appendChild(section);
 }
