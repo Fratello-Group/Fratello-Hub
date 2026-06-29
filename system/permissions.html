@@ -514,6 +514,31 @@
             text-transform: none; letter-spacing: 0;
         }
 
+        /* ── Clean People list (matches the Team Directory) ── */
+        #addPersonBtn { display: inline-flex; align-items: center; gap: 7px; }
+        #addPersonBtn svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2.4; fill: none; stroke-linecap: round; }
+        .mp-group { margin-top: 24px; }
+        .mp-glabel { display: flex; align-items: center; gap: 9px; padding-bottom: 8px; margin-bottom: 2px; border-bottom: 2px solid var(--divider-dark, #E6EAE9); }
+        .mp-glabel .dot { width: 9px; height: 9px; border-radius: 999px; flex: 0 0 auto; }
+        .mp-glabel .lbl { font-size: 14px; font-weight: 800; color: var(--ink, #16262E); }
+        .mp-glabel .cnt { font-size: 11px; font-weight: 800; color: var(--teal-ink, #1E7E77); background: var(--teal-mute, #E8F4F2); border-radius: 999px; padding: 1px 9px; }
+        .mp-glabel .hint { margin-left: auto; font-size: 11px; color: var(--slate, #5A6B68); }
+        .mp-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 6px; border: none; border-bottom: 1px solid #F1F3F2; background: none; cursor: pointer; text-align: left; font: inherit; }
+        .mp-row:hover { background: #FBFDFC; }
+        .mp-ava { width: 34px; height: 34px; border-radius: 999px; background: #EEF1F0; color: #5a6b68; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex: 0 0 auto; }
+        .mp-row.lead .mp-ava { background: var(--teal-mute, #E8F4F2); color: var(--teal-ink, #1E7E77); box-shadow: inset 0 0 0 1.5px var(--teal, #2FA9A0); }
+        .mp-meta { display: flex; flex-direction: column; min-width: 0; margin-right: auto; }
+        .mp-name { font-size: 14.5px; font-weight: 700; color: var(--ink, #16262E); line-height: 1.2; }
+        .mp-sub { font-size: 12px; color: var(--slate, #5A6B68); margin-top: 2px; }
+        .mp-pill { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+        .mp-pill.signed { background: #E6F4EF; color: #1E7E77; }
+        .mp-pill.invited { background: #FAF1E2; color: #B5780F; }
+        .mp-pill.notinv { background: #EEF1F0; color: #5a6b68; }
+        .mp-pill.draft { background: var(--teal-mute, #E8F4F2); color: #1E7E77; }
+        .mp-pill.inactive { background: #FBE9E7; color: #C0392B; }
+        .mp-chev { color: #B7C2BF; font-size: 16px; font-weight: 800; margin-left: 10px; flex: 0 0 auto; }
+        .mp-empty { color: var(--slate, #5A6B68); font-size: 14px; padding: 16px 2px; }
+
         /* Edit person bottom-sheet */
         .sheet-overlay {
             display: none;
@@ -897,13 +922,13 @@
         <div id="fratello-hub-header"></div>
 
         <main>
-            <div class="eyebrow">Manage People</div>
-            <h1>Add people, set access and roles, and remove accounts.</h1>
-            <p class="lede">Add the person once, choose their roster details and Hub access, then send their setup email from here. They set their own password, but they do not choose what they can see.</p>
+            <div class="eyebrow">Settings · Manage People</div>
+            <h1>People.</h1>
+            <p class="lede">Add someone, set what they can see, or tap a name to edit, invite, or set them inactive.</p>
 
-            <div class="access-grid" id="profileGrid"></div>
+            <div class="access-grid" id="profileGrid" style="display:none;"></div>
 
-            <div class="admin-panel">
+            <div class="admin-panel" id="addPanel" style="display:none;">
                 <div class="admin-panel-title">Add staff member and invite</div>
                 <p class="admin-panel-copy">This is the main place to add a person to the Hub. It saves the roster details, access level, and setup invite together.</p>
                 <div class="form-grid">
@@ -959,40 +984,33 @@
                 </div>
                 <div class="actions">
                     <span class="save-state" id="adminMessage">Invites and profile changes are saved to the HUB.</span>
+                    <button class="ghost-button" type="button" onclick="toggleAddPanel(false)">Cancel</button>
                     <button class="ghost-button" id="saveDraftButton" type="button" onclick="saveDraftFromForm()">Save for later</button>
                     <button class="ghost-button primary-button" id="inviteButton" type="button" onclick="inviteUser()">Add & Send Invite</button>
                 </div>
                 <div class="link-output" id="inviteOutput"></div>
             </div>
 
-            <div class="section-label">People Access</div>
-            <div id="staffFilters" style="display:flex; flex-wrap:wrap; gap:10px; margin:0 0 14px; align-items:center;">
-                <input class="text-input" id="staffSearch" type="search" placeholder="Search name, email, or title" style="flex:1 1 220px; min-width:200px;">
-                <select id="staffProfileFilter" style="flex:0 1 200px;"><option value="">All access profiles</option></select>
-                <select id="staffAreaFilter" style="flex:0 1 200px;"><option value="">All visible areas</option></select>
-                <select id="staffSort" style="flex:0 1 200px;" title="Sort the list">
+            <div id="staffFilters" style="display:flex; flex-wrap:wrap; gap:10px; margin:0 0 6px; align-items:center;">
+                <input class="text-input" id="staffSearch" type="search" placeholder="Search name, email, or role" style="flex:1 1 220px; min-width:200px;">
+                <button class="ghost-button primary-button" id="addPersonBtn" type="button" onclick="toggleAddPanel()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Add person
+                </button>
+                <select id="staffProfileFilter" style="display:none;"><option value="">All access profiles</option></select>
+                <select id="staffAreaFilter" style="display:none;"><option value="">All visible areas</option></select>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin:0 2px 4px;">
+                <select id="staffSort" style="flex:0 0 auto; font-size:12px;" title="Sort the list">
                     <option value="owners">Sort: Owners first</option>
                     <option value="department">Sort: Department</option>
                     <option value="az">Sort: A–Z</option>
                     <option value="recent">Sort: Recently added</option>
                 </select>
             </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Person</th>
-                            <th>Department &amp; Level</th>
-                            <th>Visible Areas</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staffRows"></tbody>
-                </table>
-            </div>
+            <div id="staffRows"></div>
 
             <div class="actions">
-                <span class="save-state" id="saveState">Loading staff permissions...</span>
+                <span class="save-state" id="saveState">Loading people…</span>
             </div>
         </main>
     </div>
@@ -1788,6 +1806,7 @@
                 });
                 audit('draft_saved', { target_name: payload.name, target_email: payload.email || '' });
                 clearInviteForm();
+                toggleAddPanel(false);
                 await loadUsers();
                 document.getElementById('adminMessage').textContent = `Saved ${payload.name} as a draft. Come back any time to add their email and invite.`;
             } catch (error) {
@@ -2116,22 +2135,35 @@
             { key: 'inactive',  label: 'Inactive',                  help: 'Cannot sign in', dot: '#C0392B' }
         ];
 
-        function groupHeaderRow(group, count) {
-            return `
-                <tr class="group-row">
-                    <td colspan="4">
-                        <span class="group-dot" style="background:${group.dot}"></span>
-                        <span class="group-label">${escapeHtml(group.label)}</span>
-                        <span class="group-count">${count}</span>
-                        <span class="group-help">${escapeHtml(group.help)}</span>
-                    </td>
-                </tr>`;
+        function mpIni(name) {
+            return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('') || '?';
         }
 
-        function rowFor(person) {
-            if (person.draftOnly) return draftRow(person);
-            if (person.rosterOnly) return rosterRow(person);
-            return liveRow(person);
+        function mpGroupHeader(group, count) {
+            return `<div class="mp-glabel"><span class="dot" style="background:${group.dot}"></span><span class="lbl">${escapeHtml(group.label)}</span><span class="cnt">${count}</span><span class="hint">${escapeHtml(group.help)}</span></div>`;
+        }
+
+        function mpStatusPill(person, bucket) {
+            if (bucket === 'signedin') return '<span class="mp-pill signed">Signed in</span>';
+            if (bucket === 'invited') return '<span class="mp-pill invited">Invited</span>';
+            if (bucket === 'inactive') return '<span class="mp-pill inactive">Inactive</span>';
+            if (person.draftOnly) return '<span class="mp-pill draft">Draft</span>';
+            return '<span class="mp-pill notinv">Not invited</span>';
+        }
+
+        // One clean, tappable row per person (opens the edit sheet) — same DNA as
+        // the Team Directory. Title · Department · Level in the subline.
+        function mpRow(person, bucket) {
+            const dept = personDepartment(person);
+            const tier = personRoleTier(person);
+            const lead = tier && tier !== 'Staff';
+            const bits = [person.title, dept, tier].map(x => String(x || '').trim()).filter(Boolean);
+            return `<button class="mp-row${lead ? ' lead' : ''}" type="button" data-id="${escapeHtml(person.id)}" onclick="openEditPerson(this.dataset.id)">
+                <span class="mp-ava">${escapeHtml(mpIni(person.name))}</span>
+                <span class="mp-meta"><span class="mp-name">${escapeHtml(person.name || '—')}</span><span class="mp-sub">${escapeHtml(bits.join(' · '))}</span></span>
+                ${mpStatusPill(person, bucket)}
+                <span class="mp-chev">›</span>
+            </button>`;
         }
 
         function renderStaff() {
@@ -2140,24 +2172,38 @@
             const filtered = merged.filter(person => personMatchesStaffFilters(person, staffFilterValues()));
             const list = sortPeople(filtered, document.getElementById('staffSort')?.value || 'owners');
             if (!list.length) {
-                rows.innerHTML = '<tr><td colspan="4">No people match these filters.</td></tr>';
+                rows.innerHTML = '<div class="mp-empty">No people match your search.</div>';
                 return;
             }
             // Partition into the three (+inactive) buckets, preserving the chosen
-            // sort order within each section.
+            // sort order within each section (managers/owners on top).
             const buckets = {};
             list.forEach(person => {
                 const key = personBucket(person);
                 (buckets[key] = buckets[key] || []).push(person);
             });
-            let html = '';
-            STAFF_GROUPS.forEach(group => {
+            rows.innerHTML = STAFF_GROUPS.map(group => {
                 const people = buckets[group.key];
-                if (!people || !people.length) return;
-                html += groupHeaderRow(group, people.length);
-                html += people.map(rowFor).join('');
-            });
-            rows.innerHTML = html;
+                if (!people || !people.length) return '';
+                return `<div class="mp-group">${mpGroupHeader(group, people.length)}${people.map(p => mpRow(p, group.key)).join('')}</div>`;
+            }).join('');
+        }
+
+        // Show/hide the "Add staff member" form behind the + Add person button.
+        function toggleAddPanel(forceOpen) {
+            const panel = document.getElementById('addPanel');
+            const btn = document.getElementById('addPersonBtn');
+            if (!panel) return;
+            const open = (forceOpen === undefined) ? (panel.style.display === 'none') : forceOpen;
+            panel.style.display = open ? 'block' : 'none';
+            if (btn) btn.style.display = open ? 'none' : '';
+            if (open) {
+                try { clearInviteForm(); } catch (e) {}
+                document.getElementById('inviteOutput').style.display = 'none';
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const nm = document.getElementById('inviteName');
+                if (nm) window.setTimeout(() => nm.focus(), 220);
+            }
         }
 
         function liveRow(person) {
@@ -2628,6 +2674,7 @@
         window.sendInviteForPerson = sendInviteForPerson;
         window.updateAccess = updateAccess;
         window.setHourly = setHourly;
+        window.toggleAddPanel = toggleAddPanel;
         window.prefillInvite = prefillInvite;
         window.prefillFromDraft = prefillFromDraft;
         window.saveDraftFromForm = saveDraftFromForm;
