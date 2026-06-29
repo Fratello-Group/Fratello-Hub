@@ -451,6 +451,9 @@
         .emp-row select { font-weight: 700; }
         .roster-row { background: #FAFAF9; }
         .roster-row .person-name { color: var(--slate, #44524f); }
+        .draft-row { background: var(--brand-soft, #E8F4F2); }
+        .draft-row .person-name { color: var(--ink, #16262E); }
+        .draft-row .status.invited { background: var(--brand-soft, #E8F4F2); color: var(--brand-dark, #1E7E77); }
         .field.has-error select {
             border-color: var(--error);
             box-shadow: none;
@@ -824,6 +827,7 @@
                 </div>
                 <div class="actions">
                     <span class="save-state" id="adminMessage">Invites and profile changes are saved to the HUB.</span>
+                    <button class="ghost-button" id="saveDraftButton" type="button" onclick="saveDraftFromForm()">Save for later</button>
                     <button class="ghost-button primary-button" id="inviteButton" type="button" onclick="inviteUser()">Add & Send Invite</button>
                 </div>
                 <div class="link-output" id="inviteOutput"></div>
@@ -879,7 +883,7 @@
         } from './fratello-auth.js';
         import { logActivity } from './api/activity-logger.js';
         import { PEOPLE } from '/cfia/config/people.js';
-        import { syncDirectory } from './api/firestore-client.js';
+        import { syncDirectory, getPeopleDrafts, savePeopleDraft, deletePeopleDraft } from './api/firestore-client.js';
 
         const USE_FIREBASE_AUTH = firebaseConfigured();
 
@@ -996,6 +1000,7 @@
         }
 
         let STAFF = [];
+        let DRAFTS = [];
         let LAST_GENERATED_LINK = '';
         let LAST_COPY_LABEL = 'Copy Link';
 
@@ -1386,8 +1391,16 @@
         function rosterPlaceholders() {
             // A roster person is "already in the Hub" if a live account matches by
             // email OR by name — so anyone with an account never shows as "Not invited".
-            const haveEmail = new Set(STAFF.map(p => emailKey(p.email)).filter(Boolean));
-            const haveName = new Set(STAFF.map(p => normName(p.name)));
+            // A roster person who's been saved as a draft is shown as the draft row
+            // (so we skip the bare placeholder for them here, too).
+            const haveEmail = new Set([
+                ...STAFF.map(p => emailKey(p.email)),
+                ...DRAFTS.map(d => emailKey(d.email))
+            ].filter(Boolean));
+            const haveName = new Set([
+                ...STAFF.map(p => normName(p.name)),
+                ...DRAFTS.map(d => normName(d.name))
+            ].filter(Boolean));
             return (PEOPLE || [])
                 .filter(p => p && p.name && !/\(name tbd\)/i.test(p.name)
                     && !haveName.has(normName(p.name))
@@ -1461,9 +1474,146 @@
             document.getElementById('inviteEmail').focus();
         }
 
+        // ── Saved drafts (set up now, invite later) ──
+        // A draft is a person the Owner has configured but not yet invited (often
+        // because they don't have the email yet). Drafts live in Firestore so they
+        // persist across sessions and devices, and they drop off once invited.
+        function draftPeople() {
+            // Hide any draft that now has a real account (matched by email or name).
+            const haveEmail = new Set(STAFF.map(p => emailKey(p.email)).filter(Boolean));
+            const haveName = new Set(STAFF.map(p => normName(p.name)));
+            return (DRAFTS || [])
+                .filter(d => d && d.name
+                    && !haveName.has(normName(d.name))
+                    && !(d.email && haveEmail.has(emailKey(d.email))))
+                .map(d => {
+                    const tier = d.role_tier || 'Staff';
+                    const department = d.department || '';
+                    return {
+                        id: 'draft:' + d.id,
+                        draftId: d.id,
+                        source: 'draft', draftOnly: true,
+                        name: d.name, title: d.title || '', email: d.email || '',
+                        profile: deriveProfile(tier, department),
+                        department, role_tier: tier,
+                        manager_id: d.manager_id || '', hourly: d.hourly === true,
+                        hire_date: '', active: true, status: 'draft',
+                        created_at: (d.updated_at && typeof d.updated_at.toMillis === 'function') ? d.updated_at.toMillis() : 0
+                    };
+                });
+        }
+
+        function draftRow(person) {
+            const department = personDepartment(person);
+            const tier = personRoleTier(person);
+            const hasEmail = Boolean(person.email);
+            const pay = person.hourly ? 'Hourly' : 'Salaried';
+            const emailLine = hasEmail
+                ? escapeHtml(person.email)
+                : '<span style="color:var(--slate);">No email yet</span>';
+            return `
+                <tr class="roster-row draft-row">
+                    <td>
+                        <span class="person-name">${escapeHtml(person.name)}</span>
+                        <span class="person-title">${escapeHtml(person.title || 'No title listed')}<br>${emailLine}</span>
+                        <span class="person-meta">${escapeHtml(department || '—')} · ${escapeHtml(tier)} · ${escapeHtml(pay)}</span>
+                    </td>
+                    <td><span class="person-meta" style="color:var(--slate); text-transform:none; letter-spacing:0;">Saved — edit to finish</span></td>
+                    <td><div class="profile-access">${accessTagsFor(tier, department)}</div></td>
+                    <td>
+                        <span class="status invited">Draft</span>
+                        <span class="status-help">Saved details — not invited yet</span>
+                        <div class="row-actions">
+                            <button class="ghost-button primary-button" type="button" data-draft="${escapeHtml(person.draftId)}" onclick="prefillFromDraft(this.dataset.draft)">${hasEmail ? 'Review &amp; invite' : 'Add email &amp; invite'}</button>
+                            <button class="ghost-button danger-button" type="button" data-draft="${escapeHtml(person.draftId)}" onclick="deleteDraft(this.dataset.draft)">Delete Draft</button>
+                        </div>
+                    </td>
+                </tr>`;
+        }
+
+        function prefillFromDraft(draftId) {
+            const d = (DRAFTS || []).find(x => x.id === draftId);
+            if (!d) return;
+            document.getElementById('inviteName').value = d.name || '';
+            document.getElementById('inviteTitle').value = d.title || '';
+            document.getElementById('inviteEmail').value = d.email || '';
+            const deptSel = document.getElementById('inviteDepartment');
+            const lvlSel = document.getElementById('inviteRoleTier');
+            const empSel = document.getElementById('inviteEmployment');
+            const mgrSel = document.getElementById('inviteManager');
+            if (deptSel) deptSel.value = d.department || '';
+            if (lvlSel) lvlSel.value = d.role_tier || '';
+            if (typeof syncDerivedProfile === 'function') syncDerivedProfile();
+            if (empSel) empSel.value = d.hourly ? 'hourly' : 'salaried';
+            if (mgrSel && d.manager_id) mgrSel.value = d.manager_id;
+            document.getElementById('adminMessage').textContent = d.email
+                ? `Reviewing ${d.name}. Check the details, then send the invite — or Save for later to keep editing.`
+                : `Finish ${d.name}'s setup — add their email, then send the invite. Or Save for later to keep the draft.`;
+            document.getElementById('inviteName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            (d.email ? document.getElementById('inviteName') : document.getElementById('inviteEmail')).focus();
+        }
+
+        async function saveDraftFromForm() {
+            clearInviteErrors();
+            const payload = invitePayloadFromForm();
+            if (!payload.name) {
+                setFieldError('InviteName', 'Add a name to save a draft.');
+                document.getElementById('inviteName').focus();
+                document.getElementById('adminMessage').textContent = 'A name is needed to save a draft (email can wait).';
+                return;
+            }
+            const button = document.getElementById('saveDraftButton');
+            const original = button ? button.textContent : '';
+            if (button) { button.disabled = true; button.textContent = 'Saving...'; }
+            try {
+                await savePeopleDraft({
+                    name: payload.name,
+                    title: payload.title,
+                    email: payload.email,
+                    department: payload.department,
+                    role_tier: payload.roleTier,
+                    manager_id: payload.managerId,
+                    hourly: payload.hourly
+                });
+                audit('draft_saved', { target_name: payload.name, target_email: payload.email || '' });
+                clearInviteForm();
+                await loadUsers();
+                document.getElementById('adminMessage').textContent = `Saved ${payload.name} as a draft. Come back any time to add their email and invite.`;
+            } catch (error) {
+                document.getElementById('adminMessage').textContent = 'Could not save the draft: ' + (error?.message || 'unknown error');
+            } finally {
+                if (button) { button.disabled = false; button.textContent = original || 'Save for later'; }
+            }
+        }
+
+        async function deleteDraft(draftId) {
+            const d = (DRAFTS || []).find(x => x.id === draftId);
+            const name = d ? d.name : 'this draft';
+            if (!window.confirm(`Delete the draft for ${name}? Their details will be removed (no account is affected).`)) return;
+            try {
+                await deletePeopleDraft(draftId);
+                audit('draft_deleted', { target_name: name });
+                await loadUsers();
+                document.getElementById('adminMessage').textContent = `Deleted the draft for ${name}.`;
+            } catch (error) {
+                document.getElementById('adminMessage').textContent = 'Could not delete the draft: ' + (error?.message || 'unknown error');
+            }
+        }
+
+        // After someone is invited, drop any matching draft (by email or name).
+        async function removeMatchingDrafts(email, name) {
+            const e = emailKey(email);
+            const n = normName(name);
+            const matches = (DRAFTS || []).filter(d =>
+                (e && emailKey(d.email) === e) || (n && normName(d.name) === n));
+            for (const d of matches) {
+                try { await deletePeopleDraft(d.id); } catch (error) { /* best-effort */ }
+            }
+        }
+
         function renderStaff() {
             const rows = document.getElementById('staffRows');
-            const merged = STAFF.concat(rosterPlaceholders());
+            const merged = STAFF.concat(draftPeople()).concat(rosterPlaceholders());
             const filtered = merged.filter(person => personMatchesStaffFilters(person, staffFilterValues()));
             const list = sortPeople(filtered, document.getElementById('staffSort')?.value || 'owners');
             if (!list.length) {
@@ -1471,6 +1621,7 @@
                 return;
             }
             rows.innerHTML = list.map(person => {
+                if (person.draftOnly) return draftRow(person);
                 if (person.rosterOnly) return rosterRow(person);
                 const status = statusMeta(person.status);
                 const isDisabled = person.status === 'disabled';
@@ -1587,9 +1738,15 @@
             }
         }
 
+        async function loadDrafts() {
+            try { DRAFTS = await getPeopleDrafts(); }
+            catch (error) { DRAFTS = []; /* drafts are best-effort */ }
+        }
+
         async function loadUsers() {
             if (USE_FIREBASE_AUTH) {
                 STAFF = dedupeStaff(await listHubUsers());
+                await loadDrafts();
                 refreshRosterSelects();
                 renderStaff();
                 document.getElementById('saveState').textContent = 'Staff permissions loaded from Firestore.';
@@ -1607,6 +1764,7 @@
 
             const data = await authRequest({ action: 'users:list' });
             STAFF = dedupeStaff(data.users);
+            await loadDrafts();
             refreshRosterSelects();
             renderStaff();
             document.getElementById('saveState').textContent = 'Staff permissions loaded from the HUB.';
@@ -1680,6 +1838,8 @@
                     try { await setHubUserHourly(payload.email, payload.hourly); } catch (e) { /* non-fatal */ }
                 }
                 audit('invite_sent', { target_email: payload.email, target_name: payload.name, profile: payload.profile, hourly: payload.hourly });
+                // They're now a real account — clear any saved draft for them.
+                await removeMatchingDrafts(payload.email, payload.name);
                 clearInviteForm();
                 await loadUsers();
             } catch (error) {
@@ -1931,6 +2091,9 @@
         window.updateAccess = updateAccess;
         window.setHourly = setHourly;
         window.prefillInvite = prefillInvite;
+        window.prefillFromDraft = prefillFromDraft;
+        window.saveDraftFromForm = saveDraftFromForm;
+        window.deleteDraft = deleteDraft;
         window.syncDerivedProfile = syncDerivedProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;

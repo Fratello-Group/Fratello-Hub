@@ -310,6 +310,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── People drafts ──
+    // Pre-configured employees the Owner is setting up but hasn't invited yet
+    // (no account / email required). Owner + Controller only.
+    match /people_drafts/{id} {
+      allow read, write: if isOwnerOrController();
+    }
+
     // ── Employee directory (name + position only) ──
     // A safe, company-wide projection of the live roster: every signed-in person
     // can read it (the dashboard directory); only Owner/Controller write it

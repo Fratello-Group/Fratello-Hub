@@ -24,7 +24,8 @@ const COLLECTIONS = {
     profiles: 'hubProfiles',
     avatarLogs: 'avatar_logs',
     timeClock: 'time_clock',
-    directory: 'directory'
+    directory: 'directory',
+    peopleDrafts: 'people_drafts'
 };
 
 const APPROVAL_ENDPOINT = '/.netlify/functions/time-off-approval-action';
@@ -536,6 +537,57 @@ export async function syncDirectory(people = []) {
     snapshot.docs.forEach(snap => { if (!wanted.has(snap.id)) ops.push(deleteDoc(doc(db, COLLECTIONS.directory, snap.id))); });
     await Promise.all(ops);
     return wanted.size;
+}
+
+// ── People drafts ──
+// Employees the Owner is configuring but hasn't invited yet (no account/email
+// required). Owner/Controller only. Keyed by a slug so the same draft can be
+// edited repeatedly without piling up duplicates.
+
+function slugForDraft(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFKD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+}
+
+export async function getPeopleDrafts() {
+    const { db } = requireFirestore();
+    const snapshot = await getDocs(collection(db, COLLECTIONS.peopleDrafts));
+    return snapshot.docs
+        .map(withId)
+        .filter(Boolean)
+        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+}
+
+export async function savePeopleDraft(draft = {}) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const id = draft.id ? slugForDraft(draft.id)
+        : slugForDraft(draft.email || draft.name);
+    if (!id) return null;
+    await setDoc(doc(db, COLLECTIONS.peopleDrafts, id), {
+        name: cleanOptionalText(draft.name),
+        title: cleanOptionalText(draft.title),
+        department: cleanOptionalText(draft.department),
+        role_tier: cleanOptionalText(draft.role_tier),
+        email: cleanOptionalText(draft.email),
+        manager_id: cleanOptionalText(draft.manager_id),
+        hourly: draft.hourly === true,
+        created_via: 'hub-draft',
+        updated_at: serverTimestamp()
+    }, { merge: true });
+    return id;
+}
+
+export async function deletePeopleDraft(id) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const key = slugForDraft(id);
+    if (!key) return;
+    await deleteDoc(doc(db, COLLECTIONS.peopleDrafts, key));
 }
 
 export async function getGlobalSettings() {
