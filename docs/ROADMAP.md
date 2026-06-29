@@ -9,6 +9,14 @@ Status legend: **Idea** (scoping) · **Planned** (agreed, not started) · **In p
 
 ## Backlog / Ideas
 
+### Time tracker → next level: payroll-grade export + production KPIs
+- **Status:** Idea / scoping · **Owner:** Chris · **Augments/replaces:** QuickBooks Time
+- **Stage 1:** Controller can download an "Hours by Day" payroll CSV in the *exact* format he uses now (Employee · Date · Regular · Overtime · Vacation · Total), with daily OT calc, vacation merged from time off, and export gated on approval.
+- **Stage 2:** paid/unpaid breaks, paid/unpaid time off, per-department subtotals, the 3 export variants (Totals / By Day / Individual).
+- **Stage 3:** Production Manager (Kyle) KPI dashboard + grading rubric (on-time %, OT %, absences, reliability score; manager rates each person per period) — needs a light "expected shift" since Schedule isn't used.
+- **Stage 4:** productivity/output KPIs once production output is captured.
+- Full write-up: [`docs/ideas/time-tracker-next-level.md`](ideas/time-tracker-next-level.md)
+
 ### In-house Badger Maps replacement — Odoo-native field sales tool
 - **Status:** Idea / scoping · **Owner:** Chris · **Saves:** ~$2–4K/yr (Badger subscription)
 - A field-sales app wired directly to Odoo (live, no synced copy): sales reps see
