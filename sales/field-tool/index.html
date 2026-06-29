@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/tabler-icons.min.css">
 <style>
-:root{--ink:#1A1A1A;--teal:#36B3AF;--teald:#167C6E;--mint:#E3F1ED;--grey:#8C8B86;--line:#ECEAE4;--soft:#F4F3F0;--coral:#C0552F;--coralbg:#FBE9E1;--amber:#C8973A;--amberbg:#F7EEDB}
+:root{--ink:#1A1A1A;--teal:#36B3AF;--teald:#167C6E;--mint:#E3F1ED;--grey:#8C8B86;--line:#ECEAE4;--soft:#F4F3F0;--coral:#6E4A2C;--coralbg:#EFE7DD;--amber:#C8973A;--amberbg:#F7EEDB}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 #app{font-family:'Montserrat','Helvetica Neue',Arial,sans-serif;color:var(--ink)}
 .app{max-width:434px;margin:0 auto;background:#fff;min-height:88vh;display:flex;flex-direction:column;position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden}
@@ -52,11 +52,20 @@ body.ft-checking #app{opacity:.4}
 .tab.on{color:var(--teal)}
 .tab i{font-size:21px}
 .back{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--grey);padding:16px 18px 4px;cursor:pointer}
+.crumbbar{display:flex;align-items:center;gap:10px;padding:14px 18px 4px;flex-wrap:wrap}
+.backchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px 6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--teald);font-size:12px;font-weight:700;cursor:pointer}
+.backchip:hover{background:var(--mint)}
+.crumbs{font-size:12px;font-weight:600;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.crumbs b{color:var(--ink);font-weight:700}
+.fuact{display:flex;gap:6px;align-items:center}
+.fubtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--grey);cursor:pointer;font-size:15px}
+.fubtn.done{color:#fff;background:var(--teal);border-color:var(--teal)}
+.fubtn:active{background:var(--soft)}
 .badges{display:flex;gap:6px;flex-wrap:wrap;padding:6px 18px 14px}
 .bdg{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px}
 .bdg.cat{background:var(--mint);color:var(--teald)}
 .bdg.pr{background:#fff;border:1px solid var(--line);color:var(--ink)}
-.bdg.loan{background:#EAF0FB;color:#2A5CA8;display:inline-flex;align-items:center;gap:4px}
+.bdg.loan{background:#F0EFEA;color:#4A4A4A;display:inline-flex;align-items:center;gap:4px}
 .bdg.cust{background:var(--mint);color:var(--teald)}
 .bdg.prospect{background:var(--amberbg);color:#8a5d12}
 .bdg.lead{background:var(--coralbg);color:var(--coral)}
@@ -143,7 +152,7 @@ textarea{min-height:96px;resize:vertical}
 .fill{height:100%;border-radius:5px;background:var(--teal)}
 .pace{position:absolute;top:-2px;width:2px;height:13px;background:var(--ink);opacity:.55}
 .nudge{display:flex;align-items:flex-start;gap:10px;background:var(--amberbg);border:1px solid #EAD8AE;border-radius:12px;padding:11px 13px;margin:0 18px 10px}
-.nudge.cov{background:#EAF0FB;border-color:#CBDCF4}
+.nudge.cov{background:var(--mint);border-color:#BFE5DD}
 .nudge i{font-size:18px;margin-top:1px}
 .nudge .nx{margin-left:auto;color:var(--grey);cursor:pointer;font-size:16px}
 .nudge .nt{font-size:12.5px;font-weight:700}.nudge .nd{font-size:11px;color:var(--grey);font-weight:500;margin-top:1px}
@@ -234,7 +243,8 @@ async function activateRep(rep){
 }
 function switchRep(id){const r=FC.visibleReps().find(x=>String(x.id)===String(id));if(r)activateRep(r);}
 function go(v,id,extra){route={v,id,extra};window.scrollTo(0,0);render();}
-function render(){({customers:renderList,account:renderAccount,checkin:renderCheckin,schedule:renderSchedule,order:renderOrder,calendar:renderCalendar,month:renderMonth,playbook:renderPlaybook,map:renderMap}[route.v]||renderList)();}
+function render(){({customers:renderList,account:renderAccount,checkin:renderCheckin,schedule:renderSchedule,order:renderOrder,editfu:renderEditFollowup,calendar:renderCalendar,month:renderMonth,playbook:renderPlaybook,map:renderMap}[route.v]||renderList)();}
+function crumb(onclick,trail){return `<div class="crumbbar"><span class="backchip" onclick="${onclick}"><i class="ti ti-chevron-left"></i> Back</span><span class="crumbs">${trail}</span></div>`;}
 function tabbar(active){const t=(k,ic,l)=>`<div class="tab ${active===k?'on':''}" onclick="go('${k}')"><i class="ti ti-${ic}"></i>${l}</div>`;return `<div class="tabbar">${t('customers','users','Customers')}${t('calendar','calendar','Calendar')}${t('month','chart-bar','My Month')}${t('playbook','book-2','Playbook')}</div>`;}
 
 function renderList(){
@@ -245,7 +255,7 @@ function renderList(){
  let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&(F.kind==='all'||(F.kind==='wholesale'?!a.ecom:a.ecom))&&a.name.toLowerCase().includes(F.q.toLowerCase())&&a.ytd>=F.minD&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no));
  list.sort((a,b)=>F.sort==='dollar'?b.ytd-a.ytd:F.sort==='noorder'?wkOrder(b)-wkOrder(a):F.sort==='novisit'?wkVisit(b)-wkVisit(a):F.sort==='recent'?wkOrder(a)-wkOrder(b):a.name.localeCompare(b.name));
  const activeN=(F.cat!=='All')+(F.kind!=='all')+(F.prov!=='All')+(F.city!=='All')+(F.area!=='All')+(F.minD?1:0)+(F.nv?1:0)+(F.no?1:0);
- const rows=list.map(a=>{const st=statusOf(a),od=overdue(a),ct=custType(a.id),ln=meta(a.id).loaner;const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';const tags=(ct!=='Customer'?` · <span style='color:var(--amber);font-weight:700'>${ct}</span>`:'')+(ln?` · <span style='color:#2A5CA8;font-weight:700'>loaner</span>`:'')+(od?` · <span style='color:var(--coral);font-weight:700'>due</span>`:'');return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last order ${ord} · Last visit ${vis}${tags}</div></div><div class="rt"><b>${money(a.ytd)}</b>12-mo</div></div>`;}).join('');
+ const rows=list.map(a=>{const st=statusOf(a),od=overdue(a),ct=custType(a.id),ln=meta(a.id).loaner;const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';const tags=(ct!=='Customer'?` · <span style='color:var(--amber);font-weight:700'>${ct}</span>`:'')+(ln?` · <span style='color:#4A4A4A;font-weight:700'>loaner</span>`:'')+(od?` · <span style='color:var(--coral);font-weight:700'>due</span>`:'');return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last order ${ord} · Last visit ${vis}${tags}</div></div><div class="rt"><b>${money(a.ytd)}</b>12-mo</div></div>`;}).join('');
  const sortChips=Object.keys(SORTS).map(k=>`<span class="pill ${F.sort===k?'on':''}" onclick="F.sort='${k}';renderList()">${SORTS[k]}</span>`).join('');
  const flab=lab=>`<span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;padding:9px 18px 3px;display:block">${lab}</span>`;
  const selFor=(field,values)=>`<div style="padding:0 18px 4px"><select onchange="F.${field}=this.value;renderList()">${['All',...values].map(v=>`<option ${F[field]===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>`;
@@ -276,7 +286,7 @@ function renderAccount(){
  const impPill={high:'imp-high',med:'imp-med',low:'imp-low'}[s.importance||'med'],impTxt={high:'High',med:'Medium',low:'Low'}[s.importance||'med'];
  const touched=S.activities.some(x=>x.acctId===a.id&&x.date.startsWith(MONTH));
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="back" onclick="go('customers')"><i class="ti ti-chevron-left"></i> Customers</div>
+   ${crumb("go('customers')", 'Customers › <b>'+esc(a.name)+'</b>')}
    <div class="h1" style="padding-top:2px">${esc(a.name)}</div>
    <div class="badges"><span class="bdg ${ctcls}">${ct}</span><span class="bdg cat">${esc(a.channel)}</span><span class="bdg pr">${esc(a.priceLevel)}</span>${s.loaner?'<span class="bdg loan"><i class="ti ti-device-desktop"></i>Loaner</span>':''}<span class="bdg imp ${impPill}"><i class="ti ti-flag"></i>${impTxt}</span></div>
    <div class="card">
@@ -310,7 +320,7 @@ function renderCheckin(){
  const a=acct(route.id);ci={type:'Drop In',vstate:'Verified',fu:false,fuDate:'',note:''};
  const opts=TYPES.map(t=>`<option value="${t.n}">${t.n}</option>`).join('');
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="back" onclick="go('account',${a.id})"><i class="ti ti-chevron-left"></i> ${esc(a.name)}</div>
+   ${crumb("go('account',"+a.id+")", 'Customers › '+esc(a.name)+' › <b>Check in</b>')}
    <div class="h1" style="padding-top:2px">Check in</div>
    <div class="note-pre">Logging a touch with <b>${esc(a.name)}</b> · ${TODAY.toLocaleDateString('en-CA',{month:'short',day:'numeric'})}</div>
    <div class="flabel">Notes <span style="color:var(--grey);font-weight:600;text-transform:none;letter-spacing:0">— the real intel</span></div>
@@ -334,17 +344,17 @@ function setWk(w){document.querySelectorAll('#wks .wk').forEach(e=>e.classList.r
 async function saveCheckin(){const a=acct(route.id),note=$('ci-note').value.trim();try{const act=await FC.logActivity(a,{type:ci.type,date:TODAY.toISOString().slice(0,10),vstate:ci.vstate,note});S.activities.push(act);if(ci.fu&&ci.fuDate){const f=await FC.addFollowup(a,{due:ci.fuDate,reason:note||ci.type,type:ci.type});S.followups.push(f);}}catch(e){alert('Could not save: '+e.message);return;}go('account',a.id);}
 
 let sch={};
-function renderSchedule(){const a=acct(route.id),s=meta(a.id);const d=new Date(TODAY);d.setDate(d.getDate()+(s.cadence||3)*7);sch={date:d.toISOString().slice(0,10),type:'Drop In'};const opts=TYPES.map(t=>`<option value="${t.n}">${t.n}</option>`).join('');$('app').innerHTML=`<div class="app"><div class="view"><div class="back" onclick="go('account',${a.id})"><i class="ti ti-chevron-left"></i> ${esc(a.name)}</div><div class="h1" style="padding-top:2px">Schedule</div><div class="note-pre">Plan a next touch with <b>${esc(a.name)}</b>. It lands on your Calendar and syncs to Apple/Outlook.</div><div class="flabel">When</div><div style="padding:0 18px 12px"><input type="date" id="sc-date" value="${sch.date}" onchange="sch.date=this.value"></div><div class="flabel">What</div><div style="padding:0 18px 12px"><select id="sc-type" onchange="sch.type=this.value">${opts}</select></div><div class="flabel">Note <span style="color:var(--grey);font-weight:600;text-transform:none;letter-spacing:0">— optional</span></div><div style="padding:0 18px 12px"><textarea id="sc-note" placeholder="Reason / what to bring…" style="min-height:70px"></textarea></div><div class="save" onclick="saveSchedule()">Add to calendar</div></div></div>`;}
+function renderSchedule(){const a=acct(route.id),s=meta(a.id);const d=new Date(TODAY);d.setDate(d.getDate()+(s.cadence||3)*7);sch={date:d.toISOString().slice(0,10),type:'Drop In'};const opts=TYPES.map(t=>`<option value="${t.n}">${t.n}</option>`).join('');$('app').innerHTML=`<div class="app"><div class="view">${crumb("go('account',"+a.id+")", 'Customers › '+esc(a.name)+' › <b>Schedule</b>')}<div class="h1" style="padding-top:2px">Schedule</div><div class="note-pre">Plan a next touch with <b>${esc(a.name)}</b>. It lands on your Calendar and syncs to Apple/Outlook.</div><div class="flabel">When</div><div style="padding:0 18px 12px"><input type="date" id="sc-date" value="${sch.date}" onchange="sch.date=this.value"></div><div class="flabel">What</div><div style="padding:0 18px 12px"><select id="sc-type" onchange="sch.type=this.value">${opts}</select></div><div class="flabel">Note <span style="color:var(--grey);font-weight:600;text-transform:none;letter-spacing:0">— optional</span></div><div style="padding:0 18px 12px"><textarea id="sc-note" placeholder="Reason / what to bring…" style="min-height:70px"></textarea></div><div class="save" onclick="saveSchedule()">Add to calendar</div></div></div>`;}
 async function saveSchedule(){const a=acct(route.id);try{const f=await FC.addFollowup(a,{due:$('sc-date').value,reason:$('sc-note').value.trim()||sch.type,type:sch.type});S.followups.push(f);}catch(e){alert('Could not save: '+e.message);return;}go('calendar');}
 
-function renderOrder(){const a=acct(route.id),o=a.recentOrders[route.extra];const lines=o.lines.map(l=>`<div class="li"><div><div class="ln">${esc(l.product)}</div><div class="ld">${esc(a.priceLevel)} · ${money(l.price)} ea</div></div><div><div class="lp">${money(l.subtotal)}</div><div class="lq">×${l.qty}</div></div></div>`).join('')||'<div class="sb">No line items.</div>';$('app').innerHTML=`<div class="app"><div class="view"><div class="back" onclick="go('account',${a.id})"><i class="ti ti-chevron-left"></i> ${esc(a.name)}</div><div class="h1" style="padding-top:2px">Order ${esc(o.name)}</div><div class="note-pre">${esc(o.date)} · Confirmed</div><div class="card" style="margin-top:12px">${lines}<div class="tot"><span>Total</span><span>${money(o.amount)}</span></div></div><div class="card" style="display:flex;align-items:center;gap:10px"><i class="ti ti-tag" style="color:var(--teal);font-size:18px"></i><span style="font-size:11.5px;font-weight:600;color:var(--grey)">Pricing shown is this customer's level — <b style="color:var(--ink)">${esc(a.priceLevel)}</b></span></div></div></div>`;}
+function renderOrder(){const a=acct(route.id),o=a.recentOrders[route.extra];const lines=o.lines.map(l=>`<div class="li"><div><div class="ln">${esc(l.product)}</div><div class="ld">${esc(a.priceLevel)} · ${money(l.price)} ea</div></div><div><div class="lp">${money(l.subtotal)}</div><div class="lq">×${l.qty}</div></div></div>`).join('')||'<div class="sb">No line items.</div>';$('app').innerHTML=`<div class="app"><div class="view">${crumb("go('account',"+a.id+")", 'Customers › '+esc(a.name)+' › <b>Order</b>')}<div class="h1" style="padding-top:2px">Order ${esc(o.name)}</div><div class="note-pre">${esc(o.date)} · Confirmed</div><div class="card" style="margin-top:12px">${lines}<div class="tot"><span>Total</span><span>${money(o.amount)}</span></div></div><div class="card" style="display:flex;align-items:center;gap:10px"><i class="ti ti-tag" style="color:var(--teal);font-size:18px"></i><span style="font-size:11.5px;font-weight:600;color:var(--grey)">Pricing shown is this customer's level — <b style="color:var(--ink)">${esc(a.priceLevel)}</b></span></div></div></div>`;}
 
 let showSub=false;
 function renderCalendar(){
  const fu=S.followups.filter(f=>!f.done).sort((x,y)=>x.due<y.due?-1:1);
  const buckets={Overdue:[],'This week':[],'Next week':[],Later:[]};
  fu.forEach(f=>{const d=daysAgo(f.due);if(d>0)buckets.Overdue.push(f);else if(d>=-7)buckets['This week'].push(f);else if(d>=-14)buckets['Next week'].push(f);else buckets.Later.push(f);});
- const item=f=>{const od=daysAgo(f.due)>0;return `<div class="row"><span class="dot ${od?'d-c':'d-a'}"></span><div class="ri" onclick="go('account',${f.acctId})"><div class="nm">${esc(f.acctName)}</div><div class="sb">${esc(f.type)} · ${esc(f.reason)}</div></div><div class="rt">${esc(f.due.slice(5))}</div><span class="segb on" style="margin-left:8px" onclick="doneFu('${f.id}')">Done</span></div>`;};
+ const item=f=>{const od=daysAgo(f.due)>0;return `<div class="row"><span class="dot ${od?'d-c':'d-a'}"></span><div class="ri" onclick="go('account',${f.acctId})"><div class="nm">${esc(f.acctName)}</div><div class="sb">${esc(f.type)} · ${esc(f.reason)}</div></div><div class="rt">${esc(f.due.slice(5))}</div><div class="fuact"><span class="fubtn" title="Edit / reschedule" onclick="go('editfu','${f.id}')"><i class="ti ti-pencil"></i></span><span class="fubtn done" title="Mark done" onclick="doneFu('${f.id}')"><i class="ti ti-check"></i></span></div></div>`;};
  let body='';Object.keys(buckets).forEach(k=>{if(buckets[k].length)body+=`<div class="datehd">${k}</div>`+buckets[k].map(item).join('');});
  const sub=showSub?`<div class="card"><div class="clab"><i class="ti ti-rss" style="color:var(--teal)"></i>&nbsp;Subscribe in Apple / Outlook</div><div style="font-size:12px;color:#5f5e5a;font-weight:500;line-height:1.5;margin-bottom:9px">Paste this link into your calendar (Apple: File → New Calendar Subscription. Outlook: Add calendar → Subscribe from web). Your scheduled visits appear and auto-update. Russ can subscribe to yours too.</div><div class="suburl">https://hub.fratellocoffee.com/api/sales-calendar.ics?rep=${esc(REP.slug)}&token=••••••</div><div class="btn2" style="margin:10px 0 0" onclick="copySub()"><i class="ti ti-copy"></i> Copy link</div></div>`:'';
  $('app').innerHTML=`<div class="app"><div class="view">
@@ -357,6 +367,24 @@ function renderCalendar(){
 async function doneFu(id){const f=S.followups.find(x=>x.id===id);if(f)f.done=true;try{await FC.completeFollowup(id);}catch(e){}renderCalendar();}
 function copySub(){navigator.clipboard&&navigator.clipboard.writeText('https://hub.fratellocoffee.com/api/sales-calendar.ics?rep='+REP.slug);}
 
+let efu={};
+function renderEditFollowup(){
+ const f=S.followups.find(x=>x.id===route.id);if(!f){go('calendar');return;}
+ efu={type:f.type};
+ const opts=TYPES.map(t=>`<option value="${t.n}" ${t.n===f.type?'selected':''}>${t.n}</option>`).join('');
+ $('app').innerHTML=`<div class="app"><div class="view">
+   ${crumb("go('calendar')", 'Calendar › <b>Edit follow-up</b>')}
+   <div class="h1" style="padding-top:2px">Edit follow-up</div>
+   <div class="note-pre">For <b>${esc(f.acctName)}</b></div>
+   <div class="flabel">When</div><div style="padding:0 18px 12px"><input type="date" id="ef-date" value="${esc(f.due)}"></div>
+   <div class="flabel">What</div><div style="padding:0 18px 12px"><select id="ef-type" onchange="efu.type=this.value">${opts}</select></div>
+   <div class="flabel">Note</div><div style="padding:0 18px 12px"><textarea id="ef-note" style="min-height:70px">${esc(f.reason||'')}</textarea></div>
+   <div class="save" onclick="saveEditFu()">Save changes</div>
+   <div class="btn2" style="margin-top:10px;color:var(--coral)" onclick="deleteFu()"><i class="ti ti-trash"></i> Delete follow-up</div>
+  </div></div>`;
+}
+async function saveEditFu(){const f=S.followups.find(x=>x.id===route.id);if(!f)return;const patch={due:$('ef-date').value,type:efu.type,reason:$('ef-note').value.trim()||efu.type};try{await FC.rescheduleFollowup(route.id,patch);}catch(e){alert('Could not save: '+e.message);return;}Object.assign(f,patch);go('calendar');}
+async function deleteFu(){const id=route.id;try{await FC.cancelFollowup(id);}catch(e){alert('Could not delete: '+e.message);return;}const i=S.followups.findIndex(x=>x.id===id);if(i>-1)S.followups.splice(i,1);go('calendar');}
 function scorecard(){
  const m=S.activities.filter(a=>a.date.startsWith(MONTH));
  const visits=m.filter(a=>VISIT_TYPES.includes(a.type)).length;
@@ -378,7 +406,7 @@ function renderMonth(){
  const col=c.score>=80?'var(--teal)':c.score>=70?'var(--amber)':'var(--coral)';
  const covGap=c.book-c.touched,odue=DATA.accounts.filter(a=>overdue(a)).length;
  const nudges=[];
- if(covGap>0&&!DISMISSED.has('cov'))nudges.push(`<div class="nudge cov"><i class="ti ti-target-arrow" style="color:#2A5CA8"></i><div><div class="nt">${covGap} customers untouched this month</div><div class="nd">Coverage is ${Math.round(c.cov*100)}% — every Customer should hear from you monthly.</div></div><i class="ti ti-x nx" onclick="DISMISSED.add('cov');renderMonth()"></i></div>`);
+ if(covGap>0&&!DISMISSED.has('cov'))nudges.push(`<div class="nudge cov"><i class="ti ti-target-arrow" style="color:var(--teald)"></i><div><div class="nt">${covGap} customers untouched this month</div><div class="nd">Coverage is ${Math.round(c.cov*100)}% — every Customer should hear from you monthly.</div></div><i class="ti ti-x nx" onclick="DISMISSED.add('cov');renderMonth()"></i></div>`);
  if(odue>0&&!DISMISSED.has('od'))nudges.push(`<div class="nudge"><i class="ti ti-clock-exclamation" style="color:var(--amber)"></i><div><div class="nt">${odue} accounts overdue for a visit</div><div class="nd">Past their cadence — see the “due” flags on Customers.</div></div><i class="ti ti-x nx" onclick="DISMISSED.add('od');renderMonth()"></i></div>`);
  const bar=(label,frac,disp)=>{const pct=Math.min(frac*100,100);const behind=DOM>=7&&frac<ELAPSED-0.05;const fc=behind?'var(--coral)':(pct>=100?'var(--teal)':col);return `<div class="metric"><div class="mtop"><span>${label}</span><span class="mt">${disp}</span></div><div class="track"><div class="fill" style="width:${pct}%;background:${fc}"></div><div class="pace" style="left:${Math.min(ELAPSED*100,100)}%"></div></div></div>`;};
  const gaps=[['Unique visits',c.Fr.visits,30,c.visits],['Cold calls',c.Fr.cold,10,c.cold],['QA & training',c.Fr.qa,5,c.qa],['Engagement',c.Fr.engage,60,c.engage]].map(g=>({l:g[0],need:Math.ceil(ELAPSED*g[2]-g[3])})).filter(g=>g.need>0).sort((a,b)=>b.need-a.need);
@@ -421,7 +449,7 @@ function renderPlaybook(){
    </div>
   </div>${tabbar('playbook')}</div>`;
 }
-function renderMap(){$('app').innerHTML=`<div class="app"><div class="view"><div class="back" onclick="go('customers')"><i class="ti ti-chevron-left"></i> Customers</div><div class="h1">Map</div><div class="empty"><i class="ti ti-map-2"></i>The map arrives next — your ${customerBook().length} customers as colored pins (active / watch / cold), tap to open the same account screen. Needs the one-time address geocoding step.</div></div></div>`;}
+function renderMap(){$('app').innerHTML=`<div class="app"><div class="view">${crumb("go('customers')", 'Customers › <b>Map</b>')}<div class="h1">Map</div><div class="empty"><i class="ti ti-map-2"></i>The map arrives next — your ${customerBook().length} customers as colored pins (active / watch / cold), tap to open the same account screen. Needs the one-time address geocoding step.</div></div></div>`;}
 
 // Load the data layer (module) then gate the page.
 import('/sales/field-tool/system/field-core.js')

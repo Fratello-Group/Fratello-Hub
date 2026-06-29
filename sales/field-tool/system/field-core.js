@@ -122,6 +122,14 @@ export async function saveSetting(account, patch) {
   st.settings[account.id] = { ...(st.settings[account.id] || {}), ...patch }; lsWrite(rep.id, st);
 }
 
+export async function rescheduleFollowup(id, patch) {
+  if (useFirestore()) { await updateDoc(doc(fs().db, 'sales_followups', id), { due: patch.due, reason: patch.reason, type: patch.type }); return; }
+  for (const rid of [...SNAP.reps.map(r => r.id), 'house']) { const st = lsRead(rid); if (st) { const f = st.followups.find(x => x.id === id); if (f) { Object.assign(f, patch); lsWrite(rid, st); return; } } }
+}
+export async function cancelFollowup(id) {
+  if (useFirestore()) { await updateDoc(doc(fs().db, 'sales_followups', id), { status: 'cancelled' }); return; }
+  for (const rid of [...SNAP.reps.map(r => r.id), 'house']) { const st = lsRead(rid); if (st) { const i = st.followups.findIndex(x => x.id === id); if (i > -1) { st.followups.splice(i, 1); lsWrite(rid, st); return; } } }
+}
 function localAppend(repId, key, item) { const st = lsRead(repId) || { activities: [], followups: [], settings: {} }; st[key].push(item); lsWrite(repId, st); return item; }
 
 // Demo seed for local preview only (never runs against Firestore).
