@@ -209,6 +209,20 @@ service cloud.firestore {
         && after.status in ['active', 'break', 'done'];
     }
 
+    // A person may edit ONLY their own contact details on their users record
+    // (name / phone / address). Every access-bearing field must be unchanged, so
+    // this can never escalate what they can see or do.
+    function selfUserContactOnly(before, after) {
+      return isSelfUserRecord(before)
+        && after.get('email', '') == before.get('email', '')
+        && after.get('role_tier', '') == before.get('role_tier', '')
+        && after.get('department', '') == before.get('department', '')
+        && after.get('manager_id', '') == before.get('manager_id', '')
+        && after.get('active', true) == before.get('active', true)
+        && after.get('hourly', false) == before.get('hourly', false)
+        && after.get('title', '') == before.get('title', '');
+    }
+
     function selfProfileFieldsDoNotEscalate(uid) {
       return request.auth.uid == uid
         && resource.data.status == 'active'
@@ -299,7 +313,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwnerOrController() || isSelfUserRecord(resource.data);
       allow list: if isOwnerOrController();
-      allow create, update: if isOwnerOrController();
+      // Owner/Controller manage everyone. A person may also update their OWN
+      // record, but only contact details — never anything that grants access.
+      allow create: if isOwnerOrController();
+      allow update: if isOwnerOrController() || selfUserContactOnly(resource.data, request.resource.data);
       allow delete: if isOwner();
     }
 

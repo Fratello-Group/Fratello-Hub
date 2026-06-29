@@ -454,6 +454,112 @@
         .draft-row { background: var(--brand-soft, #E8F4F2); }
         .draft-row .person-name { color: var(--ink, #16262E); }
         .draft-row .status.invited { background: var(--brand-soft, #E8F4F2); color: var(--brand-dark, #1E7E77); }
+
+        /* Tappable name + a clear per-row Edit button (always reachable, no
+           horizontal scrolling needed on a phone). */
+        .name-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font: inherit;
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+        .name-button .person-name { text-decoration: underline; text-decoration-color: rgba(47,169,160,.4); text-underline-offset: 3px; }
+        .row-edit {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 9px 14px;
+            border: 1.5px solid var(--brand, #2FA9A0);
+            border-radius: 999px;
+            background: var(--brand-soft, #E8F4F2);
+            color: var(--brand-dark, #1E7E77);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .3px;
+            cursor: pointer;
+        }
+        .row-edit:hover { background: #DCEEEB; }
+
+        /* Edit person bottom-sheet */
+        .sheet-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            background: rgba(16, 38, 46, .55);
+            backdrop-filter: blur(2px);
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+        }
+        .sheet-overlay.open { display: flex; }
+        .sheet {
+            width: 100%;
+            max-width: 640px;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            color: var(--ink, #16262E);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -12px 40px rgba(16,38,46,.28);
+            overflow: hidden;
+        }
+        @media (min-width: 720px) {
+            .sheet-overlay { align-items: center; padding: 24px; }
+            .sheet { border-radius: 18px; }
+        }
+        .sheet-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 22px 14px;
+            border-bottom: 1px solid #ECEFEE;
+        }
+        .sheet-title { font-size: 18px; font-weight: 800; color: var(--ink, #16262E); }
+        .sheet-sub { margin-top: 4px; font-size: 12.5px; color: var(--slate, #5A6B68); }
+        .sheet-close {
+            flex: none;
+            width: 36px; height: 36px;
+            border: none; border-radius: 50%;
+            background: #F1F4F3; color: var(--ink, #16262E);
+            font-size: 22px; line-height: 1; cursor: pointer;
+        }
+        .sheet-body { padding: 18px 22px; overflow-y: auto; }
+        .sheet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .sheet-grid .sheet-span { grid-column: 1 / -1; }
+        .sheet-body .field label { color: var(--slate, #5A6B68); }
+        .sheet-body .field--access label { color: var(--brand-dark, #1E7E77); }
+        .sheet-note { margin-top: 6px; font-size: 11.5px; color: var(--slate, #5A6B68); line-height: 1.45; }
+        .sheet-access { margin-top: 18px; padding-top: 14px; border-top: 1px dashed #E2E7E5; }
+        .sheet-access-label {
+            display: block; margin-bottom: 8px;
+            font-size: 10px; font-weight: 800; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--slate, #5A6B68);
+        }
+        .sheet-message { margin-top: 14px; font-size: 13px; line-height: 1.5; color: var(--brand-dark, #1E7E77); min-height: 18px; }
+        .sheet-message.error { color: var(--error, #C0392B); }
+        .sheet-foot {
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;
+            padding: 16px 22px;
+            border-top: 1px solid #ECEFEE;
+            background: #FAFBFB;
+        }
+        .sheet-foot .ghost-button { margin: 0; }
+        .sheet-foot .spacer { margin-right: auto; }
         .field.has-error select {
             border-color: var(--error);
             box-shadow: none;
@@ -865,6 +971,84 @@
         </main>
     </div>
 
+    <!-- Edit person bottom-sheet: one place to edit, invite, or deactivate anyone -->
+    <div class="sheet-overlay" id="editOverlay" onclick="if(event.target===this)closeEditPerson()">
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="editSheetTitle">
+            <div class="sheet-head">
+                <div>
+                    <div class="sheet-title" id="editSheetTitle">Edit person</div>
+                    <div class="sheet-sub" id="editSheetSub"></div>
+                </div>
+                <button class="sheet-close" type="button" onclick="closeEditPerson()" aria-label="Close">&times;</button>
+            </div>
+            <div class="sheet-body">
+                <div class="sheet-grid">
+                    <div class="field">
+                        <label for="editFirstName">First name</label>
+                        <input class="text-input" id="editFirstName" type="text" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="editLastName">Last name</label>
+                        <input class="text-input" id="editLastName" type="text" autocomplete="off">
+                    </div>
+                    <div class="field sheet-span">
+                        <label for="editTitle">Job title</label>
+                        <input class="text-input" id="editTitle" type="text" autocomplete="off">
+                    </div>
+                    <div class="field sheet-span">
+                        <label for="editEmail">Email</label>
+                        <input class="text-input" id="editEmail" type="email" autocomplete="off">
+                        <div class="sheet-note" id="editEmailNote"></div>
+                    </div>
+                    <div class="field">
+                        <label for="editPhone">Phone</label>
+                        <input class="text-input" id="editPhone" type="tel" placeholder="(403) 555-0123" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="editHireDate">Hire date</label>
+                        <input class="text-input" id="editHireDate" type="date">
+                    </div>
+                    <div class="field sheet-span">
+                        <label for="editAddress">Address</label>
+                        <input class="text-input" id="editAddress" type="text" placeholder="Street, city, province" autocomplete="off">
+                    </div>
+                    <div class="field field--access">
+                        <label for="editDepartment">Department <span class="access-flag">Sets access</span></label>
+                        <select id="editDepartment" onchange="syncEditAccess()"></select>
+                    </div>
+                    <div class="field field--access">
+                        <label for="editLevel">Level <span class="access-flag">Sets access</span></label>
+                        <select id="editLevel" onchange="syncEditAccess()"></select>
+                    </div>
+                    <div class="field">
+                        <label for="editManager">Manager</label>
+                        <select id="editManager"></select>
+                    </div>
+                    <div class="field">
+                        <label for="editPayType">Pay type</label>
+                        <select id="editPayType">
+                            <option value="salaried">Salaried</option>
+                            <option value="hourly">Hourly — uses the time clock</option>
+                        </select>
+                    </div>
+                    <div class="field sheet-span" id="editActiveField">
+                        <label for="editActive">Status</label>
+                        <select id="editActive">
+                            <option value="true">Active — can sign in</option>
+                            <option value="false">Inactive — cannot sign in</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sheet-access">
+                    <span class="sheet-access-label">Will be able to see</span>
+                    <div class="profile-access" id="editAccessTags"></div>
+                </div>
+                <div class="sheet-message" id="editSheetMessage"></div>
+            </div>
+            <div class="sheet-foot" id="editSheetFoot"></div>
+        </div>
+    </div>
+
     <script src="firebase-config.js"></script>
     <script src="/system/hub-header.js"></script>
     <script type="module">
@@ -877,6 +1061,7 @@
             onHubAuthChange,
             sendHubInviteEmail,
             sendResetEmail,
+            setHubUserContact,
             setHubUserDisabled,
             setHubUserHourly,
             updateHubUser
@@ -1441,18 +1626,16 @@
             return `
                 <tr class="roster-row">
                     <td>
-                        <span class="person-name">${escapeHtml(person.name)}</span>
+                        <button class="name-button" type="button" data-id="${escapeHtml(person.id)}" onclick="openEditPerson(this.dataset.id)"><span class="person-name">${escapeHtml(person.name)}</span></button>
                         <span class="person-title">${escapeHtml(person.title || 'No title listed')}</span>
                         <span class="person-meta">${escapeHtml(department || '—')} · suggested level: ${escapeHtml(tier)}</span>
+                        <button class="row-edit" type="button" data-id="${escapeHtml(person.id)}" onclick="openEditPerson(this.dataset.id)">Set up &amp; invite</button>
                     </td>
                     <td><span class="person-meta" style="color:var(--slate); text-transform:none; letter-spacing:0;">Set when you invite</span></td>
                     <td><div class="profile-access">${accessTagsFor(tier, department)}</div></td>
                     <td>
                         <span class="status invited">Not invited</span>
                         <span class="status-help">On the roster — not in the Hub yet</span>
-                        <div class="row-actions">
-                            <button class="ghost-button primary-button" type="button" data-roster="${escapeHtml(person.id)}" onclick="prefillInvite(this.dataset.roster)">Set up &amp; invite</button>
-                        </div>
                     </td>
                 </tr>`;
         }
@@ -1514,19 +1697,16 @@
             return `
                 <tr class="roster-row draft-row">
                     <td>
-                        <span class="person-name">${escapeHtml(person.name)}</span>
+                        <button class="name-button" type="button" data-id="${escapeHtml(person.id)}" onclick="openEditPerson(this.dataset.id)"><span class="person-name">${escapeHtml(person.name)}</span></button>
                         <span class="person-title">${escapeHtml(person.title || 'No title listed')}<br>${emailLine}</span>
                         <span class="person-meta">${escapeHtml(department || '—')} · ${escapeHtml(tier)} · ${escapeHtml(pay)}</span>
+                        <button class="row-edit" type="button" data-id="${escapeHtml(person.id)}" onclick="openEditPerson(this.dataset.id)">${hasEmail ? 'Review &amp; invite' : 'Add email &amp; invite'}</button>
                     </td>
                     <td><span class="person-meta" style="color:var(--slate); text-transform:none; letter-spacing:0;">Saved — edit to finish</span></td>
                     <td><div class="profile-access">${accessTagsFor(tier, department)}</div></td>
                     <td>
                         <span class="status invited">Draft</span>
                         <span class="status-help">Saved details — not invited yet</span>
-                        <div class="row-actions">
-                            <button class="ghost-button primary-button" type="button" data-draft="${escapeHtml(person.draftId)}" onclick="prefillFromDraft(this.dataset.draft)">${hasEmail ? 'Review &amp; invite' : 'Add email &amp; invite'}</button>
-                            <button class="ghost-button danger-button" type="button" data-draft="${escapeHtml(person.draftId)}" onclick="deleteDraft(this.dataset.draft)">Delete Draft</button>
-                        </div>
                     </td>
                 </tr>`;
         }
@@ -1611,6 +1791,282 @@
             }
         }
 
+        // ── Edit person bottom-sheet ──
+        // One surface to tap any person (live account, roster placeholder, or
+        // draft) and edit their details, invite them, or set them inactive.
+        let EDIT_CTX = null;
+
+        function findAnyPerson(id) {
+            return STAFF.find(p => p.id === id)
+                || draftPeople().find(p => p.id === id)
+                || rosterPlaceholders().find(p => p.id === id)
+                || null;
+        }
+
+        function splitName(name) {
+            const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+            if (!parts.length) return { first: '', last: '' };
+            return { first: parts[0], last: parts.slice(1).join(' ') };
+        }
+
+        function setVal(id, value) { const el = document.getElementById(id); if (el) el.value = value == null ? '' : value; }
+
+        function syncEditAccess() {
+            const dept = document.getElementById('editDepartment')?.value || '';
+            const level = document.getElementById('editLevel')?.value || '';
+            const tags = document.getElementById('editAccessTags');
+            if (tags) tags.innerHTML = accessTagsFor(level, dept);
+        }
+
+        function openEditPerson(id) {
+            const person = findAnyPerson(id);
+            if (!person) return;
+            const type = person.draftOnly ? 'draft' : person.rosterOnly ? 'roster' : 'live';
+            EDIT_CTX = { type, person };
+            const isLive = type === 'live';
+
+            const tier = personRoleTier(person);
+            const dept = personDepartment(person);
+            const { first, last } = splitName(person.name);
+
+            const deptSel = document.getElementById('editDepartment');
+            const lvlSel = document.getElementById('editLevel');
+            const mgrSel = document.getElementById('editManager');
+            if (deptSel) deptSel.innerHTML = placeholderOption('Select department…', dept) + optionList(DEPARTMENTS, dept);
+            if (lvlSel) lvlSel.innerHTML = placeholderOption('Select level…', tier) + optionList(levelOptionsForAdmin(), tier);
+            if (mgrSel) mgrSel.innerHTML = managerOptions(personManagerId(person));
+
+            setVal('editFirstName', first);
+            setVal('editLastName', last);
+            setVal('editTitle', person.title || '');
+            setVal('editEmail', person.email || '');
+            setVal('editPhone', person.phone || '');
+            setVal('editAddress', person.address || '');
+            setVal('editHireDate', person.hire_date || '');
+            setVal('editPayType', person.hourly ? 'hourly' : 'salaried');
+            setVal('editActive', person.active === false ? 'false' : 'true');
+            syncEditAccess();
+
+            const emailInput = document.getElementById('editEmail');
+            const emailNote = document.getElementById('editEmailNote');
+            if (emailInput) emailInput.readOnly = isLive;
+            if (emailNote) emailNote.textContent = isLive
+                ? 'Email is the account key — to change it, delete and re-invite.'
+                : 'Add their email to send an invite. You can Save for later without it.';
+
+            const activeField = document.getElementById('editActiveField');
+            if (activeField) activeField.style.display = isLive ? '' : 'none';
+
+            const title = document.getElementById('editSheetTitle');
+            const sub = document.getElementById('editSheetSub');
+            const msg = document.getElementById('editSheetMessage');
+            if (msg) { msg.textContent = ''; msg.classList.remove('error'); }
+            if (title) title.textContent = isLive ? `Edit ${person.name}` : type === 'draft' ? `Finish ${person.name}` : `Set up ${person.name}`;
+            if (sub) sub.textContent = isLive
+                ? 'Update details, change access, or set them inactive.'
+                : 'Fill in their details, then Save for later or Send invite.';
+
+            const foot = document.getElementById('editSheetFoot');
+            if (foot) {
+                if (isLive) {
+                    foot.innerHTML = `
+                        <button class="ghost-button danger-button spacer" type="button" onclick="deleteFromEdit()">Delete</button>
+                        <button class="ghost-button" type="button" onclick="resetFromEdit()">Send reset email</button>
+                        <button class="ghost-button primary-button" type="button" onclick="saveEditPerson()">Save changes</button>`;
+                } else {
+                    const delDraft = type === 'draft'
+                        ? `<button class="ghost-button danger-button spacer" type="button" onclick="deleteDraftFromEdit()">Delete draft</button>` : '';
+                    foot.innerHTML = `
+                        ${delDraft}
+                        <button class="ghost-button" type="button" onclick="saveDraftFromEdit()">Save for later</button>
+                        <button class="ghost-button primary-button" type="button" onclick="inviteFromEdit()">Send invite</button>`;
+                }
+            }
+
+            document.getElementById('editOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditPerson() {
+            const ov = document.getElementById('editOverlay');
+            if (ov) ov.classList.remove('open');
+            document.body.style.overflow = '';
+            EDIT_CTX = null;
+        }
+
+        function editFormValues() {
+            const first = document.getElementById('editFirstName').value.trim();
+            const last = document.getElementById('editLastName').value.trim();
+            return {
+                name: `${first} ${last}`.trim(),
+                title: document.getElementById('editTitle').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                phone: document.getElementById('editPhone').value.trim(),
+                address: document.getElementById('editAddress').value.trim(),
+                department: document.getElementById('editDepartment').value,
+                roleTier: document.getElementById('editLevel').value,
+                managerId: document.getElementById('editManager').value,
+                hourly: document.getElementById('editPayType').value === 'hourly',
+                hireDate: document.getElementById('editHireDate').value,
+                active: document.getElementById('editActive').value !== 'false'
+            };
+        }
+
+        function editMessage(text, isError) {
+            const msg = document.getElementById('editSheetMessage');
+            if (!msg) return;
+            msg.textContent = text || '';
+            msg.classList.toggle('error', Boolean(isError));
+        }
+
+        function editBusy(on, label) {
+            const foot = document.getElementById('editSheetFoot');
+            if (foot) foot.querySelectorAll('button').forEach(b => { b.disabled = on; });
+            if (on) editMessage(label || 'Saving…', false);
+        }
+
+        function editErrText(error) {
+            return USE_FIREBASE_AUTH ? friendlyAuthError(error) : (error?.message || 'Something went wrong.');
+        }
+
+        // Shared access-field validation for save/invite.
+        function editAccessValid(v) {
+            if (!v.name) { editMessage('A name is required.', true); return false; }
+            if (!v.roleTier) { editMessage('Choose a level — it sets what they can access.', true); return false; }
+            const lvl = v.roleTier.toLowerCase();
+            if (lvl !== 'owner' && lvl !== 'controller' && !v.department) {
+                editMessage('Choose a department — it sets what they can access.', true); return false;
+            }
+            return true;
+        }
+
+        async function saveEditPerson() {
+            if (!EDIT_CTX || EDIT_CTX.type !== 'live') return;
+            const v = editFormValues();
+            if (!editAccessValid(v)) return;
+            const base = EDIT_CTX.person;
+            const profile = deriveProfile(v.roleTier, v.department);
+            const wasActive = base.active !== false;
+            const email = base.email || v.email;
+            editBusy(true, 'Saving changes…');
+            try {
+                const updated = {
+                    ...base,
+                    name: v.name, title: v.title, email,
+                    department: v.department, role_tier: v.roleTier,
+                    manager_id: v.managerId, phone: v.phone, address: v.address,
+                    hourly: v.hourly, hire_date: v.hireDate, profile,
+                    active: v.active,
+                    status: v.active ? (base.status === 'disabled' ? 'invited' : base.status) : 'disabled'
+                };
+                if (USE_FIREBASE_AUTH) {
+                    await updateHubUser(updated, profile);
+                    try { await setHubUserHourly(email, v.hourly); } catch (e) { /* non-fatal */ }
+                    try { await setHubUserContact(email, { phone: v.phone, address: v.address }); } catch (e) { /* non-fatal */ }
+                    if (v.active !== wasActive) {
+                        try { await setHubUserDisabled(updated, !v.active); } catch (e) { /* non-fatal */ }
+                    }
+                } else {
+                    await authRequest({ action: 'users:update', id: base.id, profile, department: v.department, role_tier: v.roleTier, name: v.name, title: v.title, manager_id: v.managerId, hire_date: v.hireDate, active: v.active });
+                }
+                audit('person_edited', { target_email: email, target_name: v.name, profile, active: v.active });
+                closeEditPerson();
+                await loadUsers();
+                document.getElementById('adminMessage').textContent = `Saved changes for ${v.name}.`;
+            } catch (error) {
+                editBusy(false);
+                editMessage(editErrText(error), true);
+            }
+        }
+
+        async function inviteFromEdit() {
+            if (!EDIT_CTX) return;
+            const v = editFormValues();
+            if (!editAccessValid(v)) return;
+            if (!v.email || !isValidEmail(v.email)) {
+                editMessage('Add a valid email to send the invite (or Save for later).', true);
+                document.getElementById('editEmail').focus();
+                return;
+            }
+            editBusy(true, 'Sending invite…');
+            try {
+                const payload = {
+                    name: v.name, email: v.email, title: v.title,
+                    profile: deriveProfile(v.roleTier, v.department),
+                    department: v.department, roleTier: v.roleTier,
+                    managerId: v.managerId, hireDate: v.hireDate,
+                    phone: v.phone, address: v.address,
+                    active: v.active, employment: v.hourly ? 'hourly' : 'salaried', hourly: v.hourly
+                };
+                if (USE_FIREBASE_AUTH) {
+                    const data = await sendHubInviteEmail(payload);
+                    try { await setHubUserHourly(v.email, v.hourly); } catch (e) {}
+                    try { await setHubUserContact(v.email, { phone: v.phone, address: v.address }); } catch (e) {}
+                    renderGeneratedLink('Invite', data.user.name, data.setupUrl || data.inviteUrl, {
+                        email: data.user.email, emailSent: data.emailSent, emailError: data.emailError
+                    });
+                    document.getElementById('adminMessage').textContent = data.emailSent
+                        ? `Invite email sent to ${data.user.email}.`
+                        : 'Access saved. Copy the setup link below and send it manually.';
+                } else {
+                    const data = await authRequest({ action: 'users:invite', ...payload });
+                    renderGeneratedLink('Invite', data.user.name, data.inviteUrl);
+                    document.getElementById('adminMessage').textContent = 'Invite created. Use Copy Link, then send it.';
+                }
+                audit('invite_sent', { target_email: v.email, target_name: v.name, profile: payload.profile, hourly: v.hourly });
+                await removeMatchingDrafts(v.email, v.name);
+                closeEditPerson();
+                await loadUsers();
+            } catch (error) {
+                editBusy(false);
+                editMessage(editErrText(error), true);
+            }
+        }
+
+        async function saveDraftFromEdit() {
+            if (!EDIT_CTX) return;
+            const v = editFormValues();
+            if (!v.name) { editMessage('A name is needed to save a draft.', true); return; }
+            editBusy(true, 'Saving draft…');
+            try {
+                await savePeopleDraft({
+                    // Reuse the existing draft id when editing one so it updates in place.
+                    id: EDIT_CTX.type === 'draft' ? EDIT_CTX.person.draftId : undefined,
+                    name: v.name, title: v.title, email: v.email,
+                    department: v.department, role_tier: v.roleTier,
+                    manager_id: v.managerId, hourly: v.hourly
+                });
+                audit('draft_saved', { target_name: v.name, target_email: v.email || '' });
+                closeEditPerson();
+                await loadUsers();
+                document.getElementById('adminMessage').textContent = `Saved ${v.name} as a draft. Invite them whenever you’re ready.`;
+            } catch (error) {
+                editBusy(false);
+                editMessage(editErrText(error), true);
+            }
+        }
+
+        async function deleteDraftFromEdit() {
+            if (!EDIT_CTX || EDIT_CTX.type !== 'draft') return;
+            const draftId = EDIT_CTX.person.draftId;
+            closeEditPerson();
+            await deleteDraft(draftId);
+        }
+
+        async function resetFromEdit() {
+            if (!EDIT_CTX || EDIT_CTX.type !== 'live') return;
+            const id = EDIT_CTX.person.id;
+            closeEditPerson();
+            await resetPassword(id);
+        }
+
+        async function deleteFromEdit() {
+            if (!EDIT_CTX || EDIT_CTX.type !== 'live') return;
+            const id = EDIT_CTX.person.id;
+            closeEditPerson();
+            await deleteUser(id, null);
+        }
+
         function renderStaff() {
             const rows = document.getElementById('staffRows');
             const merged = STAFF.concat(draftPeople()).concat(rosterPlaceholders());
@@ -1642,9 +2098,10 @@
                 return `
                 <tr>
                     <td>
-                        <span class="person-name">${escapeHtml(person.name)}</span>
+                        <button class="name-button" type="button" data-id="${safeId}" onclick="openEditPerson(this.dataset.id)"><span class="person-name">${escapeHtml(person.name)}</span></button>
                         <span class="person-title">${escapeHtml(person.title || 'No title listed')}<br>${escapeHtml(person.email)}</span>
                         <span class="person-meta">${escapeHtml(department)} · ${escapeHtml(tier)} · Manager: ${escapeHtml(manager)}${escapeHtml(hireDate)}</span>
+                        ${canEditPerson ? `<button class="row-edit" type="button" data-id="${safeId}" onclick="openEditPerson(this.dataset.id)">Edit details</button>` : ''}
                     </td>
                     <td${lockNote}>
                         ${deptControl}
@@ -2094,6 +2551,15 @@
         window.prefillFromDraft = prefillFromDraft;
         window.saveDraftFromForm = saveDraftFromForm;
         window.deleteDraft = deleteDraft;
+        window.openEditPerson = openEditPerson;
+        window.closeEditPerson = closeEditPerson;
+        window.syncEditAccess = syncEditAccess;
+        window.saveEditPerson = saveEditPerson;
+        window.inviteFromEdit = inviteFromEdit;
+        window.saveDraftFromEdit = saveDraftFromEdit;
+        window.deleteDraftFromEdit = deleteDraftFromEdit;
+        window.resetFromEdit = resetFromEdit;
+        window.deleteFromEdit = deleteFromEdit;
         window.syncDerivedProfile = syncDerivedProfile;
         window.resetPassword = resetPassword;
         window.toggleDisabled = toggleDisabled;

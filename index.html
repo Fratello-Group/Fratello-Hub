@@ -1233,6 +1233,67 @@
         .profile-menu-link:hover, .profile-menu-signout:hover { background: var(--teal-mute); }
         .profile-menu-signout { color: #b3261e; }
 
+        /* Edit my profile sheet */
+        .mpf-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 1300;
+            background: rgba(16,38,46,.55);
+            align-items: flex-end; justify-content: center;
+        }
+        .mpf-overlay.open { display: flex; }
+        .mpf-sheet {
+            width: 100%; max-width: 560px; max-height: 92vh;
+            display: flex; flex-direction: column;
+            background: var(--surface, #fff); color: var(--text, #16262E);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -12px 40px rgba(16,38,46,.28);
+            overflow: hidden;
+        }
+        @media (min-width: 620px) {
+            .mpf-overlay { align-items: center; padding: 24px; }
+            .mpf-sheet { border-radius: 18px; }
+        }
+        .mpf-head {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+            padding: 20px 22px 14px; border-bottom: 1px solid var(--rule, #ECEFEE);
+        }
+        .mpf-title { font-size: 18px; font-weight: 800; }
+        .mpf-sub { margin-top: 4px; font-size: 12.5px; color: var(--subtext, #5A6B68); line-height: 1.45; }
+        .mpf-close {
+            flex: none; width: 36px; height: 36px; border: none; border-radius: 50%;
+            background: var(--teal-mute, #E8F4F2); color: var(--text, #16262E);
+            font-size: 22px; line-height: 1; cursor: pointer;
+        }
+        .mpf-body { padding: 18px 22px; overflow-y: auto; }
+        .mpf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .mpf-grid .mpf-span { grid-column: 1 / -1; }
+        .mpf-field label {
+            display: block; margin-bottom: 7px;
+            font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--subtext, #5A6B68);
+        }
+        .mpf-field input {
+            width: 100%; box-sizing: border-box;
+            padding: 11px 13px; font-size: 14px;
+            border: 1px solid var(--rule, #D9E0DE); border-radius: 10px;
+            background: #fff; color: var(--text, #16262E); outline: none;
+        }
+        .mpf-field input:focus { border-color: var(--teal, #2FA9A0); box-shadow: 0 0 0 3px rgba(47,169,160,.12); }
+        .mpf-readonly input { background: #F4F6F5; color: var(--subtext, #5A6B68); }
+        .mpf-note { margin-top: 6px; font-size: 11.5px; color: var(--subtext, #5A6B68); line-height: 1.45; }
+        .mpf-message { margin-top: 14px; font-size: 13px; min-height: 18px; color: var(--teal-deep, #1E7E77); }
+        .mpf-message.error { color: #b3261e; }
+        .mpf-foot {
+            display: flex; gap: 10px; justify-content: flex-end;
+            padding: 16px 22px; border-top: 1px solid var(--rule, #ECEFEE); background: #FAFBFB;
+        }
+        .mpf-btn {
+            padding: 11px 18px; border-radius: 999px; font-size: 13px; font-weight: 800; cursor: pointer;
+            border: 1px solid var(--rule, #D9E0DE); background: #fff; color: var(--text, #16262E);
+        }
+        .mpf-btn-primary { border-color: var(--teal, #2FA9A0); background: var(--teal, #2FA9A0); color: #fff; }
+        .mpf-btn:disabled { opacity: .6; cursor: default; }
+
         /* View-as preview switcher (owner-only) */
         .profile-menu-preview { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
         .ppv-head { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--subtext); margin-bottom: 9px; }
@@ -2199,6 +2260,7 @@
                         <div class="ppv-grid" id="ppvGrid"></div>
                         <button class="ppv-exit" type="button" id="ppvExit" style="display:none" onclick="exitViewAs()">↩ Back to my owner view</button>
                     </div>
+                    <button class="profile-menu-link" type="button" onclick="openMyProfile()">Edit my profile</button>
                     <a class="profile-menu-link" id="profileMenuManage" href="system/permissions.html">Manage people</a>
                     <button class="profile-menu-signout" type="button" onclick="signOut()">Sign out</button>
                 </div>
@@ -2221,6 +2283,49 @@
     </div>
 </div>
 
+<!-- Edit my profile: everyone can update their own name + contact details -->
+<div class="mpf-overlay" id="mpfOverlay" onclick="if(event.target===this)closeMyProfile()">
+    <div class="mpf-sheet" role="dialog" aria-modal="true" aria-labelledby="mpfTitle">
+        <div class="mpf-head">
+            <div>
+                <div class="mpf-title" id="mpfTitle">My profile</div>
+                <div class="mpf-sub">Update your name and contact details. This doesn’t change what you can see.</div>
+            </div>
+            <button class="mpf-close" type="button" onclick="closeMyProfile()" aria-label="Close">&times;</button>
+        </div>
+        <div class="mpf-body">
+            <div class="mpf-grid">
+                <div class="mpf-field">
+                    <label for="mpfFirst">First name</label>
+                    <input id="mpfFirst" type="text" autocomplete="given-name">
+                </div>
+                <div class="mpf-field">
+                    <label for="mpfLast">Last name</label>
+                    <input id="mpfLast" type="text" autocomplete="family-name">
+                </div>
+                <div class="mpf-field mpf-span">
+                    <label for="mpfPhone">Phone</label>
+                    <input id="mpfPhone" type="tel" placeholder="(403) 555-0123" autocomplete="tel">
+                </div>
+                <div class="mpf-field mpf-span">
+                    <label for="mpfAddress">Address</label>
+                    <input id="mpfAddress" type="text" placeholder="Street, city, province" autocomplete="street-address">
+                </div>
+                <div class="mpf-field mpf-span mpf-readonly">
+                    <label for="mpfEmail">Email (sign-in)</label>
+                    <input id="mpfEmail" type="email" readonly>
+                    <div class="mpf-note">Your sign-in email and job role are set by the office — ask them to change these.</div>
+                </div>
+            </div>
+            <div class="mpf-message" id="mpfMessage"></div>
+        </div>
+        <div class="mpf-foot">
+            <button class="mpf-btn" type="button" onclick="closeMyProfile()">Cancel</button>
+            <button class="mpf-btn mpf-btn-primary" type="button" id="mpfSave" onclick="saveMyProfile()">Save</button>
+        </div>
+    </div>
+</div>
+
 <script src="system/firebase-config.js"></script>
 <script type="module">
 import {
@@ -2233,7 +2338,8 @@ import {
     signInWithEmail,
     signInWithGoogle,
     signInWithMicrosoft,
-    signOutHub
+    signOutHub,
+    updateOwnProfile
 } from './system/fratello-auth.js';
 import { logActivity, trackLogout } from './system/api/activity-logger.js';
 
@@ -4436,6 +4542,71 @@ async function signOut() {
 window.toggleSetupCode = toggleSetupCode;
 window.toggleResetPanel = toggleResetPanel;
 window.handlePasswordReset = handlePasswordReset;
+// ════════════════════════════════════════════════
+// EDIT MY PROFILE (self-service, everyone)
+// ════════════════════════════════════════════════
+
+function openMyProfile() {
+    closeProfileMenu();
+    if (typeof isPreviewing === 'function' && isPreviewing()) {
+        window.alert('You’re previewing the Hub as someone else. Switch back to your own view first to edit your profile.');
+        return;
+    }
+    const user = (activeRole && activeRole.user) || {};
+    const parts = String(user.name || '').trim().split(/\s+/).filter(Boolean);
+    document.getElementById('mpfFirst').value = parts[0] || '';
+    document.getElementById('mpfLast').value = parts.slice(1).join(' ');
+    document.getElementById('mpfPhone').value = user.phone || '';
+    document.getElementById('mpfAddress').value = user.address || '';
+    document.getElementById('mpfEmail').value = user.email || '';
+    const msg = document.getElementById('mpfMessage');
+    if (msg) { msg.textContent = ''; msg.classList.remove('error'); }
+    document.getElementById('mpfOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMyProfile() {
+    const ov = document.getElementById('mpfOverlay');
+    if (ov) ov.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+async function saveMyProfile() {
+    const first = document.getElementById('mpfFirst').value.trim();
+    const last = document.getElementById('mpfLast').value.trim();
+    const name = `${first} ${last}`.trim();
+    const phone = document.getElementById('mpfPhone').value.trim();
+    const address = document.getElementById('mpfAddress').value.trim();
+    const msg = document.getElementById('mpfMessage');
+    const btn = document.getElementById('mpfSave');
+    const setMsg = (text, isErr) => { if (msg) { msg.textContent = text || ''; msg.classList.toggle('error', Boolean(isErr)); } };
+    if (!name) { setMsg('Please enter your name.', true); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    setMsg('Saving…', false);
+    try {
+        await updateOwnProfile({ name, phone, address });
+        // Reflect the change immediately — header chip + cached role.
+        if (activeRole && activeRole.user) {
+            activeRole.user.name = name;
+            activeRole.user.phone = phone;
+            activeRole.user.address = address;
+            try { localStorage.setItem('fratello-role', JSON.stringify(activeRole)); } catch (e) {}
+        }
+        const an = document.getElementById('avatarName'); if (an) an.textContent = first || name.split(' ')[0];
+        const ai = document.getElementById('avatarInitials'); if (ai) ai.textContent = ((first[0] || '') + (last[0] || '')).toUpperCase() || (name[0] || '').toUpperCase();
+        const pn = document.getElementById('profileMenuName'); if (pn) pn.textContent = name;
+        setMsg('Saved.', false);
+        window.setTimeout(closeMyProfile, 700);
+    } catch (error) {
+        setMsg((USE_FIREBASE_AUTH ? friendlyAuthError(error) : (error && error.message)) || 'Could not save your profile.', true);
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+    }
+}
+
+window.openMyProfile = openMyProfile;
+window.closeMyProfile = closeMyProfile;
+window.saveMyProfile = saveMyProfile;
 window.handleProviderLogin = handleProviderLogin;
 window.handleCreateAccount = handleCreateAccount;
 window.handleLogin = handleLogin;

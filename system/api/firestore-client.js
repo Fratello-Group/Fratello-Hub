@@ -827,6 +827,8 @@ export async function upsertUser(user = {}) {
         manager_id: cleanOptionalText(user.manager_id || user.managerId),
         backup_approver_id: cleanOptionalText(user.backup_approver_id || user.backupApproverId),
         hourly: Boolean(user.hourly),
+        phone: cleanOptionalText(user.phone),
+        address: cleanOptionalText(user.address),
         active: user.active !== false,
         hire_date: user.hire_date ? asTimestamp(user.hire_date) : null,
         vacation_days_allotted: user.vacation_days_allotted ?? null,
@@ -853,6 +855,8 @@ export async function updateUser(userOrId, patch = {}) {
     if (patch.role_tier !== undefined) updates.role_tier = cleanOptionalText(patch.role_tier);
     if (patch.department !== undefined) updates.department = cleanOptionalText(patch.department);
     if (patch.hourly !== undefined) updates.hourly = Boolean(patch.hourly);
+    if (patch.phone !== undefined) updates.phone = cleanOptionalText(patch.phone);
+    if (patch.address !== undefined) updates.address = cleanOptionalText(patch.address);
     if (patch.calendar_tokens !== undefined) updates.calendar_tokens = patch.calendar_tokens || {};
 
     const ref = doc(db, COLLECTIONS.users, userOrId);

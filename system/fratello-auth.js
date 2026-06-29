@@ -150,13 +150,13 @@ function dateToTimestamp(value) {
     return clean ? Timestamp.fromDate(new Date(`${clean}T00:00:00.000Z`)) : null;
 }
 
-async function upsertTimeOffUserFromAccess({ name, email, title, profile, status = 'active', department, role_tier, manager_id, hire_date, active }) {
+async function upsertTimeOffUserFromAccess({ name, email, title, profile, status = 'active', department, role_tier, manager_id, hire_date, active, phone, address }) {
     initFirebase();
     const normalized = normalizeEmail(email);
     const profileKey = PROFILE_DEFINITIONS[profile] ? profile : 'staff';
     if (!normalized) return;
 
-    await setDoc(doc(db, 'users', normalized), {
+    const record = {
         email: normalized,
         name: String(name || '').trim() || displayNameFromEmail(normalized),
         department: String(department || '').trim() || timeOffDepartment(profileKey),
@@ -167,7 +167,13 @@ async function upsertTimeOffUserFromAccess({ name, email, title, profile, status
         active: active !== undefined ? Boolean(active) : status !== 'disabled',
         hire_date: dateToTimestamp(hire_date),
         updated_at: serverTimestamp()
-    }, { merge: true });
+    };
+    // Contact details are optional — only write them when provided so a blank
+    // edit never wipes an existing phone/address.
+    if (phone !== undefined) record.phone = String(phone || '').trim();
+    if (address !== undefined) record.address = String(address || '').trim();
+
+    await setDoc(doc(db, 'users', normalized), record, { merge: true });
 }
 
 function providerLabel(providerIds) {
@@ -196,6 +202,8 @@ function roleFromProfile(id, data) {
             name: data.name || displayNameFromEmail(data.email),
             email: data.email,
             title: data.title || '',
+            phone: data.phone || '',
+            address: data.address || '',
             status: data.status || 'active',
             provider: providerLabel(data.providerIds)
         }
@@ -219,6 +227,8 @@ function publicUserFromProfile(id, data) {
         role_tier: data.role_tier || '',
         manager_id: data.manager_id || '',
         hourly: data.hourly === true,
+        phone: data.phone || '',
+        address: data.address || '',
         hire_date: dateToInputValue(data.hire_date),
         active: data.active !== false,
         status: data.status || 'active',
@@ -482,6 +492,8 @@ export async function listHubUsers() {
             role_tier: data.role_tier || '',
             manager_id: normalizeEmail(data.manager_id || ''),
             hourly: data.hourly === true,
+            phone: data.phone || '',
+            address: data.address || '',
             hire_date: dateToInputValue(data.hire_date),
             active: data.active !== false
         });
@@ -544,7 +556,55 @@ export async function setHubUserHourly(emailOrPerson, hourly) {
     return { email, hourly: Boolean(hourly) };
 }
 
-export async function saveHubInvite({ name, email, title, profile, department, role_tier, manager_id, hire_date, active = true }) {
+// Stamp contact details (phone / address) onto a person's roster record. Used
+// right after an invite so details captured on the form aren't lost server-side,
+// and anywhere the Owner edits contact info. Merge-safe.
+export async function setHubUserContact(emailOrPerson, { phone, address } = {}) {
+    initFirebase();
+    const email = normalizeEmail(typeof emailOrPerson === 'string'
+        ? emailOrPerson
+        : (emailOrPerson && (emailOrPerson.email || emailOrPerson.id)));
+    if (!email) throw new Error('A user email is required.');
+    const patch = { email, updated_at: serverTimestamp() };
+    if (phone !== undefined) patch.phone = String(phone || '').trim();
+    if (address !== undefined) patch.address = String(address || '').trim();
+    await setDoc(doc(db, 'users', email), patch, { merge: true });
+    return { email, phone: patch.phone, address: patch.address };
+}
+
+// Self-service: the signed-in person updates their OWN contact details only.
+// Name / phone / address are not permission fields, so this never changes what
+// they can see. Writes the profile (where the roster reads an accepted user's
+// name) and the users record (directory + time-off), both guarded by rules.
+export async function updateOwnProfile({ name, phone, address } = {}) {
+    initFirebase();
+    if (!auth.currentUser) throw new Error('Sign in again to update your profile.');
+    const uid = auth.currentUser.uid;
+    const email = normalizeEmail(auth.currentUser.email);
+    const clean = value => (value === undefined ? undefined : String(value || '').trim());
+    const nm = clean(name);
+    const ph = clean(phone);
+    const ad = clean(address);
+
+    const profilePatch = { updatedAt: serverTimestamp() };
+    if (nm !== undefined && nm) profilePatch.name = nm;
+    if (ph !== undefined) profilePatch.phone = ph;
+    if (ad !== undefined) profilePatch.address = ad;
+    try { await updateDoc(doc(db, 'hubProfiles', uid), profilePatch); }
+    catch (error) { /* profile may not exist yet (invited but not signed in) */ }
+
+    if (email) {
+        const userPatch = { email, updated_at: serverTimestamp() };
+        if (nm !== undefined && nm) userPatch.name = nm;
+        if (ph !== undefined) userPatch.phone = ph;
+        if (ad !== undefined) userPatch.address = ad;
+        try { await setDoc(doc(db, 'users', email), userPatch, { merge: true }); }
+        catch (error) { /* best-effort; profile copy is the source of truth for name */ }
+    }
+    return { name: nm, phone: ph, address: ad };
+}
+
+export async function saveHubInvite({ name, email, title, profile, department, role_tier, manager_id, hire_date, active = true, phone, address }) {
     initFirebase();
     const normalized = normalizeEmail(email);
     const profileKey = PROFILE_DEFINITIONS[profile] ? profile : 'staff';
@@ -556,6 +616,8 @@ export async function saveHubInvite({ name, email, title, profile, department, r
         department: String(department || '').trim() || timeOffDepartment(profileKey),
         role_tier: String(role_tier || '').trim() || timeOffRoleTier(profileKey),
         manager_id: normalizeEmail(manager_id || defaultManagerId(profileKey) || ''),
+        phone: String(phone || '').trim(),
+        address: String(address || '').trim(),
         hire_date: dateToInputValue(hire_date),
         active: active !== false,
         status: 'invited',
@@ -579,6 +641,8 @@ export async function saveHubInvite({ name, email, title, profile, department, r
             department: payload.department,
             role_tier: payload.role_tier,
             manager_id: payload.manager_id,
+            phone: payload.phone,
+            address: payload.address,
             hire_date: payload.hire_date || null,
             status: 'active',
             updatedAt: serverTimestamp()
@@ -598,11 +662,18 @@ export async function updateHubUser(person, profile) {
     initFirebase();
     const profileKey = PROFILE_DEFINITIONS[profile] ? profile : 'staff';
     if (person.uid && person.source === 'profile') {
+        // Name + title also live on the profile (that's where the roster reads
+        // an accepted user's name from), so an edit here must update them too —
+        // otherwise renaming an existing account wouldn't stick.
         await updateDoc(doc(db, 'hubProfiles', person.uid), {
+            name: person.name,
+            title: person.title || '',
             profile: profileKey,
             department: person.department || timeOffDepartment(profileKey),
             role_tier: person.role_tier || timeOffRoleTier(profileKey),
             manager_id: normalizeEmail(person.manager_id || defaultManagerId(profileKey) || ''),
+            phone: String(person.phone || '').trim(),
+            address: String(person.address || '').trim(),
             hire_date: dateToInputValue(person.hire_date) || null,
             active: person.active !== false,
             updatedAt: serverTimestamp()
@@ -616,6 +687,8 @@ export async function updateHubUser(person, profile) {
         department: person.department || timeOffDepartment(profileKey),
         role_tier: person.role_tier || timeOffRoleTier(profileKey),
         manager_id: normalizeEmail(person.manager_id || defaultManagerId(profileKey) || ''),
+        phone: String(person.phone || '').trim(),
+        address: String(person.address || '').trim(),
         hire_date: dateToInputValue(person.hire_date) || null,
         active: person.active !== false,
         status: person.status === 'disabled' ? 'disabled' : 'invited',
@@ -630,6 +703,8 @@ export async function updateHubUser(person, profile) {
         department: person.department,
         role_tier: person.role_tier,
         manager_id: person.manager_id,
+        phone: person.phone,
+        address: person.address,
         hire_date: person.hire_date,
         active: person.active !== false,
         status: person.status
