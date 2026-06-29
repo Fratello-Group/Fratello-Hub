@@ -38,6 +38,19 @@ function requireFirestore() {
     return state;
 }
 
+// The Owner's "View as" preview is look-only. While it's active, block every
+// write so previewing as a teammate can never create real data (e.g. a stray
+// time-clock punch) under the Owner's account. Reads stay allowed so the
+// previewed screens still render.
+function previewActive() {
+    try { return Boolean(localStorage.getItem('fratello-view-as')); } catch (e) { return false; }
+}
+function blockIfPreview() {
+    if (previewActive()) {
+        throw new Error('You’re previewing the Hub as someone else — changes are turned off here. Tap “Back to my view” to make real edits.');
+    }
+}
+
 function requireCurrentFirebaseUser(auth) {
     if (auth.currentUser) return Promise.resolve(auth.currentUser);
 
@@ -188,6 +201,7 @@ async function getCurrentUserRecord() {
 }
 
 async function fetchApprovalAction(action, requestId, comment = '') {
+    blockIfPreview();
     const { auth } = requireFirestore();
     const currentUser = await requireCurrentFirebaseUser(auth);
     const token = await currentUser.getIdToken();
@@ -287,6 +301,7 @@ export function teamGroupOf(department) {
 }
 
 export async function submitTimeOffRequest(input = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const user = input.user || await getCurrentUserRecord();
     const type = input.type || 'vacation';
@@ -420,6 +435,7 @@ export async function getSickDays(options = {}) {
 }
 
 export async function cancelRequest(requestId) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const ref = doc(db, COLLECTIONS.requests, requestId);
     await updateDoc(ref, {
@@ -509,6 +525,7 @@ export async function getMyClockDay(options = {}) {
 }
 
 export async function clockIn(options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const user = options.user || await getCurrentUserRecord();
     const dateKey = clockDateKey();
@@ -546,6 +563,7 @@ export async function clockIn(options = {}) {
 }
 
 export async function startBreak(options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const day = options.day || await getMyClockDay(options);
     if (!day || day.status !== 'active') throw new Error('You are not clocked in.');
@@ -559,6 +577,7 @@ export async function startBreak(options = {}) {
 }
 
 export async function endBreak(options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const day = options.day || await getMyClockDay(options);
     if (!day || day.status !== 'break') throw new Error('You are not on a break.');
@@ -573,6 +592,7 @@ export async function endBreak(options = {}) {
 }
 
 export async function clockOut(options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const day = options.day || await getMyClockDay(options);
     if (!day || (day.status !== 'active' && day.status !== 'break')) {
@@ -618,6 +638,7 @@ export async function getTeamClock(options = {}) {
 }
 
 export async function approveClockDay(dayId, options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const approver = options.user || await getCurrentUserRecord();
     const ref = doc(db, COLLECTIONS.timeClock, dayId);
@@ -635,6 +656,7 @@ export async function approveClockDay(dayId, options = {}) {
 }
 
 export async function unapproveClockDay(dayId, options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const editor = options.user || await getCurrentUserRecord();
     const ref = doc(db, COLLECTIONS.timeClock, dayId);
@@ -651,6 +673,7 @@ export async function unapproveClockDay(dayId, options = {}) {
 
 // Manager fixes the numbers (forgotten clock-out, etc.) and/or adds a note.
 export async function editClockDay(dayId, patch = {}, options = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const editor = options.user || await getCurrentUserRecord();
     const ref = doc(db, COLLECTIONS.timeClock, dayId);
