@@ -3894,8 +3894,8 @@ async function setupApprovalAlerts(role) {
     banner.className = 'alert-optin fade-in';
     banner.innerHTML = `
         <div class="alert-optin-text">
-            <strong>Turn on approval alerts</strong>
-            <span>Get a notification — and a red badge on the app icon — the moment something needs your approval.</span>
+            <strong>Please turn on notifications</strong>
+            <span>You need these on to know when something needs your approval. With them on, you get an alert and a red badge on the app icon the moment a request comes in, so nothing waits on you. Please tap "Turn on" and then "Allow".</span>
         </div>
         <div class="alert-optin-actions">
             <button class="alert-optin-no" type="button" id="alertOptInNo">Not now</button>
@@ -3909,12 +3909,12 @@ async function setupApprovalAlerts(role) {
     };
     document.getElementById('alertOptInYes').onclick = async () => {
         const yes = document.getElementById('alertOptInYes');
-        yes.disabled = true; yes.textContent = 'Turning on…';
+        yes.disabled = true; yes.textContent = 'Turning on...';
         try {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 await subscribeForPush();
-                banner.innerHTML = '<div class="alert-optin-text"><strong>Alerts are on ✓</strong><span>You’ll get a notification and a red badge when approvals come in.</span></div>';
+                banner.innerHTML = '<div class="alert-optin-text"><strong>Notifications are on.</strong><span>You will get an alert and a red badge whenever something needs your approval.</span></div>';
                 window.setTimeout(() => banner.remove(), 2800);
             } else {
                 banner.remove();   // they chose Don't Allow — respect it

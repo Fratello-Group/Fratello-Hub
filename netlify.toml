@@ -1,0 +1,5 @@
+# Serve the repo as-is. Netlify's asset post-processing (HTML minify / bundling)
+# can corrupt multi-byte UTF-8 characters (e.g. an em-dash "—" showing as "â€""),
+# so we skip it. Files are already hand-tuned; nothing here needs optimizing.
+[build.processing]
+  skip_processing = true
