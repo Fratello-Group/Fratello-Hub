@@ -1384,9 +1384,14 @@
         function normName(value) { return String(value || '').trim().toLowerCase(); }
 
         function rosterPlaceholders() {
-            const have = new Set(STAFF.map(p => normName(p.name)));
+            // A roster person is "already in the Hub" if a live account matches by
+            // email OR by name — so anyone with an account never shows as "Not invited".
+            const haveEmail = new Set(STAFF.map(p => emailKey(p.email)).filter(Boolean));
+            const haveName = new Set(STAFF.map(p => normName(p.name)));
             return (PEOPLE || [])
-                .filter(p => p && p.name && !/\(name tbd\)/i.test(p.name) && !have.has(normName(p.name)))
+                .filter(p => p && p.name && !/\(name tbd\)/i.test(p.name)
+                    && !haveName.has(normName(p.name))
+                    && !(p.email && haveEmail.has(emailKey(p.email))))
                 .map(p => {
                     const level = profileDefaults(p.hubProfile || 'staff').role_tier || 'Staff';
                     const department = ROSTER_DEPT_LABEL[p.dept] || '';

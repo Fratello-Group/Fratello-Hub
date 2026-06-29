@@ -3556,6 +3556,7 @@ function renderDashboardHome(role) {
 
     // Company-wide directory (everyone's name + position + company contact info).
     appendDirectoryTile(main, role);
+    if (tierOf(role) === 'owner') ensureDirectorySynced();  // keep it fresh from the live roster
 
     const notesSection = document.createElement('section');
     notesSection.className = 'workbench-section fade-in';
@@ -4085,6 +4086,28 @@ function dirArea(dept) {
 const DIR_AREA_ORDER = ['Leadership', 'Production', 'Sales', 'Marketing', 'Finance & Office', 'Team'];
 const DIR_TIER_RANK = { Owner: 0, Controller: 1, Manager: 2, Staff: 3 };
 
+// Keep the all-readable directory in sync with the live roster whenever an
+// Owner/Controller uses the Hub — so it's populated without needing to open
+// Manage People, and reflects who's actually in the system.
+async function ensureDirectorySynced() {
+    if (!activeRole || tierOf(activeRole) !== 'owner') return false;  // only Owner/Controller may write
+    try {
+        const auth = await import('./system/fratello-auth.js');
+        if (typeof auth.listHubUsers !== 'function') return false;
+        const people = await auth.listHubUsers();
+        const api = await clockApi();
+        if (typeof api.syncDirectory !== 'function') return false;
+        await api.syncDirectory((people || []).map(p => ({
+            email: p.email, name: p.name, title: p.title,
+            department: p.department, role_tier: p.role_tier,
+            active: p.active !== false && p.status !== 'disabled'
+        })));
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 function appendDirectoryTile(main, role) {
     const section = document.createElement('section');
     section.className = 'workbench-section fade-in';
@@ -4156,6 +4179,11 @@ async function openDirectory() {
     try {
         const api = await clockApi();
         __directory = await api.getDirectory();
+        // First time (empty) + you're an Owner/Controller: populate it from the
+        // live roster right now, then show it.
+        if ((!__directory || !__directory.length) && activeRole && tierOf(activeRole) === 'owner') {
+            if (await ensureDirectorySynced()) __directory = await api.getDirectory();
+        }
     } catch (error) {
         __directory = [];
     }
