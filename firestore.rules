@@ -238,6 +238,33 @@ service cloud.firestore {
         && request.resource.data.get('cfia_department', '') == resource.data.get('cfia_department', '');
     }
 
+    // ── Team insights: grades + production output ──
+    // A production manager (profile 'production') is scoped to their own team;
+    // owner/controller see everything. teamGroup() rolls the three sub-teams up.
+    function isProductionManager() {
+      return hasActiveProfile('production');
+    }
+    function isManagerOfTeam(team) {
+      return isOwnerOrController()
+        || (isProductionManager() && teamGroup(team) == 'Production');
+    }
+    // Per-period scorecard. Read by owner/controller, the manager of that team,
+    // or the subject reading their own grade. Write only by a manager of that
+    // team (or owner/controller), self-stamped, with scores constrained to 1..5.
+    function isGradeScore(v) {
+      return v is int && v >= 1 && v <= 5;
+    }
+    function validGradeWrite(d) {
+      return isManagerOfTeam(d.get('team', ''))
+        && d.graded_by == signedInEmail()
+        && d.user_id is string && d.user_id.size() > 0
+        && d.scores.keys().hasOnly(['attendance', 'punctuality', 'quality', 'attitude'])
+        && d.scores.attendance != null && isGradeScore(d.scores.attendance)
+        && d.scores.punctuality != null && isGradeScore(d.scores.punctuality)
+        && d.scores.quality != null && isGradeScore(d.scores.quality)
+        && d.scores.attitude != null && isGradeScore(d.scores.attitude);
+    }
+
     function validAvatarStatus(data) {
       return data.status in ['Untested', 'Live', 'Worked', 'Flopped'];
     }
@@ -393,9 +420,40 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Time-tracker company settings. Managers need to READ these (expected
+    // shifts, break policy) to compute KPIs; only owner/controller may WRITE.
+    // This more-specific path takes precedence over settings/{settingId} for
+    // the 'time' doc only — every other settings doc keeps its existing rule.
+    match /settings/time {
+      allow read: if signedIn();
+      allow create, update: if isOwnerOrController();
+      allow delete: if false;
+    }
+
     match /settings/{settingId} {
       allow read: if signedIn();
       allow create, update: if isOwner();
+      allow delete: if false;
+    }
+
+    // ── Time grades (manager's per-period scorecard) ──
+    // Read: owner/controller, the manager of that team, or the subject reading
+    // their own grade. Write: owner/controller or the manager of that team,
+    // self-stamped (graded_by == caller) with scores constrained to 1..5 ints.
+    match /time_grades/{gradeId} {
+      allow get, list: if isManagerOfTeam(resource.data.get('team', ''))
+        || (signedIn() && resource.data.user_id == signedInEmail());
+      allow create, update: if validGradeWrite(request.resource.data);
+      allow delete: if false;
+    }
+
+    // ── Production output (Stage 4 light output log) ──
+    // Read by any signed-in manager/owner/controller; written by owner/
+    // controller or a production manager (one doc per team per day).
+    match /production_output/{outputId} {
+      allow get, list: if isOwnerOrController() || isProductionManager();
+      allow create, update: if (isOwnerOrController() || isProductionManager())
+        && request.resource.data.logged_by == signedInEmail();
       allow delete: if false;
     }
 

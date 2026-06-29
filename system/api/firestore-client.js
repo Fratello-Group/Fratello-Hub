@@ -25,7 +25,10 @@ const COLLECTIONS = {
     avatarLogs: 'avatar_logs',
     timeClock: 'time_clock',
     directory: 'directory',
-    peopleDrafts: 'people_drafts'
+    peopleDrafts: 'people_drafts',
+    timeSettings: 'settings',
+    grades: 'time_grades',
+    output: 'production_output'
 };
 
 const APPROVAL_ENDPOINT = '/.netlify/functions/time-off-approval-action';
@@ -127,6 +130,19 @@ function isOwner(user) {
 
 function cleanOptionalText(value) {
     return String(value || '').trim();
+}
+
+// Per-person shift overrides. expected_start is "HH:MM" (or null to clear);
+// expected_hours is a positive number (or null). Anything unparseable -> null.
+function normalizeExpectedStart(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const text = String(value).trim();
+    return /^\d{2}:\d{2}$/.test(text) ? text : null;
+}
+function normalizeExpectedHours(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const num = Number(value);
+    return Number.isFinite(num) && num > 0 ? num : null;
 }
 
 function validAvatarStatus(status) {
@@ -812,7 +828,183 @@ export async function editClockDay(dayId, patch = {}, options = {}) {
     return withId(await getDoc(ref));
 }
 
+// ════════════════════════════════════════════════
+// TIME SETTINGS · GRADES · PRODUCTION OUTPUT
+// ════════════════════════════════════════════════
+// Settings (settings/time) are read by managers/owner/controller and written
+// only by owner/controller. time_grades is a manager's per-period scorecard
+// (one doc per person per pay period). production_output is the Stage-4 light
+// output log (one doc per team per day). All writes are preview-safe and the
+// writer is resolved from the live Firestore user record.
+
+// Sane defaults for settings/time — getTimeSettings merges the stored doc over
+// these so missing fields never break callers, and a missing doc returns these.
+const TIME_SETTINGS_DEFAULTS = {
+    paid_break_minutes: 0,
+    unpaid_lunch_minutes: 30,
+    grace_minutes: 5,
+    department_shifts: {
+        roasting: { start: '06:00', hours: 8 },
+        packaging: { start: '07:00', hours: 8 },
+        warehouse: { start: '07:00', hours: 8 }
+    },
+    default_shift: { start: '08:00', hours: 8 }
+};
+
+function clonedTimeSettingsDefaults() {
+    return {
+        ...TIME_SETTINGS_DEFAULTS,
+        department_shifts: Object.fromEntries(
+            Object.entries(TIME_SETTINGS_DEFAULTS.department_shifts)
+                .map(([k, v]) => [k, { ...v }])
+        ),
+        default_shift: { ...TIME_SETTINGS_DEFAULTS.default_shift }
+    };
+}
+
+function clampScore(value) {
+    const num = Math.round(Number(value));
+    if (!Number.isFinite(num)) return 1;
+    return Math.min(5, Math.max(1, num));
+}
+
+export async function getTimeSettings() {
+    const { db } = requireFirestore();
+    const ref = doc(db, COLLECTIONS.timeSettings, 'time');
+    let stored = null;
+    try {
+        stored = withId(await getDoc(ref));
+    } catch (error) {
+        stored = null;
+    }
+    const defaults = clonedTimeSettingsDefaults();
+    if (!stored) return defaults;
+    return {
+        ...defaults,
+        ...stored,
+        department_shifts: { ...defaults.department_shifts, ...(stored.department_shifts || {}) },
+        default_shift: { ...defaults.default_shift, ...(stored.default_shift || {}) }
+    };
+}
+
+export async function saveTimeSettings(patch = {}) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const writer = await getCurrentUserRecord();
+    if (!isOwnerOrController(writer)) {
+        throw new Error('Only the Owner or Controller can change time settings.');
+    }
+    const ref = doc(db, COLLECTIONS.timeSettings, 'time');
+    await setDoc(ref, {
+        ...patch,
+        updated_at: serverTimestamp(),
+        updated_by: normalizeEmail(writer.email || writer.id)
+    }, { merge: true });
+    return getTimeSettings();
+}
+
+// Grades the viewer may see: owner/controller see all; a manager is scoped to
+// their team via teamGroupOf so every returned doc passes the security rule.
+export async function getTeamGrades(options = {}) {
+    const { db } = requireFirestore();
+    const user = options.user || await getCurrentUserRecord();
+    const constraints = [];
+    if (!isOwnerOrController(user)) {
+        const team = teamGroupOf(user.department) || 'Production';
+        constraints.push(where('team', '==', team));
+    }
+    const snapshot = await getDocs(query(collection(db, COLLECTIONS.grades), ...constraints));
+    let items = snapshot.docs.map(withId).filter(Boolean);
+    if (options.team) items = items.filter(item => teamGroupOf(item.team) === teamGroupOf(options.team));
+    const start = options.start_date ? clockDateKey(options.start_date) : '0000-00-00';
+    const end = options.end_date ? clockDateKey(options.end_date) : '9999-99-99';
+    items = items.filter(item => String(item.period_start || '') >= start && String(item.period_start || '') <= end);
+    return items.sort((a, b) =>
+        String(b.period_start || '').localeCompare(String(a.period_start || ''))
+        || String(a.user_name || '').localeCompare(String(b.user_name || '')));
+}
+
+export async function saveGrade(input = {}) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const writer = await getCurrentUserRecord();
+    const userId = normalizeEmail(input.user_id);
+    const periodStart = cleanOptionalText(input.period_start);
+    if (!userId) throw new Error('A person is required to save a grade.');
+    if (!periodStart) throw new Error('A pay-period start is required to save a grade.');
+
+    const rawScores = input.scores || {};
+    const scores = {
+        attendance: clampScore(rawScores.attendance),
+        punctuality: clampScore(rawScores.punctuality),
+        quality: clampScore(rawScores.quality),
+        attitude: clampScore(rawScores.attitude)
+    };
+
+    const record = {
+        user_id: userId,
+        user_name: cleanOptionalText(input.user_name) || '',
+        team: cleanOptionalText(input.team) || '',
+        department: cleanOptionalText(input.department) || '',
+        period_start: periodStart,
+        period_end: cleanOptionalText(input.period_end) || '',
+        scores,
+        note: cleanOptionalText(input.note),
+        graded_by: normalizeEmail(writer.email || writer.id),
+        graded_by_name: cleanOptionalText(writer.name) || '',
+        graded_at: serverTimestamp(),
+        created_via: 'hub-insights'
+    };
+
+    const id = `${docIdForEmail(userId)}_${periodStart}`;
+    const ref = doc(db, COLLECTIONS.grades, id);
+    await setDoc(ref, record, { merge: true });
+    return withId(await getDoc(ref));
+}
+
+export async function getProductionOutput(options = {}) {
+    const { db } = requireFirestore();
+    const user = options.user || await getCurrentUserRecord();
+    const snapshot = await getDocs(collection(db, COLLECTIONS.output));
+    let items = snapshot.docs.map(withId).filter(Boolean);
+    if (options.team) items = items.filter(item => teamGroupOf(item.team) === teamGroupOf(options.team));
+    const start = options.start_date ? clockDateKey(options.start_date) : '0000-00-00';
+    const end = options.end_date ? clockDateKey(options.end_date) : '9999-99-99';
+    items = items.filter(item => String(item.date || '') >= start && String(item.date || '') <= end);
+    return items.sort((a, b) =>
+        String(b.date || '').localeCompare(String(a.date || ''))
+        || String(a.team || '').localeCompare(String(b.team || '')));
+}
+
+export async function saveProductionOutput(input = {}) {
+    blockIfPreview();
+    const { db } = requireFirestore();
+    const writer = await getCurrentUserRecord();
+    const team = cleanOptionalText(input.team);
+    const date = cleanOptionalText(input.date);
+    if (!team) throw new Error('A team is required to log output.');
+    if (!date) throw new Error('A date is required to log output.');
+
+    const record = {
+        team,
+        date,
+        units: Math.max(0, Number(input.units) || 0),
+        unit_label: cleanOptionalText(input.unit_label),
+        note: cleanOptionalText(input.note),
+        logged_by: normalizeEmail(writer.email || writer.id),
+        logged_by_name: cleanOptionalText(writer.name) || '',
+        logged_at: serverTimestamp(),
+        created_via: 'hub-insights'
+    };
+
+    const id = `${team.toLowerCase()}_${date}`;
+    const ref = doc(db, COLLECTIONS.output, id);
+    await setDoc(ref, record, { merge: true });
+    return withId(await getDoc(ref));
+}
+
 export async function upsertUser(user = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const id = docIdForEmail(user.email || user.id);
     if (!id) throw new Error('User email is required.');
@@ -833,6 +1025,8 @@ export async function upsertUser(user = {}) {
         hire_date: user.hire_date ? asTimestamp(user.hire_date) : null,
         vacation_days_allotted: user.vacation_days_allotted ?? null,
         vacation_days_used: user.vacation_days_used ?? null,
+        expected_start: normalizeExpectedStart(user.expected_start),
+        expected_hours: normalizeExpectedHours(user.expected_hours),
         calendar_tokens: user.calendar_tokens || {},
         updated_at: serverTimestamp()
     }, { merge: true });
@@ -844,6 +1038,7 @@ export const saveUser = upsertUser;
 export const createUser = upsertUser;
 
 export async function updateUser(userOrId, patch = {}) {
+    blockIfPreview();
     if (typeof userOrId !== 'string') {
         return upsertUser(userOrId);
     }
@@ -857,6 +1052,8 @@ export async function updateUser(userOrId, patch = {}) {
     if (patch.hourly !== undefined) updates.hourly = Boolean(patch.hourly);
     if (patch.phone !== undefined) updates.phone = cleanOptionalText(patch.phone);
     if (patch.address !== undefined) updates.address = cleanOptionalText(patch.address);
+    if (patch.expected_start !== undefined) updates.expected_start = normalizeExpectedStart(patch.expected_start);
+    if (patch.expected_hours !== undefined) updates.expected_hours = normalizeExpectedHours(patch.expected_hours);
     if (patch.calendar_tokens !== undefined) updates.calendar_tokens = patch.calendar_tokens || {};
 
     const ref = doc(db, COLLECTIONS.users, userOrId);
@@ -865,6 +1062,7 @@ export async function updateUser(userOrId, patch = {}) {
 }
 
 export async function setUserActive(userId, { active } = {}) {
+    blockIfPreview();
     const { db } = requireFirestore();
     const ref = doc(db, COLLECTIONS.users, userId);
     await updateDoc(ref, {
