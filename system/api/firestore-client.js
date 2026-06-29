@@ -840,7 +840,9 @@ export async function editClockDay(dayId, patch = {}, options = {}) {
 // Sane defaults for settings/time — getTimeSettings merges the stored doc over
 // these so missing fields never break callers, and a missing doc returns these.
 const TIME_SETTINGS_DEFAULTS = {
-    paid_break_minutes: 0,
+    // Fratello policy: two paid 15-min breaks (= 30 paid) + a 30-min unpaid lunch
+    // on a full 8h shift. Editable in Manage People → Time & pay settings.
+    paid_break_minutes: 30,
     unpaid_lunch_minutes: 30,
     grace_minutes: 5,
     department_shifts: {

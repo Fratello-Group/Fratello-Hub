@@ -367,6 +367,18 @@
 
         let ROLE = null;
         let SETTINGS = null;
+        // Fallback so the dashboard always has a shift policy to read, even if the
+        // settings doc can't be fetched. Real values are set in Manage People →
+        // Time & pay settings (and per person on each edit screen).
+        const DEFAULT_SETTINGS = {
+            paid_break_minutes: 30, unpaid_lunch_minutes: 30, grace_minutes: 5,
+            department_shifts: {
+                roasting: { start: '06:00', hours: 8 },
+                packaging: { start: '07:00', hours: 8 },
+                warehouse: { start: '07:00', hours: 8 }
+            },
+            default_shift: { start: '08:00', hours: 8 }
+        };
         let LAST = null; // { period, kpis, clockDays }
 
         function reliabilityChip(r) {
@@ -650,9 +662,10 @@
             $('scopeNote').textContent = `Loading ${team || 'all production'} · ${from} → ${to}…`;
 
             const c = await api();
+            let loadWarn = '';
             const [clock, reqs, users] = await Promise.all([
-                c.getTeamClock({ start_date: from, end_date: to }),
-                c.getTeamRequests({ status: 'approved', start_date: from, end_date: to }),
+                c.getTeamClock({ start_date: from, end_date: to }).catch(() => { loadWarn = 'time clock'; return []; }),
+                c.getTeamRequests({ status: 'approved', start_date: from, end_date: to }).catch(() => []),
                 (c.getUsers ? c.getUsers().catch(() => []) : Promise.resolve([]))
             ]);
 
@@ -691,7 +704,7 @@
                 });
             }
 
-            const kpis = computeKpis({ clockDays, vacationDays, settings: SETTINGS, period });
+            const kpis = computeKpis({ clockDays, vacationDays, settings: SETTINGS || DEFAULT_SETTINGS, period });
 
             // Labour hours per sub-team for productivity (from this period's clock).
             const labourHoursByTeam = {};
@@ -709,10 +722,22 @@
             catch (e) { outputDocs = []; }
 
             LAST = { period, kpis, clockDays };
-            $('scopeNote').textContent = `${team || 'All production'} · ${from} → ${to}`;
+            $('scopeNote').textContent = loadWarn
+                ? `Couldn't reach the ${loadWarn} just now — showing what loaded. Tap Refresh to retry.`
+                : `${team || 'All production'} · ${from} → ${to}`;
             renderKpis(kpis.team, kpis.people, period);
             renderPeople(kpis.people);
             renderProductivity(labourHoursByTeam, outputDocs);
+        }
+
+        // Paint the shell with zeros so the dashboard is ALWAYS visible — even before
+        // data loads, with no data, or if a fetch fails. Never leave a blank page.
+        function paintEmpty(period) {
+            const empty = computeKpis({ clockDays: [], vacationDays: [], settings: SETTINGS || DEFAULT_SETTINGS, period });
+            renderKpis(empty.team, empty.people, period);
+            renderPeople(empty.people);
+            const labour = {}; TEAMS.forEach(t => { labour[t] = 0; });
+            renderProductivity(labour, []);
         }
 
         (async function init() {
@@ -751,17 +776,18 @@
                 const c = await api();
                 SETTINGS = await c.getTimeSettings();
             } catch (e) {
-                SETTINGS = null;
+                SETTINGS = DEFAULT_SETTINGS;
             }
 
+            // Reveal the dashboard and paint the empty shell FIRST, so the page is
+            // never blank — then load real data over top of it.
             $('gateOk').hidden = false;
+            $('loadingState').hidden = true;
+            paintEmpty(p);
             try {
                 await load();
-                $('loadingState').hidden = true;
             } catch (err) {
-                $('loadingState').hidden = true;
-                $('errorState').hidden = false;
-                $('errorState').textContent = (err && err.message) || 'Could not load Team Insights — check your connection or sign in again.';
+                $('scopeNote').textContent = (err && err.message) || 'Could not load the latest data — tap Refresh to retry.';
             }
         })();
     </script>
