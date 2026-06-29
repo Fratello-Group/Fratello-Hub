@@ -13,6 +13,12 @@ window.FRATELLO_SNAPSHOT = {
    "name": "D'arcy Watsham",
    "slug": "darcy-watsham",
    "email": "darcy.watsham@fratellocoffee.com"
+  },
+  {
+   "id": 10,
+   "name": "Russ Prefontaine",
+   "slug": "russ-prefontaine",
+   "email": "russ@fratellocoffee.com"
   }
  ],
  "accounts": [
@@ -21,6 +27,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "722 World Bier Haus",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 2 - B (CAD)",
    "city": "Calgary",
    "street": "#601 722 85 Street SW",
@@ -83,6 +90,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "AM Coffee Services",
    "channel": "Dealer",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Winnipeg",
    "street": "B-140 Provencher Blvd",
@@ -474,6 +482,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Abel Dizon",
    "channel": "Small Business",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Calgary",
    "street": "5300 - 53 Ave. NW",
@@ -611,6 +620,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Acme Pizza & Pasta Co.",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Calgary",
    "street": "1808 8th Street SE",
@@ -942,6 +952,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Alenn Sandwich and Coffee Inc",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Calgary",
    "street": "5403 Crowchild Trail NW, Unit 120",
@@ -1197,6 +1208,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Allan",
    "channel": "Uncategorized",
+   "ecom": false,
    "priceLevel": "SCH 2 - B (CAD)",
    "city": "Airdrie",
    "street": "2967 Main Street SW",
@@ -1660,6 +1672,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Allegra Restaurant",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Cranbrook",
    "street": "1316 20th Street S",
@@ -1722,6 +1735,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Andreas Co.",
    "channel": "Small Business",
+   "ecom": false,
    "priceLevel": "SCH 6 - Small Business (CAD)",
    "city": "Calgary",
    "street": "121- 9 A Street NE",
@@ -1947,6 +1961,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Bean Upnorth Coffee House",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 2 - B (CAD)",
    "city": "Fort St. John",
    "street": "10045 100 Ave",
@@ -2224,6 +2239,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Belmont Diner - Aspen",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 1 - Agent (CAD)",
    "city": "Calgary",
    "street": "#116-332 Aspen Glen Landing SW.",
@@ -2453,6 +2469,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Belmont Diner - Marda Loop",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 1 - Agent (CAD)",
    "city": "Calgary",
    "street": "2008 33 Ave SW #19",
@@ -2676,6 +2693,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Belmont Diner - Willow Park",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 1 - Agent (CAD)",
    "city": "Calgary",
    "street": "#244 10816 Macleod Trail SE",
@@ -2983,6 +3001,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Bike Bros.",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Cochrane",
    "street": "128 River Ave",
@@ -3099,6 +3118,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Blue Star Diner",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 3 - A (CAD)",
    "city": "Calgary",
    "street": "809 1st Ave NE",
@@ -3406,6 +3426,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 11,
    "name": "Bonterra Trattoria",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Calgary",
    "street": "1016 8 Street SW",
@@ -3472,145 +3493,11 @@ window.FRATELLO_SNAPSHOT = {
    ]
   },
   {
-   "id": 2467,
-   "repId": 11,
-   "name": "Bow Valley Christian Church",
-   "channel": "Small Business",
-   "priceLevel": "SCH 4 - BASE Price (CAD)",
-   "city": "Calgary",
-   "street": "5300 - 53 Ave. NW",
-   "province": "Alberta (CA)",
-   "phone": "(403) 286-5344",
-   "email": "finance@bvcchurch.ca",
-   "lastOrder": "2024-04-10",
-   "ytd": 0,
-   "orders": 0,
-   "months": [],
-   "topProducts": [
-    {
-     "name": "[B2200 2 lb] Habitat Organic Espresso",
-     "qty": 7.0
-    },
-    {
-     "name": "In Town Delivery - $20: In town delivery",
-     "qty": 2.0
-    },
-    {
-     "name": "[B1630 2 lb] DECAF Godfather Espresso\u2122 (",
-     "qty": 2.0
-    },
-    {
-     "name": "[SYR2001] Phillips - Dark Chocolate Sauc",
-     "qty": 2.0
-    }
-   ],
-   "recentOrders": [
-    {
-     "name": "S02248",
-     "date": "2024-04-10",
-     "amount": 79.24,
-     "lines": [
-      {
-       "product": "Roasted around mid to end March",
-       "qty": 0.0,
-       "price": 0.0,
-       "subtotal": 0.0
-      },
-      {
-       "product": "[B2200 2 lb] Habitat Organic Espresso",
-       "qty": 1.0,
-       "price": 29.12,
-       "subtotal": 29.12
-      },
-      {
-       "product": "Roasted after the end of March",
-       "qty": 0.0,
-       "price": 0.0,
-       "subtotal": 0.0
-      },
-      {
-       "product": "[B2200 2 lb] Habitat Organic Espresso",
-       "qty": 1.0,
-       "price": 29.12,
-       "subtotal": 29.12
-      },
-      {
-       "product": "In Town Delivery - $20",
-       "qty": 1.0,
-       "price": 20.0,
-       "subtotal": 20.0
-      }
-     ]
-    },
-    {
-     "name": "S01505",
-     "date": "2024-03-21",
-     "amount": 240.8,
-     "lines": [
-      {
-       "product": "[B2200 2 lb] Habitat Organic Espresso",
-       "qty": 3.0,
-       "price": 28.1,
-       "subtotal": 84.3
-      },
-      {
-       "product": "[B1210 5 lb] Bull Rider (5 lb)",
-       "qty": 1.0,
-       "price": 68.75,
-       "subtotal": 68.75
-      },
-      {
-       "product": "[B1430 5 lb] French Saigon Dark (5 lb)",
-       "qty": 1.0,
-       "price": 66.75,
-       "subtotal": 66.75
-      },
-      {
-       "product": "In Town Delivery - $20: In town delivery",
-       "qty": 1.0,
-       "price": 20.0,
-       "subtotal": 20.0
-      }
-     ]
-    },
-    {
-     "name": "S00689",
-     "date": "2024-02-27",
-     "amount": 183.54,
-     "lines": [
-      {
-       "product": "[B2200 2 lb] Habitat Organic Espresso",
-       "qty": 2.0,
-       "price": 28.1,
-       "subtotal": 56.2
-      },
-      {
-       "product": "[B1630 2 lb] DECAF Godfather Espresso\u2122 (",
-       "qty": 2.0,
-       "price": 32.22,
-       "subtotal": 64.44
-      },
-      {
-       "product": "[SYR2001] Phillips - Dark Chocolate Sauc",
-       "qty": 2.0,
-       "price": 20.95,
-       "subtotal": 41.9
-      },
-      {
-       "product": "In Town Delivery - $20: In town delivery",
-       "qty": 1.0,
-       "price": 20.0,
-       "subtotal": 20.0
-      }
-     ]
-    }
-   ]
-  },
-  {
    "id": 31152,
    "repId": 9,
    "name": "Alforno 707 5th",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "Alforno 707",
@@ -3855,6 +3742,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Alforno Bakery & Cafe",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "222 7 St. SW",
@@ -4150,6 +4038,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Alforno Bakery & Cafe - Pratts",
    "channel": "Grocery",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "300 - 714 1st Street SE",
@@ -4273,6 +4162,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Alforno Chinook",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "300, 714 1 Street S.E.",
@@ -4445,6 +4335,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Alforno First Street Market",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "1327 1 ST SW",
@@ -4673,6 +4564,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Alforno Gulf Canada",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "Suite 240, 401 9th Avenue SW",
@@ -4944,6 +4836,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Alforno Livingston",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 0 - Dealer (CAD)",
    "city": "Calgary",
    "street": "Livingston Place South Tower",
@@ -5221,6 +5114,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Analog Calgary Farmers Market West",
    "channel": "Analog",
+   "ecom": false,
    "priceLevel": "Contract Pricing - Analog (CAD)",
    "city": "Calgary",
    "street": "264132 Range Road 20",
@@ -5816,6 +5710,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Anthony Vink",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 2 - B (CAD)",
    "city": "Lethbridge",
    "street": "101 - 2049 Mayor Magrath Dr S",
@@ -6170,6 +6065,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Apt. Coffee",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Lethbridge",
    "street": "222 5th St. South",
@@ -6336,6 +6232,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Bake Venue",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 5 - Equipment (CAD)",
    "city": "Calgary",
    "street": "227 Taracove Estate Drive NE",
@@ -6488,6 +6385,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Barrel No. 612 Grill & Bar",
    "channel": "Restaurant",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Calgary",
    "street": "612 5 Street SE.",
@@ -6671,6 +6569,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Bentley Cycle Inc",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Bentley",
    "street": "4925 50th Ave4925 50th Ave",
@@ -6723,6 +6622,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Bike and Brew",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 4 - BASE Price (CAD)",
    "city": "Calgary",
    "street": "921 1 Ave NE",
@@ -7030,6 +6930,7 @@ window.FRATELLO_SNAPSHOT = {
    "repId": 9,
    "name": "Blackwood Coffee",
    "channel": "SCH",
+   "ecom": false,
    "priceLevel": "SCH 3 - A (CAD)",
    "city": "Claresholm",
    "street": "110 50 Ave W",
@@ -7494,157 +7395,121 @@ window.FRATELLO_SNAPSHOT = {
    ]
   },
   {
-   "id": 4401,
-   "repId": 9,
-   "name": "Blackwood Coffee - Claresholm",
+   "id": 24318,
+   "repId": 10,
+   "name": "49th Parallel Coffee Roasters",
    "channel": "SCH",
-   "priceLevel": "SCH 3 - A (CAD)",
-   "city": "Claresholm",
-   "street": "110 50 Ave W",
-   "province": "Alberta (CA)",
+   "ecom": false,
+   "priceLevel": "SCH 0 - Dealer (CAD)",
+   "city": "Burnaby",
+   "street": "Unit 112 - 6741 Cariboo Road",
+   "province": "British Columbia (CA)",
    "phone": "",
-   "email": "blackwoodcoffeeco@gmail.com",
-   "lastOrder": "2026-05-04",
-   "ytd": 34407,
-   "orders": 35,
-   "months": [
-    {
-     "label": "Jul",
-     "amt": 4242
-    },
-    {
-     "label": "Aug",
-     "amt": 2518
-    },
-    {
-     "label": "Sep",
-     "amt": 3889
-    },
-    {
-     "label": "Oct",
-     "amt": 4166
-    },
-    {
-     "label": "Nov",
-     "amt": 3303
-    },
-    {
-     "label": "Dec",
-     "amt": 2231
-    },
-    {
-     "label": "Jan",
-     "amt": 2751
-    },
-    {
-     "label": "Feb",
-     "amt": 3395
-    },
-    {
-     "label": "Mar",
-     "amt": 3901
-    },
-    {
-     "label": "Apr",
-     "amt": 2519
-    },
-    {
-     "label": "May",
-     "amt": 1493
-    }
-   ],
+   "email": "acctspay@49thparallelroasters.com",
+   "lastOrder": "2025-05-16",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
    "topProducts": [
     {
-     "name": "[B1610 2 lb] CLASSIC Godfather Espresso\u2122",
-     "qty": 67.0
+     "name": "[SYR2002] Idle - Spiced Chai - 1 L",
+     "qty": 900.0
     },
     {
-     "name": "[LF1001] QuickLabel - Fratello Labels - ",
-     "qty": 50.0
-    },
-    {
-     "name": "[B2260 2 lb] Guatemala Montecristo (2 lb",
-     "qty": 21.0
-    },
-    {
-     "name": "[PK2001] Fratello Bag - 12 oz",
-     "qty": 15.0
+     "name": "[DRI1002 12 x 1L] Idle - Spiced Chai - 1",
+     "qty": 75.0
     }
    ],
    "recentOrders": [
     {
-     "name": "S39962",
-     "date": "2026-05-04",
-     "amount": 1492.65,
+     "name": "S20044",
+     "date": "2025-05-16",
+     "amount": 4950.0,
      "lines": [
       {
-       "product": "[TEA1040 8 oz] Idle - Earl Grey Cream Or",
-       "qty": 2.0,
-       "price": 12.5,
-       "subtotal": 25.0
-      },
+       "product": "[DRI1002 12 x 1L] Idle - Spiced Chai - 1",
+       "qty": 75.0,
+       "price": 66.0,
+       "subtotal": 4950.0
+      }
+     ]
+    },
+    {
+     "name": "S16915",
+     "date": "2025-03-26",
+     "amount": 4950.0,
+     "lines": [
       {
-       "product": "[TEA1130 8 oz] Idle - Organic Matcha Gre",
-       "qty": 3.0,
-       "price": 30.0,
-       "subtotal": 90.0
-      },
+       "product": "[SYR2002] Idle - Spiced Chai - 1 L",
+       "qty": 900.0,
+       "price": 5.5,
+       "subtotal": 4950.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 8402,
+   "repId": 10,
+   "name": "AGNIESZKA GRABA",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "VICTORIA",
+   "street": "528 PANDORA AVE.",
+   "province": "British Columbia (CA)",
+   "phone": "+17782655026",
+   "email": "grabaagnieszka@gmail.com",
+   "lastOrder": "2026-05-06",
+   "ytd": 177,
+   "orders": 4,
+   "months": [
+    {
+     "label": "Aug",
+     "amt": 87
+    },
+    {
+     "label": "Apr",
+     "amt": 50
+    },
+    {
+     "label": "May",
+     "amt": 40
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "DARK Godfather Espresso\u2122",
+     "qty": 5.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 5.0
+    },
+    {
+     "name": "CLASSIC Goodmother Espresso - BUNDLE",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping (Included)",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S40159",
+     "date": "2026-05-06",
+     "amount": 40.0,
+     "lines": [
       {
-       "product": "[TEA1060 8 oz] Idle - Indian Chai Organi",
-       "qty": 2.0,
-       "price": 13.5,
-       "subtotal": 27.0
-      },
-      {
-       "product": "[B1610 2 lb] CLASSIC Godfather Espresso\u2122",
-       "qty": 20.0,
-       "price": 32.08,
-       "subtotal": 641.6
-      },
-      {
-       "product": "[B2260 2 lb] Guatemala Montecristo (2 lb",
-       "qty": 6.0,
-       "price": 33.28,
-       "subtotal": 199.68
-      },
-      {
-       "product": "[B1630 2 lb] DECAF Godfather Espresso\u2122 (",
-       "qty": 4.0,
-       "price": 33.12,
-       "subtotal": 132.48
-      },
-      {
-       "product": "[PK2001] Fratello Bag - 12 oz",
-       "qty": 15.0,
-       "price": 0.65,
-       "subtotal": 9.75
-      },
-      {
-       "product": "[LF1001] QuickLabel - Fratello Labels - ",
-       "qty": 20.0,
-       "price": 0.06,
-       "subtotal": 1.2
-      },
-      {
-       "product": "10 x GF Decaf and 10 x GF classic",
-       "qty": 0.0,
-       "price": 0.0,
-       "subtotal": 0.0
-      },
-      {
-       "product": "[DRI1010C] Idle - Spiced Chai - 12 x 1 L",
-       "qty": 3.0,
-       "price": 113.4,
-       "subtotal": 340.2
-      },
-      {
-       "product": "[MIS3020] Urnex - Milk Frother Cleaner -",
+       "product": "CLASSIC Goodmother Espresso - BUNDLE",
        "qty": 1.0,
-       "price": 23.99,
-       "subtotal": 23.99
+       "price": 40.0,
+       "subtotal": 40.0
       },
       {
-       "product": "Free Shipping over 30 lbs or at Cost",
+       "product": "Free Shipping (Included)",
        "qty": 1.0,
        "price": 0.0,
        "subtotal": 0.0
@@ -7652,18 +7517,18 @@ window.FRATELLO_SNAPSHOT = {
      ]
     },
     {
-     "name": "S39142",
-     "date": "2026-04-21",
-     "amount": 232.96,
+     "name": "S39275",
+     "date": "2026-04-23",
+     "amount": 50.0,
      "lines": [
       {
-       "product": "[B2260 2 lb] Guatemala Montecristo (2 lb",
-       "qty": 7.0,
-       "price": 33.28,
-       "subtotal": 232.96
+       "product": "DARK Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
       },
       {
-       "product": "Free Shipping over 30 lbs or at Cost",
+       "product": "Free Shipping",
        "qty": 1.0,
        "price": 0.0,
        "subtotal": 0.0
@@ -7671,66 +7536,18 @@ window.FRATELLO_SNAPSHOT = {
      ]
     },
     {
-     "name": "S39059",
-     "date": "2026-04-20",
-     "amount": 1333.39,
+     "name": "S25273",
+     "date": "2025-08-30",
+     "amount": 40.0,
      "lines": [
       {
-       "product": "[B2260 2 lb] Guatemala Montecristo (2 lb",
+       "product": "DARK Godfather Espresso\u2122",
        "qty": 1.0,
-       "price": 33.28,
-       "subtotal": 33.28
+       "price": 50.0,
+       "subtotal": 40.0
       },
       {
-       "product": "[B1610 2 lb] CLASSIC Godfather Espresso\u2122",
-       "qty": 20.0,
-       "price": 32.08,
-       "subtotal": 641.6
-      },
-      {
-       "product": "[DRI1010C] Idle - Spiced Chai - 12 x 1 L",
-       "qty": 3.0,
-       "price": 113.4,
-       "subtotal": 340.2
-      },
-      {
-       "product": "[B2260 2 lb] Guatemala Montecristo (2 lb",
-       "qty": 4.0,
-       "price": 33.28,
-       "subtotal": 133.12
-      },
-      {
-       "product": "[TEA1040 8 oz] Idle - Earl Grey Cream Or",
-       "qty": 2.0,
-       "price": 12.5,
-       "subtotal": 25.0
-      },
-      {
-       "product": "[TEA1080 8 oz] Idle - Lemon Sunset Herba",
-       "qty": 2.0,
-       "price": 15.5,
-       "subtotal": 31.0
-      },
-      {
-       "product": "[TEA1140 8 oz] Idle - Golden Turmeric La",
-       "qty": 2.0,
-       "price": 22.0,
-       "subtotal": 44.0
-      },
-      {
-       "product": "[TEA1130 8 oz] Idle - Organic Matcha Gre",
-       "qty": 2.0,
-       "price": 30.0,
-       "subtotal": 60.0
-      },
-      {
-       "product": "[MIS3020] Urnex - Milk Frother Cleaner -",
-       "qty": 1.0,
-       "price": 23.99,
-       "subtotal": 23.99
-      },
-      {
-       "product": "Free Shipping over 30 lbs or at Cost",
+       "product": "Free Shipping",
        "qty": 1.0,
        "price": 0.0,
        "subtotal": 0.0
@@ -7738,42 +7555,18 @@ window.FRATELLO_SNAPSHOT = {
      ]
     },
     {
-     "name": "S38461",
-     "date": "2026-04-09",
-     "amount": 952.19,
+     "name": "S24064",
+     "date": "2025-08-07",
+     "amount": 47.0,
      "lines": [
       {
-       "product": "[B1610 2 lb] CLASSIC Godfather Espresso\u2122",
-       "qty": 15.0,
-       "price": 32.08,
-       "subtotal": 481.2
-      },
-      {
-       "product": "[TEA1080 8 oz] Idle - Lemon Sunset Herba",
+       "product": "CLASSIC Godfather Espresso\u2122",
        "qty": 1.0,
-       "price": 15.5,
-       "subtotal": 15.5
+       "price": 50.0,
+       "subtotal": 47.0
       },
       {
-       "product": "[DRI1010C] Idle - Spiced Chai - 12 x 1 L",
-       "qty": 4.0,
-       "price": 113.4,
-       "subtotal": 453.6
-      },
-      {
-       "product": "[LF1001] QuickLabel - Fratello Labels - ",
-       "qty": 30.0,
-       "price": 0.06,
-       "subtotal": 1.8
-      },
-      {
-       "product": "15 -Canopy Stickers, 15 -Guatemala Stick",
-       "qty": 0.0,
-       "price": 0.0,
-       "subtotal": 0.0
-      },
-      {
-       "product": "Free Shipping over 30 lbs or at Cost",
+       "product": "Free Shipping",
        "qty": 1.0,
        "price": 0.0,
        "subtotal": 0.0
@@ -7781,48 +7574,462 @@ window.FRATELLO_SNAPSHOT = {
      ]
     },
     {
-     "name": "S37799",
-     "date": "2026-03-30",
-     "amount": 1521.18,
+     "name": "S20790",
+     "date": "2025-06-02",
+     "amount": 52.5,
      "lines": [
       {
-       "product": "[PL2210FRA 10 x 2 lb] Canopy Organic Ble",
+       "product": "DARK Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 15.0,
+       "subtotal": 15.0
+      },
+      {
+       "product": "DARK Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 37.5,
+       "subtotal": 37.5
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S19141",
+     "date": "2025-05-03",
+     "amount": 37.5,
+     "lines": [
+      {
+       "product": "DARK Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 37.5
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 10007,
+   "repId": 10,
+   "name": "Aaron Bilkoski",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "27 Christie Briar Row Southwest",
+   "province": "Alberta (CA)",
+   "phone": "+15878929334",
+   "email": "aaron.bilkoski@icloud.com",
+   "lastOrder": "2024-05-10",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S03545",
+     "date": "2024-05-10",
+     "amount": 37.2,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 46.5,
+       "subtotal": 37.2
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 9836,
+   "repId": 10,
+   "name": "Aaron Going",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "2903 Lindsay Dr SW",
+   "province": "Alberta (CA)",
+   "phone": "+14039992352",
+   "email": "aaron.going77@gmail.com",
+   "lastOrder": "2026-04-19",
+   "ytd": 50,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Apr",
+     "amt": 50
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Flat Rate",
+     "qty": 5.0
+    },
+    {
+     "name": "Idle - Spiced Chai - 1 L",
+     "qty": 3.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 2.0
+    },
+    {
+     "name": "Idle - Earl Grey Cream Organic Black Tea",
+     "qty": 2.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S39009",
+     "date": "2026-04-19",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "Habitat Organic Espresso",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S22083",
+     "date": "2025-06-25",
+     "amount": 40.0,
+     "lines": [
+      {
+       "product": "Gun Smoke",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Midnight Espresso",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S10782",
+     "date": "2024-11-07",
+     "amount": 28.49,
+     "lines": [
+      {
+       "product": "Idle - Earl Grey Cream Organic Black Tea",
+       "qty": 1.0,
+       "price": 17.99,
+       "subtotal": 17.99
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    },
+    {
+     "name": "S10494",
+     "date": "2024-11-01",
+     "amount": 58.49,
+     "lines": [
+      {
+       "product": "Moca Arabica",
+       "qty": 1.0,
+       "price": 40.5,
+       "subtotal": 40.5
+      },
+      {
+       "product": "Idle - Earl Grey Cream Organic Black Tea",
+       "qty": 1.0,
+       "price": 17.99,
+       "subtotal": 17.99
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S05847",
+     "date": "2024-07-08",
+     "amount": 49.97,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 19.75,
+       "subtotal": 19.75
+      },
+      {
+       "product": "Idle - Spiced Chai - 1 L",
        "qty": 2.0,
-       "price": 325.0,
-       "subtotal": 650.0
+       "price": 15.11,
+       "subtotal": 30.22
       },
       {
-       "product": "[B1610 2 lb] CLASSIC Godfather Espresso\u2122",
-       "qty": 12.0,
-       "price": 32.08,
-       "subtotal": 384.96
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S03369",
+     "date": "2024-05-07",
+     "amount": 42.74,
+     "lines": [
+      {
+       "product": "Idle - Spiced Chai - 1 L",
+       "qty": 1.0,
+       "price": 15.11,
+       "subtotal": 12.09
       },
       {
-       "product": "[B2260 2 lb] Guatemala Montecristo (2 lb",
-       "qty": 3.0,
-       "price": 33.28,
-       "subtotal": 99.84
+       "product": "DECAF Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 18.56,
+       "subtotal": 14.85
       },
       {
-       "product": "[MIS3010] Urnex - Puro Caff - 20 oz",
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 19.75,
+       "subtotal": 15.8
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6244,
+   "repId": 10,
+   "name": "Aaron Long",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Lloydminster",
+   "street": "5313 35 Street",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "aaron@hopeplusfury.com",
+   "lastOrder": "2026-06-21",
+   "ytd": 663,
+   "orders": 14,
+   "months": [
+    {
+     "label": "Jul",
+     "amt": 50
+    },
+    {
+     "label": "Aug",
+     "amt": 50
+    },
+    {
+     "label": "Sep",
+     "amt": 56
+    },
+    {
+     "label": "Oct",
+     "amt": 50
+    },
+    {
+     "label": "Nov",
+     "amt": 73
+    },
+    {
+     "label": "Jan",
+     "amt": 100
+    },
+    {
+     "label": "Feb",
+     "amt": 50
+    },
+    {
+     "label": "Mar",
+     "amt": 70
+    },
+    {
+     "label": "Apr",
+     "amt": 50
+    },
+    {
+     "label": "May",
+     "amt": 50
+    },
+    {
+     "label": "Jun",
+     "amt": 64
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 6.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 6.0
+    },
+    {
+     "name": "Idle - Jasmine Green Tea",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42714",
+     "date": "2026-06-21",
+     "amount": 14.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 14.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S41923",
+     "date": "2026-06-07",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S40405",
+     "date": "2026-05-10",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S38589",
+     "date": "2026-04-12",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S37174",
+     "date": "2026-03-18",
+     "amount": 69.99,
+     "lines": [
+      {
+       "product": "Idle - Jasmine Green Tea",
        "qty": 1.0,
        "price": 19.99,
        "subtotal": 19.99
       },
       {
-       "product": "[MIS3020] Urnex - Milk Frother Cleaner -",
+       "product": "CLASSIC Godfather Espresso\u2122",
        "qty": 1.0,
-       "price": 23.99,
-       "subtotal": 23.99
+       "price": 50.0,
+       "subtotal": 50.0
       },
       {
-       "product": "[DRI1010C] Idle - Spiced Chai - 12 x 1 L",
-       "qty": 3.0,
-       "price": 113.4,
-       "subtotal": 340.2
-      },
-      {
-       "product": "Free Shipping over 30 lbs or at Cost",
+       "product": "Free Shipping",
        "qty": 1.0,
        "price": 0.0,
        "subtotal": 0.0
@@ -7830,15 +8037,3308 @@ window.FRATELLO_SNAPSHOT = {
      ]
     },
     {
-     "name": "S37041",
-     "date": "2026-03-16",
+     "name": "S35816",
+     "date": "2026-02-22",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 8193,
+   "repId": 10,
+   "name": "Aaron MacNeil",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "3424 6th Street Southwest",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "macneil.aaron@gmail.com",
+   "lastOrder": "2026-06-11",
+   "ytd": 616,
+   "orders": 13,
+   "months": [
+    {
+     "label": "Jul",
+     "amt": 45
+    },
+    {
+     "label": "Aug",
+     "amt": 45
+    },
+    {
+     "label": "Sep",
+     "amt": 45
+    },
+    {
+     "label": "Oct",
+     "amt": 45
+    },
+    {
+     "label": "Nov",
+     "amt": 90
+    },
+    {
+     "label": "Dec",
+     "amt": 45
+    },
+    {
+     "label": "Feb",
+     "amt": 45
+    },
+    {
+     "label": "Mar",
+     "amt": 45
+    },
+    {
+     "label": "Apr",
+     "amt": 100
+    },
+    {
+     "label": "May",
+     "amt": 56
+    },
+    {
+     "label": "Jun",
+     "amt": 56
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 6.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 3.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 3.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42155",
+     "date": "2026-06-11",
+     "amount": 55.5,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    },
+    {
+     "name": "S40742",
+     "date": "2026-05-17",
+     "amount": 55.5,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    },
+    {
+     "name": "S39118",
+     "date": "2026-04-20",
+     "amount": 55.5,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    },
+    {
+     "name": "S38043",
+     "date": "2026-04-01",
+     "amount": 45.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S36311",
+     "date": "2026-03-02",
+     "amount": 45.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S35144",
+     "date": "2026-02-09",
+     "amount": 45.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5789,
+   "repId": 10,
+   "name": "Aaron Santucci",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "2236 6 Avenue Northwest",
+   "province": "Alberta (CA)",
+   "phone": "+15872841307",
+   "email": "aaronsantucci@hotmail.com",
+   "lastOrder": "2026-06-17",
+   "ytd": 528,
+   "orders": 10,
+   "months": [
+    {
+     "label": "Jul",
+     "amt": 50
+    },
+    {
+     "label": "Aug",
+     "amt": 50
+    },
+    {
+     "label": "Sep",
+     "amt": 57
+    },
+    {
+     "label": "Oct",
+     "amt": 50
+    },
+    {
+     "label": "Nov",
+     "amt": 50
+    },
+    {
+     "label": "Dec",
+     "amt": 71
+    },
+    {
+     "label": "Jan",
+     "amt": 50
+    },
+    {
+     "label": "Feb",
+     "amt": 50
+    },
+    {
+     "label": "Apr",
+     "amt": 50
+    },
+    {
+     "label": "Jun",
+     "amt": 50
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 6.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 6.0
+    },
+    {
+     "name": "Brazil Campo Das Vertentes",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42497",
+     "date": "2026-06-17",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S38849",
+     "date": "2026-04-16",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S35151",
+     "date": "2026-02-10",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S34490",
+     "date": "2026-01-28",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S31510",
+     "date": "2025-12-04",
+     "amount": 71.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Brazil Campo Das Vertentes",
+       "qty": 1.0,
+       "price": 21.0,
+       "subtotal": 21.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S29821",
+     "date": "2025-11-20",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 9662,
+   "repId": 10,
+   "name": "Aartje Verhey",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "4208 Voyageur Drive Northwest",
+   "province": "Alberta (CA)",
+   "phone": "+14036203120",
+   "email": "tedandannetteverhey@gmail.com",
+   "lastOrder": "2024-11-22",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
+   "topProducts": [
+    {
+     "name": "Bull Rider",
+     "qty": 3.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 2.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S11502",
+     "date": "2024-11-22",
+     "amount": 102.38,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 46.5,
+       "subtotal": 34.88
+      },
+      {
+       "product": "Bull Rider",
+       "qty": 2.0,
+       "price": 45.0,
+       "subtotal": 67.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S03196",
+     "date": "2024-05-04",
+     "amount": 36.0,
+     "lines": [
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 36.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6556,
+   "repId": 10,
+   "name": "Acacia Schneider",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Kyle",
+   "street": "Box 181",
+   "province": "Saskatchewan (CA)",
+   "phone": "+13066717556",
+   "email": "acaciabrodie@gmail.com",
+   "lastOrder": "2025-05-11",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
+   "topProducts": [
+    {
+     "name": "Flat Rate",
+     "qty": 4.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 3.0
+    },
+    {
+     "name": "Guatemala Montecristo",
+     "qty": 3.0
+    },
+    {
+     "name": "Bolivia Buena Vista",
+     "qty": 2.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S19777",
+     "date": "2025-05-11",
+     "amount": 52.5,
+     "lines": [
+      {
+       "product": "Idle - Earl Grey Cream Organic Black Tea",
+       "qty": 1.0,
+       "price": 19.99,
+       "subtotal": 15.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 37.5
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S06965",
+     "date": "2024-08-08",
+     "amount": 46.5,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 46.5,
+       "subtotal": 46.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S02628",
+     "date": "2024-04-21",
+     "amount": 94.0,
+     "lines": [
+      {
+       "product": "Guatemala Montecristo",
+       "qty": 1.0,
+       "price": 47.5,
+       "subtotal": 47.5
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 46.5,
+       "subtotal": 46.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S01669",
+     "date": "2024-03-26",
+     "amount": 94.0,
+     "lines": [
+      {
+       "product": "Guatemala Montecristo",
+       "qty": 1.0,
+       "price": 45.5,
+       "subtotal": 45.5
+      },
+      {
+       "product": "Bolivia Buena Vista",
+       "qty": 1.0,
+       "price": 48.5,
+       "subtotal": 48.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S00527",
+     "date": "2024-02-23",
+     "amount": 94.0,
+     "lines": [
+      {
+       "product": "Bolivia Buena Vista",
+       "qty": 1.0,
+       "price": 48.5,
+       "subtotal": 48.5
+      },
+      {
+       "product": "Guatemala Montecristo",
+       "qty": 1.0,
+       "price": 45.5,
+       "subtotal": 45.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 7831,
+   "repId": 10,
+   "name": "Adam Hillier",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "197 Tuscany Ridge Circle Northwest",
+   "province": "Alberta (CA)",
+   "phone": "+14035542324",
+   "email": "ahillier@outlook.com",
+   "lastOrder": "2024-12-10",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
+   "topProducts": [
+    {
+     "name": "Flat Rate",
+     "qty": 6.0
+    },
+    {
+     "name": "Bolivia Buena Vista",
+     "qty": 3.0
+    },
+    {
+     "name": "Moca Arabica",
+     "qty": 1.0
+    },
+    {
+     "name": "Costa Rica El Poeta",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S12598",
+     "date": "2024-12-10",
+     "amount": 45.0,
+     "lines": [
+      {
+       "product": "Moca Arabica",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S04511",
+     "date": "2024-06-05",
      "amount": 0.0,
      "lines": [
       {
-       "product": "[DRI1010C] Idle - Spiced Chai - 12 x 1 L",
-       "qty": 1.0,
-       "price": 113.4,
+       "product": "Bolivia Buena Vista",
+       "qty": 0.0,
+       "price": 34.06,
        "subtotal": 0.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S03458",
+     "date": "2024-05-08",
+     "amount": 43.65,
+     "lines": [
+      {
+       "product": "Bolivia Buena Vista",
+       "qty": 1.0,
+       "price": 43.65,
+       "subtotal": 43.65
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S03159",
+     "date": "2024-05-03",
+     "amount": 38.0,
+     "lines": [
+      {
+       "product": "Costa Rica El Poeta",
+       "qty": 1.0,
+       "price": 47.5,
+       "subtotal": 38.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S02270",
+     "date": "2024-04-10",
+     "amount": 43.65,
+     "lines": [
+      {
+       "product": "Bolivia Buena Vista",
+       "qty": 1.0,
+       "price": 43.65,
+       "subtotal": 43.65
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S01257",
+     "date": "2024-03-14",
+     "amount": 43.65,
+     "lines": [
+      {
+       "product": "Bolivia Buena Vista",
+       "qty": 1.0,
+       "price": 43.65,
+       "subtotal": 43.65
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 7057,
+   "repId": 10,
+   "name": "Adam Keck",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "591 Woodpark Blvd SW",
+   "province": "Alberta (CA)",
+   "phone": "+14038077725",
+   "email": "adam.keck4@gmail.com",
+   "lastOrder": "2025-10-27",
+   "ytd": 80,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Oct",
+     "amt": 80
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 12.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 5.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S28503",
+     "date": "2025-10-27",
+     "amount": 80.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 50.0,
+       "subtotal": 80.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S10315",
+     "date": "2024-10-28",
+     "amount": 80.1,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 40.05,
+       "subtotal": 80.1
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S08899",
+     "date": "2024-09-23",
+     "amount": 80.1,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 40.05,
+       "subtotal": 80.1
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S07398",
+     "date": "2024-08-19",
+     "amount": 80.1,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 40.05,
+       "subtotal": 80.1
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S06136",
+     "date": "2024-07-15",
+     "amount": 80.1,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 40.05,
+       "subtotal": 80.1
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S04697",
+     "date": "2024-06-10",
+     "amount": 80.1,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 40.05,
+       "subtotal": 80.1
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6164,
+   "repId": 10,
+   "name": "Adam Rich",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "100 Tuscany Springs Circle Northwest",
+   "province": "Alberta (CA)",
+   "phone": "+14037037632",
+   "email": "adamrich@telus.net",
+   "lastOrder": "2025-01-21",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
+   "topProducts": [
+    {
+     "name": "Bull Rider",
+     "qty": 2.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 2.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S14339",
+     "date": "2025-01-21",
+     "amount": 38.0,
+     "lines": [
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 38.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S00269",
+     "date": "2024-02-15",
+     "amount": 43.0,
+     "lines": [
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 43.0,
+       "subtotal": 43.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 9620,
+   "repId": 10,
+   "name": "Adrian Armanca",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "631 Mahogany Blvd SE",
+   "province": "Alberta (CA)",
+   "phone": "+14037717370",
+   "email": "adrian.armanca@gmail.com",
+   "lastOrder": "2026-04-01",
+   "ytd": 269,
+   "orders": 5,
+   "months": [
+    {
+     "label": "Jul",
+     "amt": 72
+    },
+    {
+     "label": "Sep",
+     "amt": 80
+    },
+    {
+     "label": "Nov",
+     "amt": 70
+    },
+    {
+     "label": "Apr",
+     "amt": 47
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 9.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 6.0
+    },
+    {
+     "name": "Ethiopia Daye Bensa",
+     "qty": 1.0
+    },
+    {
+     "name": "Tanzania Tarime AA",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S37991",
+     "date": "2026-04-01",
+     "amount": 47.0,
+     "lines": [
+      {
+       "product": "Ethiopia Daye Bensa",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 47.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S30307",
+     "date": "2025-11-24",
+     "amount": 70.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 50.0,
+       "subtotal": 70.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S26053",
+     "date": "2025-09-09",
+     "amount": 80.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 50.0,
+       "subtotal": 80.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S22505",
+     "date": "2025-07-04",
+     "amount": 46.4,
+     "lines": [
+      {
+       "product": "Tanzania Tarime AA",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 46.4
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S22506",
+     "date": "2025-07-04",
+     "amount": 26.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 26.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S21022",
+     "date": "2025-06-05",
+     "amount": 60.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 4.0,
+       "price": 15.0,
+       "subtotal": 60.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6095,
+   "repId": 10,
+   "name": "Adrian Macri",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Surrey",
+   "street": "1633 184 Street",
+   "province": "British Columbia (CA)",
+   "phone": "",
+   "email": "adrnmacri@gmail.com",
+   "lastOrder": "2024-02-14",
+   "ytd": 0,
+   "orders": 0,
+   "months": [],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 2.0
+    },
+    {
+     "name": "Bull Rider",
+     "qty": 1.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S00217",
+     "date": "2024-02-14",
+     "amount": 55.5,
+     "lines": [
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 17.5,
+       "subtotal": 17.5
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 19.0,
+       "subtotal": 19.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 19.0,
+       "subtotal": 19.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 8972,
+   "repId": 10,
+   "name": "Adrien Meier",
+   "channel": "Online Orders",
+   "ecom": true,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "410 15 Street NW",
+   "province": "Alberta (CA)",
+   "phone": "+14033053020",
+   "email": "adrienmeier@outlook.com",
+   "lastOrder": "2026-03-21",
+   "ytd": 404,
+   "orders": 4,
+   "months": [
+    {
+     "label": "Jul",
+     "amt": 100
+    },
+    {
+     "label": "Oct",
+     "amt": 100
+    },
+    {
+     "label": "Dec",
+     "amt": 91
+    },
+    {
+     "label": "Mar",
+     "amt": 113
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 7.0
+    },
+    {
+     "name": "Habitat Organic Espresso",
+     "qty": 5.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 5.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+     "qty": 2.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S37318",
+     "date": "2026-03-21",
+     "amount": 113.49,
+     "lines": [
+      {
+       "product": "Habitat Organic Espresso",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+       "qty": 1.0,
+       "price": 13.49,
+       "subtotal": 13.49
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S31963",
+     "date": "2025-12-11",
+     "amount": 90.8,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+       "qty": 1.0,
+       "price": 13.49,
+       "subtotal": 10.8
+      },
+      {
+       "product": "Habitat Organic Espresso",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 40.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 40.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S27667",
+     "date": "2025-10-11",
+     "amount": 100.0,
+     "lines": [
+      {
+       "product": "Habitat Organic Espresso",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S22493",
+     "date": "2025-07-04",
+     "amount": 100.0,
+     "lines": [
+      {
+       "product": "Habitat Organic Espresso",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S18035",
+     "date": "2025-04-11",
+     "amount": 100.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 50.0,
+       "subtotal": 100.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    },
+    {
+     "name": "S13965",
+     "date": "2025-01-12",
+     "amount": 91.5,
+     "lines": [
+      {
+       "product": "Habitat Organic Espresso",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 46.5,
+       "subtotal": 46.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38615,
+   "repId": "house",
+   "name": "Edward ZHOU",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Kindersley",
+   "street": "33 McEwen Dr.",
+   "province": "Saskatchewan (CA)",
+   "phone": "",
+   "email": "zfxwbz@gmail.com",
+   "lastOrder": "2026-06-29",
+   "ytd": 60,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 60
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Outlaw",
+     "qty": 1.0
+    },
+    {
+     "name": "Bull Rider",
+     "qty": 1.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43184",
+     "date": "2026-06-29",
+     "amount": 60.0,
+     "lines": [
+      {
+       "product": "Outlaw",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38610,
+   "repId": "house",
+   "name": "Harrison skiba",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "132 Alandale Pl",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "skibaharrison@gmail.com",
+   "lastOrder": "2026-06-29",
+   "ytd": 50,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 50
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43166",
+     "date": "2026-06-29",
+     "amount": 50.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38606,
+   "repId": "house",
+   "name": "Lawrence Jang",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Edmonton",
+   "street": "1545 Cunningham Cape SW",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "larryjpark@hotmail.com",
+   "lastOrder": "2026-06-29",
+   "ytd": 50,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 50
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Costa Rica El Poeta",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43158",
+     "date": "2026-06-29",
+     "amount": 49.64,
+     "lines": [
+      {
+       "product": "Costa Rica El Poeta",
+       "qty": 1.0,
+       "price": 52.25,
+       "subtotal": 49.64
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38593,
+   "repId": "house",
+   "name": "John Spooner",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "BON ACCORD",
+   "street": "P.O. BOX 116",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "jspooner@telusplanet.net",
+   "lastOrder": "2026-06-28",
+   "ytd": 52,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 52
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Costa Rica El Poeta",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43106",
+     "date": "2026-06-28",
+     "amount": 52.25,
+     "lines": [
+      {
+       "product": "Costa Rica El Poeta",
+       "qty": 1.0,
+       "price": 52.25,
+       "subtotal": 52.25
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38586,
+   "repId": "house",
+   "name": "Jaco Lotter",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Medicine Hat",
+   "street": "22 Ranchman Ct NE",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "jacolotter@yahoo.com",
+   "lastOrder": "2026-06-28",
+   "ytd": 208,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 208
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 2.0
+    },
+    {
+     "name": "Ethiopia Guji Uraga",
+     "qty": 1.0
+    },
+    {
+     "name": "Colombia Bolivar",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43096",
+     "date": "2026-06-28",
+     "amount": 208.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 50.0,
+       "subtotal": 100.0
+      },
+      {
+       "product": "Ethiopia Guji Uraga",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 58.0
+      },
+      {
+       "product": "Colombia Bolivar",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38579,
+   "repId": "house",
+   "name": "JIM MCGEER",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "56 Baycrest Place SW",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "jimmcgeer@mac.com",
+   "lastOrder": "2026-06-27",
+   "ytd": 45,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 45
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Free Shipping",
+     "qty": 2.0
+    },
+    {
+     "name": "French Saigon Dark",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43076",
+     "date": "2026-06-27",
+     "amount": 45.0,
+     "lines": [
+      {
+       "product": "French Saigon Dark",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38576,
+   "repId": "house",
+   "name": "Bonnie Hayden",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Abbotsford",
+   "street": "3504 Bassano Terrace",
+   "province": "British Columbia (CA)",
+   "phone": "",
+   "email": "bonnie@alpine2022.ca",
+   "lastOrder": "2026-06-27",
+   "ytd": 86,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 86
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Hollander - Dutched Chocolate Sauce - 15",
+     "qty": 1.0
+    },
+    {
+     "name": "1883 - Caramel Syrup - 1 L",
+     "qty": 1.0
+    },
+    {
+     "name": "Midnight Espresso",
+     "qty": 1.0
+    },
+    {
+     "name": "DARK Godfather Espresso\u2122",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43071",
+     "date": "2026-06-27",
+     "amount": 86.31,
+     "lines": [
+      {
+       "product": "Hollander - Dutched Chocolate Sauce - 15",
+       "qty": 1.0,
+       "price": 15.95,
+       "subtotal": 14.35
+      },
+      {
+       "product": "1883 - Caramel Syrup - 1 L",
+       "qty": 1.0,
+       "price": 19.95,
+       "subtotal": 17.96
+      },
+      {
+       "product": "Midnight Espresso",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "DARK Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "Standard Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38572,
+   "repId": "house",
+   "name": "Jaclyn Thast",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Edmonton",
+   "street": "656 Kinglet Blvd NW",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "jaclyn@thast.ca",
+   "lastOrder": "2026-06-27",
+   "ytd": 71,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 71
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Colombia - Natural Decaf",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43065",
+     "date": "2026-06-27",
+     "amount": 71.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Colombia - Natural Decaf",
+       "qty": 1.0,
+       "price": 21.0,
+       "subtotal": 21.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38567,
+   "repId": "house",
+   "name": "Joelle Plumer",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Redwood Meadows",
+   "street": "5 Manyhorses Gardens",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "joelle.lieuwen@gmail.com",
+   "lastOrder": "2026-06-27",
+   "ytd": 148,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 148
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Costa Rica El Poeta",
+     "qty": 1.0
+    },
+    {
+     "name": "Outlaw",
+     "qty": 1.0
+    },
+    {
+     "name": "Brazil Campo Das Vertentes",
+     "qty": 1.0
+    },
+    {
+     "name": "Colombia - Natural Decaf",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43056",
+     "date": "2026-06-27",
+     "amount": 147.83,
+     "lines": [
+      {
+       "product": "Costa Rica El Poeta",
+       "qty": 1.0,
+       "price": 21.0,
+       "subtotal": 18.9
+      },
+      {
+       "product": "Outlaw",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "Brazil Campo Das Vertentes",
+       "qty": 1.0,
+       "price": 21.0,
+       "subtotal": 18.9
+      },
+      {
+       "product": "Colombia - Natural Decaf",
+       "qty": 1.0,
+       "price": 52.25,
+       "subtotal": 47.02
+      },
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 45.01
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38559,
+   "repId": "house",
+   "name": "Jamie Matei",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Blind Bay",
+   "street": "2680 Golf Course Drive",
+   "province": "British Columbia (CA)",
+   "phone": "",
+   "email": "jamie_matei@hotmail.com",
+   "lastOrder": "2026-06-26",
+   "ytd": 50,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 50
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Ethiopia Daye Bensa",
+     "qty": 1.0
+    },
+    {
+     "name": "Colombian El Para\u00edso",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43032",
+     "date": "2026-06-26",
+     "amount": 50.4,
+     "lines": [
+      {
+       "product": "Ethiopia Daye Bensa",
+       "qty": 1.0,
+       "price": 22.95,
+       "subtotal": 22.95
+      },
+      {
+       "product": "Colombian El Para\u00edso",
+       "qty": 1.0,
+       "price": 27.45,
+       "subtotal": 27.45
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38556,
+   "repId": "house",
+   "name": "Piyarat Chaiyabut",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "3400 14 St Nw",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "contact@bakemeup.ca",
+   "lastOrder": "2026-06-26",
+   "ytd": 67,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 67
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 2.0
+    },
+    {
+     "name": "Colombian El Para\u00edso",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S43021",
+     "date": "2026-06-26",
+     "amount": 67.45,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 2.0,
+       "price": 20.0,
+       "subtotal": 40.0
+      },
+      {
+       "product": "Colombian El Para\u00edso",
+       "qty": 1.0,
+       "price": 27.45,
+       "subtotal": 27.45
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38545,
+   "repId": "house",
+   "name": "Craig Cooper",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "8 Royal Birch Point Northwest",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "cskoop42@gmail.com",
+   "lastOrder": "2026-06-25",
+   "ytd": 52,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 52
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Guatemala Montecristo",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42980",
+     "date": "2026-06-25",
+     "amount": 52.25,
+     "lines": [
+      {
+       "product": "Guatemala Montecristo",
+       "qty": 1.0,
+       "price": 52.25,
+       "subtotal": 52.25
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38542,
+   "repId": "house",
+   "name": "Scott Reinarz",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "35 Everhollow Way SW",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "scott.reinarz@gmail.com",
+   "lastOrder": "2026-06-25",
+   "ytd": 58,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 58
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122 - Analog",
+     "qty": 1.0
+    },
+    {
+     "name": "Standard Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42979",
+     "date": "2026-06-25",
+     "amount": 58.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122 - Analog",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 58.0
+      },
+      {
+       "product": "Standard Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38535,
+   "repId": "house",
+   "name": "Brett G",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Rocky View County",
+   "street": "25 Silverhorn Vale",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "gouletbrett@gmail.com",
+   "lastOrder": "2026-06-25",
+   "ytd": 45,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 45
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Free Shipping",
+     "qty": 2.0
+    },
+    {
+     "name": "Colombia Bolivar",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42942",
+     "date": "2026-06-25",
+     "amount": 45.0,
+     "lines": [
+      {
+       "product": "Colombia Bolivar",
+       "qty": 1.0,
+       "price": 45.0,
+       "subtotal": 45.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38525,
+   "repId": "house",
+   "name": "Yogita Lahori",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "15207 1St SE",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "lahoriyogita@gmail.com",
+   "lastOrder": "2026-06-24",
+   "ytd": 55,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 55
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Gun Smoke",
+     "qty": 1.0
+    },
+    {
+     "name": "DARK Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42916",
+     "date": "2026-06-24",
+     "amount": 55.0,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.33
+      },
+      {
+       "product": "Gun Smoke",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.33
+      },
+      {
+       "product": "DARK Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.34
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38522,
+   "repId": "house",
+   "name": "Chelsey Lynn Stevenson",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Richlea",
+   "street": "Box 28",
+   "province": "Saskatchewan (CA)",
+   "phone": "",
+   "email": "cjacobson837@gmail.com",
+   "lastOrder": "2026-06-24",
+   "ytd": 54,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 54
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Colombia Bolivar",
+     "qty": 1.0
+    },
+    {
+     "name": "Moca Arabica",
+     "qty": 1.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42910",
+     "date": "2026-06-24",
+     "amount": 54.0,
+     "lines": [
+      {
+       "product": "Colombia Bolivar",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "Moca Arabica",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 18.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38514,
+   "repId": "house",
+   "name": "Shay Magnan",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "844",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "shaymagnan11@gmail.com",
+   "lastOrder": "2026-06-24",
+   "ytd": 42,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 42
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Standard Shipping",
+     "qty": 1.0
+    },
+    {
+     "name": "Pacific Foods Barista -  Almond Beverage",
+     "qty": 0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42874",
+     "date": "2026-06-24",
+     "amount": 42.5,
+     "lines": [
+      {
+       "product": "Pacific Foods Barista -  Almond Beverage",
+       "qty": 0.0,
+       "price": 4.9,
+       "subtotal": 0.0
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 42.5
+      },
+      {
+       "product": "Standard Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38506,
+   "repId": "house",
+   "name": "Huyen Thi Thu Nguyen",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "48 Country Hills Green Nw",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "nthuyen.sg@gmail.com",
+   "lastOrder": "2026-06-23",
+   "ytd": 222,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 222
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 4.0
+    },
+    {
+     "name": "Idle - Organic Matcha Green Tea",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42850",
+     "date": "2026-06-23",
+     "amount": 221.83,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 4.0,
+       "price": 50.0,
+       "subtotal": 190.0
+      },
+      {
+       "product": "Idle - Organic Matcha Green Tea",
+       "qty": 1.0,
+       "price": 33.5,
+       "subtotal": 31.83
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38502,
+   "repId": "house",
+   "name": "mingyue Xu",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "scarborough",
+   "street": "6 lesskim crt",
+   "province": "Ontario (CA)",
+   "phone": "",
+   "email": "mingyuexu84@gmail.com",
+   "lastOrder": "2026-06-23",
+   "ytd": 72,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 72
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "DARK Godfather Espresso\u2122 - Analog",
+     "qty": 3.0
+    },
+    {
+     "name": "Standard",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42838",
+     "date": "2026-06-23",
+     "amount": 72.0,
+     "lines": [
+      {
+       "product": "DARK Godfather Espresso\u2122 - Analog",
+       "qty": 3.0,
+       "price": 24.0,
+       "subtotal": 72.0
+      },
+      {
+       "product": "Standard",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38499,
+   "repId": "house",
+   "name": "Rachel Vanaschen",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "313 Auburn Shores Landing Southeast",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "rvanaschen@gmail.com",
+   "lastOrder": "2026-06-23",
+   "ytd": 58,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 58
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "DECAF Godfather Espresso\u2122 - Analog",
+     "qty": 1.0
+    },
+    {
+     "name": "Standard Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42829",
+     "date": "2026-06-23",
+     "amount": 58.0,
+     "lines": [
+      {
+       "product": "DECAF Godfather Espresso\u2122 - Analog",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 58.0
+      },
+      {
+       "product": "Standard Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38492,
+   "repId": "house",
+   "name": "Cassandra Harasemchuk",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "29 Falsby Place Northeast",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "cassandra.harasemchuk@gmail.com",
+   "lastOrder": "2026-06-23",
+   "ytd": 53,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 53
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Ethiopia Daye Bensa",
+     "qty": 1.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42806",
+     "date": "2026-06-23",
+     "amount": 53.45,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Ethiopia Daye Bensa",
+       "qty": 1.0,
+       "price": 22.95,
+       "subtotal": 22.95
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38486,
+   "repId": "house",
+   "name": "Auri Penner",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "20 Discovery Ridge Close SW",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "auripenner@gmail.com",
+   "lastOrder": "2026-06-22",
+   "ytd": 24,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 24
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Chocolate Coffee Beans - 100 g",
+     "qty": 1.0
+    },
+    {
+     "name": "Standard Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42789",
+     "date": "2026-06-22",
+     "amount": 24.15,
+     "lines": [
+      {
+       "product": "Chocolate Coffee Beans - 100 g",
+       "qty": 1.0,
+       "price": 13.0,
+       "subtotal": 13.0
+      },
+      {
+       "product": "Standard Shipping",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38483,
+   "repId": "house",
+   "name": "Tim Jones",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Okotoks",
+   "street": "78 Sheep River Crescent",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "tjones105@gmail.com",
+   "lastOrder": "2026-06-22",
+   "ytd": 116,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 116
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "DARK Godfather Espresso\u2122 - Analog",
+     "qty": 1.0
+    },
+    {
+     "name": "DECAF Godfather Espresso\u2122 - Analog",
+     "qty": 1.0
+    },
+    {
+     "name": "Standard Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42788",
+     "date": "2026-06-22",
+     "amount": 116.0,
+     "lines": [
+      {
+       "product": "DARK Godfather Espresso\u2122 - Analog",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 58.0
+      },
+      {
+       "product": "DECAF Godfather Espresso\u2122 - Analog",
+       "qty": 1.0,
+       "price": 58.0,
+       "subtotal": 58.0
+      },
+      {
+       "product": "Standard Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38479,
+   "repId": "house",
+   "name": "Ali sofiane Laouadi",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "8924 Wentworth Ave Sw",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "laouadialisofiane@yahoo.com",
+   "lastOrder": "2026-06-22",
+   "ytd": 53,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 53
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Ethiopia Daye Bensa",
+     "qty": 1.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122",
+     "qty": 1.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42785",
+     "date": "2026-06-22",
+     "amount": 53.45,
+     "lines": [
+      {
+       "product": "Ethiopia Daye Bensa",
+       "qty": 1.0,
+       "price": 22.95,
+       "subtotal": 22.95
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38474,
+   "repId": "house",
+   "name": "Michael Brown",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Toronto",
+   "street": "88 Queen",
+   "province": "Ontario (CA)",
+   "phone": "",
+   "email": "michael.brown442@gmail.com",
+   "lastOrder": "2026-06-22",
+   "ytd": 23,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 23
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Two Bears - Barista Oat Milk - 1 L",
+     "qty": 1.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42779",
+     "date": "2026-06-22",
+     "amount": 22.88,
+     "lines": [
+      {
+       "product": "Two Bears - Barista Oat Milk - 1 L",
+       "qty": 1.0,
+       "price": 5.25,
+       "subtotal": 5.25
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 15.0,
+       "subtotal": 15.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38462,
+   "repId": "house",
+   "name": "Andrea Macedo",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Calgary",
+   "street": "4975 130 Ave Se",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "andreapmacedo@gmail.com",
+   "lastOrder": "2026-06-21",
+   "ytd": 70,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 70
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Bull Rider",
+     "qty": 1.0
+    },
+    {
+     "name": "Midnight Espresso",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42716",
+     "date": "2026-06-21",
+     "amount": 70.0,
+     "lines": [
+      {
+       "product": "Bull Rider",
+       "qty": 1.0,
+       "price": 50.0,
+       "subtotal": 50.0
+      },
+      {
+       "product": "Midnight Espresso",
+       "qty": 1.0,
+       "price": 20.0,
+       "subtotal": 20.0
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38454,
+   "repId": "house",
+   "name": "Christina Lin",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Richmond Hill",
+   "street": "8 Brimwood Cres",
+   "province": "Ontario (CA)",
+   "phone": "",
+   "email": "clinyuka@hotmail.com",
+   "lastOrder": "2026-06-20",
+   "ytd": 104,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 104
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Guatemala Montecristo",
+     "qty": 2.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42677",
+     "date": "2026-06-20",
+     "amount": 104.5,
+     "lines": [
+      {
+       "product": "Guatemala Montecristo",
+       "qty": 2.0,
+       "price": 52.25,
+       "subtotal": 104.5
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38451,
+   "repId": "house",
+   "name": "David Hall",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Brampton",
+   "street": "62 Buttercup Lane",
+   "province": "Ontario (CA)",
+   "phone": "",
+   "email": "vhfleetservices@rogers.com",
+   "lastOrder": "2026-06-20",
+   "ytd": 108,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 108
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "DECAF Godfather Espresso\u2122 - Original\u00a0Nes",
+     "qty": 2.0
+    },
+    {
+     "name": "DARK Godfather Espresso\u2122 - Original\u00a0Nesp",
+     "qty": 2.0
+    },
+    {
+     "name": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+     "qty": 2.0
+    },
+    {
+     "name": "Guatemala Montecristo - Original\u00a0Nespres",
+     "qty": 2.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42675",
+     "date": "2026-06-20",
+     "amount": 107.92,
+     "lines": [
+      {
+       "product": "DECAF Godfather Espresso\u2122 - Original\u00a0Nes",
+       "qty": 2.0,
+       "price": 13.49,
+       "subtotal": 26.98
+      },
+      {
+       "product": "DARK Godfather Espresso\u2122 - Original\u00a0Nesp",
+       "qty": 2.0,
+       "price": 13.49,
+       "subtotal": 26.98
+      },
+      {
+       "product": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+       "qty": 2.0,
+       "price": 13.49,
+       "subtotal": 26.98
+      },
+      {
+       "product": "Guatemala Montecristo - Original\u00a0Nespres",
+       "qty": 2.0,
+       "price": 13.49,
+       "subtotal": 26.98
+      },
+      {
+       "product": "Free Shipping",
+       "qty": 1.0,
+       "price": 0.0,
+       "subtotal": 0.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38447,
+   "repId": "house",
+   "name": "Valerie Boras",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Coaldale",
+   "street": "P O Box 506",
+   "province": "Alberta (CA)",
+   "phone": "",
+   "email": "vfboras@live.ca",
+   "lastOrder": "2026-06-20",
+   "ytd": 44,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 44
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "Idle - Organic Matcha Green Tea",
+     "qty": 1.0
+    },
+    {
+     "name": "Flat Rate",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42670",
+     "date": "2026-06-20",
+     "amount": 44.0,
+     "lines": [
+      {
+       "product": "Idle - Organic Matcha Green Tea",
+       "qty": 1.0,
+       "price": 33.5,
+       "subtotal": 33.5
+      },
+      {
+       "product": "Flat Rate",
+       "qty": 1.0,
+       "price": 10.0,
+       "subtotal": 10.0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38442,
+   "repId": "house",
+   "name": "Bernd Henzler",
+   "channel": "Uncategorized",
+   "ecom": false,
+   "priceLevel": "SCH 7 - Retail (CAD)",
+   "city": "Salt Spring Island",
+   "street": "256 Pringle Farm Rd",
+   "province": "British Columbia (CA)",
+   "phone": "",
+   "email": "hello@lavenderandblack.ca",
+   "lastOrder": "2026-06-19",
+   "ytd": 109,
+   "orders": 1,
+   "months": [
+    {
+     "label": "Jun",
+     "amt": 109
+    }
+   ],
+   "topProducts": [
+    {
+     "name": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+     "qty": 1.0
+    },
+    {
+     "name": "Free Shipping",
+     "qty": 1.0
+    }
+   ],
+   "recentOrders": [
+    {
+     "name": "S42648",
+     "date": "2026-06-19",
+     "amount": 109.27,
+     "lines": [
+      {
+       "product": "CLASSIC Godfather Espresso\u2122 - Original\u00a0N",
+       "qty": 1.0,
+       "price": 121.41,
+       "subtotal": 109.27
       },
       {
        "product": "Free Shipping",
