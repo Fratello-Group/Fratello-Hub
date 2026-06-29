@@ -19,19 +19,20 @@ export const PEOPLE = [
     // Kyle is the PRODUCTION MANAGER over ALL production (roasting, packaging, warehouse)
     // AND the QA / food-safety officer over all departments. The three department
     // supervisors report to him.
-    { name: 'Kyle Park', title: 'Production Manager (all production)', dept: 'production', reportsTo: 'Russ Prefontaine', email: 'kyle.park@fratellocoffee.com', hubProfile: 'production', cfiaTier: 'qa', safetyOfficer: true },
+    { name: 'Kyle (Jaeoh) Park', title: 'Production Manager (all production)', dept: 'production', reportsTo: 'Russ Prefontaine', email: 'kyle.park@fratellocoffee.com', hubProfile: 'production', cfiaTier: 'qa', safetyOfficer: true },
 
-    { name: 'Samantha Stewart', title: 'Roasting Supervisor', dept: 'roasting', reportsTo: 'Kyle Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
+    { name: 'Samantha Stewart', title: 'Roasting Supervisor', dept: 'roasting', reportsTo: 'Kyle (Jaeoh) Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
     { name: 'Oleksandr Svyrydov', title: 'Production Coffee Roaster', dept: 'roasting', reportsTo: 'Samantha Stewart', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
     { name: 'Sydney Penfold', title: 'Roasting Assistant', dept: 'roasting', reportsTo: 'Samantha Stewart', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
+    { name: 'Tatum Olsen', title: 'Roasting Assistant', dept: 'roasting', reportsTo: 'Samantha Stewart', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
 
-    { name: 'Jaleisy Quintero', title: 'Packaging Supervisor', dept: 'packaging', reportsTo: 'Kyle Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
+    { name: 'Jaleisy Quintero', title: 'Packaging Supervisor', dept: 'packaging', reportsTo: 'Kyle (Jaeoh) Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
     { name: 'Olena Zaitseva', title: 'Packaging Team Member', dept: 'packaging', reportsTo: 'Jaleisy Quintero', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
     { name: 'Yerly Camacho', title: 'Packaging Team Member', dept: 'packaging', reportsTo: 'Jaleisy Quintero', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
+    { name: 'Monica Banman', title: 'Packaging Team Member', dept: 'packaging', reportsTo: 'Jaleisy Quintero', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
 
-    { name: 'Allana Contois', title: 'Warehouse Supervisor', dept: 'warehouse', reportsTo: 'Kyle Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
-    { name: 'Monica Lynn', title: 'Warehouse Team Member', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
-    { name: 'Sandra Mestre', title: 'Warehouse Team Member', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
+    { name: 'Allana Contois', title: 'Warehouse Supervisor', dept: 'warehouse', reportsTo: 'Kyle (Jaeoh) Park', email: '', hubProfile: 'production', cfiaTier: 'supervisor', safetyOfficer: false },
+    { name: 'Sandra Mestre Quintero', title: 'Warehouse Team Member', dept: 'warehouse', reportsTo: 'Allana Contois', email: '', hubProfile: 'staff', cfiaTier: 'staff', safetyOfficer: false },
     // Delivery Driver — currently VACANT (Luke moved to Marketing).
 
     // ── Commercial & office (Hub users; not in the daily food-safety record chain,
@@ -45,6 +46,6 @@ export const PEOPLE = [
 ];
 
 // Kyle (Production Manager) sits ABOVE the three department supervisors and below the owners.
-export const PRODUCTION_MANAGER = 'Kyle Park';
+export const PRODUCTION_MANAGER = 'Kyle (Jaeoh) Park';
 export const DEPT_HEADS = { roasting: 'Samantha Stewart', packaging: 'Jaleisy Quintero', warehouse: 'Allana Contois' };
-export const SAFETY_OFFICER = 'Kyle Park';
+export const SAFETY_OFFICER = 'Kyle (Jaeoh) Park';
