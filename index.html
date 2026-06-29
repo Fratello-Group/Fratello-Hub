@@ -2307,7 +2307,7 @@
         <div class="mpf-head">
             <div>
                 <div class="mpf-title" id="mpfTitle">My profile</div>
-                <div class="mpf-sub">Update your name and contact details. This doesn’t change what you can see.</div>
+                <div class="mpf-sub" id="mpfSub">Update your name and contact details. This does not change what you can see.</div>
             </div>
             <button class="mpf-close" type="button" onclick="closeMyProfile()" aria-label="Close">&times;</button>
         </div>
@@ -2332,13 +2332,13 @@
                 <div class="mpf-field mpf-span mpf-readonly">
                     <label for="mpfEmail">Email (sign-in)</label>
                     <input id="mpfEmail" type="email" readonly>
-                    <div class="mpf-note">Your sign-in email and job role are set by the office — ask them to change these.</div>
+                    <div class="mpf-note">Your sign-in email and job role are set by the office. Ask them to change these.</div>
                 </div>
             </div>
             <div class="mpf-message" id="mpfMessage"></div>
         </div>
         <div class="mpf-foot">
-            <button class="mpf-btn" type="button" onclick="closeMyProfile()">Cancel</button>
+            <button class="mpf-btn" type="button" id="mpfCancel" onclick="closeMyProfile()">Cancel</button>
             <button class="mpf-btn mpf-btn-primary" type="button" id="mpfSave" onclick="saveMyProfile()">Save</button>
         </div>
     </div>
@@ -2358,7 +2358,8 @@ import {
     signInWithMicrosoft,
     signOutHub,
     updateOwnProfile,
-    savePushSubscription
+    savePushSubscription,
+    markOnboarded
 } from './system/fratello-auth.js';
 import { logActivity, trackLogout } from './system/api/activity-logger.js';
 
@@ -3679,6 +3680,7 @@ function renderDashboardHome(role) {
     appendPersonalToolGroups(main, role);
     updateApprovalsBadge(role);
     setupApprovalAlerts(role);          // offer phone push alerts to approvers
+    maybeWelcomeNewUser(role);          // one-time welcome on a brand-new first sign-in
 
     // Company-wide directory (everyone's name + position + company contact info).
     appendDirectoryTile(main, role);
@@ -4656,10 +4658,26 @@ window.handlePasswordReset = handlePasswordReset;
 // EDIT MY PROFILE (self-service, everyone)
 // ════════════════════════════════════════════════
 
-function openMyProfile() {
+let MPF_WELCOME = false;
+
+// Show the one-time welcome the first time a freshly-invited person signs in.
+// `onboarded === false` is set only on a brand-new profile, so existing people
+// never see it. Fires at most once per session, and not while previewing.
+let welcomeShown = false;
+function maybeWelcomeNewUser(role) {
+    if (welcomeShown) return;
+    if (typeof isPreviewing === 'function' && isPreviewing()) return;
+    if (!role || !role.user || role.user.onboarded !== false) return;
+    welcomeShown = true;
+    window.setTimeout(() => openMyProfile({ welcome: true }), 450);   // let the dashboard paint first
+}
+
+function openMyProfile(opts) {
+    const welcome = !!(opts && opts.welcome);
+    MPF_WELCOME = welcome;
     closeProfileMenu();
-    if (typeof isPreviewing === 'function' && isPreviewing()) {
-        window.alert('You’re previewing the Hub as someone else. Switch back to your own view first to edit your profile.');
+    if (!welcome && typeof isPreviewing === 'function' && isPreviewing()) {
+        window.alert('You are previewing the Hub as someone else. Switch back to your own view first to edit your profile.');
         return;
     }
     const user = (activeRole && activeRole.user) || {};
@@ -4669,6 +4687,19 @@ function openMyProfile() {
     document.getElementById('mpfPhone').value = user.phone || '';
     document.getElementById('mpfAddress').value = user.address || '';
     document.getElementById('mpfEmail').value = user.email || '';
+
+    // Welcome mode (a brand-new account's first sign-in) gets a warmer header
+    // and a "Skip for now" instead of "Cancel".
+    const title = document.getElementById('mpfTitle');
+    const sub = document.getElementById('mpfSub');
+    const cancel = document.getElementById('mpfCancel');
+    const firstName = parts[0] || '';
+    if (title) title.textContent = welcome ? `Welcome${firstName ? ', ' + firstName : ''}!` : 'My profile';
+    if (sub) sub.textContent = welcome
+        ? 'Glad you are here. Take a few seconds to set up your profile so your team can reach you. You can change it any time.'
+        : 'Update your name and contact details. This does not change what you can see.';
+    if (cancel) cancel.textContent = welcome ? 'Skip for now' : 'Cancel';
+
     const msg = document.getElementById('mpfMessage');
     if (msg) { msg.textContent = ''; msg.classList.remove('error'); }
     document.getElementById('mpfOverlay').classList.add('open');
@@ -4679,6 +4710,12 @@ function closeMyProfile() {
     const ov = document.getElementById('mpfOverlay');
     if (ov) ov.classList.remove('open');
     document.body.style.overflow = '';
+    // Whether they filled it in or skipped, the one-time welcome is done.
+    if (MPF_WELCOME) {
+        MPF_WELCOME = false;
+        if (activeRole && activeRole.user) activeRole.user.onboarded = true;
+        try { markOnboarded(); } catch (e) { /* best-effort */ }
+    }
 }
 
 async function saveMyProfile() {
@@ -4691,8 +4728,8 @@ async function saveMyProfile() {
     const btn = document.getElementById('mpfSave');
     const setMsg = (text, isErr) => { if (msg) { msg.textContent = text || ''; msg.classList.toggle('error', Boolean(isErr)); } };
     if (!name) { setMsg('Please enter your name.', true); return; }
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-    setMsg('Saving…', false);
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    setMsg('Saving...', false);
     try {
         await updateOwnProfile({ name, phone, address });
         // Reflect the change immediately — header chip + cached role.

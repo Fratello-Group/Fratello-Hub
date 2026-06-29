@@ -205,9 +205,18 @@ function roleFromProfile(id, data) {
             phone: data.phone || '',
             address: data.address || '',
             status: data.status || 'active',
+            onboarded: data.onboarded,   // false only on a brand-new first login
             provider: providerLabel(data.providerIds)
         }
     };
+}
+
+// Mark the signed-in person as past the one-time welcome, so it never shows again.
+export async function markOnboarded() {
+    initFirebase();
+    if (!auth.currentUser) return;
+    try { await updateDoc(doc(db, 'hubProfiles', auth.currentUser.uid), { onboarded: true, updatedAt: serverTimestamp() }); }
+    catch (error) { /* best-effort */ }
 }
 
 function publicUserFromProfile(id, data) {
@@ -294,8 +303,14 @@ async function profileForUser(user) {
         role_tier: invite.role_tier || timeOffRoleTier(invite.profile || 'staff'),
         manager_id: normalizeEmail(invite.manager_id || defaultManagerId(invite.profile || 'staff') || ''),
         hire_date: dateToInputValue(invite.hire_date) || null,
+        phone: invite.phone || '',
+        address: invite.address || '',
         active: invite.active !== false,
         status: 'active',
+        // First-ever sign-in: flag them so the Hub shows a one-time welcome and
+        // invites them to fill in their profile. Existing accounts never get this
+        // field, so they don't see the welcome.
+        onboarded: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         lastLoginAt: serverTimestamp(),
