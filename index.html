@@ -3952,10 +3952,13 @@ async function setupApprovalAlerts(role) {
 // Submit (do) · Review (check) · Forms & Handbook (reference). Sourced from the
 // time-off + employee-resources sections — the content the old Resources page held.
 function appendPersonalToolGroups(main, role) {
+    // Only show tools that are actually live — no "Coming Soon" placeholders on
+    // the dashboard (e.g. Staff Forms / Employee Handbook stay hidden until real).
     const allCards = ['time-off', 'employee-resources']
         .map(key => visibleSection(role, key))
         .filter(Boolean)
-        .flatMap(section => section.cards.filter(card => cardIsVisible(card, role)));
+        .flatMap(section => section.cards.filter(card => cardIsVisible(card, role)))
+        .filter(card => card.href && card.href !== '#');
 
     const groups = [
         { key: 'submit', title: 'Submit', meta: 'Add or request', accent: 'teal' },
