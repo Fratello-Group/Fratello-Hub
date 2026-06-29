@@ -1428,16 +1428,23 @@
         .dir-c a:hover { text-decoration: underline; }
         .dir-search { width: 100%; border: 1.5px solid var(--rule); border-radius: 12px; padding: 11px 14px; font: inherit; margin: 4px 0 6px; box-sizing: border-box; }
         .dir-search:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(47,169,160,.12); }
-        .dir-group { margin-top: 16px; }
-        .dir-group h4 { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--subtext); margin-bottom: 9px; }
-        .dir-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-        .dir-person { display: flex; align-items: center; gap: 11px; border: 1px solid var(--rule); border-radius: 14px; padding: 11px 13px; background: var(--surface); }
-        .dir-ava { width: 38px; height: 38px; border-radius: 99px; background: var(--teal-mute); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex: 0 0 auto; }
-        .dir-person .nm { font-weight: 700; font-size: 14px; color: var(--text); line-height: 1.2; display: block; }
-        .dir-person .ti { color: var(--subtext); font-size: 12px; margin-top: 2px; display: block; }
-        .dir-person.lead { border-color: var(--teal); background: var(--teal-mute); }
-        .dir-person.lead .dir-ava { background: var(--teal); color: #fff; }
-        .dir-lead-badge { display: inline-block; margin-left: 7px; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal-deep); background: #fff; border: 1px solid var(--teal); border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
+        .dir-group { margin-top: 24px; }
+        .dir-group:first-of-type { margin-top: 8px; }
+        /* Clear, confident department headers (no longer faint). */
+        .dir-glabel { display: flex; align-items: center; gap: 9px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 2px solid var(--rule); }
+        .dir-glabel .lbl { font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: .005em; }
+        .dir-glabel .cnt { font-size: 11px; font-weight: 800; color: var(--teal-deep); background: var(--teal-mute); border-radius: 999px; padding: 1px 9px; line-height: 1.7; }
+        /* Sub-department label (Roasting / Packaging / Warehouse under Production). */
+        .dir-sub { display: flex; align-items: center; gap: 8px; margin: 13px 0 1px; padding-left: 44px; }
+        .dir-sub .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--teal-deep); }
+        .dir-sub .ln { flex: 1; height: 1px; background: var(--rule); }
+        .dir-person { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid #F1F3F2; }
+        .dir-ava { width: 32px; height: 32px; border-radius: 99px; background: #EEF1F0; color: #5a6b68; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11.5px; flex: 0 0 auto; }
+        .dir-meta { display: flex; flex-direction: column; min-width: 0; }
+        .dir-person .nm { font-weight: 600; font-size: 14px; color: var(--text); line-height: 1.2; }
+        .dir-person .ti { color: var(--subtext); font-size: 12px; margin-top: 2px; }
+        .dir-person.lead .dir-ava { background: var(--teal-mute); color: var(--teal-deep); box-shadow: inset 0 0 0 1.5px var(--teal); }
+        .dir-person.lead .ti { color: var(--teal-deep); font-weight: 600; }
         .dir-empty { color: var(--subtext); font-size: 14px; padding: 16px 2px; }
 
         .signout-btn:hover {
@@ -4301,8 +4308,25 @@ function dirArea(dept) {
     if (d.includes('financ') || d.includes('admin') || d.includes('office')) return 'Finance & Office';
     return dept || 'Team';
 }
-const DIR_AREA_ORDER = ['Leadership', 'Production', 'Sales', 'Marketing', 'Finance & Office', 'Team'];
+const DIR_AREA_ORDER = ['Leadership', 'Finance & Office', 'Sales', 'Marketing', 'Production', 'Team'];
 const DIR_TIER_RANK = { Owner: 0, Controller: 1, Manager: 2, Staff: 3 };
+// Production splits into three sub-departments; everyone else has none.
+const DIR_SUB_ORDER = ['Roasting', 'Packaging', 'Warehouse'];
+function dirSubDept(dept) {
+    const d = String(dept || '').toLowerCase();
+    if (d.includes('roast')) return 'Roasting';
+    if (d.includes('packag')) return 'Packaging';
+    if (d.includes('warehouse')) return 'Warehouse';
+    return '';   // production-level (e.g. the Production Manager)
+}
+function dirSort(a, b) {
+    return ((DIR_TIER_RANK[a.role_tier] != null ? DIR_TIER_RANK[a.role_tier] : 9) - (DIR_TIER_RANK[b.role_tier] != null ? DIR_TIER_RANK[b.role_tier] : 9))
+        || String(a.name || '').localeCompare(String(b.name || ''));
+}
+function dirPersonRow(p) {
+    const lead = p.role_tier && p.role_tier !== 'Staff';
+    return `<div class="dir-person${lead ? ' lead' : ''}"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span class="dir-meta"><span class="nm">${dirEsc(p.name || '—')}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`;
+}
 
 // Keep the all-readable directory in sync with the live roster whenever an
 // Owner/Controller uses the Hub — so it's populated without needing to open
@@ -4425,15 +4449,30 @@ function renderDirectoryList(query) {
         return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
     });
     host.innerHTML = areas.map(area => {
-        const list = groups[area].slice().sort((a, b) =>
-            ((DIR_TIER_RANK[a.role_tier] != null ? DIR_TIER_RANK[a.role_tier] : 9) - (DIR_TIER_RANK[b.role_tier] != null ? DIR_TIER_RANK[b.role_tier] : 9))
-            || String(a.name || '').localeCompare(String(b.name || '')));
-        return `<div class="dir-group"><h4>${dirEsc(area)} · ${list.length}</h4><div class="dir-people">${
-            list.map(p => {
-                const lead = p.role_tier && p.role_tier !== 'Staff';
-                return `<div class="dir-person${lead ? ' lead' : ''}"><span class="dir-ava">${dirEsc(dirInitials(p.name))}</span><span class="dir-pmeta"><span class="nm">${dirEsc(p.name || '—')}${lead ? '<span class="dir-lead-badge">Lead</span>' : ''}</span><span class="ti">${dirEsc(p.title || '')}</span></span></div>`;
-            }).join('')
-        }</div></div>`;
+        const list = groups[area].slice();
+        const header = `<div class="dir-glabel"><span class="lbl">${dirEsc(area)}</span><span class="cnt">${list.length}</span></div>`;
+
+        // Production nests its three sub-departments; the Production Manager sits
+        // at the top, then Roasting / Packaging / Warehouse underneath.
+        if (area === 'Production') {
+            const top = list.filter(p => !dirSubDept(p.department)).sort(dirSort);
+            const subs = {};
+            list.filter(p => dirSubDept(p.department)).forEach(p => {
+                const s = dirSubDept(p.department); (subs[s] = subs[s] || []).push(p);
+            });
+            const subOrder = Object.keys(subs).sort((a, b) => {
+                const ia = DIR_SUB_ORDER.indexOf(a), ib = DIR_SUB_ORDER.indexOf(b);
+                return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+            });
+            const body = top.map(dirPersonRow).join('')
+                + subOrder.map(s =>
+                    `<div class="dir-sub"><span class="lbl">${dirEsc(s)}</span><span class="ln"></span></div>`
+                    + subs[s].slice().sort(dirSort).map(dirPersonRow).join('')
+                ).join('');
+            return `<div class="dir-group">${header}${body}</div>`;
+        }
+
+        return `<div class="dir-group">${header}${list.sort(dirSort).map(dirPersonRow).join('')}</div>`;
     }).join('');
 }
 
