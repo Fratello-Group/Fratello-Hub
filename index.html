@@ -4453,7 +4453,11 @@ function renderDirectoryList(query) {
         return;
     }
     const groups = {};
-    people.forEach(p => { const a = dirArea(p.department); (groups[a] = groups[a] || []).push(p); });
+    // Owners always sit under Leadership, whatever department their account lists.
+    people.forEach(p => {
+        const a = (p.role_tier === 'Owner') ? 'Leadership' : dirArea(p.department);
+        (groups[a] = groups[a] || []).push(p);
+    });
     const areas = Object.keys(groups).sort((a, b) => {
         const ia = DIR_AREA_ORDER.indexOf(a), ib = DIR_AREA_ORDER.indexOf(b);
         return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
