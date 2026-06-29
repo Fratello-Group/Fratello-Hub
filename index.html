@@ -1406,6 +1406,7 @@
         .tc-foot { display: flex; justify-content: space-between; color: var(--subtext); font-size: 13px; border-top: 1px solid var(--rule); margin-top: 18px; padding-top: 14px; }
         .tc-foot b { color: var(--text); }
         .tc-err { color: #b3261e; font-size: 13px; margin-top: 10px; text-align: center; min-height: 2px; }
+        .tc-demo { text-align: center; color: var(--subtext); font-size: 12.5px; line-height: 1.4; margin-top: 12px; }
         .tc-done-note { text-align: center; color: var(--subtext); font-size: 14px; margin-top: 4px; }
 
         /* ── Employee directory ── */
@@ -4117,8 +4118,14 @@ async function appendTimeClock(main, role) {
     section.hidden = false;
 
     try {
-        const api = await clockApi();
-        __clockDay = await api.getMyClockDay();
+        if (isPreviewing()) {
+            // Owner "View as" preview: start off the clock and keep everything
+            // local — nothing is read from or written to Firestore.
+            __clockDay = null;
+        } else {
+            const api = await clockApi();
+            __clockDay = await api.getMyClockDay();
+        }
     } catch (error) {
         __clockDay = null;
     }
@@ -4219,6 +4226,11 @@ function renderClockSheet() {
     }
 
     const showLegend = live.status === 'active' || live.status === 'break' || live.status === 'done' || live.status === 'approved';
+    // In owner "View as" preview the clock is fully tappable but simulated — make
+    // it obvious nothing is being recorded.
+    const previewNote = isPreviewing()
+        ? '<div class="tc-demo">👁 Demo only — punches aren’t recorded while you’re viewing as someone else.</div>'
+        : '';
     sheet.innerHTML = `
         <div class="tc-grab"></div>
         <div class="tc-head">
@@ -4234,19 +4246,46 @@ function renderClockSheet() {
             <div><span class="tc-sw a"></span><b>${tcFmt(live.brk)}</b> break</div>
         </div>` : '<div style="height:8px"></div>'}
         ${buttons}
+        ${previewNote}
         <div class="tc-err" id="tcErr"></div>
         <div class="tc-foot">${foot}</div>`;
 
     sheet.querySelectorAll('[data-act]').forEach(el => {
         el.addEventListener('click', () => handleClockAction(el.dataset.act));
     });
+}
 
-    // In owner "View as" preview, the clock is look-only — no real punches.
-    if (isPreviewing()) {
-        sheet.querySelectorAll('.tc-btn').forEach(b => { b.disabled = true; });
-        const pe = sheet.querySelector('#tcErr');
-        if (pe) pe.textContent = '👁 Preview mode — clock actions are off here.';
+// Simulate the clock entirely in memory for the owner's "View as" preview, so the
+// buttons look and feel exactly like the real thing while writing nothing. Mirrors
+// the clockIn / startBreak / endBreak / clockOut transitions in firestore-client.
+function simulateClockAction(act, day) {
+    const now = new Date();
+    const cur = day || {};
+    if (act === 'in') {
+        return {
+            __preview: true, status: 'active', clock_in: now, clock_out: null,
+            break_started_at: null, break_seconds: 0, breaks_count: 0, worked_seconds: 0
+        };
     }
+    if (act === 'break' && cur.status === 'active') {
+        return { ...cur, status: 'break', break_started_at: now, breaks_count: (cur.breaks_count || 0) + 1 };
+    }
+    if (act === 'back' && cur.status === 'break') {
+        const bs = tcDateOf(cur.break_started_at);
+        const added = bs ? Math.max(0, Math.floor((now.getTime() - bs.getTime()) / 1000)) : 0;
+        return { ...cur, status: 'active', break_started_at: null, break_seconds: (cur.break_seconds || 0) + added };
+    }
+    if (act === 'out' && (cur.status === 'active' || cur.status === 'break')) {
+        let brk = cur.break_seconds || 0;
+        if (cur.status === 'break') {
+            const bs = tcDateOf(cur.break_started_at);
+            if (bs) brk += Math.max(0, Math.floor((now.getTime() - bs.getTime()) / 1000));
+        }
+        const cin = tcDateOf(cur.clock_in);
+        const worked = cin ? Math.max(0, Math.floor((now.getTime() - cin.getTime()) / 1000) - brk) : 0;
+        return { ...cur, status: 'done', clock_out: now, break_started_at: null, break_seconds: brk, worked_seconds: worked };
+    }
+    return cur;
 }
 
 async function handleClockAction(act) {
@@ -4255,6 +4294,15 @@ async function handleClockAction(act) {
     if (err) err.textContent = '';
     const buttons = document.querySelectorAll('#tcSheet .tc-btn');
     buttons.forEach(b => { b.disabled = true; });
+
+    // Owner "View as" preview: run the whole flow locally — never touch Firestore.
+    if (isPreviewing()) {
+        __clockDay = simulateClockAction(act, __clockDay);
+        renderClockSheet();
+        paintClockTile();
+        return;
+    }
+
     try {
         const api = await clockApi();
         if (act === 'in') __clockDay = await api.clockIn();
