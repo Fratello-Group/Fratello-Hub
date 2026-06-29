@@ -991,6 +991,67 @@
                 <div class="link-output" id="inviteOutput"></div>
             </div>
 
+            <div class="admin-panel" id="timeSettingsPanel" style="display:none;">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                    <div>
+                        <div class="admin-panel-title">Time &amp; pay settings</div>
+                        <p class="admin-panel-copy" style="margin-bottom:0;">Company defaults for the hourly time clock: paid break, unpaid lunch, lateness grace, and each production team's expected shift. Per-person overrides live on each person's edit screen.</p>
+                    </div>
+                    <button class="ghost-button" id="timeSettingsToggle" type="button" onclick="toggleTimeSettings()" aria-expanded="false" style="flex:0 0 auto;">Edit</button>
+                </div>
+                <div id="timeSettingsBody" style="display:none; margin-top:18px;">
+                    <div class="form-grid" style="grid-template-columns:repeat(3, minmax(0, 1fr));">
+                        <div class="field">
+                            <label for="tsPaidBreak">Paid break (min)</label>
+                            <input class="text-input" id="tsPaidBreak" type="number" min="0" max="240" step="1" placeholder="0">
+                        </div>
+                        <div class="field">
+                            <label for="tsUnpaidLunch">Unpaid lunch (min)</label>
+                            <input class="text-input" id="tsUnpaidLunch" type="number" min="0" max="240" step="1" placeholder="30">
+                        </div>
+                        <div class="field">
+                            <label for="tsGrace">Lateness grace (min)</label>
+                            <input class="text-input" id="tsGrace" type="number" min="0" max="120" step="1" placeholder="5">
+                        </div>
+                    </div>
+                    <div class="section-label" style="margin-top:28px; font-size:10px; letter-spacing:3px;">Expected shift by team</div>
+                    <div class="form-grid" style="grid-template-columns:repeat(3, minmax(0, 1fr)); margin-top:16px;">
+                        <div class="field">
+                            <label for="tsRoastStart">Roasting start</label>
+                            <input class="text-input" id="tsRoastStart" type="time">
+                        </div>
+                        <div class="field">
+                            <label for="tsRoastHours">Roasting hours</label>
+                            <input class="text-input" id="tsRoastHours" type="number" min="0" max="24" step="0.25" placeholder="8">
+                        </div>
+                        <div></div>
+                        <div class="field">
+                            <label for="tsPackStart">Packaging start</label>
+                            <input class="text-input" id="tsPackStart" type="time">
+                        </div>
+                        <div class="field">
+                            <label for="tsPackHours">Packaging hours</label>
+                            <input class="text-input" id="tsPackHours" type="number" min="0" max="24" step="0.25" placeholder="8">
+                        </div>
+                        <div></div>
+                        <div class="field">
+                            <label for="tsWhStart">Warehouse start</label>
+                            <input class="text-input" id="tsWhStart" type="time">
+                        </div>
+                        <div class="field">
+                            <label for="tsWhHours">Warehouse hours</label>
+                            <input class="text-input" id="tsWhHours" type="number" min="0" max="24" step="0.25" placeholder="8">
+                        </div>
+                        <div></div>
+                    </div>
+                    <div class="actions">
+                        <span class="save-state" id="timeSettingsMessage"></span>
+                        <button class="ghost-button" type="button" onclick="toggleTimeSettings(false)">Cancel</button>
+                        <button class="ghost-button primary-button" id="timeSettingsSave" type="button" onclick="saveTimeSettingsFromForm()">Save settings</button>
+                    </div>
+                </div>
+            </div>
+
             <div id="staffFilters" style="display:flex; flex-wrap:wrap; gap:10px; margin:0 0 6px; align-items:center;">
                 <input class="text-input" id="staffSearch" type="search" placeholder="Search name, email, or role" style="flex:1 1 220px; min-width:200px;">
                 <button class="ghost-button primary-button" id="addPersonBtn" type="button" onclick="toggleAddPanel()">
@@ -1075,6 +1136,16 @@
                             <option value="hourly">Hourly — uses the time clock</option>
                         </select>
                     </div>
+                    <div class="field">
+                        <label for="editExpectedStart">Expected start</label>
+                        <input class="text-input" id="editExpectedStart" type="time">
+                        <div class="sheet-note">Overrides their department's default. Blank = use the company default.</div>
+                    </div>
+                    <div class="field">
+                        <label for="editExpectedHours">Shift length (hours)</label>
+                        <input class="text-input" id="editExpectedHours" type="number" min="0" max="24" step="0.25" placeholder="e.g. 8">
+                        <div class="sheet-note">Used for late / early-out and KPI math. Blank = use the company default.</div>
+                    </div>
                     <div class="field sheet-span" id="editActiveField">
                         <label for="editActive">Status</label>
                         <select id="editActive">
@@ -1112,7 +1183,7 @@
         } from './fratello-auth.js';
         import { logActivity } from './api/activity-logger.js';
         import { PEOPLE } from '/cfia/config/people.js';
-        import { syncDirectory, getPeopleDrafts, savePeopleDraft, deletePeopleDraft } from './api/firestore-client.js';
+        import { syncDirectory, getPeopleDrafts, savePeopleDraft, deletePeopleDraft, updateUser, getUserByEmail, getTimeSettings, saveTimeSettings } from './api/firestore-client.js';
 
         const USE_FIREBASE_AUTH = firebaseConfigured();
 
@@ -1921,6 +1992,18 @@
             setVal('editHireDate', person.hire_date || '');
             setVal('editPayType', person.hourly ? 'hourly' : 'salaried');
             setVal('editActive', person.active === false ? 'false' : 'true');
+            // Per-person shift override. Prefill from whatever the merged record
+            // carries, then (for a live person) refresh from the canonical user
+            // doc — listHubUsers() doesn't surface these two fields.
+            setVal('editExpectedStart', person.expected_start || '');
+            setVal('editExpectedHours', person.expected_hours == null ? '' : person.expected_hours);
+            if (isLive && person.email) {
+                getUserByEmail(person.email).then(rec => {
+                    if (!rec || !EDIT_CTX || EDIT_CTX.person !== person) return;
+                    setVal('editExpectedStart', rec.expected_start || '');
+                    setVal('editExpectedHours', rec.expected_hours == null ? '' : rec.expected_hours);
+                }).catch(() => { /* prefill is best-effort */ });
+            }
             syncEditAccess();
 
             const emailInput = document.getElementById('editEmail');
@@ -1984,6 +2067,8 @@
                 managerId: document.getElementById('editManager').value,
                 hourly: document.getElementById('editPayType').value === 'hourly',
                 hireDate: document.getElementById('editHireDate').value,
+                expectedStart: document.getElementById('editExpectedStart').value.trim(),
+                expectedHours: document.getElementById('editExpectedHours').value.trim(),
                 active: document.getElementById('editActive').value !== 'false'
             };
         }
@@ -2042,6 +2127,13 @@
                     if (v.active !== wasActive) {
                         try { await setHubUserDisabled(updated, !v.active); } catch (e) { /* non-fatal */ }
                     }
+                    // Per-person shift override lives on the Firestore user record.
+                    try {
+                        await updateUser(normalizeEmail(email), {
+                            expected_start: v.expectedStart || null,
+                            expected_hours: v.expectedHours === '' ? null : Number(v.expectedHours)
+                        });
+                    } catch (e) { /* non-fatal */ }
                 } else {
                     await authRequest({ action: 'users:update', id: base.id, profile, department: v.department, role_tier: v.roleTier, name: v.name, title: v.title, manager_id: v.managerId, hire_date: v.hireDate, active: v.active });
                 }
@@ -2654,6 +2746,98 @@
             }
         }
 
+        // ── Time & pay settings (settings/time) ──
+        // Owner/Controller edit the company defaults the hourly time clock + KPIs
+        // use. Reads merge over sane defaults in the data layer; writes are
+        // preview-safe and gated to Owner/Controller there too.
+        let TIME_SETTINGS = null;
+
+        function fillTimeSettingsForm(s) {
+            const ds = s.department_shifts || {};
+            const roast = ds.roasting || {};
+            const pack = ds.packaging || {};
+            const wh = ds.warehouse || {};
+            setVal('tsPaidBreak', s.paid_break_minutes == null ? '' : s.paid_break_minutes);
+            setVal('tsUnpaidLunch', s.unpaid_lunch_minutes == null ? '' : s.unpaid_lunch_minutes);
+            setVal('tsGrace', s.grace_minutes == null ? '' : s.grace_minutes);
+            setVal('tsRoastStart', roast.start || '');
+            setVal('tsRoastHours', roast.hours == null ? '' : roast.hours);
+            setVal('tsPackStart', pack.start || '');
+            setVal('tsPackHours', pack.hours == null ? '' : pack.hours);
+            setVal('tsWhStart', wh.start || '');
+            setVal('tsWhHours', wh.hours == null ? '' : wh.hours);
+        }
+
+        async function loadTimeSettings() {
+            const panel = document.getElementById('timeSettingsPanel');
+            if (panel) panel.style.display = 'block';
+            try {
+                TIME_SETTINGS = await getTimeSettings();
+                fillTimeSettingsForm(TIME_SETTINGS);
+            } catch (error) {
+                const msg = document.getElementById('timeSettingsMessage');
+                if (msg) msg.textContent = 'Could not load time settings.';
+            }
+        }
+
+        function toggleTimeSettings(forceOpen) {
+            const body = document.getElementById('timeSettingsBody');
+            const toggle = document.getElementById('timeSettingsToggle');
+            if (!body) return;
+            const open = forceOpen === undefined ? body.style.display === 'none' : forceOpen;
+            body.style.display = open ? 'block' : 'none';
+            if (toggle) {
+                toggle.textContent = open ? 'Close' : 'Edit';
+                toggle.setAttribute('aria-expanded', String(open));
+            }
+            const msg = document.getElementById('timeSettingsMessage');
+            if (msg) msg.textContent = '';
+            // Re-sync the form to the last-loaded values when (re)opening.
+            if (open && TIME_SETTINGS) fillTimeSettingsForm(TIME_SETTINGS);
+        }
+
+        function tsNum(id) {
+            const raw = (document.getElementById(id)?.value || '').trim();
+            if (raw === '') return null;
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : null;
+        }
+        function tsTime(id) {
+            const raw = (document.getElementById(id)?.value || '').trim();
+            return /^\d{2}:\d{2}$/.test(raw) ? raw : '';
+        }
+
+        async function saveTimeSettingsFromForm() {
+            const msg = document.getElementById('timeSettingsMessage');
+            const saveBtn = document.getElementById('timeSettingsSave');
+            const patch = {
+                paid_break_minutes: tsNum('tsPaidBreak') ?? 0,
+                unpaid_lunch_minutes: tsNum('tsUnpaidLunch') ?? 30,
+                grace_minutes: tsNum('tsGrace') ?? 5,
+                department_shifts: {
+                    roasting: { start: tsTime('tsRoastStart') || '06:00', hours: tsNum('tsRoastHours') ?? 8 },
+                    packaging: { start: tsTime('tsPackStart') || '07:00', hours: tsNum('tsPackHours') ?? 8 },
+                    warehouse: { start: tsTime('tsWhStart') || '07:00', hours: tsNum('tsWhHours') ?? 8 }
+                }
+            };
+            if (saveBtn) saveBtn.disabled = true;
+            if (msg) { msg.textContent = 'Saving settings…'; }
+            try {
+                TIME_SETTINGS = await saveTimeSettings(patch);
+                fillTimeSettingsForm(TIME_SETTINGS);
+                audit('time_settings_saved', {
+                    paid_break_minutes: patch.paid_break_minutes,
+                    unpaid_lunch_minutes: patch.unpaid_lunch_minutes,
+                    grace_minutes: patch.grace_minutes
+                });
+                if (msg) msg.textContent = 'Time & pay settings saved.';
+            } catch (error) {
+                if (msg) msg.textContent = editErrText(error);
+            } finally {
+                if (saveBtn) saveBtn.disabled = false;
+            }
+        }
+
         (async function initPermissions() {
             populateStaffFilters();
             populateSubProfile();
@@ -2668,6 +2852,7 @@
                         populateSubProfile();
                         if (requireOwner()) {
                             renderProfiles();
+                            loadTimeSettings();
                             loadUsers().catch(loadError => {
                                 document.getElementById('saveState').textContent = loadError.message;
                             });
@@ -2692,6 +2877,7 @@
 
             if (isOwner) {
                 renderProfiles();
+                loadTimeSettings();
                 loadUsers().catch(error => {
                     document.getElementById('saveState').textContent = error.message;
                 });
@@ -2721,6 +2907,8 @@
         window.toggleDisabled = toggleDisabled;
         window.deleteUser = deleteUser;
         window.copyGeneratedLink = copyGeneratedLink;
+        window.toggleTimeSettings = toggleTimeSettings;
+        window.saveTimeSettingsFromForm = saveTimeSettingsFromForm;
     </script>
 </body>
 </html>

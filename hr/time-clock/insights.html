@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fratello Hub - Team Insights</title>
+    <link rel="icon" type="image/png" href="../../assets/Fratello_Favicon_Blue.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../system/fratello-ui.css">
+    <style>
+        :root{
+            --teal:#2FA9A0; --teal-dark:#1E7E77; --teal-soft:#E8F4F2;
+            --amber:#E0A23D; --amber-dark:#B5780F; --amber-soft:#FAF1E2;
+            --ok:#1F7A57; --ok-soft:#E4F6EF;
+            --red:#B3261E; --red-soft:#FBEAE9;
+            --ink:#16262E; --sub:#6A7A7A; --bg:#F5F6F5; --line:#ECEEEC; --surface:#fff;
+            --font:'Inter',-apple-system,'Segoe UI',sans-serif;
+            --head:'Poppins',-apple-system,'Segoe UI',sans-serif;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+        button,input,textarea,select{font:inherit}
+        main{width:min(1060px,calc(100% - 36px));margin:0 auto;padding:34px 0 64px}
+        .eyebrow{color:var(--teal-dark);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+        h1{font-family:var(--head);font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.01em;margin:8px 0 6px}
+        .lede{color:var(--sub);font-size:15px;line-height:1.6;max-width:680px}
+
+        .controls{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:24px 0 6px}
+        .ctrl-group{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+        .ctrl{display:flex;flex-direction:column;gap:6px}
+        .ctrl label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub)}
+        .ctrl input,.ctrl select{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);background:#fff}
+        .ctrl input:focus,.ctrl select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,169,160,.12)}
+        .apply{align-self:flex-end;background:var(--ink);color:#fff;border:none;font-weight:600;font-size:14px;padding:11px 18px;border-radius:999px;cursor:pointer}
+        .apply:hover{opacity:.92}
+        .scope-note{color:var(--sub);font-size:13px;margin-top:2px}
+
+        /* KPI tiles */
+        .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:18px}
+        .kpi{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(15,30,30,.05);padding:18px 18px 16px}
+        .kpi .klabel{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--sub)}
+        .kpi .kval{font-family:var(--head);font-weight:700;font-size:30px;margin-top:8px;letter-spacing:-.01em}
+        .kpi .ksub{color:var(--sub);font-size:12px;margin-top:4px;line-height:1.4}
+        .kpi.accent-t .kval{color:var(--teal-dark)}
+        .kpi.accent-a .kval{color:var(--amber-dark)}
+
+        /* info tooltip */
+        .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:99px;background:#E7EAE9;color:var(--sub);font-size:10px;font-weight:800;cursor:pointer;border:none;padding:0;line-height:1}
+        .info:hover,.info:focus-visible{background:var(--teal-soft);color:var(--teal-dark);outline:none}
+        .info-note{margin-top:8px;background:var(--teal-soft);color:var(--teal-dark);font-size:12px;line-height:1.45;border-radius:10px;padding:8px 10px}
+
+        .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 30px rgba(15,30,30,.05);padding:14px 22px 16px;margin-top:18px}
+        .card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 2px}
+        .card-h h2{font-family:var(--head);font-weight:600;font-size:18px}
+        .card-h .meta{color:var(--sub);font-size:13px}
+        .rule{height:2px;border-radius:2px;margin:8px 0 4px}
+        .rule.t{background:var(--teal)} .rule.a{background:var(--amber)} .rule.g{background:var(--ok)}
+
+        /* people table */
+        .ptable{width:100%;border-collapse:collapse;font-size:14px}
+        .ptable th{text-align:left;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:10px 8px;border-bottom:1px solid var(--line)}
+        .ptable td{padding:13px 8px;border-bottom:1px solid #F4F6F5;vertical-align:middle}
+        .ptable tr:last-child td{border-bottom:none}
+        .ptable .num{text-align:right;font-variant-numeric:tabular-nums}
+        .ptable .nm{font-weight:700;display:block}
+        .ptable .dept{color:var(--sub);font-size:12px;margin-top:2px;display:block;text-transform:capitalize}
+        .chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;padding:6px 11px;border-radius:999px;white-space:nowrap}
+        .chip.green{background:var(--ok-soft);color:var(--ok)}
+        .chip.amber{background:var(--amber-soft);color:var(--amber-dark)}
+        .chip.red{background:var(--red-soft);color:var(--red)}
+        .gradebtn{background:#fff;border:1.5px solid var(--teal);color:var(--teal-dark);font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+        .gradebtn:hover{background:var(--teal-soft)}
+        .empty{color:var(--sub);font-size:14px;padding:22px 2px}
+
+        /* productivity */
+        .prod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:6px}
+        .prod-card{border:1px solid var(--line);border-radius:16px;padding:16px}
+        .prod-card h3{font-family:var(--head);font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px}
+        .prod-per{margin-top:10px;font-size:13px;color:var(--sub)}
+        .prod-per b{font-family:var(--head);font-size:20px;color:var(--ink);display:block;margin-top:2px}
+        .prod-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+        .prod-form .field.full{grid-column:1 / -1}
+        .field label{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin-bottom:6px}
+        .field input{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:10px 11px;color:var(--ink)}
+        .field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,169,160,.12)}
+        .prod-save{grid-column:1 / -1;background:var(--teal);color:#fff;border:none;font-weight:700;font-size:14px;padding:11px;border-radius:12px;cursor:pointer}
+        .prod-save:hover{opacity:.93}
+        .prod-status{grid-column:1 / -1;font-size:13px;color:var(--sub);min-height:2px}
+        .prod-status.err{color:var(--red)}
+        .prod-note{color:var(--sub);font-size:13px;line-height:1.5;margin-top:10px}
+
+        .state{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:22px;color:var(--sub);font-size:15px}
+        .state a{color:var(--teal-dark);font-weight:700}
+
+        /* grade modal */
+        .scrim{position:fixed;inset:0;background:rgba(15,25,25,.45);z-index:2100;display:flex;align-items:center;justify-content:center;padding:18px}
+        .scrim[hidden]{display:none}
+        .modal{background:#fff;width:100%;max-width:480px;border-radius:22px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.25);max-height:92vh;overflow:auto}
+        .modal h2{font-family:var(--head);font-weight:600;font-size:22px}
+        .modal .msub{color:var(--sub);font-size:14px;margin-top:2px}
+        .slider-row{margin-top:16px}
+        .slider-row .stop{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px}
+        .slider-row .stop .v{font-family:var(--head);color:var(--teal-dark)}
+        .slider-row input[type=range]{width:100%;accent-color:var(--teal)}
+        .gfield{margin-top:16px}
+        .gfield label{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);margin-bottom:6px}
+        .gfield textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--ink);resize:vertical}
+        .gfield textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,169,160,.12)}
+        .trend{margin-top:16px;background:#FAFBFB;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+        .trend .th{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--sub)}
+        .trend .tline{display:flex;gap:8px;align-items:flex-end;margin-top:10px;flex-wrap:wrap}
+        .trend .tcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+        .trend .bar{width:26px;background:var(--teal-soft);border-radius:6px 6px 0 0}
+        .trend .bd{font-size:10px;color:var(--sub)}
+        .trend .empty-t{font-size:13px;color:var(--sub);margin-top:6px}
+        .merr{color:var(--red);font-size:13px;margin-top:12px;min-height:2px}
+        .modal-actions{display:flex;gap:10px;margin-top:20px}
+        .btn{flex:1;border:none;border-radius:14px;padding:14px;font-weight:800;font-size:15px;cursor:pointer}
+        .btn-ghost{background:#F0F2F1;color:var(--ink)}
+        .btn-save{background:var(--teal);color:#fff}
+
+        @media (max-width:860px){
+            .kpis{grid-template-columns:repeat(2,1fr)}
+            .ptable thead{display:none}
+            .ptable,.ptable tbody,.ptable tr,.ptable td{display:block;width:100%}
+            .ptable tr{border:1px solid var(--line);border-radius:14px;padding:8px 12px;margin-top:12px}
+            .ptable td{border:none;padding:6px 0;display:flex;justify-content:space-between;align-items:center;text-align:right}
+            .ptable td.num{text-align:right}
+            .ptable td::before{content:attr(data-l);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--sub);text-align:left}
+            .ptable td.nmcell{display:block;text-align:left}
+            .ptable td.nmcell::before{content:''}
+            .ptable td.actcell{display:block;text-align:left}
+            .ptable td.actcell::before{content:''}
+            .ptable td.actcell .gradebtn{width:100%;text-align:center}
+            .prod-form{grid-template-columns:1fr}
+        }
+        @media (max-width:520px){ .kpis{grid-template-columns:1fr} }
+    </style>
+</head>
+<body>
+    <div id="fratello-hub-header"></div>
+
+    <main>
+        <div class="eyebrow">Team Insights</div>
+        <h1>How the team is doing.</h1>
+        <p class="lede">On-time, overtime, absences and a reliability read for your team over a pay period — at a glance. Grade each person with a note so reviews are data-backed, and log production output to start tracking units per labour hour.</p>
+
+        <div id="gateOk" hidden>
+            <div class="controls">
+                <div class="ctrl-group">
+                    <div class="ctrl"><label for="fromDate">From</label><input type="date" id="fromDate"></div>
+                    <div class="ctrl"><label for="toDate">To</label><input type="date" id="toDate"></div>
+                    <div class="ctrl" id="teamFilterWrap" hidden>
+                        <label for="teamFilter">Team</label>
+                        <select id="teamFilter">
+                            <option value="">All production</option>
+                            <option value="Roasting">Roasting</option>
+                            <option value="Packaging">Packaging</option>
+                            <option value="Warehouse">Warehouse</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="apply" id="applyBtn" type="button">Refresh</button>
+            </div>
+            <div class="scope-note" id="scopeNote">Loading…</div>
+
+            <!-- KPI tiles -->
+            <div class="kpis" id="kpis"></div>
+
+            <!-- People table -->
+            <div class="card">
+                <div class="card-h">
+                    <h2>People</h2>
+                    <span class="meta" id="peopleMeta"></span>
+                </div>
+                <div class="rule t"></div>
+                <div id="peopleBody"></div>
+            </div>
+
+            <!-- Productivity -->
+            <div class="card">
+                <div class="card-h">
+                    <h2>Productivity</h2>
+                    <span class="meta">Output per labour hour</span>
+                </div>
+                <div class="rule a"></div>
+                <p class="prod-note">A starting point, not a full MES: log what each team produced this period and we divide by the hours actually worked. Labour hours come straight from the clock.</p>
+                <div class="prod-grid" id="prodGrid"></div>
+            </div>
+        </div>
+
+        <div class="state" id="gateDenied" hidden>
+            Team Insights is for Production managers, the Owner, and the Controller.
+            <a href="../../index.html">Back to the Hub →</a>
+        </div>
+
+        <div class="state" id="loadingState">Loading Team Insights…</div>
+        <div class="state" id="errorState" hidden></div>
+    </main>
+
+    <!-- Grade modal -->
+    <div class="scrim" id="gradeScrim" hidden>
+        <div class="modal">
+            <h2 id="gTitle">Grade</h2>
+            <div class="msub" id="gSub">—</div>
+
+            <div class="slider-row">
+                <div class="stop"><span>Attendance</span><span class="v" id="vAttendance">3</span></div>
+                <input type="range" min="1" max="5" step="1" value="3" id="sAttendance">
+            </div>
+            <div class="slider-row">
+                <div class="stop"><span>Punctuality</span><span class="v" id="vPunctuality">3</span></div>
+                <input type="range" min="1" max="5" step="1" value="3" id="sPunctuality">
+            </div>
+            <div class="slider-row">
+                <div class="stop"><span>Quality</span><span class="v" id="vQuality">3</span></div>
+                <input type="range" min="1" max="5" step="1" value="3" id="sQuality">
+            </div>
+            <div class="slider-row">
+                <div class="stop"><span>Attitude</span><span class="v" id="vAttitude">3</span></div>
+                <input type="range" min="1" max="5" step="1" value="3" id="sAttitude">
+            </div>
+
+            <div class="gfield">
+                <label for="gNote">Note</label>
+                <textarea id="gNote" rows="3" placeholder="e.g. Strong week — covered a shift, on time every day."></textarea>
+            </div>
+
+            <div class="trend" id="gTrend"></div>
+
+            <div class="merr" id="gErr"></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="gCancel" type="button">Cancel</button>
+                <button class="btn btn-save" id="gSave" type="button">Save grade</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/system/hub-header.js"></script>
+    <script type="module">
+        import { computeKpis, expandVacation, computeProductivity, fmtHours } from './payroll-csv.js';
+
+        const $ = id => document.getElementById(id);
+
+        function readRole() {
+            try { return JSON.parse(localStorage.getItem('fratello-role') || 'null'); }
+            catch (e) { return null; }
+        }
+
+        let client = null;
+        async function api() {
+            if (client) return client;
+            client = window.__TS_STUB || await import('../../system/api/firestore-client.js');
+            return client;
+        }
+
+        // ── time helpers (mirror the timesheet's dOf / toDateKey patterns) ──
+        function dOf(v) {
+            if (!v) return null;
+            if (v instanceof Date) return v;
+            if (typeof v.toDate === 'function') return v.toDate();
+            if (typeof v.seconds === 'number') return new Date(v.seconds * 1000);
+            const d = new Date(v); return isNaN(d.getTime()) ? null : d;
+        }
+        function ymd(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        function toDateKey(v) {
+            if (typeof v === 'string') return v.length >= 10 ? v.slice(0, 10) : v;
+            const d = dOf(v);
+            return d ? ymd(d) : '';
+        }
+        // minutes since local midnight from a timestamp-like value, or null.
+        function minutesOf(v) {
+            const d = dOf(v);
+            if (!d) return null;
+            return d.getHours() * 60 + d.getMinutes();
+        }
+        function labelOf(v) {
+            const d = dOf(v);
+            if (!d) return '';
+            return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+        }
+        function defaultPayPeriod() {
+            // Most recent complete bi-weekly Mon–Sun period (same math as the timesheet).
+            const d = new Date();
+            const dow = (d.getDay() + 6) % 7;       // Mon = 0
+            d.setDate(d.getDate() - dow);            // this week's Monday
+            d.setDate(d.getDate() - 1);              // last Sunday = To
+            const to = new Date(d.getTime());
+            const from = new Date(d.getTime());
+            from.setDate(from.getDate() - 13);       // 14-day window starting on a Monday
+            return { from: ymd(from), to: ymd(to) };
+        }
+        function fmtDayLabel(dateKey) {
+            const d = new Date(`${dateKey}T12:00:00`);
+            return isNaN(d.getTime()) ? dateKey : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+        function escapeHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+        // Build the plain clockDay shape the pure module expects from a getTeamClock doc.
+        function toClockDay(r) {
+            return {
+                name: r.user_name || '',
+                email: r.user_email || '',
+                date: toDateKey(r.date),
+                workedSeconds: r.worked_seconds || 0,
+                breakSeconds: r.break_seconds || 0,
+                breaksCount: r.breaks_count || 0,
+                clockInMin: minutesOf(r.clock_in),
+                clockOutMin: minutesOf(r.clock_out),
+                clockInLabel: labelOf(r.clock_in),
+                clockOutLabel: labelOf(r.clock_out),
+                department: r.department || '',
+                team: r.team || '',
+                status: r.status
+            };
+        }
+
+        // The team rollup keys (sub-teams that map to "Production").
+        const TEAMS = ['Roasting', 'Packaging', 'Warehouse'];
+        function deptToTeam(dept) {
+            const d = String(dept || '').trim().toLowerCase();
+            if (d === 'roasting') return 'Roasting';
+            if (d === 'packaging') return 'Packaging';
+            if (d === 'warehouse') return 'Warehouse';
+            return '';
+        }
+
+        // ── access gate (same as timesheet.html) ──
+        function canSee(role) {
+            if (!role) return false;
+            const tier = String(role.tier || '').toLowerCase();
+            if (tier === 'owner' || tier === 'controller') return true;
+            const dept = String(role.department || '').toLowerCase();
+            return tier === 'manager' && ['production','roasting','packaging','warehouse'].includes(dept);
+        }
+        // Owner / controller / a production manager (team "Production") may switch teams.
+        function canFilterTeams(role) {
+            const tier = String(role.tier || '').toLowerCase();
+            if (tier === 'owner' || tier === 'controller') return true;
+            const dept = String(role.department || '').toLowerCase();
+            return tier === 'manager' && dept === 'production';
+        }
+        // Who may grade: owner/controller, or a production-family manager.
+        // Mirrors the saveGrade data-layer check so the modal never opens for a
+        // person the viewer cannot grade.
+        function canGrade(role) {
+            if (!role) return false;
+            const tier = String(role.tier || '').toLowerCase();
+            if (tier === 'owner' || tier === 'controller') return true;
+            const dept = String(role.department || '').toLowerCase();
+            return tier === 'manager' && ['production','roasting','packaging','warehouse'].includes(dept);
+        }
+        // A single sub-team manager is locked to their team.
+        function lockedTeam(role) {
+            const tier = String(role.tier || '').toLowerCase();
+            if (tier === 'owner' || tier === 'controller') return '';
+            const dept = String(role.department || '').toLowerCase();
+            if (dept === 'roasting') return 'Roasting';
+            if (dept === 'packaging') return 'Packaging';
+            if (dept === 'warehouse') return 'Warehouse';
+            return '';
+        }
+
+        let ROLE = null;
+        let SETTINGS = null;
+        let LAST = null; // { period, kpis, clockDays }
+
+        function reliabilityChip(r) {
+            const band = r >= 85 ? 'green' : r >= 70 ? 'amber' : 'red';
+            // Differentiate bands by glyph + word as well as colour (color-blind safe).
+            const glyph = band === 'green' ? '●' : band === 'amber' ? '◐' : '▲';
+            const word = band === 'green' ? 'Good' : band === 'amber' ? 'Watch' : 'Low';
+            return `<span class="chip ${band}">${glyph} ${r} <span style="font-weight:600;opacity:.85">${word}</span></span>`;
+        }
+
+        function kpiTile(label, value, sub, tip, accent) {
+            // Info is hover (title) AND tap (button toggles a visible note) so the
+            // explanation is reachable on touch devices.
+            const info = tip ? ` <button type="button" class="info" title="${escapeHtml(tip)}" aria-label="What is ${escapeHtml(label)}?" data-tip="${escapeHtml(tip)}">i</button>` : '';
+            const note = tip ? `<div class="info-note" hidden>${escapeHtml(tip)}</div>` : '';
+            return `<div class="kpi ${accent || ''}">
+                <div class="klabel">${escapeHtml(label)}${info}</div>
+                <div class="kval">${value}</div>
+                <div class="ksub">${escapeHtml(sub)}</div>
+                ${note}
+            </div>`;
+        }
+
+        function renderKpis(team, people, period) {
+            const grace = SETTINGS && SETTINGS.grace_minutes != null ? SETTINGS.grace_minutes : 5;
+            const roster = people || [];
+            const avgHoursPerDayPerPerson = roster.length
+                ? round2(roster.reduce((s, p) => s + (Number(p.avgHoursPerDay) || 0), 0) / roster.length)
+                : 0;
+            const tiles = [
+                kpiTile('On-time %', `${team.onTimePct}%`,
+                    'Days clocked in by expected start + grace',
+                    `late = clocked in after expected start + ${grace}-min grace; on-time % is averaged across people`, 'accent-t'),
+                kpiTile('Avg hours/day', fmtHours(avgHoursPerDayPerPerson),
+                    'Avg worked hours per day per person', 'Each person\'s worked hours ÷ their days worked, averaged across the team.'),
+                kpiTile('OT %', `${team.otPct}%`,
+                    'Share of hours paid as overtime',
+                    'Alberta overtime — the greater of over-8/day or over-44/week.', 'accent-a'),
+                kpiTile('Absences', String(team.absences),
+                    'Expected weekdays not worked or on vacation',
+                    'A weekday in the period with no worked day and no approved vacation counts as an absence.'),
+                kpiTile('Team reliability', String(team.reliability),
+                    '50% on-time · 40% attendance · 10% breaks',
+                    'A 0–100 read: 0.5×on-time + 0.4×attendance + 0.1×break adherence. A starting formula.', 'accent-t')
+            ];
+            const host = $('kpis');
+            host.innerHTML = tiles.join('');
+            // Tap-to-toggle the definition note (touch devices have no hover).
+            host.querySelectorAll('.info').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const note = btn.closest('.kpi').querySelector('.info-note');
+                    if (note) note.hidden = !note.hidden;
+                });
+            });
+        }
+
+        function renderPeople(people) {
+            const body = $('peopleBody');
+            $('peopleMeta').textContent = people.length ? `${people.length} ${people.length === 1 ? 'person' : 'people'}` : '';
+            if (!people.length) {
+                body.innerHTML = '<div class="empty">No hours logged for this team in this period yet.</div>';
+                return;
+            }
+            const mayGrade = canGrade(ROLE);
+            const lateEarlyDef = 'late = in after expected start + grace; early = out before expected end − grace';
+            const rows = people.map(p => `
+                <tr>
+                    <td class="nmcell"><span class="nm">${escapeHtml(p.name)}</span><span class="dept">${escapeHtml(p.department || p.team || '')}</span></td>
+                    <td class="num" data-l="Days">${p.daysWorked}</td>
+                    <td class="num" data-l="Total hrs">${fmtHours(p.totalHours)}</td>
+                    <td class="num" data-l="OT %">${p.otPct}%</td>
+                    <td class="num" data-l="Late / early">${p.lateStarts} / ${p.earlyOuts}</td>
+                    <td class="num" data-l="Absences">${p.absences}</td>
+                    <td class="num" data-l="Reliability">${reliabilityChip(p.reliability)}</td>
+                    <td class="actcell" style="text-align:right">${mayGrade ? `<button class="gradebtn" data-grade="${escapeHtml(p.email)}">Grade</button>` : ''}</td>
+                </tr>`).join('');
+            body.innerHTML = `<table class="ptable">
+                <thead><tr>
+                    <th>Person</th>
+                    <th class="num">Days</th>
+                    <th class="num">Total hrs</th>
+                    <th class="num">OT %</th>
+                    <th class="num" title="${escapeHtml(lateEarlyDef)}">Late / early</th>
+                    <th class="num">Absences</th>
+                    <th class="num">Reliability</th>
+                    <th></th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+            body.querySelectorAll('[data-grade]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const email = btn.getAttribute('data-grade');
+                    const person = people.find(x => String(x.email).toLowerCase() === String(email).toLowerCase());
+                    if (person) openGrade(person);
+                });
+            });
+        }
+
+        // ── productivity ──
+        function renderProductivity(labourHoursByTeam, outputDocs) {
+            const grid = $('prodGrid');
+            const teamsToShow = filterTeam() ? [filterTeam()] : TEAMS;
+
+            // Build outputByTeam from the most recent output doc per team in the period.
+            const latestByTeam = {};
+            (outputDocs || []).forEach(d => {
+                const t = deptToTeam(d.team) || d.team;
+                if (!latestByTeam[t] || String(d.date) > String(latestByTeam[t].date)) latestByTeam[t] = d;
+            });
+            const outputByTeam = {};
+            teamsToShow.forEach(t => {
+                const doc = latestByTeam[t];
+                if (doc) outputByTeam[t] = { units: doc.units || 0, unitLabel: doc.unit_label || '' };
+            });
+            const prod = computeProductivity({ outputByTeam, labourHoursByTeam });
+            const prodByTeam = {};
+            prod.forEach(p => { prodByTeam[p.team] = p; });
+
+            grid.innerHTML = teamsToShow.map(t => {
+                const labour = round2(labourHoursByTeam[t] || 0);
+                const p = prodByTeam[t] || { units: 0, unitLabel: '', perHour: 0 };
+                const last = latestByTeam[t];
+                const perLine = (last && p.units > 0 && labour > 0)
+                    ? `<div class="prod-per">Output / labour hour<b>${round2(p.perHour)} ${escapeHtml(p.unitLabel || 'units')}/hr</b></div>`
+                    : `<div class="prod-per">Log output below to see units per labour hour. Labour this period: <b style="display:inline">${fmtHours(labour)} hrs</b></div>`;
+                const lastLine = last
+                    ? `<div class="prod-note">Last logged: ${last.units} ${escapeHtml(last.unit_label || 'units')} on ${escapeHtml(fmtDayLabel(last.date))}.</div>`
+                    : '';
+                return `<div class="prod-card">
+                    <h3>${escapeHtml(t)}</h3>
+                    ${perLine}
+                    ${lastLine}
+                    <div class="prod-form" data-team="${escapeHtml(t)}">
+                        <div class="field"><label>Units produced</label><input type="number" min="0" step="1" data-f="units" placeholder="e.g. 420"></div>
+                        <div class="field"><label>Unit label</label><input type="text" data-f="label" placeholder="bags, batches…" value="${escapeHtml(last ? (last.unit_label || '') : '')}"></div>
+                        <div class="field full"><label>Date</label><input type="date" data-f="date"></div>
+                        <button class="prod-save" type="button" data-save="${escapeHtml(t)}">Log output</button>
+                        <div class="prod-status" data-status="${escapeHtml(t)}"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            grid.querySelectorAll('[data-save]').forEach(btn => {
+                btn.addEventListener('click', () => saveOutput(btn.getAttribute('data-save')));
+            });
+            // Default each date input to the period's To date.
+            grid.querySelectorAll('input[data-f="date"]').forEach(inp => { inp.value = $('toDate').value || ''; });
+        }
+
+        function round2(n){ return Math.round(((Number(n)||0)+Number.EPSILON)*100)/100; }
+
+        async function saveOutput(team) {
+            const form = document.querySelector(`.prod-form[data-team="${CSS.escape(team)}"]`);
+            const statusEl = document.querySelector(`[data-status="${CSS.escape(team)}"]`);
+            if (!form) return;
+            const units = Number(form.querySelector('input[data-f="units"]').value);
+            const label = form.querySelector('input[data-f="label"]').value.trim();
+            const date = form.querySelector('input[data-f="date"]').value;
+            const setS = (msg, err) => { if (statusEl) { statusEl.textContent = msg || ''; statusEl.classList.toggle('err', !!err); } };
+            if (!date) { setS('Pick a date for the output.', true); return; }
+            if (!(units >= 0) || !form.querySelector('input[data-f="units"]').value) { setS('Enter the units produced.', true); return; }
+            const saveBtn = form.querySelector('[data-save]');
+            saveBtn.disabled = true;
+            setS('Saving…');
+            try {
+                const c = await api();
+                await c.saveProductionOutput({ team, date, units, unit_label: label });
+                setS('Logged. Refreshing…');
+                await load();
+            } catch (e) {
+                setS((e && e.message) || 'Could not log output.', true);
+            } finally {
+                saveBtn.disabled = false;
+            }
+        }
+
+        // ── grade modal ──
+        let grading = null; // current person
+        function bindSlider(id, vId) {
+            $(id).addEventListener('input', () => { $(vId).textContent = $(id).value; });
+        }
+        function setSlider(id, vId, val) {
+            const v = Math.min(5, Math.max(1, Math.round(Number(val) || 3)));
+            $(id).value = String(v);
+            $(vId).textContent = String(v);
+        }
+
+        async function openGrade(person) {
+            grading = person;
+            $('gTitle').textContent = `Grade ${person.name}`;
+            $('gSub').textContent = `${person.department || person.team || 'Production'} · ${LAST.period.from} → ${LAST.period.to}`;
+            ['Attendance','Punctuality','Quality','Attitude'].forEach(k => setSlider(`s${k}`, `v${k}`, 3));
+            $('gNote').value = '';
+            $('gErr').textContent = '';
+            $('gTrend').innerHTML = '<div class="th">Recent grades</div><div class="empty-t">Loading…</div>';
+            $('gradeScrim').hidden = false;
+            // Load this person's grade history + prefill current period if it exists.
+            try {
+                const c = await api();
+                const grades = await c.getTeamGrades({ team: filterTeam() || person.team || undefined });
+                const mine = (grades || []).filter(g => String(g.user_id).toLowerCase() === String(person.email).toLowerCase());
+                const current = mine.find(g => g.period_start === LAST.period.from);
+                if (current && current.scores) {
+                    setSlider('sAttendance', 'vAttendance', current.scores.attendance);
+                    setSlider('sPunctuality', 'vPunctuality', current.scores.punctuality);
+                    setSlider('sQuality', 'vQuality', current.scores.quality);
+                    setSlider('sAttitude', 'vAttitude', current.scores.attitude);
+                    $('gNote').value = current.note || '';
+                }
+                renderTrend(mine);
+            } catch (e) {
+                $('gTrend').innerHTML = `<div class="th">Recent grades</div><div class="empty-t">Could not load history.</div>`;
+            }
+        }
+        function gradeAvg(s) {
+            if (!s) return 0;
+            return (Number(s.attendance||0)+Number(s.punctuality||0)+Number(s.quality||0)+Number(s.attitude||0))/4;
+        }
+        function renderTrend(grades) {
+            const sorted = (grades || []).slice()
+                .sort((a,b) => String(a.period_start).localeCompare(String(b.period_start)))
+                .slice(-6);
+            if (!sorted.length) {
+                $('gTrend').innerHTML = '<div class="th">Recent grades</div><div class="empty-t">No grades yet — this will be the first.</div>';
+                return;
+            }
+            const cols = sorted.map(g => {
+                const avg = gradeAvg(g.scores);
+                const h = Math.max(6, Math.round((avg / 5) * 56));
+                return `<div class="tcol"><div class="bar" style="height:${h}px" title="avg ${avg.toFixed(1)} / 5"></div><div class="bd">${escapeHtml(fmtDayLabel(g.period_start))}</div></div>`;
+            }).join('');
+            const last = sorted[sorted.length - 1];
+            $('gTrend').innerHTML = `<div class="th">Recent grades · last avg ${gradeAvg(last.scores).toFixed(1)}/5</div><div class="tline">${cols}</div>`;
+        }
+        function closeGrade() { $('gradeScrim').hidden = true; grading = null; }
+
+        async function saveGradeNow() {
+            const person = grading;
+            if (!person) return;
+            $('gErr').textContent = '';
+            ['gSave','gCancel'].forEach(id => $(id).disabled = true);
+            try {
+                const c = await api();
+                await c.saveGrade({
+                    user_id: person.email,
+                    user_name: person.name,
+                    team: deptToTeam(person.department) || person.team || filterTeam() || '',
+                    department: person.department || '',
+                    period_start: LAST.period.from,
+                    period_end: LAST.period.to,
+                    scores: {
+                        attendance: Number($('sAttendance').value),
+                        punctuality: Number($('sPunctuality').value),
+                        quality: Number($('sQuality').value),
+                        attitude: Number($('sAttitude').value)
+                    },
+                    note: $('gNote').value
+                });
+                closeGrade();
+            } catch (e) {
+                $('gErr').textContent = (e && e.message) || 'Could not save the grade.';
+            } finally {
+                ['gSave','gCancel'].forEach(id => $(id).disabled = false);
+            }
+        }
+
+        // ── controls ──
+        function filterTeam() {
+            const locked = lockedTeam(ROLE);
+            if (locked) return locked;
+            return $('teamFilter') ? ($('teamFilter').value || '') : '';
+        }
+
+        async function load() {
+            const from = $('fromDate').value;
+            const to = $('toDate').value;
+            if (!from || !to) { $('scopeNote').textContent = 'Pick a From and To date.'; return; }
+            if (from > to) { $('scopeNote').textContent = 'From date must be on or before the To date.'; return; }
+            const period = { from, to };
+            const team = filterTeam();
+            $('scopeNote').textContent = `Loading ${team || 'all production'} · ${from} → ${to}…`;
+
+            const c = await api();
+            const [clock, reqs, users] = await Promise.all([
+                c.getTeamClock({ start_date: from, end_date: to }),
+                c.getTeamRequests({ status: 'approved', start_date: from, end_date: to }),
+                (c.getUsers ? c.getUsers().catch(() => []) : Promise.resolve([]))
+            ]);
+
+            // Map email -> department so team membership for vacation does not depend
+            // on clock presence (a full-period vacationer has no clock docs).
+            const deptByEmail = {};
+            (users || []).forEach(u => {
+                const em = String(u.email || u.id || '').toLowerCase();
+                if (em) deptByEmail[em] = u.department || '';
+            });
+
+            let clockDays = (clock || []).map(toClockDay);
+            // Team filter: by the doc's sub-team department.
+            if (team) clockDays = clockDays.filter(d => deptToTeam(d.department) === team);
+
+            const requests = (reqs || []).map(r => ({
+                name: r.user_name || '',
+                email: r.user_id || '',
+                startDate: toDateKey(r.start_date),
+                endDate: toDateKey(r.end_date),
+                halfStart: !!r.half_day_start,
+                halfEnd: !!r.half_day_end
+            }));
+            let vacationDays = expandVacation(requests, { from, to });
+            if (team) {
+                // Resolve team membership from each person's department (user record),
+                // so someone on vacation for the whole period — and therefore absent
+                // from the clock — is still counted. Fall back to clock presence when
+                // we have no user record for them.
+                const inTeam = new Set(clockDays.map(d => String(d.email).toLowerCase()));
+                vacationDays = vacationDays.filter(v => {
+                    const em = String(v.email).toLowerCase();
+                    const dept = deptByEmail[em];
+                    if (dept !== undefined && dept !== '') return deptToTeam(dept) === team;
+                    return inTeam.has(em);
+                });
+            }
+
+            const kpis = computeKpis({ clockDays, vacationDays, settings: SETTINGS, period });
+
+            // Labour hours per sub-team for productivity (from this period's clock).
+            const labourHoursByTeam = {};
+            TEAMS.forEach(t => { labourHoursByTeam[t] = 0; });
+            clockDays.forEach(d => {
+                const t = deptToTeam(d.department);
+                if (!t) return;
+                if (d.status === 'done' || d.status === 'approved') {
+                    labourHoursByTeam[t] = round2(labourHoursByTeam[t] + (d.workedSeconds || 0) / 3600);
+                }
+            });
+
+            let outputDocs = [];
+            try { outputDocs = await c.getProductionOutput({ start_date: from, end_date: to }); }
+            catch (e) { outputDocs = []; }
+
+            LAST = { period, kpis, clockDays };
+            $('scopeNote').textContent = `${team || 'All production'} · ${from} → ${to}`;
+            renderKpis(kpis.team, kpis.people, period);
+            renderPeople(kpis.people);
+            renderProductivity(labourHoursByTeam, outputDocs);
+        }
+
+        (async function init() {
+            ROLE = readRole();
+            if (!canSee(ROLE)) {
+                $('loadingState').hidden = true;
+                $('gateDenied').hidden = false;
+                return;
+            }
+            const p = defaultPayPeriod();
+            $('fromDate').value = p.from;
+            $('toDate').value = p.to;
+
+            if (canFilterTeams(ROLE)) {
+                $('teamFilterWrap').hidden = false;
+            }
+
+            // sliders
+            bindSlider('sAttendance', 'vAttendance');
+            bindSlider('sPunctuality', 'vPunctuality');
+            bindSlider('sQuality', 'vQuality');
+            bindSlider('sAttitude', 'vAttitude');
+            $('gCancel').addEventListener('click', closeGrade);
+            $('gSave').addEventListener('click', saveGradeNow);
+            $('gradeScrim').addEventListener('click', e => { if (e.target === $('gradeScrim')) closeGrade(); });
+
+            $('applyBtn').addEventListener('click', () => load().catch(showErr));
+            ['fromDate','toDate'].forEach(id => $(id).addEventListener('change', () => load().catch(showErr)));
+            if ($('teamFilter')) $('teamFilter').addEventListener('change', () => load().catch(showErr));
+
+            function showErr(err) {
+                $('scopeNote').textContent = (err && err.message) || 'Could not load.';
+            }
+
+            try {
+                const c = await api();
+                SETTINGS = await c.getTimeSettings();
+            } catch (e) {
+                SETTINGS = null;
+            }
+
+            $('gateOk').hidden = false;
+            try {
+                await load();
+                $('loadingState').hidden = true;
+            } catch (err) {
+                $('loadingState').hidden = true;
+                $('errorState').hidden = false;
+                $('errorState').textContent = (err && err.message) || 'Could not load Team Insights — check your connection or sign in again.';
+            }
+        })();
+    </script>
+</body>
+</html>

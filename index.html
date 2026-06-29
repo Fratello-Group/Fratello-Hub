@@ -4160,6 +4160,19 @@ function appendTimesheetLink(main, role) {
         </span>
         <span class="dept-arrow">→</span>`;
     section.appendChild(tile);
+
+    const insightsTile = document.createElement('a');
+    insightsTile.className = 'dept-row fade-in';
+    insightsTile.href = 'hr/time-clock/insights.html';
+    insightsTile.innerHTML = `
+        <span class="dept-icon">${iconSvg('pulse')}</span>
+        <span class="dept-copy">
+            <span class="dept-title">Team Insights</span>
+            <span class="dept-note">On-time, overtime, absences and reliability — grade your team and track output.</span>
+        </span>
+        <span class="dept-arrow">→</span>`;
+    section.appendChild(insightsTile);
+
     main.appendChild(section);
 }
 

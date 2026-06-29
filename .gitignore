@@ -8,3 +8,6 @@ __dash-preview.html
 __vt-preview.html
 __timeclock-concept.html
 __icon.html
+
+# Local tooling installs (never commit)
+node_modules/

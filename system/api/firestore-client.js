@@ -956,6 +956,19 @@ export async function saveGrade(input = {}) {
         created_via: 'hub-insights'
     };
 
+    // Mirror the security rule (validGradeWrite) in the data layer so the
+    // preview-safe boundary authorizes the writer rather than relying solely on
+    // Firestore rules: owner/controller may grade anyone; a production manager
+    // may grade a person whose team rolls up to Production.
+    if (!isOwnerOrController(writer)) {
+        const isManager = String(writer.role_tier || '').toLowerCase() === 'manager';
+        const writerTeam = teamGroupOf(writer.department);
+        const gradeTeam = teamGroupOf(record.team);
+        if (!(isManager && writerTeam === 'Production' && gradeTeam === 'Production')) {
+            throw new Error('Only the Owner, Controller, or the team\'s manager can grade.');
+        }
+    }
+
     const id = `${docIdForEmail(userId)}_${periodStart}`;
     const ref = doc(db, COLLECTIONS.grades, id);
     await setDoc(ref, record, { merge: true });

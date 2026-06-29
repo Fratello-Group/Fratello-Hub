@@ -34,6 +34,15 @@
         .export:hover{opacity:.92}
         .export-secondary{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
         .export-secondary:hover{background:#FAFBFB;opacity:1}
+        .export .caret{font-size:12px;opacity:.85;transform:translateY(-1px)}
+        .export-wrap{position:relative;display:inline-block}
+        .export-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:1500;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 40px rgba(15,30,30,.16);padding:7px;min-width:300px}
+        .export-menu[hidden]{display:none}
+        .export-item{display:block;width:100%;text-align:left;border:none;background:none;border-radius:11px;padding:11px 13px;cursor:pointer}
+        .export-item:hover{background:var(--teal-soft)}
+        .export-item .ei-t{display:block;font-weight:700;font-size:14px;color:var(--ink)}
+        .export-item .ei-s{display:block;color:var(--sub);font-size:12px;margin-top:2px;line-height:1.4}
+        .export-sep{height:1px;background:var(--line);margin:6px 9px}
         .modal .mhelp{color:var(--sub);font-size:13px;line-height:1.5;margin-top:14px}
         .modal .mstatus{font-size:13px;margin-top:12px;min-height:2px;line-height:1.5}
         .modal .mstatus.err{color:#b3261e}
@@ -102,9 +111,27 @@
                     <button id="tabToday" class="on" type="button">Today</button>
                     <button id="tabWeek" type="button">This week</button>
                 </div>
-                <div style="display:inline-flex;gap:10px;flex-wrap:wrap">
-                    <button class="export" id="payrollBtn" type="button">↓ Payroll CSV</button>
-                    <button class="export export-secondary" id="exportBtn" type="button">↓ Detailed CSV</button>
+                <div class="export-wrap" id="exportWrap">
+                    <button class="export" id="exportMenuBtn" type="button" aria-haspopup="true" aria-expanded="false">Export <span class="caret">▾</span></button>
+                    <div class="export-menu" id="exportMenu" role="menu" hidden>
+                        <button class="export-item" id="optTotals" role="menuitem" type="button">
+                            <span class="ei-t">Payroll Totals (CSV)</span>
+                            <span class="ei-s">Per-person period totals, grouped by department</span>
+                        </button>
+                        <button class="export-item" id="optByDay" role="menuitem" type="button">
+                            <span class="ei-t">Payroll — Hours by Day (CSV)</span>
+                            <span class="ei-s">Alberta overtime, vacation merged, day by day</span>
+                        </button>
+                        <button class="export-item" id="optIndividual" role="menuitem" type="button">
+                            <span class="ei-t">Individual Timesheets (CSV)</span>
+                            <span class="ei-s">Per-person daily detail with clock in/out</span>
+                        </button>
+                        <div class="export-sep"></div>
+                        <button class="export-item" id="optDetailed" role="menuitem" type="button">
+                            <span class="ei-t">Detailed punches (CSV)</span>
+                            <span class="ei-s">Every punch in the current view</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="scope-note" id="scopeNote">Loading…</div>
@@ -142,27 +169,30 @@
         </div>
     </div>
 
-    <!-- Payroll CSV modal -->
+    <!-- Payroll CSV modal (shared across the three payroll variants) -->
     <div class="scrim" id="payScrim" hidden>
         <div class="modal">
-            <h2>Payroll CSV</h2>
-            <div class="msub">Hours by Day — Alberta overtime, vacation merged.</div>
+            <h2 id="payTitle">Payroll CSV</h2>
+            <div class="msub" id="paySub">Hours by Day — Alberta overtime, vacation merged.</div>
             <div class="frow">
                 <div class="field"><label>From</label><input type="date" id="payFrom"></div>
                 <div class="field"><label>To</label><input type="date" id="payTo"></div>
             </div>
-            <div class="mhelp">Pick the pay period. Hours use Alberta overtime — the greater of over-8/day or over-44/week.</div>
+            <div class="mhelp">Pick the pay period. Hours use Alberta overtime — the greater of over-8/day or over-44/week. Only approved days are exported.</div>
             <div class="mstatus" id="payStatus"></div>
             <div class="modal-actions">
                 <button class="btn btn-ghost" id="payCancel" type="button">Cancel</button>
-                <button class="btn btn-approve" id="payDownload" type="button">Download payroll CSV</button>
+                <button class="btn btn-approve" id="payDownload" type="button">Download CSV</button>
             </div>
         </div>
     </div>
 
     <script src="/system/hub-header.js"></script>
     <script type="module">
-        import { expandVacation, checkApproval, buildPayrollModel, toCsv } from './payroll-csv.js';
+        import {
+            expandVacation, checkApproval, buildPayrollModel, toCsv,
+            buildTotalsModel, toTotalsCsv, buildIndividualModel, toIndividualCsv
+        } from './payroll-csv.js';
 
         const $ = id => document.getElementById(id);
 
@@ -192,6 +222,16 @@
         }
         function fmtClock(v) {
             const d = dOf(v); if (!d) return '—';
+            return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+        }
+        // Minutes since local midnight for a Timestamp|Date|{seconds}|string, null if missing.
+        function minsOf(v) {
+            const d = dOf(v); if (!d) return null;
+            return d.getHours() * 60 + d.getMinutes();
+        }
+        // 'h:mm a' label for a clock timestamp, '' if missing.
+        function clockLabel(v) {
+            const d = dOf(v); if (!d) return '';
             return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
         }
         function fmtStamp(v) {
@@ -449,7 +489,55 @@
             el.textContent = msg || '';
             el.classList.toggle('err', !!isErr);
         }
-        function openPayroll() {
+
+        // Convert a raw getTeamClock doc to the plain clockDay the pure module needs.
+        function buildClockDay(r) {
+            return {
+                name: r.user_name || '',
+                email: r.user_email || '',
+                date: toDateKey(r.date),
+                workedSeconds: r.worked_seconds || 0,
+                breakSeconds: r.break_seconds || 0,
+                breaksCount: r.breaks_count || 0,
+                clockInMin: minsOf(r.clock_in),
+                clockOutMin: minsOf(r.clock_out),
+                clockInLabel: clockLabel(r.clock_in),
+                clockOutLabel: clockLabel(r.clock_out),
+                department: r.department || '',
+                team: r.team || '',
+                status: r.status,
+            };
+        }
+
+        // The three payroll variants share the pay-period modal + approval gate.
+        const PAY_VARIANTS = {
+            totals: {
+                title: 'Payroll Totals (CSV)',
+                sub: 'Per-person period totals, grouped by department.',
+                button: 'Download totals CSV',
+                file: 'fratello-payroll-totals',
+            },
+            byday: {
+                title: 'Payroll — Hours by Day (CSV)',
+                sub: 'Hours by Day — Alberta overtime, vacation merged.',
+                button: 'Download Hours-by-Day CSV',
+                file: 'fratello-payroll-hours-by-day',
+            },
+            individual: {
+                title: 'Individual Timesheets (CSV)',
+                sub: 'Per-person daily detail with clock in/out.',
+                button: 'Download individual CSV',
+                file: 'fratello-individual-timesheets',
+            },
+        };
+        let payVariant = 'byday';
+
+        function openPayroll(variant) {
+            payVariant = PAY_VARIANTS[variant] ? variant : 'byday';
+            const v = PAY_VARIANTS[payVariant];
+            $('payTitle').textContent = v.title;
+            $('paySub').textContent = v.sub;
+            $('payDownload').textContent = v.button;
             const p = defaultPayPeriod();
             $('payFrom').value = p.from;
             $('payTo').value = p.to;
@@ -458,22 +546,30 @@
         }
         function closePayroll() { $('payScrim').hidden = true; }
 
+        function downloadCsv(csv, name) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+        }
+
         async function downloadPayroll() {
             const from = $('payFrom').value, to = $('payTo').value;
             if (!from || !to) { setPayStatus('Pick a From and To date.', true); return; }
             if (from > to) { setPayStatus('From date must be on or before the To date.', true); return; }
+            const variant = payVariant;
+            const v = PAY_VARIANTS[variant];
             $('payDownload').disabled = true;
             setPayStatus('Checking approvals…');
             try {
                 const c = await api();
                 const clock = await c.getTeamClock({ start_date: from, end_date: to });
-                const clockDays = (clock || []).map(r => ({
-                    name: r.user_name || '',
-                    email: r.user_email || '',
-                    date: toDateKey(r.date),
-                    workedSeconds: r.worked_seconds || 0,
-                    status: r.status,
-                }));
+                const clockDays = (clock || []).map(buildClockDay);
+
+                // Approval gate — shared by all three payroll variants.
                 const gate = checkApproval(clockDays);
                 if (!gate.ok) {
                     const list = gate.unapproved.slice(0, 5)
@@ -482,6 +578,7 @@
                     setPayStatus(`Can't export payroll yet — ${gate.unapproved.length} day(s) still need approval: ${list}${more}. Approve everything in this pay period first.`, true);
                     return;
                 }
+
                 setPayStatus('Building CSV…');
                 const reqs = await c.getTeamRequests({ status: 'approved', start_date: from, end_date: to });
                 const requests = (reqs || []).map(r => ({
@@ -493,16 +590,19 @@
                     halfEnd: !!r.half_day_end,
                 }));
                 const vacationDays = expandVacation(requests, { from, to });
-                const model = buildPayrollModel({ clockDays, vacationDays });
-                const csv = toCsv(model);
 
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `fratello-payroll-hours-by-day-${from}-thru-${to}.csv`;
-                document.body.appendChild(a); a.click(); a.remove();
-                URL.revokeObjectURL(url);
+                let csv;
+                if (variant === 'totals') {
+                    const settings = await c.getTimeSettings();
+                    const paidBreakMinutes = (settings && settings.paid_break_minutes) || 0;
+                    csv = toTotalsCsv(buildTotalsModel({ clockDays, vacationDays, paidBreakMinutes }));
+                } else if (variant === 'individual') {
+                    csv = toIndividualCsv(buildIndividualModel({ clockDays, vacationDays }));
+                } else {
+                    csv = toCsv(buildPayrollModel({ clockDays, vacationDays }));
+                }
+
+                downloadCsv(csv, `${v.file}-${from}-thru-${to}.csv`);
                 setPayStatus('Downloaded.');
             } catch (e) {
                 setPayStatus((e && e.message) || 'Could not build the payroll CSV.', true);
@@ -543,8 +643,22 @@
             $('gateOk').hidden = false;
             $('tabToday').addEventListener('click', () => setTab('today'));
             $('tabWeek').addEventListener('click', () => setTab('week'));
-            $('exportBtn').addEventListener('click', exportCsv);
-            $('payrollBtn').addEventListener('click', openPayroll);
+
+            // Export ▾ menu
+            function toggleMenu(show) {
+                const open = show === undefined ? $('exportMenu').hidden : show;
+                $('exportMenu').hidden = !open;
+                $('exportMenuBtn').setAttribute('aria-expanded', String(open));
+            }
+            function closeMenu() { toggleMenu(false); }
+            $('exportMenuBtn').addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+            document.addEventListener('click', e => { if (!$('exportWrap').contains(e.target)) closeMenu(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+            $('optTotals').addEventListener('click', () => { closeMenu(); openPayroll('totals'); });
+            $('optByDay').addEventListener('click', () => { closeMenu(); openPayroll('byday'); });
+            $('optIndividual').addEventListener('click', () => { closeMenu(); openPayroll('individual'); });
+            $('optDetailed').addEventListener('click', () => { closeMenu(); exportCsv(); });
+
             $('payCancel').addEventListener('click', closePayroll);
             $('payDownload').addEventListener('click', downloadPayroll);
             $('payScrim').addEventListener('click', e => { if (e.target === $('payScrim')) closePayroll(); });
