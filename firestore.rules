@@ -371,5 +371,55 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if false;
     }
+
+    // ── Field Sales Tool: activity log (immutable check-ins, audit-grade) ──
+    // A rep logs a touch (visit / call / email). Permanent: create-only, never
+    // edited or deleted. The writer is bound to their own auth identity + the
+    // server time, so it can't be forged. The territory (rep_email) drives who
+    // can read it: owners/controllers (sales leadership) see the whole team;
+    // a rep sees their own.
+    match /sales_activities/{id} {
+      allow get, list: if isOwnerOrController()
+        || (signedIn() && resource.data.rep_email == signedInEmail());
+      allow create: if signedIn()
+        && (hasActiveProfile('sales') || isOwnerOrController())
+        && request.resource.data.created_by_uid == request.auth.uid
+        && request.resource.data.created_by_email == signedInEmail()
+        && request.resource.data.created_at == request.time
+        && request.resource.data.created_via == 'sales-field-tool';
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── Field Sales Tool: planned follow-ups (calendar items) ──
+    // Created like activities; status moves pending -> completed by the territory
+    // owner or a manager. Identity + account link stay pinned on update.
+    match /sales_followups/{id} {
+      allow get, list: if isOwnerOrController()
+        || (signedIn() && resource.data.rep_email == signedInEmail());
+      allow create: if signedIn()
+        && (hasActiveProfile('sales') || isOwnerOrController())
+        && request.resource.data.created_by_uid == request.auth.uid
+        && request.resource.data.created_by_email == signedInEmail()
+        && request.resource.data.created_at == request.time
+        && request.resource.data.created_via == 'sales-field-tool';
+      allow update: if (isOwnerOrController()
+          || (signedIn() && resource.data.rep_email == signedInEmail()))
+        && request.resource.data.rep_email == resource.data.rep_email
+        && request.resource.data.account_id == resource.data.account_id
+        && request.resource.data.created_by_uid == resource.data.created_by_uid;
+      allow delete: if false;
+    }
+
+    // ── Field Sales Tool: per-account settings (importance, cadence, tag, loaner) ──
+    // Mutable, one doc per (rep, account). Editable by the territory owner or a manager.
+    match /sales_settings/{id} {
+      allow get, list: if isOwnerOrController()
+        || (signedIn() && resource.data.rep_email == signedInEmail());
+      allow create, update: if signedIn()
+        && (isOwnerOrController()
+            || (hasActiveProfile('sales') && request.resource.data.rep_email == signedInEmail()));
+      allow delete: if false;
+    }
   }
 }

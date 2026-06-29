@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Fratello Hub — Field Sales Tool</title>
+<link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/tabler-icons.min.css">
+<style>
+:root{--ink:#1A1A1A;--teal:#36B3AF;--teald:#167C6E;--mint:#E3F1ED;--grey:#8C8B86;--line:#ECEAE4;--soft:#F4F3F0;--coral:#C0552F;--coralbg:#FBE9E1;--amber:#C8973A;--amberbg:#F7EEDB}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+#app{font-family:'Montserrat','Helvetica Neue',Arial,sans-serif;color:var(--ink)}
+.app{max-width:434px;margin:0 auto;background:#fff;min-height:88vh;display:flex;flex-direction:column;position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+body.ft-checking #app{opacity:.4}
+.view{flex:1;padding:0 0 92px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 6px}
+.wm{font-size:14px;font-weight:900;letter-spacing:.1em;color:var(--teal)}
+.live{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--teal);text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.live .p{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+.hicon{font-size:20px;color:var(--grey);cursor:pointer}
+.ey{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--grey);text-transform:uppercase;padding:2px 18px 0}
+.h1{font-size:25px;font-weight:800;letter-spacing:-.01em;padding:2px 18px 10px}
+.srch{display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:11px;padding:10px 12px;color:var(--grey);font-size:13px;font-weight:500;margin:0 18px}
+.srch i{font-size:17px;color:var(--teal)}
+.srch input{border:0;background:transparent;outline:0;font:inherit;color:var(--ink);width:100%}
+.pills{display:flex;gap:7px;padding:11px 18px 3px;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.fchips{display:flex;flex-wrap:wrap;gap:7px;padding:0 18px 2px}
+.pill{font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:1px solid var(--line);color:var(--grey);white-space:nowrap;cursor:pointer;background:#fff}
+.pill.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.row{display:flex;align-items:center;gap:11px;padding:13px 18px;border-top:1px solid #F0EEEA;cursor:pointer}
+.row:active{background:var(--soft)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.d-a{background:var(--teal)}.d-w{background:var(--amber)}.d-c{background:var(--coral)}
+.ri{flex:1;min-width:0}
+.nm{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb{font-size:11.5px;font-weight:500;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.rt{font-size:11px;font-weight:600;color:var(--grey);text-align:right;white-space:nowrap}
+.rt b{display:block;color:var(--ink);font-weight:800;font-size:13px}
+.tabbar{position:sticky;bottom:0;display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:9px 0 12px;background:#fff}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#AEADA7;cursor:pointer;flex:1}
+.tab.on{color:var(--teal)}
+.tab i{font-size:21px}
+.back{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--grey);padding:16px 18px 4px;cursor:pointer}
+.badges{display:flex;gap:6px;flex-wrap:wrap;padding:6px 18px 14px}
+.bdg{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px}
+.bdg.cat{background:var(--mint);color:var(--teald)}
+.bdg.pr{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.bdg.loan{background:#EAF0FB;color:#2A5CA8;display:inline-flex;align-items:center;gap:4px}
+.bdg.cust{background:var(--mint);color:var(--teald)}
+.bdg.prospect{background:var(--amberbg);color:#8a5d12}
+.bdg.lead{background:var(--coralbg);color:var(--coral)}
+.bdg.imp{display:inline-flex;align-items:center;gap:4px}
+.imp-high{background:var(--coralbg);color:var(--coral)}.imp-med{background:var(--amberbg);color:#8a5d12}.imp-low{background:var(--soft);color:var(--grey)}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:0 18px 12px}
+.line{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;padding:5px 0}
+.line i{font-size:17px;color:var(--teal);width:18px;text-align:center}
+.line a{color:var(--ink);text-decoration:none}
+.rep{font-size:11.5px;font-weight:600;color:var(--grey);margin-top:6px;padding-top:9px;border-top:1px solid #F0EEEA}
+.ctrl{display:flex;justify-content:space-between;align-items:center;padding:9px 0;gap:10px}
+.ctrl:not(:last-child){border-bottom:1px solid #F0EEEA}
+.ctrlL{font-size:12px;font-weight:700}
+.ctrlL small{display:block;font-weight:500;color:var(--grey);font-size:10.5px;margin-top:1px}
+.seg{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.segb{font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line);color:var(--grey);cursor:pointer;background:#fff}
+.segb.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.step{display:flex;align-items:center;gap:10px}
+.step button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:17px;font-weight:700;cursor:pointer;color:var(--ink)}
+.step b{font-size:14px;min-width:54px;text-align:center}
+.stats{display:flex;gap:8px;padding:0 18px 12px}
+.stat{flex:1;background:var(--soft);border-radius:12px;padding:10px 9px}
+.sl{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--grey);text-transform:uppercase}
+.sv{font-size:17px;font-weight:800;margin-top:3px}
+.sv.teal{color:var(--teal)}
+.clab{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.clab .mut{color:var(--grey);font-weight:600;letter-spacing:0;text-transform:none}
+.chart{display:flex;align-items:flex-end;gap:4px;height:66px}
+.bar{flex:1;background:var(--teal);border-radius:3px 3px 0 0;min-height:4px}
+.bar.last{background:var(--teald)}
+.xax{display:flex;justify-content:space-between;font-size:10px;color:#AEADA7;margin-top:5px;font-weight:600}
+.prod,.ord,.visit{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-top:1px solid #F0EEEA;font-size:12.5px}
+.prod:first-of-type,.ord:first-of-type,.visit:first-of-type{border-top:none}
+.pn{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.pq{font-size:11px;font-weight:700;color:var(--teald);background:var(--mint);border-radius:14px;padding:2px 9px;white-space:nowrap}
+.ord{cursor:pointer;font-weight:600;align-items:center}
+.ord .amt{font-weight:800;display:flex;align-items:center;gap:6px}
+.ord .amt i{color:#C9C8C3;font-size:16px}
+.visit{flex-direction:column;gap:3px}
+.visit .vh{display:flex;justify-content:space-between;width:100%;align-items:center}
+.visit .vt{font-weight:700}
+.visit .vnote{font-size:11.5px;color:#5f5e5a;font-weight:500;line-height:1.45}
+.vchk{font-size:10.5px;font-weight:700;border-radius:12px;padding:2px 8px;white-space:nowrap}
+.vchk.yes{color:var(--teald);background:var(--mint)}
+.vchk.no{color:var(--coral);background:var(--coralbg)}
+.vchk.na{color:var(--grey);background:var(--soft)}
+.float{position:sticky;bottom:14px;margin:16px 18px 0;background:var(--ink);border-radius:16px;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.float i{color:var(--teal);font-size:19px}
+.btn2{margin:0 18px 12px;border:1px solid var(--line);border-radius:13px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);background:#fff}
+.btn2 i{color:var(--teal);font-size:17px}
+.flabel{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:14px 18px 8px}
+select,textarea,input[type=date]{width:100%;font:inherit;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;color:var(--ink);outline:0}
+select:focus,textarea:focus,input:focus{border-color:var(--teal)}
+textarea{min-height:96px;resize:vertical}
+.hint{margin:8px 18px 0;background:var(--mint);border-radius:10px;padding:9px 11px;font-size:11.5px;font-weight:600;color:var(--teald);line-height:1.45;display:flex;gap:8px;align-items:flex-start}
+.hint i{font-size:15px;margin-top:1px}
+.hint .fix{margin-top:6px;display:inline-block;background:#fff;border:1px solid var(--teal);color:var(--teald);border-radius:8px;padding:4px 9px;font-weight:700;cursor:pointer}
+.wks{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.wk{font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;border:1px solid var(--line);color:var(--grey);cursor:pointer;background:#fff}
+.wk.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.gps{display:flex;align-items:center;justify-content:space-between;background:var(--mint);border:1px solid #BFE5DD;border-radius:11px;padding:11px;margin:0 18px 12px}
+.gps.off{background:var(--coralbg);border-color:#E9C3B6}
+.gps .gl{font-size:12px;font-weight:700;color:var(--teald);display:flex;align-items:center;gap:8px}
+.gps.off .gl{color:var(--coral)}
+.gps i{font-size:18px}
+.tg{width:42px;height:24px;border-radius:14px;background:var(--teal);position:relative;cursor:pointer;flex:none}
+.tg.off{background:#D8A99A}
+.tg b{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.tg.off b{left:21px}
+.save{margin:6px 18px 0;background:var(--teal);border-radius:13px;text-align:center;padding:15px;color:#fff;font-size:15px;font-weight:800;cursor:pointer}
+.li{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid #F0EEEA}
+.li:first-of-type{border-top:none}
+.ln{font-size:12.5px;font-weight:700}.ld{font-size:11px;color:var(--grey);font-weight:500;margin-top:2px}
+.lp{font-size:12.5px;font-weight:800;white-space:nowrap}.lq{font-size:11px;color:var(--grey);font-weight:600;text-align:right}
+.tot{display:flex;justify-content:space-between;border-top:2px solid var(--ink);margin-top:8px;padding-top:11px;font-weight:800;font-size:15px}
+.score-hero{text-align:center;padding:8px 18px 4px}
+.score-num{font-size:54px;font-weight:900;line-height:1}
+.score-grade{font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.metric{padding:11px 0;border-top:1px solid #F0EEEA}
+.metric:first-of-type{border-top:none}
+.mtop{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;margin-bottom:6px}
+.mtop .mt{color:var(--grey);font-weight:600}
+.track{height:9px;background:var(--soft);border-radius:5px;overflow:hidden;position:relative}
+.fill{height:100%;border-radius:5px;background:var(--teal)}
+.pace{position:absolute;top:-2px;width:2px;height:13px;background:var(--ink);opacity:.55}
+.nudge{display:flex;align-items:flex-start;gap:10px;background:var(--amberbg);border:1px solid #EAD8AE;border-radius:12px;padding:11px 13px;margin:0 18px 10px}
+.nudge.cov{background:#EAF0FB;border-color:#CBDCF4}
+.nudge i{font-size:18px;margin-top:1px}
+.nudge .nx{margin-left:auto;color:var(--grey);cursor:pointer;font-size:16px}
+.nudge .nt{font-size:12.5px;font-weight:700}.nudge .nd{font-size:11px;color:var(--grey);font-weight:500;margin-top:1px}
+.empty{text-align:center;color:var(--grey);font-size:13px;font-weight:500;padding:50px 30px}
+.empty i{font-size:34px;color:#D6D5D0;display:block;margin-bottom:10px}
+.note-pre{font-size:11px;color:var(--grey);font-weight:600;padding:6px 18px 0}
+.datehd{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--teald);padding:14px 18px 2px}
+.suburl{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:9px;word-break:break-all;color:#444}
+.acc{border-top:1px solid #F0EEEA}.acc:first-child{border-top:none}
+.acch{display:flex;justify-content:space-between;align-items:center;padding:12px 0;font-size:13px;font-weight:700;cursor:pointer}
+.accb{font-size:12px;color:#5f5e5a;font-weight:500;line-height:1.55;padding:0 0 12px}
+.accb b{color:var(--ink)}
+.cheat{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-top:1px dashed #ECEAE4}
+.cheat:first-child{border-top:none}.cheat .cl{font-weight:700}.cheat .cr{color:var(--teald);font-weight:700}
+.repsel{margin:2px 18px 8px;width:calc(100% - 36px)}
+.snapnote{font-size:10.5px;color:var(--grey);font-weight:600;text-align:center;padding:8px 18px 16px}
+</style>
+<script src="/system/firebase-config.js"></script>
+</head>
+<body class="ft-checking">
+<div id="fratello-hub-header"></div>
+<script src="/system/hub-header.js"></script>
+
+<div id="app"></div>
+
+<script src="/sales/field-tool/snapshot.js"></script>
+<script>
+const SNAP = window.FRATELLO_SNAPSHOT || {reps:[],accounts:[],generatedAt:'2026-06-29'};
+const TODAY = new Date((SNAP.generatedAt||'2026-06-29')+'T12:00:00');
+const MONTH = (SNAP.generatedAt||'2026-06-29').slice(0,7);
+const DIM = new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate();
+const DOM = TODAY.getDate();
+const ELAPSED = DOM/DIM;
+const VISIT_TYPES=['Drop In','Service Call','QA Inspection','Training','Cold Call Follow-Up','In-House Meeting'];
+const REMOTE=['Phone Call','Email','Text'];
+const QA_TYPES=['QA Inspection','Training'];
+const ENGAGE_TYPES=['Phone Call','Email','Text'];
+const TYPES=[
+ {n:'Drop In',tag:'Counts as a Unique Visit'},
+ {n:'Cold Call Follow-Up',tag:'Return to a prospect — Unique Visit'},
+ {n:'Service Call',tag:'On-site fix — Unique Visit'},
+ {n:'QA Inspection',tag:'Counts twice: Visit + QA & Training'},
+ {n:'Training',tag:'Counts twice: Visit + QA & Training'},
+ {n:'In-House Meeting',tag:'Visit — no GPS check'},
+ {n:'Cold Call',tag:'New prospect, first contact — Cold Call'},
+ {n:'Phone Call',tag:'Remote — Engagement'},
+ {n:'Email',tag:'Remote — Engagement'},
+ {n:'Text',tag:'Remote — Engagement'},
+];
+const TARGETS={visits:30,cold:10,qa:5,engage:60};
+
+let FC=null, REP=null, DATA=null, S={activities:[],followups:[],settings:{}};
+let route={v:'customers'};
+let F={q:'',cat:'All',prov:'All',city:'All',area:'All',sort:'dollar',minD:0,nv:0,no:0,panel:false};
+const DISMISSED=new Set();
+
+const $=id=>document.getElementById(id);
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const acct=id=>DATA.accounts.find(a=>a.id===id);
+const meta=id=>S.settings[id]||{};
+const money=n=>'$'+Math.round(n||0).toLocaleString();
+function daysAgo(d){if(!d)return 99999;return Math.round((TODAY-new Date(d+'T00:00:00'))/86400000);}
+function rel(d){const x=daysAgo(d);if(x<=0)return'today';if(x===1)return'1d';if(x<7)return x+'d';return Math.round(x/7)+'w';}
+function statusOf(a){const x=daysAgo(a.lastOrder);return x<=30?'a':x<=60?'w':'c';}
+function lastTouch(id){const t=S.activities.filter(x=>x.acctId===id).map(x=>x.date).sort();return t.length?t[t.length-1]:null;}
+function overdue(a){const s=meta(a.id);if(!s.cadence)return false;const lt=lastTouch(a.id);if(!lt)return true;return daysAgo(lt)>s.cadence*7;}
+function custType(id){return meta(id).customerType||'Customer';}
+function customerBook(){return DATA.accounts.filter(a=>custType(a.id)==='Customer');}
+function wkOrder(a){return a.lastOrder?Math.round(daysAgo(a.lastOrder)/7):99999;}
+function wkVisit(a){const lt=lastTouch(a.id);return lt?Math.round(daysAgo(lt)/7):99999;}
+function area(a){const s=(a.street||'').toUpperCase();if(/DOWNTOWN/.test(s))return'Downtown';const m=s.match(/\b(SE|SW|NE|NW)\b/);return m?m[1]:'';}
+
+// ─── boot ──────────────────────────────────────────────────────
+function onAuth(role){
+ if(!role){$('app').innerHTML=`<div class="app"><div class="empty" style="padding-top:80px"><i class="ti ti-lock"></i>This tool is for the Fratello sales team.<br>Ask an owner to grant you sales access.</div></div>`;return;}
+ const reps=FC.visibleReps();
+ if(!reps.length){$('app').innerHTML=`<div class="app"><div class="empty" style="padding-top:80px"><i class="ti ti-user-question"></i>No sales territory is linked to<br><b>${esc(role.user.email)}</b> yet.<br>An owner can map this login to a rep.</div></div>`;return;}
+ activateRep(reps[0]);
+}
+async function activateRep(rep){
+ REP=rep;
+ const accts=FC.snapshotAccounts(rep.id);
+ DATA={rep,accounts:accts,channels:[...new Set(accts.map(a=>a.channel))].sort()};
+ try{S=await FC.loadState(rep);}catch(e){console.error(e);S={activities:[],followups:[],settings:{}};}
+ if(location.search.indexOf('panel')>-1)F.panel=true;
+ route={v:'customers'};render();
+}
+function switchRep(id){const r=FC.visibleReps().find(x=>String(x.id)===String(id));if(r)activateRep(r);}
+function go(v,id,extra){route={v,id,extra};window.scrollTo(0,0);render();}
+function render(){({customers:renderList,account:renderAccount,checkin:renderCheckin,schedule:renderSchedule,order:renderOrder,calendar:renderCalendar,month:renderMonth,playbook:renderPlaybook,map:renderMap}[route.v]||renderList)();}
+function tabbar(active){const t=(k,ic,l)=>`<div class="tab ${active===k?'on':''}" onclick="go('${k}')"><i class="ti ti-${ic}"></i>${l}</div>`;return `<div class="tabbar">${t('customers','users','Customers')}${t('calendar','calendar','Calendar')}${t('month','chart-bar','My Month')}${t('playbook','book-2','Playbook')}</div>`;}
+
+function renderList(){
+ const SORTS={dollar:'Top $',noorder:'Stale order',novisit:'Stale visit',recent:'Recent order',name:'A–Z'};
+ const provs=[...new Set(DATA.accounts.map(a=>a.province).filter(Boolean))].sort();
+ const cities=[...new Set(DATA.accounts.map(a=>a.city).filter(Boolean))].sort();
+ const areas=[...new Set(DATA.accounts.map(a=>area(a)).filter(Boolean))].sort();
+ let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&a.name.toLowerCase().includes(F.q.toLowerCase())&&a.ytd>=F.minD&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no));
+ list.sort((a,b)=>F.sort==='dollar'?b.ytd-a.ytd:F.sort==='noorder'?wkOrder(b)-wkOrder(a):F.sort==='novisit'?wkVisit(b)-wkVisit(a):F.sort==='recent'?wkOrder(a)-wkOrder(b):a.name.localeCompare(b.name));
+ const activeN=(F.cat!=='All')+(F.prov!=='All')+(F.city!=='All')+(F.area!=='All')+(F.minD?1:0)+(F.nv?1:0)+(F.no?1:0);
+ const rows=list.map(a=>{const st=statusOf(a),od=overdue(a),ct=custType(a.id),ln=meta(a.id).loaner;const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';const tags=(ct!=='Customer'?` · <span style='color:var(--amber);font-weight:700'>${ct}</span>`:'')+(ln?` · <span style='color:#2A5CA8;font-weight:700'>loaner</span>`:'')+(od?` · <span style='color:var(--coral);font-weight:700'>due</span>`:'');return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last order ${ord} · Last visit ${vis}${tags}</div></div><div class="rt"><b>${money(a.ytd)}</b>12-mo</div></div>`;}).join('');
+ const sortChips=Object.keys(SORTS).map(k=>`<span class="pill ${F.sort===k?'on':''}" onclick="F.sort='${k}';renderList()">${SORTS[k]}</span>`).join('');
+ const flab=lab=>`<span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;padding:9px 18px 3px;display:block">${lab}</span>`;
+ const selFor=(field,values)=>`<div style="padding:0 18px 4px"><select onchange="F.${field}=this.value;renderList()">${['All',...values].map(v=>`<option ${F[field]===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>`;
+ const chips=(field,opts)=>`<div class="fchips">${opts.map(x=>`<span class="pill ${F[field]===x[0]?'on':''}" onclick="F.${field}=${typeof x[0]==='number'?x[0]:`'${x[0]}'`};renderList()">${x[1]}</span>`).join('')}</div>`;
+ const panel=F.panel?`${flab('Category')}${selFor('cat',DATA.channels)}${flab('Province')}${selFor('prov',provs)}${flab('City')}${selFor('city',cities)}${flab('Area of town')}${chips('area',[['All','All'],...areas.map(v=>[v,v])])}${flab('12-month $')}${chips('minD',[[0,'Any'],[10000,'$10k+'],[25000,'$25k+'],[50000,'$50k+'],[100000,'$100k+']])}${flab('Not visited in')}${chips('nv',[[0,'Any'],[4,'4w+'],[8,'8w+'],[12,'12w+']])}${flab('Not ordered in')}${chips('no',[[0,'Any'],[4,'4w+'],[12,'12w+'],[52,'1yr+']])}<div style="height:8px"></div>`:'';
+ const reps=FC.visibleReps();
+ const picker=(FC.isManager()&&reps.length>1)?`<select class="repsel" onchange="switchRep(this.value)">${reps.map(r=>`<option value="${r.id}" ${REP.id===r.id?'selected':''}>Viewing: ${esc(r.name)}</option>`).join('')}</select>`:'';
+ $('app').innerHTML=`<div class="app"><div class="view">
+   <div class="topbar"><span class="wm">FIELD TOOL</span><span style="display:flex;align-items:center;gap:12px"><i class="ti ti-map-pin hicon" title="Map" onclick="go('map')"></i><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></span></div>
+   <div class="ey">${esc(DATA.rep.name)} · showing ${list.length} of ${DATA.accounts.length}</div>
+   <div class="h1">Customers</div>${picker}
+   <div class="srch"><i class="ti ti-search"></i><input placeholder="Search customers" value="${esc(F.q)}" oninput="F.q=this.value;renderList()"></div>
+   <div style="display:flex;align-items:center;gap:8px;padding:11px 18px 0"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase">Sort</span><div style="display:flex;flex-wrap:wrap;gap:7px;flex:1">${sortChips}</div></div>
+   <div style="padding:8px 18px 2px"><span class="pill ${activeN?'on':''}" onclick="F.panel=!F.panel;renderList()"><i class="ti ti-adjustments-horizontal" style="font-size:13px;vertical-align:-2px"></i> Filters${activeN?' ('+activeN+')':''}</span>${activeN?` <span class="pill" onclick="F.cat='All';F.prov='All';F.city='All';F.area='All';F.minD=0;F.nv=0;F.no=0;renderList()">Clear</span>`:''}</div>
+   ${panel}${rows||'<div class="empty"><i class="ti ti-search-off"></i>No customers match these filters.</div>'}
+  </div>${tabbar('customers')}</div>`;
+ const inp=document.querySelector('.srch input');if(inp&&F.q){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
+}
+
+function renderAccount(){
+ const a=acct(route.id),s=meta(a.id);
+ const max=Math.max(...a.months.map(m=>m.amt),1);
+ const bars=a.months.map((m,i)=>`<div class="bar ${i===a.months.length-1?'last':''}" style="height:${Math.max(6,Math.round(m.amt/max*100))}%" title="${m.label} ${money(m.amt)}"></div>`).join('');
+ const prods=a.topProducts.map(p=>`<div class="prod"><span class="pn">${esc(p.name)}</span><span class="pq">${p.qty}</span></div>`).join('')||'<div class="sb" style="padding:4px 0">No product history.</div>';
+ const ords=a.recentOrders.map((o,i)=>`<div class="ord" onclick="go('order',${a.id},${i})"><span>${esc(o.date)} · ${esc(o.name)}</span><span class="amt">${money(o.amount)} <i class="ti ti-chevron-right"></i></span></div>`).join('');
+ const vlist=S.activities.filter(x=>x.acctId===a.id).sort((x,y)=>y.date<x.date?-1:1).slice(0,6).map(x=>{const chk=x.vstate==='Verified'?'<span class="vchk yes">Verified</span>':x.vstate==='No'?'<span class="vchk no">Not verified</span>':x.vstate==='NA'?'<span class="vchk na">Remote</span>':'';return `<div class="visit"><div class="vh"><span class="vt">${esc(x.type)} · ${rel(x.date)} ago</span>${chk}</div>${x.note?`<div class="vnote">${esc(x.note)}</div>`:''}</div>`;}).join('')||'<div class="sb" style="padding:4px 0">No visits logged yet.</div>';
+ const ct=s.customerType||'Customer',ctcls={Customer:'cust',Prospect:'prospect',Lead:'lead'}[ct];
+ const impPill={high:'imp-high',med:'imp-med',low:'imp-low'}[s.importance||'med'],impTxt={high:'High',med:'Medium',low:'Low'}[s.importance||'med'];
+ const touched=S.activities.some(x=>x.acctId===a.id&&x.date.startsWith(MONTH));
+ $('app').innerHTML=`<div class="app"><div class="view">
+   <div class="back" onclick="go('customers')"><i class="ti ti-chevron-left"></i> Customers</div>
+   <div class="h1" style="padding-top:2px">${esc(a.name)}</div>
+   <div class="badges"><span class="bdg ${ctcls}">${ct}</span><span class="bdg cat">${esc(a.channel)}</span><span class="bdg pr">${esc(a.priceLevel)}</span>${s.loaner?'<span class="bdg loan"><i class="ti ti-device-desktop"></i>Loaner</span>':''}<span class="bdg imp ${impPill}"><i class="ti ti-flag"></i>${impTxt}</span></div>
+   <div class="card">
+    ${a.phone?`<div class="line"><i class="ti ti-phone"></i><a href="tel:${esc(a.phone)}">${esc(a.phone)}</a></div>`:''}
+    ${a.email?`<div class="line"><i class="ti ti-mail"></i><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></div>`:''}
+    <div class="line"><i class="ti ti-map-pin"></i>${esc(a.street||'—')}${a.city?', '+esc(a.city):''}</div>
+    <div class="rep">Your rep: ${esc(DATA.rep.name)}${ct==='Customer'?' · '+(touched?'<span style="color:var(--teald)">Touched this month ✓</span>':'<span style="color:var(--coral)">Not touched this month</span>'):''}</div>
+   </div>
+   <div class="card">
+    <div class="ctrl"><div class="ctrlL">Type<small>Customer book = Customers only</small></div><div class="seg">${['Customer','Prospect','Lead'].map(k=>`<span class="segb ${ct===k?'on':''}" onclick="setType(${a.id},'${k}')">${k}</span>`).join('')}</div></div>
+    <div class="ctrl"><div class="ctrlL">Importance</div><div class="seg">${['low','med','high'].map(k=>`<span class="segb ${s.importance===k?'on':''}" onclick="setImp(${a.id},'${k}')">${k==='med'?'Med':k[0].toUpperCase()+k.slice(1)}</span>`).join('')}</div></div>
+    <div class="ctrl"><div class="ctrlL">Visit cadence<small>Reach out every…</small></div><div class="step"><button onclick="setCad(${a.id},-1)">−</button><b>${s.cadence||3} wk${(s.cadence||3)>1?'s':''}</b><button onclick="setCad(${a.id},1)">+</button></div></div>
+    <div class="ctrl"><div class="ctrlL">Loaner equipment<small>We have a machine here</small></div><div class="tg ${s.loaner?'':'off'}" onclick="setLoan(${a.id})"><b></b></div></div>
+   </div>
+   <div class="stats"><div class="stat"><div class="sl">Last order</div><div class="sv teal">${a.lastOrder?rel(a.lastOrder):'—'}</div></div><div class="stat"><div class="sl">12-mo</div><div class="sv">${money(a.ytd)}</div></div><div class="stat"><div class="sl">Orders</div><div class="sv">${a.orders}</div></div></div>
+   <div class="card"><div class="clab">Purchases <span class="mut">last 12 months</span></div><div class="chart">${bars}</div><div class="xax"><span>${esc(a.months[0]?a.months[0].label:'')}</span><span>${esc(a.months[a.months.length-1]?a.months[a.months.length-1].label:'')}</span></div></div>
+   <div class="card"><div class="clab">Top products <span class="mut">they buy</span></div>${prods}</div>
+   <div class="card"><div class="clab">Recent orders <span class="mut">tap to open</span></div>${ords}</div>
+   <div class="card"><div class="clab">Visit history <span class="mut">your notes</span></div>${vlist}</div>
+   <div class="btn2" onclick="go('schedule',${a.id})"><i class="ti ti-calendar-plus"></i> Schedule next visit / call</div>
+   <div class="float" onclick="go('checkin',${a.id})"><i class="ti ti-circle-plus"></i> Check in</div>
+  </div></div>`;
+}
+function setImp(id,k){S.settings[id]=S.settings[id]||{};S.settings[id].importance=k;FC.saveSetting(REP,id,{importance:k});renderAccount();}
+function setCad(id,d){const c=Math.min(8,Math.max(1,(meta(id).cadence||3)+d));S.settings[id]=S.settings[id]||{};S.settings[id].cadence=c;FC.saveSetting(REP,id,{cadence:c});renderAccount();}
+function setType(id,k){S.settings[id]=S.settings[id]||{};S.settings[id].customerType=k;FC.saveSetting(REP,id,{customerType:k});renderAccount();}
+function setLoan(id){const v=!meta(id).loaner;S.settings[id]=S.settings[id]||{};S.settings[id].loaner=v;FC.saveSetting(REP,id,{loaner:v});renderAccount();}
+
+let ci={};
+function renderCheckin(){
+ const a=acct(route.id);ci={type:'Drop In',vstate:'Verified',fu:false,fuDate:'',note:''};
+ const opts=TYPES.map(t=>`<option value="${t.n}">${t.n}</option>`).join('');
+ $('app').innerHTML=`<div class="app"><div class="view">
+   <div class="back" onclick="go('account',${a.id})"><i class="ti ti-chevron-left"></i> ${esc(a.name)}</div>
+   <div class="h1" style="padding-top:2px">Check in</div>
+   <div class="note-pre">Logging a touch with <b>${esc(a.name)}</b> · ${TODAY.toLocaleDateString('en-CA',{month:'short',day:'numeric'})}</div>
+   <div class="flabel">Notes <span style="color:var(--grey);font-weight:600;text-transform:none;letter-spacing:0">— the real intel</span></div>
+   <div style="padding:0 18px 4px"><textarea id="ci-note" placeholder="What happened? What did they say? Anything for the next visit…"></textarea></div>
+   <div class="flabel">Type of touch</div>
+   <div style="padding:0 18px"><select id="ci-type" onchange="ci.type=this.value;syncType()">${opts}</select></div>
+   <div id="hint"></div>
+   <div class="flabel" id="gpslab">On-site check</div>
+   <div class="gps" id="gps"><span class="gl"><i class="ti ti-map-pin-check" id="gpsicon"></i><span id="gpstxt">At the location — Verified</span></span><div class="tg" id="gpstg" onclick="toggleGps()"><b></b></div></div>
+   <div class="flabel">Follow-up <span style="color:var(--grey);font-weight:600;text-transform:none;letter-spacing:0">— optional</span></div>
+   <div style="padding:0 18px 4px"><div class="wks" id="wks">${[1,2,3,4,6,8].map(w=>`<span class="wk" onclick="setWk(${w})">${w} wk${w>1?'s':''}</span>`).join('')}<span class="wk" onclick="setWk(0)">None</span></div></div>
+   <div style="padding:0 18px 12px"><input type="date" id="ci-date" onchange="ci.fu=!!this.value;ci.fuDate=this.value"></div>
+   <div class="save" onclick="saveCheckin()">Save check-in</div>
+  </div></div>`;
+ syncType();
+}
+function syncType(){const t=ci.type,hint=$('hint'),lab=$('gpslab'),g=$('gps');const m=TYPES.find(x=>x.n===t);let h=`<div class="hint"><i class="ti ti-info-circle"></i><div>${m.tag}.`;if(t==='Cold Call')h+=` <b>Been here before?</b> Log it as a Follow-Up so it scores as a visit.<span class="fix" onclick="document.getElementById('ci-type').value='Cold Call Follow-Up';ci.type='Cold Call Follow-Up';syncType()">Switch to Follow-Up</span>`;h+=`</div></div>`;hint.innerHTML=h;const remote=REMOTE.includes(t),inhouse=t==='In-House Meeting';if(remote||inhouse){g.style.display='none';lab.style.display='none';ci.vstate=remote?'NA':null;}else{g.style.display='';lab.style.display='';if(ci.vstate!=='Verified'&&ci.vstate!=='No')ci.vstate='Verified';setGps(ci.vstate==='Verified');}}
+function setGps(on){ci.vstate=on?'Verified':'No';const tg=$('gpstg'),t=$('gpstxt'),g=$('gps'),ic=$('gpsicon');tg.className='tg'+(on?'':' off');g.className='gps'+(on?'':' off');t.textContent=on?'At the location — Verified':'Logging remotely — not verified';ic.className='ti ti-'+(on?'map-pin-check':'map-pin-off');}
+function toggleGps(){setGps(ci.vstate!=='Verified');}
+function setWk(w){document.querySelectorAll('#wks .wk').forEach(e=>e.classList.remove('on'));event.target.classList.add('on');if(w===0){ci.fu=false;ci.fuDate='';$('ci-date').value='';return;}const d=new Date(TODAY);d.setDate(d.getDate()+w*7);const iso=d.toISOString().slice(0,10);ci.fu=true;ci.fuDate=iso;$('ci-date').value=iso;}
+async function saveCheckin(){const a=acct(route.id),note=$('ci-note').value.trim();try{const act=await FC.logActivity(REP,{acctId:a.id,acctName:a.name,type:ci.type,date:TODAY.toISOString().slice(0,10),vstate:ci.vstate,note});S.activities.push(act);if(ci.fu&&ci.fuDate){const f=await FC.addFollowup(REP,{acctId:a.id,acctName:a.name,due:ci.fuDate,reason:note||ci.type,type:ci.type});S.followups.push(f);}}catch(e){alert('Could not save: '+e.message);return;}go('account',a.id);}
+
+let sch={};
+function renderSchedule(){const a=acct(route.id),s=meta(a.id);const d=new Date(TODAY);d.setDate(d.getDate()+(s.cadence||3)*7);sch={date:d.toISOString().slice(0,10),type:'Drop In'};const opts=TYPES.map(t=>`<option value="${t.n}">${t.n}</option>`).join('');$('app').innerHTML=`<div class="app"><div class="view"><div class="back" onclick="go('account',${a.id})"><i class="ti ti-chevron-left"></i> ${esc(a.name)}</div><div class="h1" style="padding-top:2px">Schedule</div><div class="note-pre">Plan a next touch with <b>${esc(a.name)}</b>. It lands on your Calendar and syncs to Apple/Outlook.</div><div class="flabel">When</div><div style="padding:0 18px 12px"><input type="date" id="sc-date" value="${sch.date}" onchange="sch.date=this.value"></div><div class="flabel">What</div><div style="padding:0 18px 12px"><select id="sc-type" onchange="sch.type=this.value">${opts}</select></div><div class="flabel">Note <span style="color:var(--grey);font-weight:600;text-transform:none;letter-spacing:0">— optional</span></div><div style="padding:0 18px 12px"><textarea id="sc-note" placeholder="Reason / what to bring…" style="min-height:70px"></textarea></div><div class="save" onclick="saveSchedule()">Add to calendar</div></div></div>`;}
+async function saveSchedule(){const a=acct(route.id);try{const f=await FC.addFollowup(REP,{acctId:a.id,acctName:a.name,due:$('sc-date').value,reason:$('sc-note').value.trim()||sch.type,type:sch.type});S.followups.push(f);}catch(e){alert('Could not save: '+e.message);return;}go('calendar');}
+
+function renderOrder(){const a=acct(route.id),o=a.recentOrders[route.extra];const lines=o.lines.map(l=>`<div class="li"><div><div class="ln">${esc(l.product)}</div><div class="ld">${esc(a.priceLevel)} · ${money(l.price)} ea</div></div><div><div class="lp">${money(l.subtotal)}</div><div class="lq">×${l.qty}</div></div></div>`).join('')||'<div class="sb">No line items.</div>';$('app').innerHTML=`<div class="app"><div class="view"><div class="back" onclick="go('account',${a.id})"><i class="ti ti-chevron-left"></i> ${esc(a.name)}</div><div class="h1" style="padding-top:2px">Order ${esc(o.name)}</div><div class="note-pre">${esc(o.date)} · Confirmed</div><div class="card" style="margin-top:12px">${lines}<div class="tot"><span>Total</span><span>${money(o.amount)}</span></div></div><div class="card" style="display:flex;align-items:center;gap:10px"><i class="ti ti-tag" style="color:var(--teal);font-size:18px"></i><span style="font-size:11.5px;font-weight:600;color:var(--grey)">Pricing shown is this customer's level — <b style="color:var(--ink)">${esc(a.priceLevel)}</b></span></div></div></div>`;}
+
+let showSub=false;
+function renderCalendar(){
+ const fu=S.followups.filter(f=>!f.done).sort((x,y)=>x.due<y.due?-1:1);
+ const buckets={Overdue:[],'This week':[],'Next week':[],Later:[]};
+ fu.forEach(f=>{const d=daysAgo(f.due);if(d>0)buckets.Overdue.push(f);else if(d>=-7)buckets['This week'].push(f);else if(d>=-14)buckets['Next week'].push(f);else buckets.Later.push(f);});
+ const item=f=>{const od=daysAgo(f.due)>0;return `<div class="row"><span class="dot ${od?'d-c':'d-a'}"></span><div class="ri" onclick="go('account',${f.acctId})"><div class="nm">${esc(f.acctName)}</div><div class="sb">${esc(f.type)} · ${esc(f.reason)}</div></div><div class="rt">${esc(f.due.slice(5))}</div><span class="segb on" style="margin-left:8px" onclick="doneFu('${f.id}')">Done</span></div>`;};
+ let body='';Object.keys(buckets).forEach(k=>{if(buckets[k].length)body+=`<div class="datehd">${k}</div>`+buckets[k].map(item).join('');});
+ const sub=showSub?`<div class="card"><div class="clab"><i class="ti ti-rss" style="color:var(--teal)"></i>&nbsp;Subscribe in Apple / Outlook</div><div style="font-size:12px;color:#5f5e5a;font-weight:500;line-height:1.5;margin-bottom:9px">Paste this link into your calendar (Apple: File → New Calendar Subscription. Outlook: Add calendar → Subscribe from web). Your scheduled visits appear and auto-update. Russ can subscribe to yours too.</div><div class="suburl">https://hub.fratellocoffee.com/api/sales-calendar.ics?rep=${esc(REP.slug)}&token=••••••</div><div class="btn2" style="margin:10px 0 0" onclick="copySub()"><i class="ti ti-copy"></i> Copy link</div></div>`:'';
+ $('app').innerHTML=`<div class="app"><div class="view">
+   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="pill ${showSub?'on':''}" onclick="showSub=!showSub;renderCalendar()"><i class="ti ti-rss" style="font-size:13px;vertical-align:-2px"></i> Subscribe</span></div>
+   <div class="ey">${esc(DATA.rep.name)} · ${fu.length} planned</div><div class="h1">Calendar</div>
+   ${sub}${body||'<div class="empty"><i class="ti ti-calendar-plus"></i>Nothing planned. Open a customer and tap “Schedule next visit”.</div>'}
+   <div class="btn2" onclick="go('customers')"><i class="ti ti-plus"></i> Schedule from a customer</div>
+  </div>${tabbar('calendar')}</div>`;
+}
+async function doneFu(id){const f=S.followups.find(x=>x.id===id);if(f)f.done=true;try{await FC.completeFollowup(REP,id);}catch(e){}renderCalendar();}
+function copySub(){navigator.clipboard&&navigator.clipboard.writeText('https://hub.fratellocoffee.com/api/sales-calendar.ics?rep='+REP.slug);}
+
+function scorecard(){
+ const m=S.activities.filter(a=>a.date.startsWith(MONTH));
+ const visits=m.filter(a=>VISIT_TYPES.includes(a.type)).length;
+ const cold=m.filter(a=>a.type==='Cold Call').length;
+ const qa=m.filter(a=>QA_TYPES.includes(a.type)).length;
+ const engage=m.filter(a=>ENGAGE_TYPES.includes(a.type)).length;
+ const book=customerBook();const bookIds=new Set(book.map(a=>a.id));
+ const touchedCust=new Set(m.filter(a=>bookIds.has(a.acctId)).map(a=>a.acctId));
+ const cov=book.length?touchedCust.size/book.length:0;
+ const verApplied=m.filter(a=>a.vstate==='Verified'||a.vstate==='No');
+ const admin=verApplied.length?verApplied.filter(a=>a.vstate==='Verified').length/verApplied.length:1;
+ const Fr={visits:visits/30,cold:cold/10,cov,qa:qa/5,engage:engage/60,admin};
+ const score=Math.round(25*Math.min(Fr.visits,1)+20*Math.min(Fr.cold,1)+15*Math.min(cov,1)+15*Math.min(Fr.qa,1)+15*Math.min(Fr.engage,1)+10*Math.min(admin,1));
+ const grade=score>=90?'A':score>=80?'B':score>=70?'C':score>=60?'D':'F';
+ return {visits,cold,qa,engage,touched:touchedCust.size,book:book.length,cov,admin,score,grade,Fr};
+}
+function renderMonth(){
+ const c=scorecard();
+ const col=c.score>=80?'var(--teal)':c.score>=70?'var(--amber)':'var(--coral)';
+ const covGap=c.book-c.touched,odue=DATA.accounts.filter(a=>overdue(a)).length;
+ const nudges=[];
+ if(covGap>0&&!DISMISSED.has('cov'))nudges.push(`<div class="nudge cov"><i class="ti ti-target-arrow" style="color:#2A5CA8"></i><div><div class="nt">${covGap} customers untouched this month</div><div class="nd">Coverage is ${Math.round(c.cov*100)}% — every Customer should hear from you monthly.</div></div><i class="ti ti-x nx" onclick="DISMISSED.add('cov');renderMonth()"></i></div>`);
+ if(odue>0&&!DISMISSED.has('od'))nudges.push(`<div class="nudge"><i class="ti ti-clock-exclamation" style="color:var(--amber)"></i><div><div class="nt">${odue} accounts overdue for a visit</div><div class="nd">Past their cadence — see the “due” flags on Customers.</div></div><i class="ti ti-x nx" onclick="DISMISSED.add('od');renderMonth()"></i></div>`);
+ const bar=(label,frac,disp)=>{const pct=Math.min(frac*100,100);const behind=DOM>=7&&frac<ELAPSED-0.05;const fc=behind?'var(--coral)':(pct>=100?'var(--teal)':col);return `<div class="metric"><div class="mtop"><span>${label}</span><span class="mt">${disp}</span></div><div class="track"><div class="fill" style="width:${pct}%;background:${fc}"></div><div class="pace" style="left:${Math.min(ELAPSED*100,100)}%"></div></div></div>`;};
+ const gaps=[['Unique visits',c.Fr.visits,30,c.visits],['Cold calls',c.Fr.cold,10,c.cold],['QA & training',c.Fr.qa,5,c.qa],['Engagement',c.Fr.engage,60,c.engage]].map(g=>({l:g[0],need:Math.ceil(ELAPSED*g[2]-g[3])})).filter(g=>g.need>0).sort((a,b)=>b.need-a.need);
+ const coach=gaps.length?`<div class="card" style="border-color:#EAD8AE;background:var(--amberbg)"><div style="font-size:12.5px;font-weight:700;color:#8a5d12"><i class="ti ti-bulb"></i> Focus: ${gaps[0].l}</div><div style="font-size:11.5px;color:#8a5d12;font-weight:500;margin-top:3px">About ${gaps[0].need} more to be on pace for the month.</div></div>`:`<div class="card" style="border-color:#BFE5DD;background:var(--mint)"><div style="font-size:12.5px;font-weight:700;color:var(--teald)"><i class="ti ti-circle-check"></i> On pace across the board. Keep it up.</div></div>`;
+ const mix=[['Visits',c.visits],['Cold',c.cold],['QA/Train',c.qa],['Engage',c.engage]].map(x=>`<div style="flex:1;text-align:center"><div style="font-size:16px;font-weight:800">${x[1]}</div><div style="font-size:10px;font-weight:700;color:var(--grey);text-transform:uppercase">${x[0]}</div></div>`).join('');
+ $('app').innerHTML=`<div class="app"><div class="view">
+   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></div>
+   <div class="ey">${esc(DATA.rep.name)} · ${TODAY.toLocaleDateString('en-CA',{month:'long',year:'numeric'})} · day ${DOM}/${DIM}</div><div class="h1">My Month</div>
+   <div class="score-hero"><div class="score-num" style="color:${col}">${c.score}</div><div class="score-grade" style="color:${col}">Grade ${c.grade} · running</div></div>
+   <div style="margin-top:12px">${nudges.join('')}</div>${coach}
+   <div class="card" style="display:flex;gap:6px">${mix}</div>
+   <div class="card">
+    ${bar('Unique visits',c.Fr.visits,c.visits+' / 30')}
+    ${bar('Cold calls',c.Fr.cold,c.cold+' / 10')}
+    ${bar('Accounts touched',c.cov,c.touched+' / '+c.book+' · '+Math.round(c.cov*100)+'%')}
+    ${bar('QA & training',c.Fr.qa,c.qa+' / 5')}
+    ${bar('Engagement',c.Fr.engage,c.engage+' / 60')}
+    ${bar('Admin accuracy (verified)',c.admin,Math.round(c.admin*100)+'%')}
+   </div>
+   <div class="note-pre" style="margin-bottom:4px">The thin black line on each bar = where you should be by today. Same math as Russ's monthly Report Card.</div>
+   <div class="btn2" onclick="alert('In the live version this generates your 3-page Monthly Report Card as a PDF — score dashboard, summary + coaching, 6-month trend.')"><i class="ti ti-file-text"></i> Generate Monthly Report Card</div>
+  </div>${tabbar('month')}</div>`;
+}
+
+function renderPlaybook(){
+ const acc=(t,b)=>`<div class="acc"><div class="acch" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">${t}<i class="ti ti-chevron-down"></i></div><div class="accb" style="display:none">${b}</div></div>`;
+ const cheat=[['Drop In','Unique Visit'],['Service Call','Unique Visit'],['QA Inspection','Visit + QA/Training'],['Training','Visit + QA/Training'],['Cold Call Follow-Up','Unique Visit'],['In-House Meeting','Unique Visit'],['Cold Call','Cold Call'],['Phone / Email / Text','Engagement']].map(x=>`<div class="cheat"><span class="cl">${x[0]}</span><span class="cr">${x[1]}</span></div>`).join('');
+ const grades=[['A','90–100','Setting the standard'],['B','80–89','Strong; small tweaks'],['C','70–79','Below target; plan together'],['D','60–69','Significant gap'],['F','<60','Support plan begins']].map(g=>`<div class="cheat"><span class="cl">${g[0]} · ${g[1]}</span><span class="cr" style="color:var(--grey);font-weight:600">${g[2]}</span></div>`).join('');
+ $('app').innerHTML=`<div class="app"><div class="view">
+   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="live"><span class="p"></span>Guide</span></div>
+   <div class="ey">Sales performance · v2.0</div><div class="h1">Playbook</div>
+   <div class="card" style="background:var(--mint);border-color:#BFE5DD"><div style="font-weight:800;font-size:13px;color:var(--teald);margin-bottom:6px">Your 3 responsibilities</div><div style="font-size:12.5px;color:var(--teald);font-weight:600;line-height:1.7">1 · Stay connected — customers hear from us regularly.<br>2 · Protect relationships — every touch reflects Fratello.<br>3 · Keep accurate records — if it isn't logged, it didn't happen.</div></div>
+   <div class="card"><div class="clab">How each touch scores</div>${cheat}</div>
+   <div class="card"><div class="clab">Monthly targets</div><div class="cheat"><span class="cl">Unique visits</span><span class="cr">${TARGETS.visits}</span></div><div class="cheat"><span class="cl">Cold calls</span><span class="cr">${TARGETS.cold}</span></div><div class="cheat"><span class="cl">QA & training</span><span class="cr">${TARGETS.qa}</span></div><div class="cheat"><span class="cl">Engagement</span><span class="cr">${TARGETS.engage}</span></div><div class="cheat"><span class="cl">Coverage</span><span class="cr">100%</span></div><div class="cheat"><span class="cl">Admin accuracy</span><span class="cr">100%</span></div></div>
+   <div class="card"><div class="clab">Grade scale</div>${grades}</div>
+   <div class="card" style="padding-top:4px">
+    ${acc('Common mistakes that cost points','• Inconsistent follow-up after visits.<br>• Late or missed logging.<br>• Same accounts every week — weak coverage.<br>• Logging a return visit as a new <b>Cold Call</b> (use Cold Call Follow-Up).<br>• Checking in from the truck after several stops — Verified = No on each.<br>• Mis-tagging a Customer as Lead/Prospect (it stops counting toward coverage).')}
+    ${acc('What strong territory ownership looks like','• Plan the week before it starts.<br>• Notice risks early — a quieter order, a slower reply.<br>• Keep accounts warm on a cadence, not seasonally.<br>• Know who is growing and who is slowing.<br>• Records reflect reality; notes help the next visit.')}
+    ${acc('If you are unsure — STOP and ask','A pricing question, an escalating issue, an account that looks at risk, a tag that is unclear. A quick message costs nothing; a missed signal can cost an account.')}
+   </div>
+  </div>${tabbar('playbook')}</div>`;
+}
+function renderMap(){$('app').innerHTML=`<div class="app"><div class="view"><div class="back" onclick="go('customers')"><i class="ti ti-chevron-left"></i> Customers</div><div class="h1">Map</div><div class="empty"><i class="ti ti-map-2"></i>The map arrives next — your ${customerBook().length} customers as colored pins (active / watch / cold), tap to open the same account screen. Needs the one-time address geocoding step.</div></div></div>`;}
+
+// Load the data layer (module) then gate the page.
+import('/sales/field-tool/system/field-core.js')
+ .then(m=>{FC=m;FC.guardSalesPage(onAuth);})
+ .catch(e=>{console.error(e);$('app').innerHTML=`<div class="app"><div class="empty" style="padding-top:80px"><i class="ti ti-alert-triangle"></i>Couldn't load the tool. Refresh to try again.</div></div>`;});
+</script>
+</body>
+</html>
