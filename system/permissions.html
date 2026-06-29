@@ -1654,6 +1654,32 @@
                 });
         }
 
+        // The full company list Settings shows: live accounts + saved drafts +
+        // not-yet-invited roster people. Used to render Manage People AND to sync the
+        // company-wide directory, so the two can never drift apart.
+        function mergedPeople() {
+            return STAFF.concat(draftPeople()).concat(rosterPlaceholders());
+        }
+
+        // Match a live account to its canonical org-chart entry (people.js) by email
+        // first, then by exact name, and overlay the corrected name/title. Lets fixes
+        // like "Kyle (Jaeoh) Park" show on existing accounts (and in the directory)
+        // without rewriting their Firestore records — re-applied on every load.
+        function applyCanonicalRoster() {
+            const byEmail = new Map(), byName = new Map();
+            (PEOPLE || []).forEach(p => {
+                if (!p || !p.name) return;
+                if (p.email) byEmail.set(emailKey(p.email), p);
+                byName.set(normName(p.name), p);
+            });
+            (STAFF || []).forEach(p => {
+                const c = (p.email && byEmail.get(emailKey(p.email))) || byName.get(normName(p.name));
+                if (!c) return;
+                if (c.name) p.name = c.name;
+                if (c.title) p.title = c.title;
+            });
+        }
+
         const TIER_RANK = { Owner: 0, Controller: 1, Manager: 2, Staff: 3 };
         function sortPeople(list, mode) {
             const arr = list.slice();
@@ -2168,7 +2194,7 @@
 
         function renderStaff() {
             const rows = document.getElementById('staffRows');
-            const merged = STAFF.concat(draftPeople()).concat(rosterPlaceholders());
+            const merged = mergedPeople();
             const filtered = merged.filter(person => personMatchesStaffFilters(person, staffFilterValues()));
             const list = sortPeople(filtered, document.getElementById('staffSort')?.value || 'owners');
             if (!list.length) {
@@ -2330,14 +2356,16 @@
         async function loadUsers() {
             if (USE_FIREBASE_AUTH) {
                 STAFF = dedupeStaff(await listHubUsers());
+                applyCanonicalRoster();   // overlay corrected names/titles from the org chart
                 await loadDrafts();
                 refreshRosterSelects();
                 renderStaff();
                 document.getElementById('saveState').textContent = 'Staff permissions loaded from Firestore.';
-                // Keep the company-wide directory (on everyone's dashboard) in sync
-                // with the live roster — adds appear, removed people drop off.
+                // Keep the company-wide directory (on everyone's dashboard) in sync with the
+                // FULL roster shown here — live accounts, drafts, and not-yet-invited roster
+                // people — so the directory and this Settings list always match.
                 try {
-                    await syncDirectory(STAFF.map(p => ({
+                    await syncDirectory(mergedPeople().map(p => ({
                         email: p.email || p.id, name: p.name, title: p.title || '',
                         department: personDepartment(p), role_tier: personRoleTier(p),
                         active: p.active !== false && p.status !== 'disabled'
