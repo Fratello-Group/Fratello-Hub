@@ -14,7 +14,7 @@
  *  - Static assets (CSS/JS/icons/fonts/json) are stale-while-revalidate: served
  *    instantly from cache and refreshed in the background.
  */
-const CACHE = 'fratello-hub-v2';
+const CACHE = 'fratello-hub-v3';
 const PRECACHE = [
     '/index.html',
     '/system/fratello-ui.css',
@@ -94,6 +94,24 @@ self.addEventListener('fetch', event => {
     const url = new URL(req.url);
     if (url.origin !== self.location.origin) return;        // Firebase / Google / fonts → network
     if (url.pathname.startsWith('/.netlify/')) return;      // server functions → always network
+
+    // The Sales-Hub field tool iterates fast — always serve its latest code when
+    // online (fall back to cache only offline), so a stale cached module can't
+    // run against newer markup. Avoids the "old JS / new HTML" hybrid.
+    if (url.pathname.startsWith('/sales/field-tool/')) {
+        event.respondWith((async () => {
+            try {
+                const res = await fetch(req);
+                const cache = await caches.open(CACHE);
+                if (res && res.ok) cache.put(req, res.clone());
+                return res;
+            } catch (err) {
+                const cache = await caches.open(CACHE);
+                return (await cache.match(req)) || Response.error();
+            }
+        })());
+        return;
+    }
 
     // Page loads: network-first so the app is always current; fall back to the
     // last-seen page (or the shell) when offline.
