@@ -56,18 +56,27 @@ export function visibleReps() {
 export function snapshotAccounts(repId) {
   return repId === 'all' ? SNAP.accounts.slice() : SNAP.accounts.filter(a => a.repId === repId);
 }
-// ── Live Odoo (via the secure /api/odoo/read function) with snapshot fallback ──
+// ── Live Odoo (via the secure read-only function) with snapshot fallback ──
 const isLocal = () => location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 export function useLive() { return !isLocal(); }
+// Where the account list actually came from, so the UI can be honest ('live' Odoo
+// vs the 'sample' snapshot) and show the reason when it falls back.
+export const dataSource = { live: false, error: '' };
 async function odoo(action, payload) {
   const tok = await currentIdToken();
-  const r = await fetch('/api/odoo/read', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (tok || '') }, body: JSON.stringify(Object.assign({ action }, payload)) });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  // Hit the function directly so a misconfigured /api redirect can't quietly
+  // return the SPA's HTML (which would look like an empty result).
+  const r = await fetch('/.netlify/functions/odoo-read', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (tok || '') }, body: JSON.stringify(Object.assign({ action }, payload)) });
+  const text = await r.text();
+  let j = null; try { j = JSON.parse(text); } catch (e) { /* non-JSON (e.g. HTML) */ }
+  if (!r.ok) throw new Error((j && j.error) || ('Sales server error (HTTP ' + r.status + ')'));
+  if (!j || typeof j !== 'object') throw new Error('The sales server returned an unexpected response.');
   return j;
 }
-// All accounts for a view — live from Odoo, or the committed snapshot on localhost / before the key is set.
+// All accounts for a view — live from Odoo, or the committed snapshot on localhost
+// or whenever the live read fails / comes back empty (so the list is never blank).
 export async function listAccounts(rep) {
+  dataSource.live = false; dataSource.error = '';
   if (useLive()) {
     try {
       const all = []; let offset = 0;
@@ -77,8 +86,9 @@ export async function listAccounts(rep) {
         if (!more || !accounts.length) break;
         offset += accounts.length;
       }
-      return all;                                  // success (even if empty) — only a throw falls through to the snapshot
-    } catch (e) { console.warn('Odoo list failed; snapshot fallback:', e.message); }
+      if (all.length) { dataSource.live = true; return all; }
+      dataSource.error = 'Odoo connected but returned no accounts for this view.';
+    } catch (e) { dataSource.error = e.message || 'Could not reach the live Odoo book.'; console.warn('Odoo list failed; showing sample:', e.message); }
   }
   return snapshotAccounts(rep.id);
 }
