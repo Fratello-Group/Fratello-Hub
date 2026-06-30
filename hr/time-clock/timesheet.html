@@ -76,6 +76,13 @@
 
         .state{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:22px;color:var(--sub);font-size:15px}
         .state a{color:var(--teal-dark);font-weight:700}
+        .howto{margin-top:14px;background:#F3FAF8;border:1px solid #DCEEEA;border-radius:14px;padding:4px 16px}
+        .howto summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--teal-dark);padding:11px 0;list-style:none}
+        .howto summary::-webkit-details-marker{display:none}
+        .howto summary::before{content:'▸ ';font-size:12px}
+        .howto[open] summary::before{content:'▾ '}
+        .howto ul{margin:0 0 12px;padding-left:20px;color:var(--ink);font-size:13.5px;line-height:1.7}
+        .howto b{font-weight:700}
 
         /* edit modal */
         .scrim{position:fixed;inset:0;background:rgba(15,25,25,.45);z-index:2100;display:flex;align-items:center;justify-content:center;padding:18px}
@@ -104,6 +111,18 @@
         <div class="eyebrow">Hourly Timesheet</div>
         <h1>Team time clock.</h1>
         <p class="lede">Review hours as they happen, fix a forgotten punch, add a note, and approve. Only approved hours are reported — export the payroll Hours-by-Day CSV for a pay period, or a detailed, timestamped CSV for the Controller any time.</p>
+
+        <details class="howto">
+            <summary>How hours are counted</summary>
+            <ul>
+                <li>Two 15-min breaks are <b>paid</b> — staff stay clocked in, so those minutes count as worked time.</li>
+                <li>The 30-min lunch is <b>unpaid</b> — staff punch out for it, so it’s deducted.</li>
+                <li>So <b>worked hours already equal paid hours</b> — no payroll adjustment needed.</li>
+                <li><b>Overtime (Alberta):</b> the greater of over 8 hrs/day or over 44 hrs/week — never both.</li>
+                <li><b>Vacation</b> merges from approved time off (8 hrs full day, 4 hrs half day).</li>
+                <li>Hours are reported only once <b>approved</b>; payroll export is blocked until the whole period is approved.</li>
+            </ul>
+        </details>
 
         <div id="gateOk" hidden>
             <div class="controls">
