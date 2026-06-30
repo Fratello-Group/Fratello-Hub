@@ -67,11 +67,35 @@ async function rpc(service, method, args) {
   return j.result;
 }
 
+// Odoo Online / .sh often names the Postgres database differently from the
+// subdomain (e.g. "fratello-main-1234567"), so ODOO_DB="fratello" fails with
+// 'database does not exist'. When the server lets us list databases, pick the
+// right one automatically; otherwise fall back to the configured value.
+let _db = null;
+async function resolveDb() {
+  if (_db) return _db;
+  _db = ODOO_DB;
+  try {
+    const list = await rpc('db', 'list', []);
+    if (Array.isArray(list) && list.length && !list.includes(ODOO_DB)) {
+      const hit = list.find(d => /fratello/i.test(d));
+      _db = hit || (list.length === 1 ? list[0] : ODOO_DB);
+    }
+  } catch (e) { /* database listing disabled — keep the configured value */ }
+  return _db;
+}
+// Best-effort list of database names, for a helpful error when auth fails.
+async function dbList() {
+  try { const l = await rpc('db', 'list', []); return Array.isArray(l) ? l : []; }
+  catch (e) { return []; }
+}
+
 let _uid = null;
 async function uid() {
   if (_uid) return _uid;
-  _uid = await rpc('common', 'authenticate', [ODOO_DB, ODOO_USER, ODOO_KEY, {}]);
-  if (!_uid) throw new Error('Odoo authentication failed — check the service login / API key.');
+  const db = await resolveDb();
+  _uid = await rpc('common', 'authenticate', [db, ODOO_USER, ODOO_KEY, {}]);
+  if (!_uid) throw new Error(`Odoo sign-in failed for database "${db}" — check ODOO_USERNAME / ODOO_API_KEY.`);
   return _uid;
 }
 
@@ -83,7 +107,7 @@ async function kw(model, method, args, kwargs) {
   if (!READ_ONLY_METHODS.has(method)) {
     throw new Error(`Blocked "${method}" on ${model}: odoo-read is strictly read-only.`);
   }
-  return rpc('object', 'execute_kw', [ODOO_DB, await uid(), ODOO_KEY, model, method, args, kwargs || {}]);
+  return rpc('object', 'execute_kw', [await resolveDb(), await uid(), ODOO_KEY, model, method, args, kwargs || {}]);
 }
 
 // Schema tolerance: only ask for partner fields this Odoo actually has, and pick
@@ -231,6 +255,13 @@ exports.handler = async (event) => {
     return json(400, { error: 'Unknown action.' });
   } catch (e) {
     console.error('odoo-read error', e);
-    return json(500, { error: e.message || 'Odoo read failed.' });
+    let extra = '';
+    if (/does not exist|database/i.test(e.message || '')) {
+      const names = await dbList();
+      extra = names.length
+        ? ` — set ODOO_DB to one of these exact names: ${names.join(', ')}`
+        : ` — the real database name isn't "${ODOO_DB}"; confirm it in Odoo and set ODOO_DB to it`;
+    }
+    return json(500, { error: (e.message || 'Odoo read failed.') + extra });
   }
 };
