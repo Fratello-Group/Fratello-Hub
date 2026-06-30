@@ -14,17 +14,17 @@ and track a monthly scorecard. Account/order data is **read** from Odoo; activit
 **written** to Firestore (immutable, self-stamped — mirrors the CFIA pattern). Reps
 see only their own territory; owners/controllers see any rep or "All".
 
-Surfaced on the Hub home as **Field Sales Tool** (Tier 2/3). Owner: Russ.
+Surfaced on the Hub home as **Sales-Hub** (Tier 2/3). Owner: Russ.
 
 ## Shipped
 
 - Customers list — search, sort (top $ / stale order / stale visit / recent / A–Z),
   filters (channel, province, city, area, wholesale vs ecom, $ band, not-visited/ordered).
 - Account detail — contact, 12-mo chart, top products, recent orders + line items,
-  per-account settings (type / importance / cadence / loaner).
+  per-account settings (type / importance / cadence).
 - Check-in — typed touch + notes, GPS "verified" toggle, optional follow-up.
 - Schedule / Calendar — follow-ups bucketed (overdue/this week/next/later), edit,
-  reschedule, complete, delete; ICS subscribe link (stubbed).
+  reschedule, complete, delete (ICS endpoint still stubbed — see Next up).
 - My Month — running scorecard (visits / cold / coverage / QA / engagement / admin),
   pace line, coaching nudge, grade.
 - Playbook — scoring rules, targets, grade scale, coaching.
