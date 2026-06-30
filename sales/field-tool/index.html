@@ -38,6 +38,9 @@ body.ft-checking #app{opacity:.4}
 .panelwrap{padding:10px 0 14px;border-bottom:1px solid var(--line)}
 .pill{font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:1px solid var(--line);color:var(--grey);white-space:nowrap;cursor:pointer;background:#fff}
 .pill.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.brandchips{display:flex;flex-wrap:wrap;gap:7px;padding:4px 0 2px}
+.bchip{font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;border:1px solid var(--line);color:var(--grey);cursor:pointer;background:#fff;display:inline-flex;align-items:center;gap:4px}
+.bchip.on{background:var(--mint);border-color:#BFE5DD;color:var(--teald);font-weight:700}
 .row{display:flex;align-items:center;gap:11px;padding:13px 18px;border-top:1px solid #F0EEEA;cursor:pointer}
 .row:active{background:var(--soft)}
 .dot{width:9px;height:9px;border-radius:50%;flex:none}
@@ -224,10 +227,14 @@ const TYPES=[
  {n:'Text',tag:'Remote — Engagement'},
 ];
 const TARGETS={visits:30,cold:10,qa:5,engage:60};
+// Brands/lines we carry — toggle per account, then filter the list by them.
+// Edit this list as the line-up changes (key is stored, label is shown).
+const BRANDS=[{k:'coffee',label:'Coffee'},{k:'syrups',label:'1883 Syrups'},{k:'oatmilk',label:'Oat milk'},{k:'idletea',label:'Idle Tea'},{k:'chai',label:'Chai'},{k:'frappe',label:'Frappé / Powders'}];
+const brandLabel=k=>{const b=BRANDS.find(x=>x.k===k);return b?b.label:k;};
 
 let FC=null, REP=null, DATA=null, S={activities:[],followups:[],settings:{}};
 let route={v:'customers'};
-let F={q:'',cat:'All',kind:'all',prov:'All',city:'All',area:'All',sort:'dollar',minD:0,nv:0,no:0,panel:false};
+let F={q:'',cat:'All',kind:'all',prov:'All',city:'All',area:'All',sort:'dollar',minD:0,nv:0,no:0,brand:'',brandHas:true,panel:false};
 const DISMISSED=new Set();
 
 const $=id=>document.getElementById(id);
@@ -278,15 +285,15 @@ function renderList(){
  const provs=[...new Set(DATA.accounts.map(a=>a.province).filter(Boolean))].sort();
  const cities=[...new Set(DATA.accounts.map(a=>a.city).filter(Boolean))].sort();
  const areas=[...new Set(DATA.accounts.map(a=>area(a)).filter(Boolean))].sort();
- let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&(F.kind==='all'||(F.kind==='wholesale'?!a.ecom:a.ecom))&&a.name.toLowerCase().includes(F.q.toLowerCase())&&(a.ytd==null||a.ytd>=F.minD)&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no));
+ let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&(F.kind==='all'||(F.kind==='wholesale'?!a.ecom:a.ecom))&&a.name.toLowerCase().includes(F.q.toLowerCase())&&(a.ytd==null||a.ytd>=F.minD)&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no)&&(F.brand===''||((meta(a.id).brands||[]).includes(F.brand)===F.brandHas)));
  list.sort((a,b)=>F.sort==='dollar'?(b.ytd||0)-(a.ytd||0):F.sort==='noorder'?wkOrder(b)-wkOrder(a):F.sort==='novisit'?wkVisit(b)-wkVisit(a):F.sort==='recent'?wkOrder(a)-wkOrder(b):a.name.localeCompare(b.name));
- const activeN=(F.cat!=='All')+(F.kind!=='all')+(F.prov!=='All')+(F.city!=='All')+(F.area!=='All')+(F.minD?1:0)+(F.nv?1:0)+(F.no?1:0);
+ const activeN=(F.cat!=='All')+(F.kind!=='all')+(F.prov!=='All')+(F.city!=='All')+(F.area!=='All')+(F.minD?1:0)+(F.nv?1:0)+(F.no?1:0)+(F.brand?1:0);
  const rows=list.map(a=>{const st=statusOf(a);const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last visit ${vis} · Last order ${ord}</div></div><div class="rt"><b>${a.ytd==null?'—':money(a.ytd)}</b>12-mo</div></div>`;}).join('');
  const sortChips=Object.keys(SORTS).map(k=>`<span class="pill ${F.sort===k?'on':''}" onclick="F.sort='${k}';renderList()">${SORTS[k]}</span>`).join('');
  const flab=lab=>`<span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;padding:9px 18px 3px;display:block">${lab}</span>`;
  const selFor=(field,values)=>`<div style="padding:0 18px 4px"><select onchange="F.${field}=this.value;renderList()">${['All',...values].map(v=>`<option ${F[field]===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>`;
  const chips=(field,opts)=>`<div class="fchips">${opts.map(x=>`<span class="pill ${F[field]===x[0]?'on':''}" onclick="F.${field}=${typeof x[0]==='number'?x[0]:`'${x[0]}'`};renderList()">${x[1]}</span>`).join('')}</div>`;
- const panel=F.panel?`${flab('Customer type')}${chips('kind',[['all','All'],['wholesale','Wholesale'],['ecom','Online / ecom']])}${flab('Category')}${selFor('cat',DATA.channels)}${flab('Province')}${selFor('prov',provs)}${flab('City')}${selFor('city',cities)}${flab('Area of town')}${chips('area',[['All','All'],...areas.map(v=>[v,v])])}${flab('12-month $')}${chips('minD',[[0,'Any'],[10000,'$10k+'],[25000,'$25k+'],[50000,'$50k+'],[100000,'$100k+']])}${flab('Not visited in')}${chips('nv',[[0,'Any'],[4,'4w+'],[8,'8w+'],[12,'12w+']])}${flab('Not ordered in')}${chips('no',[[0,'Any'],[4,'4w+'],[12,'12w+'],[52,'1yr+']])}<div style="height:8px"></div>`:'';
+ const panel=F.panel?`${flab('Customer type')}${chips('kind',[['all','All'],['wholesale','Wholesale'],['ecom','Online / ecom']])}${flab('Product they carry')}<div style="padding:0 18px 4px"><select onchange="F.brand=this.value;renderList()">${['',...BRANDS.map(b=>b.k)].map(k=>`<option value="${k}" ${F.brand===k?'selected':''}>${k===''?'Any product':esc(brandLabel(k))}</option>`).join('')}</select></div>${F.brand?`<div class="fchips">${[[true,'They carry it'],[false,'Missing it']].map(x=>`<span class="pill ${F.brandHas===x[0]?'on':''}" onclick="F.brandHas=${x[0]};renderList()">${x[1]}</span>`).join('')}</div>`:''}${flab('Category')}${selFor('cat',DATA.channels)}${flab('Province')}${selFor('prov',provs)}${flab('City')}${selFor('city',cities)}${flab('Area of town')}${chips('area',[['All','All'],...areas.map(v=>[v,v])])}${flab('12-month $')}${chips('minD',[[0,'Any'],[10000,'$10k+'],[25000,'$25k+'],[50000,'$50k+'],[100000,'$100k+']])}${flab('Not visited in')}${chips('nv',[[0,'Any'],[4,'4w+'],[8,'8w+'],[12,'12w+']])}${flab('Not ordered in')}${chips('no',[[0,'Any'],[4,'4w+'],[12,'12w+'],[52,'1yr+']])}<div style="height:8px"></div>`:'';
  const reps=FC.visibleReps();
  const picker=(FC.isManager()&&reps.length>1)?`<select class="repsel" onchange="switchRep(this.value)">${reps.map(r=>`<option value="${r.id}" ${REP.id===r.id?'selected':''}>${r.id==='all'?'All customers':'Viewing: '+esc(r.name)}</option>`).join('')}</select>`:'';
  $('app').innerHTML=`<div class="app"><div class="view">
@@ -295,7 +302,7 @@ function renderList(){
    <div class="h1">Customers</div>${picker}
    <div class="srch"><i class="ti ti-search"></i><input placeholder="Search customers" value="${esc(F.q)}" oninput="F.q=this.value;renderList()"></div>
    <div class="toolbar"><div class="sortwrap"><span class="sortlbl">Sort</span><select class="sortsel" onchange="F.sort=this.value;renderList()">${Object.keys(SORTS).map(k=>`<option value="${k}" ${F.sort===k?'selected':''}>${SORTS[k]}</option>`).join('')}</select></div><span class="fbtn ${activeN?'on':''}" onclick="F.panel=!F.panel;renderList()"><i class="ti ti-adjustments-horizontal" style="font-size:14px;vertical-align:-2px"></i> Filters${activeN?' ('+activeN+')':''}</span></div>
-   ${F.panel?`<div class="panelwrap">${panel}${activeN?`<div style="padding:4px 18px 0"><span class="pill" onclick="F.cat='All';F.kind='all';F.prov='All';F.city='All';F.area='All';F.minD=0;F.nv=0;F.no=0;renderList()">Clear all filters</span></div>`:''}</div>`:''}
+   ${F.panel?`<div class="panelwrap">${panel}${activeN?`<div style="padding:4px 18px 0"><span class="pill" onclick="F.cat='All';F.kind='all';F.prov='All';F.city='All';F.area='All';F.minD=0;F.nv=0;F.no=0;F.brand='';F.brandHas=true;renderList()">Clear all filters</span></div>`:''}</div>`:''}
    ${rows?`<div id="cust-rows">${rows}</div>`:'<div class="empty"><i class="ti ti-search-off"></i>No customers match these filters.</div>'}
   </div></div>`;
  const inp=document.querySelector('.srch input');if(inp&&F.q){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
@@ -334,6 +341,12 @@ function renderAccount(){
    <div class="card"><div class="clab">Purchases <span class="mut">last 12 months</span></div><div class="chart">${bars}</div><div class="xax"><span>${esc(a.months[0]?a.months[0].label:'')}</span><span>${esc(a.months[a.months.length-1]?a.months[a.months.length-1].label:'')}</span></div></div>
    <div class="card"><div class="clab">Top products <span class="mut">they buy</span></div>${prods}</div>
    <div class="card"><div class="clab">Recent orders <span class="mut">tap to open</span></div>${ords}</div>
+   <div class="card"><div class="clab">Products they carry <span class="mut">tap to toggle</span></div>
+    <div class="brandchips">${BRANDS.map(b=>{const on=(s.brands||[]).includes(b.k);return `<span class="bchip ${on?'on':''}" onclick="toggleBrand(${a.id},'${b.k}')">${on?'<i class="ti ti-check"></i>':''}${esc(b.label)}</span>`;}).join('')}</div>
+    <div class="note-pre" style="padding:8px 0 0">Mark what they buy from us — then filter the Customers list by product to spot opportunities.</div></div>
+   <div class="card"><div class="clab">Water filtration <span class="mut">filter changes</span></div>
+    <div class="ctrl"><div class="ctrlL">Last changed<small>${s.waterFilterLast?rel(s.waterFilterLast)+' ago':'Not recorded yet'}</small></div><input type="date" id="wf-date" value="${s.waterFilterLast||''}" onchange="setWaterDate(${a.id},this.value)" style="width:160px"></div>
+    <div class="ctrl"><div class="ctrlL">Remind me to change it<small>Drops a reminder on your Calendar</small></div><div class="seg">${[1,2,3,4,6,12].map(m=>`<span class="segb" onclick="scheduleWater(${a.id},${m})">${m} mo</span>`).join('')}</div></div></div>
    <div class="card"><div class="clab">Account settings</div>
     <div class="ctrl"><div class="ctrlL">Type<small>Customer book = Customers only</small></div><div class="seg">${['Customer','Prospect','Lead'].map(k=>`<span class="segb ${ct===k?'on':''}" onclick="setType(${a.id},'${k}')">${k}</span>`).join('')}</div></div>
     <div class="ctrl"><div class="ctrlL">Importance</div><div class="seg">${['low','med','high'].map(k=>`<span class="segb ${s.importance===k?'on':''}" onclick="setImp(${a.id},'${k}')">${k==='med'?'Med':k[0].toUpperCase()+k.slice(1)}</span>`).join('')}</div></div>
@@ -345,7 +358,9 @@ function renderAccount(){
 function setImp(id,k){S.settings[id]=S.settings[id]||{};S.settings[id].importance=k;FC.saveSetting(acct(id),{importance:k});renderAccount();}
 function setCad(id,d){const c=Math.min(8,Math.max(1,(meta(id).cadence||3)+d));S.settings[id]=S.settings[id]||{};S.settings[id].cadence=c;FC.saveSetting(acct(id),{cadence:c});renderAccount();}
 function setType(id,k){S.settings[id]=S.settings[id]||{};S.settings[id].customerType=k;FC.saveSetting(acct(id),{customerType:k});renderAccount();}
-function setLoan(id){const v=!meta(id).loaner;S.settings[id]=S.settings[id]||{};S.settings[id].loaner=v;FC.saveSetting(acct(id),{loaner:v});renderAccount();}
+function toggleBrand(id,k){const cur=new Set(meta(id).brands||[]);cur.has(k)?cur.delete(k):cur.add(k);const arr=[...cur];S.settings[id]=S.settings[id]||{};S.settings[id].brands=arr;FC.saveSetting(acct(id),{brands:arr});renderAccount();}
+function setWaterDate(id,v){S.settings[id]=S.settings[id]||{};S.settings[id].waterFilterLast=v;FC.saveSetting(acct(id),{waterFilterLast:v});renderAccount();}
+async function scheduleWater(id,months){const a=acct(id);const d=new Date(TODAY);d.setMonth(d.getMonth()+months);const due=d.toISOString().slice(0,10);try{const f=await FC.addFollowup(a,{due,reason:'Change water filter',type:'Service Call'});S.followups.push(f);}catch(e){alert('Could not schedule: '+e.message);return;}go('calendar');}
 
 let ci={};
 function renderCheckin(){

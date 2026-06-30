@@ -127,7 +127,7 @@ export async function loadState(rep) {
     const get = coll => filt ? getDocs(query(collection(d, coll), where('rep_email', '==', filt))) : getDocs(collection(d, coll));
     const [actS, fuS, setS] = await Promise.all([get('sales_activities'), get('sales_followups'), get('sales_settings')]);
     const settings = {};
-    setS.docs.forEach(x => { const r = x.data(); settings[r.account_id] = { importance: r.importance, cadence: r.cadence, customerType: r.customerType, loaner: r.loaner }; });
+    setS.docs.forEach(x => { const r = x.data(); settings[r.account_id] = { importance: r.importance, cadence: r.cadence, customerType: r.customerType, brands: r.brands || [], waterFilterLast: r.waterFilterLast || '' }; });
     return { activities: actS.docs.map(x => mapAct({ id: x.id, ...x.data() })), followups: fuS.docs.map(x => mapFu({ id: x.id, ...x.data() })), settings, _live: true };
   }
   if (rep.id === 'all') {
@@ -184,8 +184,9 @@ function localAppend(repId, key, item) { const st = lsRead(repId) || { activitie
 // Demo seed for local preview only (never runs against Firestore).
 function seedLocal(rep) {
   const A = snapshotAccounts(rep.id), acts = [], settings = {};
-  const P = new Set([5, 12]), L = new Set([9]), LO = new Set([0, 1, 3, 6, 8, 11]);
-  A.forEach((a, i) => { settings[a.id] = { importance: ['med', 'high', 'med', 'low', 'high'][i % 5], cadence: [2, 3, 4, 2, 6][i % 5], customerType: L.has(i) ? 'Lead' : P.has(i) ? 'Prospect' : 'Customer', loaner: LO.has(i) }; });
+  const P = new Set([5, 12]), L = new Set([9]);
+  const BR = [['coffee', 'syrups', 'oatmilk'], ['coffee', 'idletea'], ['coffee', 'syrups', 'chai', 'frappe'], ['coffee'], ['coffee', 'oatmilk', 'idletea']];
+  A.forEach((a, i) => { settings[a.id] = { importance: ['med', 'high', 'med', 'low', 'high'][i % 5], cadence: [2, 3, 4, 2, 6][i % 5], customerType: L.has(i) ? 'Lead' : P.has(i) ? 'Prospect' : 'Customer', brands: BR[i % 5], waterFilterLast: i % 3 === 0 ? '2026-03-15' : '' }; });
   let n = 0; const add = (i, t, day, v, note) => { const a = A[i]; if (a) acts.push({ id: 's' + (n++), acctId: a.id, acctName: a.name, type: t, date: '2026-06-' + String(day).padStart(2, '0'), vstate: v, note: note || '' }); };
   A.slice(0, 10).forEach((a, i) => add(i, 'Drop In', (i * 2) % 26 + 2, i % 5 !== 0 ? 'Verified' : 'No', 'Dropped samples, checked stock.'));
   add(0, 'QA Inspection', 6, 'Verified', 'Calibrated espresso.'); add(3, 'Training', 9, 'Verified', 'Barista refresher.');
