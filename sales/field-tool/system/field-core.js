@@ -5,10 +5,11 @@
 // sales_settings) — mirrors the CFIA immutable, self-stamped pattern.
 // Reps see only their own book; owners/controllers can pick any rep or "All".
 // Falls back to localStorage when not signed in (local UX preview only).
-// Swap-in for live Odoo: replace snapshotAccounts() with a fetch to the
-// odoo-read Netlify function once the API key is set — nothing else changes.
+// LIVE ODOO: initData() pulls every customer from the odoo-read Netlify
+// function and replaces the snapshot in place. The committed snapshot.js
+// remains an automatic fallback when Odoo isn't configured/reachable.
 // ═══════════════════════════════════════════════════════════════
-import { firebaseConfigured, onHubAuthChange, initFirebase, normalizeEmail } from '/system/fratello-auth.js';
+import { firebaseConfigured, onHubAuthChange, initFirebase, normalizeEmail, currentIdToken } from '/system/fratello-auth.js';
 import {
   collection, addDoc, getDocs, query, where, serverTimestamp, doc, setDoc, updateDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -24,9 +25,43 @@ const REP_BY_EMAIL = {
   'russ.prefontaine@fratellocoffee.com': 10,
 };
 
-const SNAP = (window.FRATELLO_SNAPSHOT || { reps: [], accounts: [] });
+let SNAP = (window.FRATELLO_SNAPSHOT || { reps: [], accounts: [] });
 const ALL_REP = { id: 'all', name: 'All customers', slug: 'all', email: '*' };
 let currentRole = null;
+let LIVE = false;
+
+// Pull the live account book from Odoo (every customer, current order data) and
+// replace the frozen snapshot in place. The committed snapshot.js stays as an
+// automatic fallback: if Odoo isn't configured yet, the user isn't signed in,
+// or the call fails, we keep the photo so the tool never goes blank.
+// This is the "swap-in" the header comment describes — nothing downstream changes.
+export async function initData() {
+  try {
+    let token = null;
+    try { token = await currentIdToken(); } catch (e) { token = null; }
+    const res = await fetch('/.netlify/functions/odoo-read', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    if (!res.ok) throw new Error('odoo-read ' + res.status);
+    const live = await res.json();
+    if (live && Array.isArray(live.accounts) && live.accounts.length) {
+      // Mutate the shared window object so every existing reference sees live data.
+      Object.assign(SNAP, {
+        reps: Array.isArray(live.reps) ? live.reps : [],
+        accounts: live.accounts,
+        generatedAt: live.generatedAt || SNAP.generatedAt,
+        source: live.source || 'odoo-live'
+      });
+      LIVE = true;
+      return { live: true, count: live.accounts.length };
+    }
+    return { live: false, reason: 'no accounts returned' };
+  } catch (e) {
+    console.warn('[field-tool] live Odoo unavailable — using snapshot:', e.message);
+    return { live: false, reason: e.message };
+  }
+}
+export function isLiveData() { return LIVE; }
 
 function roleFromLocalStorage() {
   try { return JSON.parse(localStorage.getItem('fratello-role') || 'null'); }

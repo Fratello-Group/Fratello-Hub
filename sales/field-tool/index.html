@@ -181,11 +181,20 @@ textarea{min-height:96px;resize:vertical}
 <script src="/sales/field-tool/snapshot.js"></script>
 <script>
 const SNAP = window.FRATELLO_SNAPSHOT || {reps:[],accounts:[],generatedAt:'2026-06-29'};
-const TODAY = new Date((SNAP.generatedAt||'2026-06-29')+'T12:00:00');
-const MONTH = (SNAP.generatedAt||'2026-06-29').slice(0,7);
-const DIM = new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate();
-const DOM = TODAY.getDate();
-const ELAPSED = DOM/DIM;
+// Date-derived clock. `let` so we can recompute once live Odoo data arrives
+// (its generatedAt is "today" rather than the frozen snapshot date).
+let TODAY = new Date((SNAP.generatedAt||'2026-06-29')+'T12:00:00');
+let MONTH = (SNAP.generatedAt||'2026-06-29').slice(0,7);
+let DIM = new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate();
+let DOM = TODAY.getDate();
+let ELAPSED = DOM/DIM;
+function recomputeClock(){
+ TODAY = new Date((SNAP.generatedAt||'2026-06-29')+'T12:00:00');
+ MONTH = (SNAP.generatedAt||'2026-06-29').slice(0,7);
+ DIM = new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate();
+ DOM = TODAY.getDate();
+ ELAPSED = DOM/DIM;
+}
 const VISIT_TYPES=['Drop In','Service Call','QA Inspection','Training','Cold Call Follow-Up','In-House Meeting'];
 const REMOTE=['Phone Call','Email','Text'];
 const QA_TYPES=['QA Inspection','Training'];
@@ -227,8 +236,11 @@ function wkVisit(a){const lt=lastTouch(a.id);return lt?Math.round(daysAgo(lt)/7)
 function area(a){const s=(a.street||'').toUpperCase();if(/DOWNTOWN/.test(s))return'Downtown';const m=s.match(/\b(SE|SW|NE|NW)\b/);return m?m[1]:'';}
 
 // ─── boot ──────────────────────────────────────────────────────
-function onAuth(role){
+async function onAuth(role){
  if(!role){$('app').innerHTML=`<div class="app"><div class="empty" style="padding-top:80px"><i class="ti ti-lock"></i>This tool is for the Fratello sales team.<br>Ask an owner to grant you sales access.</div></div>`;return;}
+ $('app').innerHTML=`<div class="app"><div class="empty" style="padding-top:80px"><i class="ti ti-loader-2"></i>Loading your customers from Odoo…</div></div>`;
+ try{await FC.initData();}catch(e){console.error(e);}
+ recomputeClock();
  const reps=FC.visibleReps();
  if(!reps.length){$('app').innerHTML=`<div class="app"><div class="empty" style="padding-top:80px"><i class="ti ti-user-question"></i>No sales territory is linked to<br><b>${esc(role.user.email)}</b> yet.<br>An owner can map this login to a rep.</div></div>`;return;}
  activateRep(reps[0]);
@@ -264,7 +276,7 @@ function renderList(){
  const reps=FC.visibleReps();
  const picker=(FC.isManager()&&reps.length>1)?`<select class="repsel" onchange="switchRep(this.value)">${reps.map(r=>`<option value="${r.id}" ${REP.id===r.id?'selected':''}>${r.id==='all'?'All customers':'Viewing: '+esc(r.name)}</option>`).join('')}</select>`:'';
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">FIELD TOOL</span><span style="display:flex;align-items:center;gap:12px"><i class="ti ti-map-pin hicon" title="Map" onclick="go('map')"></i><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></span></div>
+   <div class="topbar"><span class="wm">FIELD TOOL</span><span style="display:flex;align-items:center;gap:12px"><i class="ti ti-map-pin hicon" title="Map" onclick="go('map')"></i><span class="live"><span class="p"></span>${(FC.isLiveData&&FC.isLiveData())||S._live?'Live':'Preview'}</span></span></div>
    <div class="ey">${esc(DATA.rep.name)} · showing ${list.length} of ${DATA.accounts.length}</div>
    <div class="h1">Customers</div>${picker}
    <div class="srch"><i class="ti ti-search"></i><input placeholder="Search customers" value="${esc(F.q)}" oninput="F.q=this.value;renderList()"></div>
@@ -413,7 +425,7 @@ function renderMonth(){
  const coach=gaps.length?`<div class="card" style="border-color:#EAD8AE;background:var(--amberbg)"><div style="font-size:12.5px;font-weight:700;color:#8a5d12"><i class="ti ti-bulb"></i> Focus: ${gaps[0].l}</div><div style="font-size:11.5px;color:#8a5d12;font-weight:500;margin-top:3px">About ${gaps[0].need} more to be on pace for the month.</div></div>`:`<div class="card" style="border-color:#BFE5DD;background:var(--mint)"><div style="font-size:12.5px;font-weight:700;color:var(--teald)"><i class="ti ti-circle-check"></i> On pace across the board. Keep it up.</div></div>`;
  const mix=[['Visits',c.visits],['Cold',c.cold],['QA/Train',c.qa],['Engage',c.engage]].map(x=>`<div style="flex:1;text-align:center"><div style="font-size:16px;font-weight:800">${x[1]}</div><div style="font-size:10px;font-weight:700;color:var(--grey);text-transform:uppercase">${x[0]}</div></div>`).join('');
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></div>
+   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="live"><span class="p"></span>${(FC.isLiveData&&FC.isLiveData())||S._live?'Live':'Preview'}</span></div>
    <div class="ey">${esc(DATA.rep.name)} · ${TODAY.toLocaleDateString('en-CA',{month:'long',year:'numeric'})} · day ${DOM}/${DIM}</div><div class="h1">My Month</div>
    <div class="score-hero"><div class="score-num" style="color:${col}">${c.score}</div><div class="score-grade" style="color:${col}">Grade ${c.grade} · running</div></div>
    <div style="margin-top:12px">${nudges.join('')}</div>${coach}
