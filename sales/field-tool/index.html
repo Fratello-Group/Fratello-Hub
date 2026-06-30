@@ -256,11 +256,12 @@ function onAuth(role){
 }
 async function activateRep(rep){
  REP=rep;
- const accts=FC.snapshotAccounts(rep.id);
+ let accts=[];try{accts=await FC.listAccounts(rep);}catch(e){console.error(e);accts=[];}
  DATA={rep,accounts:accts,channels:[...new Set(accts.map(a=>a.channel))].sort()};
  try{S=await FC.loadState(rep);}catch(e){console.error(e);S={activities:[],followups:[],settings:{}};}
  if(location.search.indexOf('panel')>-1)F.panel=true;
  route={v:'customers'};render();try{history.replaceState(null,'','#customers');}catch(e){}
+ FC.enrichAggregates(DATA.accounts,()=>{if(route.v==='customers'){const ch=[...new Set(DATA.accounts.map(a=>a.channel))].sort();DATA.channels=ch;renderList();}});
 }
 function switchRep(id){const r=FC.visibleReps().find(x=>String(x.id)===String(id));if(r)activateRep(r);}
 function encodeRoute(r){return '#'+r.v+(r.id!=null?'/'+encodeURIComponent(r.id):'')+(r.extra!=null?'/'+r.extra:'');}
@@ -277,8 +278,8 @@ function renderList(){
  const provs=[...new Set(DATA.accounts.map(a=>a.province).filter(Boolean))].sort();
  const cities=[...new Set(DATA.accounts.map(a=>a.city).filter(Boolean))].sort();
  const areas=[...new Set(DATA.accounts.map(a=>area(a)).filter(Boolean))].sort();
- let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&(F.kind==='all'||(F.kind==='wholesale'?!a.ecom:a.ecom))&&a.name.toLowerCase().includes(F.q.toLowerCase())&&a.ytd>=F.minD&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no));
- list.sort((a,b)=>F.sort==='dollar'?b.ytd-a.ytd:F.sort==='noorder'?wkOrder(b)-wkOrder(a):F.sort==='novisit'?wkVisit(b)-wkVisit(a):F.sort==='recent'?wkOrder(a)-wkOrder(b):a.name.localeCompare(b.name));
+ let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&(F.kind==='all'||(F.kind==='wholesale'?!a.ecom:a.ecom))&&a.name.toLowerCase().includes(F.q.toLowerCase())&&(a.ytd==null||a.ytd>=F.minD)&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no));
+ list.sort((a,b)=>F.sort==='dollar'?(b.ytd||0)-(a.ytd||0):F.sort==='noorder'?wkOrder(b)-wkOrder(a):F.sort==='novisit'?wkVisit(b)-wkVisit(a):F.sort==='recent'?wkOrder(a)-wkOrder(b):a.name.localeCompare(b.name));
  const activeN=(F.cat!=='All')+(F.kind!=='all')+(F.prov!=='All')+(F.city!=='All')+(F.area!=='All')+(F.minD?1:0)+(F.nv?1:0)+(F.no?1:0);
  const rows=list.map(a=>{const st=statusOf(a),od=overdue(a),ct=custType(a.id),ln=meta(a.id).loaner;const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';const tags=(ct!=='Customer'?` · <span style='color:var(--amber);font-weight:700'>${ct}</span>`:'')+(ln?` · <span style='color:#4A4A4A;font-weight:700'>loaner</span>`:'')+(od?` · <span style='color:var(--coral);font-weight:700'>due</span>`:'');return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last order ${ord} · Last visit ${vis}${tags}</div></div><div class="rt"><b>${money(a.ytd)}</b>12-mo</div></div>`;}).join('');
  const sortChips=Object.keys(SORTS).map(k=>`<span class="pill ${F.sort===k?'on':''}" onclick="F.sort='${k}';renderList()">${SORTS[k]}</span>`).join('');
@@ -302,6 +303,8 @@ function renderList(){
 
 function renderAccount(){
  const a=acct(route.id),s=meta(a.id);
+ const loading=FC.needsDetail(a);if(loading)FC.loadDetail(a).then(()=>{if(route.v==='account'&&route.id===a.id)renderAccount();});
+ a.months=a.months||[];a.topProducts=a.topProducts||[];a.recentOrders=a.recentOrders||[];
  const max=Math.max(...a.months.map(m=>m.amt),1);
  const bars=a.months.map((m,i)=>`<div class="bar ${i===a.months.length-1?'last':''}" style="height:${Math.max(6,Math.round(m.amt/max*100))}%" title="${m.label} ${money(m.amt)}"></div>`).join('');
  const prods=a.topProducts.map(p=>`<div class="prod"><span class="pn">${esc(p.name)}</span><span class="pq">${p.qty}</span></div>`).join('')||'<div class="sb" style="padding:4px 0">No product history.</div>';
@@ -318,6 +321,7 @@ function renderAccount(){
     <div class="actmain" onclick="go('checkin',${a.id})"><i class="ti ti-circle-plus"></i> Check in</div>
     <div class="act2" onclick="go('schedule',${a.id})"><i class="ti ti-calendar-plus"></i> Schedule next visit / call</div>
    </div>
+   ${loading?'<div class="note-pre" style="padding-bottom:6px">Loading live order history…</div>':''}
    <div class="dgrid">
    <div class="card">
     ${a.phone?`<div class="line"><i class="ti ti-phone"></i><a href="tel:${esc(a.phone)}">${esc(a.phone)}</a></div>`:''}
@@ -326,7 +330,7 @@ function renderAccount(){
     <div class="rep">Your rep: ${esc(repName(a))}${ct==='Customer'?' · '+(touched?'<span style="color:var(--teald)">Touched this month ✓</span>':'<span style="color:var(--coral)">Not touched this month</span>'):''}</div>
    </div>
    <div class="card"><div class="clab">Visit history <span class="mut">your notes</span></div>${vlist}</div>
-   <div class="stats"><div class="stat"><div class="sl">Last order</div><div class="sv teal">${a.lastOrder?rel(a.lastOrder):'—'}</div></div><div class="stat"><div class="sl">12-mo</div><div class="sv">${money(a.ytd)}</div></div><div class="stat"><div class="sl">Orders</div><div class="sv">${a.orders}</div></div></div>
+   <div class="stats"><div class="stat"><div class="sl">Last order</div><div class="sv teal">${a.lastOrder?rel(a.lastOrder):'—'}</div></div><div class="stat"><div class="sl">12-mo</div><div class="sv">${money(a.ytd)}</div></div><div class="stat"><div class="sl">Orders</div><div class="sv">${a.orders??'—'}</div></div></div>
    <div class="card"><div class="clab">Purchases <span class="mut">last 12 months</span></div><div class="chart">${bars}</div><div class="xax"><span>${esc(a.months[0]?a.months[0].label:'')}</span><span>${esc(a.months[a.months.length-1]?a.months[a.months.length-1].label:'')}</span></div></div>
    <div class="card"><div class="clab">Top products <span class="mut">they buy</span></div>${prods}</div>
    <div class="card"><div class="clab">Recent orders <span class="mut">tap to open</span></div>${ords}</div>

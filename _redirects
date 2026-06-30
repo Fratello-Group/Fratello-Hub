@@ -1,1 +1,2 @@
 /api/calendar.ics /.netlify/functions/calendar-ics 200
+/api/odoo/read /.netlify/functions/odoo-read 200
