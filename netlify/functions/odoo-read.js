@@ -33,14 +33,6 @@ const ODOO_DB = process.env.ODOO_DB;
 const ODOO_USER = process.env.ODOO_USERNAME;
 const ODOO_KEY = process.env.ODOO_API_KEY || process.env.ODOO_PASSWORD;
 
-// Hub login email -> Odoo salesperson id. (A rep is locked to their own book.)
-const REP_BY_EMAIL = {
-  'joel.may@fratellocoffee.com': 11,
-  'darcy.watsham@fratellocoffee.com': 9,
-  'russ@fratellocoffee.com': 10,
-  'russ.prefontaine@fratellocoffee.com': 10,
-};
-const FIELD_REP_IDS = [9, 10, 11];
 const CONFIRMED = ['sale', 'done'];
 const RPC_TIMEOUT_MS = 20000;
 const ONLINE = ['online', 'shopify', 'e-com', 'ecom', 'webshop', 'website'];
@@ -112,19 +104,39 @@ async function partnerPlan() {
   return _plan;
 }
 
-// Resolve which accounts the caller may see. Returns an Odoo domain or null (denied).
-function scopeDomain(tier, email, repParam) {
+// Resolve a Hub user to their Odoo salesperson by EMAIL (matched to the Odoo
+// user's login/email), cached per warm invocation. Resolving by email instead of
+// a hard-coded id means the scoping tracks whatever ids Odoo actually uses.
+const _uidByEmail = {};
+async function repUserId(email) {
+  email = String(email || '').toLowerCase();
+  if (!email) return null;
+  if (email in _uidByEmail) return _uidByEmail[email];
+  let id = null;
+  try {
+    const u = await kw('res.users', 'search_read', [['|', ['login', '=ilike', email], ['email', '=ilike', email]]], { fields: ['id'], limit: 1 });
+    id = (u && u.length) ? u[0].id : null;
+  } catch (e) { id = null; }
+  _uidByEmail[email] = id;
+  return id;
+}
+
+// Which accounts the caller may see, as an Odoo domain (or null = denied):
+//  • owner/controller: every customer ([]); a specific salesperson id; or just
+//    the house/ecom bucket (user_id = false).
+//  • sales rep: only their own book, found by matching their email to the Odoo
+//    salesperson. Unresolvable rep -> denied.
+async function resolveDomain(tier, email, repParam) {
   const mgr = tier === 'owner' || tier === 'controller';
   if (mgr) {
-    if (!repParam || repParam === 'all') return ['|', ['user_id', 'in', FIELD_REP_IDS], ['user_id', '=', false]];
     if (repParam === 'house') return [['user_id', '=', false]];
     const rid = Number(repParam);
-    if (FIELD_REP_IDS.includes(rid)) return [['user_id', '=', rid]];
-    return ['|', ['user_id', 'in', FIELD_REP_IDS], ['user_id', '=', false]];
+    if (repParam && repParam !== 'all' && Number.isInteger(rid) && rid > 0) return [['user_id', '=', rid]];
+    return [];                                   // 'all' / unspecified -> every customer
   }
   if (tier === 'sales') {
-    const rid = REP_BY_EMAIL[String(email || '').toLowerCase()];
-    return rid ? [['user_id', '=', rid]] : null;   // unmapped sales rep -> no access
+    const uid = await repUserId(email);
+    return uid ? [['user_id', '=', uid]] : null;
   }
   return null;
 }
@@ -135,7 +147,7 @@ function scopeDomain(tier, email, repParam) {
 // history / revenue by passing arbitrary (enumerable) partner ids. Honest calls
 // only ever pass ids from their own scoped list, so this never filters them.
 async function allowedIds(tier, email, ids) {
-  const scope = scopeDomain(tier, email, 'all');
+  const scope = await resolveDomain(tier, email, 'all');
   if (!scope) return [];
   const uniq = [...new Set(ids.map(Number).filter(Boolean))];
   if (!uniq.length) return [];
@@ -160,7 +172,7 @@ exports.handler = async (event) => {
     const SINCE = windowStart();
 
     if (action === 'list') {
-      const domain = scopeDomain(tier, user.email, body.rep);
+      const domain = await resolveDomain(tier, user.email, body.rep);
       if (!domain) return json(200, { accounts: [] });
       const { fields, channelField, hasRank } = await partnerPlan();
       const limit = Math.min(Number(body.limit) || 4000, 6000);
