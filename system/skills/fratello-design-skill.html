@@ -35,46 +35,6 @@
             text-rendering: optimizeLegibility;
         }
 
-        .masthead {
-            position: sticky;
-            top: var(--fh-bar-h, 72px);
-            z-index: 20;
-            max-width: none;
-            width: 100%;
-            margin: 0;
-            padding: 16px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 24px;
-            background: rgba(255, 255, 255, 0.96);
-            border-bottom: 1px solid var(--divider-dark);
-            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
-        }
-
-        .masthead-logo {
-            height: 32px;
-            width: auto;
-            display: block;
-        }
-
-        .masthead-right {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .role-pill {
-            color: var(--teal);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
-        .nav-link,
         .button {
             display: inline-flex;
             align-items: center;
@@ -93,7 +53,6 @@
             transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
         }
 
-        .nav-link:hover,
         .button:hover {
             color: var(--black);
             border-color: var(--teal);
@@ -246,19 +205,11 @@
             color: var(--black);
         }
 
-        .masthead {
-            background: rgba(255, 255, 255, 0.96);
-            border-bottom: 1px solid var(--divider-dark);
-            box-shadow: 0 1px 2px rgba(15, 17, 17, 0.04);
-        }
-
-        .nav-link,
         .button {
             color: var(--slate);
             border-color: var(--divider-dark);
         }
 
-        .nav-link:hover,
         .button:hover {
             color: var(--black);
             border-color: var(--teal);
@@ -269,16 +220,6 @@
         }
 
         @media (max-width: 800px) {
-            .masthead {
-                align-items: flex-start;
-                flex-direction: column;
-                padding: 18px 22px;
-            }
-
-            .masthead-right {
-                justify-content: flex-start;
-            }
-
             main {
                 padding: 48px 24px 72px;
             }
@@ -292,17 +233,22 @@
 </head>
 <body class="auth-checking">
     <div class="page">
+        <!-- Breadcrumb adopted by the shared header (system/hub-header.js): it
+             relocates this into the Back/breadcrumb row and points Back at the
+             last link — the Marketing section this skill lives under — so Back
+             returns there instead of the personal dashboard. The old masthead
+             (logo + uppercase buttons) was dropped: the shared header already
+             carries the logo/account/back, and the hero below repeats the
+             Download / Open Claude actions. -->
+        <nav class="fh-crumbs" aria-label="Breadcrumb">
+            <a href="/index.html">Hub</a>
+            <span class="fh-crumb-sep">›</span>
+            <a href="/index.html#marketing">Marketing</a>
+            <span class="fh-crumb-sep">›</span>
+            <span class="fh-crumb-current">Design Skill</span>
+        </nav>
         <div id="fratello-hub-header"></div>
         <script src="/system/hub-header.js"></script>
-        <header class="masthead">
-            <img src="../../assets/Fratello_Logo_Black.png" alt="Fratello" class="masthead-logo">
-            <div class="masthead-right">
-                <span class="role-pill">Brand Resource</span>
-                <a class="nav-link" href="fratello-design-skill.md" download>Download Skill</a>
-                <a class="nav-link" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Open Claude</a>
-                <a class="nav-link" href="../../index.html">Back to Hub</a>
-            </div>
-        </header>
 
         <main class="resource-content">
             <div class="eyebrow">Claude Design Skill</div>

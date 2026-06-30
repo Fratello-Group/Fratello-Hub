@@ -3302,6 +3302,12 @@ function renderHub(role, view = 'dashboard', sectionKey = '', push = true) {
         else history.replaceState({ view, sectionKey }, '', newHash);
     }
 
+    // Opening a new view should start at the top — swapping the main content in
+    // place leaves the window scrolled wherever the previous view was, which
+    // lands you mid-page. Only on forward navigation (push); Back/Forward and
+    // the first render keep their position.
+    if (push) window.scrollTo(0, 0);
+
     if (view === 'departments') {
         renderDepartmentsIndex(role);
         return;
