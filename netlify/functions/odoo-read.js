@@ -90,12 +90,29 @@ async function dbList() {
   catch (e) { return []; }
 }
 
+// Odoo embeds the database name in its own login page (a hidden "db" field on a
+// single-database instance, e.g. Odoo.sh). Reading it there finds custom names
+// like "fratello-main-1234567" that can't be guessed.
+async function dbFromLoginPage() {
+  for (const path of ['/web/login', '/web/database/selector', '/web']) {
+    try {
+      const r = await fetch(ODOO_URL + path, { headers: { Accept: 'text/html' }, redirect: 'follow' });
+      const html = await r.text();
+      const m = html.match(/name="db"[^>]*\bvalue="([^"]+)"/i)
+        || html.match(/"db"\s*:\s*"([^"]+)"/i)
+        || html.match(/[?&]db=([A-Za-z0-9._-]+)/);
+      if (m && m[1] && !['false', 'none', ''].includes(m[1].toLowerCase())) return m[1];
+    } catch (e) { /* try the next path */ }
+  }
+  return null;
+}
+
 let _uid = null;
 async function uid() {
   if (_uid) return _uid;
-  // Prefer the server's own list when it's exposed; otherwise probe candidates.
-  const listed = await dbList();
-  const candidates = listed.length ? listed : dbCandidates();
+  const listed = await dbList();             // server's own list (usually disabled)
+  const scraped = await dbFromLoginPage();   // the real name from the login page
+  const candidates = [...new Set([scraped, ...listed, ...dbCandidates()].filter(Boolean))];
   let lastErr = null;
   for (const db of candidates) {
     try {
