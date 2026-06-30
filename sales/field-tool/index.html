@@ -179,6 +179,32 @@ textarea{min-height:96px;resize:vertical}
 .actmain i{color:var(--teal);font-size:20px}
 .act2{margin-top:9px;border:1px solid var(--line);border-radius:13px;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);background:#fff;text-decoration:none}
 .act2 i{color:var(--teal);font-size:17px}
+.calwrap{padding:8px 18px 6px}
+.calhd{display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px}
+.calhd .ml{font-size:15px;font-weight:800}
+.calhd .nav{display:flex;gap:6px}
+.calhd .nav button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:17px;color:var(--ink);line-height:1}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%}
+.caldow{font-size:9px;font-weight:700;color:var(--grey);text-align:center;text-transform:uppercase;padding:2px 0}
+.calday{height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;background:var(--soft);position:relative}
+.calday.empty{background:transparent;cursor:default}
+.calday.today{background:var(--teal);color:#fff}
+.calday.sel{outline:2px solid var(--teald);outline-offset:1px}
+.calday .cd{position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--teald)}
+.calday.today .cd{background:#fff}
+.subbtn{margin:8px 18px 4px;background:var(--teal);border-radius:13px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;color:#fff;font-size:14px;font-weight:800;cursor:pointer}
+.subbtn i{font-size:17px}
+.modal{position:fixed;inset:0;background:rgba(20,20,20,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.modalcard{background:#fff;width:100%;max-width:460px;border-radius:18px 18px 0 0;max-height:86vh;overflow:auto;padding:0 0 20px}
+.modalhd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);font-size:15px;font-weight:800;position:sticky;top:0;background:#fff}
+.modalhd i{font-size:21px;color:var(--grey);cursor:pointer}
+.modalbody{padding:14px 18px}
+.modalbody p{font-size:13px;color:#5f5e5a;font-weight:500;line-height:1.5;margin:0 0 12px}
+.howto{background:var(--soft);border-radius:11px;padding:11px 13px;font-size:12px;font-weight:500;color:#444;line-height:1.5;margin-bottom:10px}
+.howto b{color:var(--ink);font-weight:700}
+.sublink{border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:10px}
+.sublabel{font-size:12.5px;font-weight:700;margin-bottom:6px}
+@media(min-width:820px){.modal{align-items:center}.modalcard{border-radius:18px}}
 @media(min-width:820px){
  body{background:#EEEDEA}
  .app{max-width:880px;margin:20px auto;border-radius:18px;min-height:auto;box-shadow:0 2px 16px rgba(0,0,0,.05)}
@@ -396,23 +422,37 @@ async function saveSchedule(){const a=acct(route.id);try{const f=await FC.addFol
 
 function renderOrder(){const a=acct(route.id),o=a.recentOrders[route.extra];const lines=o.lines.map(l=>`<div class="li"><div><div class="ln">${esc(l.product)}</div><div class="ld">${esc(a.priceLevel)} · ${money(l.price)} ea</div></div><div><div class="lp">${money(l.subtotal)}</div><div class="lq">×${l.qty}</div></div></div>`).join('')||'<div class="sb">No line items.</div>';$('app').innerHTML=`<div class="app"><div class="view">${crumb([{label:'Customers',go:"go('customers')"},{label:esc(a.name),go:"go('account',"+a.id+")"},{label:'Order'}])}<div class="h1" style="padding-top:2px">Order ${esc(o.name)}</div><div class="note-pre">${esc(o.date)} · Confirmed</div><div class="card" style="margin-top:12px">${lines}<div class="tot"><span>Total</span><span>${money(o.amount)}</span></div></div><div class="card" style="display:flex;align-items:center;gap:10px"><i class="ti ti-tag" style="color:var(--teal);font-size:18px"></i><span style="font-size:11.5px;font-weight:600;color:var(--grey)">Pricing shown is this customer's level — <b style="color:var(--ink)">${esc(a.priceLevel)}</b></span></div></div></div>`;}
 
-let showSub=false;
+let showSub=false, calY=null, calM=null, calSel=null;
+function calShift(d){if(calY==null){calY=TODAY.getFullYear();calM=TODAY.getMonth();}calM+=d;while(calM<0){calM+=12;calY--;}while(calM>11){calM-=12;calY++;}calSel=null;renderCalendar();}
+function calPick(iso){calSel=calSel===iso?null:iso;renderCalendar();}
+function subUrl(slug){return 'https://hub.fratellocoffee.com/api/sales-calendar.ics?rep='+(slug||REP.slug)+'&token=••••••';}
+function subLinks(){return FC.isManager()?FC.visibleReps().map(r=>({name:r.id==='all'?'Everyone — all reps':r.name,slug:r.slug})):[{name:'My calendar',slug:REP.slug}];}
 function renderCalendar(){
+ if(calY==null){calY=TODAY.getFullYear();calM=TODAY.getMonth();}
  const fu=S.followups.filter(f=>!f.done).sort((x,y)=>x.due<y.due?-1:1);
- const buckets={Overdue:[],'This week':[],'Next week':[],Later:[]};
- fu.forEach(f=>{const d=daysAgo(f.due);if(d>0)buckets.Overdue.push(f);else if(d>=-7)buckets['This week'].push(f);else if(d>=-14)buckets['Next week'].push(f);else buckets.Later.push(f);});
+ const byDay={};fu.forEach(f=>{byDay[f.due]=(byDay[f.due]||0)+1;});
+ const todayIso=TODAY.toISOString().slice(0,10);
+ const startDow=new Date(calY,calM,1).getDay(),dim=new Date(calY,calM+1,0).getDate();
+ const cells=[];for(let i=0;i<startDow;i++)cells.push('');
+ for(let d=1;d<=dim;d++)cells.push(`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+ const grid=`<div class="calgrid">${['S','M','T','W','T','F','S'].map(x=>`<div class="caldow">${x}</div>`).join('')}${cells.map(iso=>{if(!iso)return '<div class="calday empty"></div>';const cls=['calday',iso===todayIso?'today':'',iso===calSel?'sel':''].filter(Boolean).join(' ');return `<div class="${cls}" onclick="calPick('${iso}')">${Number(iso.slice(8))}${byDay[iso]?'<span class="cd"></span>':''}</div>`;}).join('')}</div>`;
+ const mlabel=new Date(calY,calM,1).toLocaleDateString('en-CA',{month:'long',year:'numeric'});
  const item=f=>{const od=daysAgo(f.due)>0;return `<div class="row"><span class="dot ${od?'d-c':'d-a'}"></span><div class="ri" onclick="go('account',${f.acctId})"><div class="nm">${esc(f.acctName)}</div><div class="sb">${esc(f.type)} · ${esc(f.reason)}</div></div><div class="rt">${esc(f.due.slice(5))}</div><div class="fuact"><span class="fubtn" title="Edit / reschedule" onclick="go('editfu','${f.id}')"><i class="ti ti-pencil"></i></span><span class="fubtn done" title="Mark done" onclick="doneFu('${f.id}')"><i class="ti ti-check"></i></span></div></div>`;};
- let body='';Object.keys(buckets).forEach(k=>{if(buckets[k].length)body+=`<div class="datehd">${k}</div>`+buckets[k].map(item).join('');});
- const sub=showSub?`<div class="card"><div class="clab"><i class="ti ti-rss" style="color:var(--teal)"></i>&nbsp;Subscribe in Apple / Outlook</div><div style="font-size:12px;color:#5f5e5a;font-weight:500;line-height:1.5;margin-bottom:9px">Paste this link into your calendar (Apple: File → New Calendar Subscription. Outlook: Add calendar → Subscribe from web). Your scheduled visits appear and auto-update. Russ can subscribe to yours too.</div><div class="suburl">https://hub.fratellocoffee.com/api/sales-calendar.ics?rep=${esc(REP.slug)}&token=••••••</div><div class="btn2" style="margin:10px 0 0" onclick="copySub()"><i class="ti ti-copy"></i> Copy link</div></div>`:'';
- $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">SALES-HUB</span><span class="pill ${showSub?'on':''}" onclick="showSub=!showSub;renderCalendar()"><i class="ti ti-rss" style="font-size:13px;vertical-align:-2px"></i> Subscribe</span></div>
+ let body;
+ if(calSel){const day=fu.filter(f=>f.due===calSel);const lbl=new Date(calSel+'T12:00:00').toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'});body=`<div class="datehd">${lbl} · <span class="clink" onclick="calSel=null;renderCalendar()">show all</span></div>`+(day.length?day.map(item).join(''):'<div class="empty" style="padding:30px 18px"><i class="ti ti-calendar"></i>Nothing planned this day.</div>');}
+ else{const b={Overdue:[],'This week':[],'Next week':[],Later:[]};fu.forEach(f=>{const d=daysAgo(f.due);if(d>0)b.Overdue.push(f);else if(d>=-7)b['This week'].push(f);else if(d>=-14)b['Next week'].push(f);else b.Later.push(f);});body='';Object.keys(b).forEach(k=>{if(b[k].length)body+=`<div class="datehd">${k}</div>`+b[k].map(item).join('');});if(!body)body='<div class="empty"><i class="ti ti-calendar-plus"></i>Nothing planned. Open a customer and tap “Schedule next visit”.</div>';}
+ const modal=showSub?`<div class="modal" onclick="if(event.target===this){showSub=false;renderCalendar()}"><div class="modalcard"><div class="modalhd"><span>Subscribe to this calendar</span><i class="ti ti-x" onclick="showSub=false;renderCalendar()"></i></div><div class="modalbody"><p>Add your Sales-Hub visits to the calendar on your phone, so they sit next to everything else and update on their own.</p><div class="howto"><b>iPhone — Apple Calendar</b><br>Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste a link below.</div><div class="howto"><b>Outlook</b><br>Add calendar → Subscribe from web → paste a link → Import.</div>${FC.isManager()?'<p style="margin-top:2px">You can subscribe to each rep, or to everyone at once:</p>':''}${subLinks().map(l=>`<div class="sublink"><div class="sublabel">${esc(l.name)}</div><div class="suburl">${esc(subUrl(l.slug))}</div><div class="btn2" style="margin:8px 0 0" onclick="copySub('${l.slug}')"><i class="ti ti-copy"></i> Copy link</div></div>`).join('')}</div></div></div>`:'';
+ $('app').innerHTML=`<div class="app">${tabbar('calendar')}<div class="view">
+   <div class="topbar"><span class="wm">SALES-HUB</span><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></div>
    <div class="ey">${esc(DATA.rep.name)} · ${fu.length} planned</div><div class="h1">Calendar</div>
-   ${sub}${body||'<div class="empty"><i class="ti ti-calendar-plus"></i>Nothing planned. Open a customer and tap “Schedule next visit”.</div>'}
+   <div class="calwrap"><div class="calhd"><span class="ml">${mlabel}</span><span class="nav"><button onclick="calShift(-1)" title="Previous month">‹</button><button onclick="calShift(1)" title="Next month">›</button></span></div>${grid}</div>
+   <div class="subbtn" onclick="showSub=true;renderCalendar()"><i class="ti ti-rss"></i> Subscribe in Apple / Outlook</div>
+   ${body}
    <div class="btn2" onclick="go('customers')"><i class="ti ti-plus"></i> Schedule from a customer</div>
-  </div>${tabbar('calendar')}</div>`;
+  </div>${modal}</div>`;
 }
 async function doneFu(id){const f=S.followups.find(x=>x.id===id);if(f)f.done=true;try{await FC.completeFollowup(id);}catch(e){}renderCalendar();}
-function copySub(){navigator.clipboard&&navigator.clipboard.writeText('https://hub.fratellocoffee.com/api/sales-calendar.ics?rep='+REP.slug);}
+function copySub(slug){navigator.clipboard&&navigator.clipboard.writeText(subUrl(slug));}
 
 let efu={};
 function renderEditFollowup(){

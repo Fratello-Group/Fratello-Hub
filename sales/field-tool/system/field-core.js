@@ -192,6 +192,7 @@ function seedLocal(rep) {
   add(0, 'QA Inspection', 6, 'Verified', 'Calibrated espresso.'); add(3, 'Training', 9, 'Verified', 'Barista refresher.');
   add(7, 'Cold Call', 5, 'No', 'First intro — new cafe.'); add(8, 'Cold Call', 11, 'No', 'Dropped a card.');
   A.slice(0, 12).forEach((a, i) => add(i, ['Email', 'Phone Call', 'Text'][i % 3], (i + 3) % 26 + 2, 'NA', ''));
-  const fu = A[4] ? [{ id: 'f0', acctId: A[4].id, acctName: A[4].name, due: '2026-06-30', reason: 'Trial the new Ethiopia', type: 'Drop In', done: false }] : [];
+  const fuPlan = [[4, '2026-06-30', 'Trial the new Ethiopia', 'Drop In'], [2, '2026-06-25', 'Follow up on the quote', 'Phone Call'], [6, '2026-07-03', 'Barista refresher', 'Training'], [1, '2026-07-09', 'Check the grinder', 'Service Call'], [3, '2026-07-21', 'Change water filter', 'Service Call']];
+  const fu = fuPlan.filter(p => A[p[0]]).map((p, i) => ({ id: 'f' + i, acctId: A[p[0]].id, acctName: A[p[0]].name, due: p[1], reason: p[2], type: p[3], done: false }));
   return { activities: acts, followups: fu, settings };
 }
