@@ -4245,6 +4245,11 @@ function renderClockSheet() {
     const previewNote = isPreviewing()
         ? '<div class="tc-demo">👁 Demo only — punches aren’t recorded while you’re viewing as someone else.</div>'
         : '';
+    // Keep payroll automatic: paid 15-min breaks stay on the clock; only the unpaid
+    // lunch is punched out. Shown while on the clock / on a break.
+    const breakHint = (live.status === 'active' || live.status === 'break')
+        ? '<div class="tc-demo">Your two 15-min breaks are paid — only take a break here for your unpaid lunch.</div>'
+        : '';
     sheet.innerHTML = `
         <div class="tc-grab"></div>
         <div class="tc-head">
@@ -4260,6 +4265,7 @@ function renderClockSheet() {
             <div><span class="tc-sw a"></span><b>${tcFmt(live.brk)}</b> break</div>
         </div>` : '<div style="height:8px"></div>'}
         ${buttons}
+        ${breakHint}
         ${previewNote}
         <div class="tc-err" id="tcErr"></div>
         <div class="tc-foot">${foot}</div>`;
