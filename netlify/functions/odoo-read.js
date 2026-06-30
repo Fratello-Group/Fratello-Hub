@@ -67,24 +67,24 @@ async function rpc(service, method, args) {
   return j.result;
 }
 
-// Odoo Online / .sh often names the Postgres database differently from the
-// subdomain (e.g. "fratello-main-1234567"), so ODOO_DB="fratello" fails with
-// 'database does not exist'. When the server lets us list databases, pick the
-// right one automatically; otherwise fall back to the configured value.
+// The Postgres database name on Odoo Online/.sh is often NOT the subdomain
+// ("fratello" fails with 'database does not exist'), and the server usually
+// won't list its databases. So we try the configured ODOO_DB first, then a set
+// of likely names (case variants + company-derived), and use whichever one the
+// API key actually authenticates against. Whatever works is cached.
 let _db = null;
-async function resolveDb() {
-  if (_db) return _db;
-  _db = ODOO_DB;
-  try {
-    const list = await rpc('db', 'list', []);
-    if (Array.isArray(list) && list.length && !list.includes(ODOO_DB)) {
-      const hit = list.find(d => /fratello/i.test(d));
-      _db = hit || (list.length === 1 ? list[0] : ODOO_DB);
-    }
-  } catch (e) { /* database listing disabled — keep the configured value */ }
-  return _db;
+function dbCandidates() {
+  const base = String(ODOO_DB || 'fratello').trim();
+  const cap = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  return [...new Set([
+    base, base.toLowerCase(), base.toUpperCase(), cap(base.toLowerCase()),
+    'fratello', 'Fratello', 'FRATELLO',
+    'fratellocoffee', 'Fratellocoffee', 'fratello-coffee', 'fratello_coffee',
+    'fratellogroup', 'fratello-group', 'fratello_group', 'fratelloinc'
+  ].filter(Boolean))];
 }
-// Best-effort list of database names, for a helpful error when auth fails.
+// Best-effort list of database names from the server (often disabled), used to
+// give a precise error when none of the candidates authenticate.
 async function dbList() {
   try { const l = await rpc('db', 'list', []); return Array.isArray(l) ? l : []; }
   catch (e) { return []; }
@@ -93,10 +93,19 @@ async function dbList() {
 let _uid = null;
 async function uid() {
   if (_uid) return _uid;
-  const db = await resolveDb();
-  _uid = await rpc('common', 'authenticate', [db, ODOO_USER, ODOO_KEY, {}]);
-  if (!_uid) throw new Error(`Odoo sign-in failed for database "${db}" — check ODOO_USERNAME / ODOO_API_KEY.`);
-  return _uid;
+  // Prefer the server's own list when it's exposed; otherwise probe candidates.
+  const listed = await dbList();
+  const candidates = listed.length ? listed : dbCandidates();
+  let lastErr = null;
+  for (const db of candidates) {
+    try {
+      const u = await rpc('common', 'authenticate', [db, ODOO_USER, ODOO_KEY, {}]);
+      if (u) { _uid = u; _db = db; return _uid; }
+      // The database exists but rejected the key — almost certainly the right DB.
+      lastErr = new Error(`Found database "${db}", but the ODOO_USERNAME / ODOO_API_KEY was rejected.`);
+    } catch (e) { lastErr = e; }   // usually "database does not exist" → try the next
+  }
+  throw lastErr || new Error('Could not sign in to Odoo.');
 }
 
 // The ONLY Odoo methods this proxy may ever invoke — every one a non-mutating
@@ -107,7 +116,8 @@ async function kw(model, method, args, kwargs) {
   if (!READ_ONLY_METHODS.has(method)) {
     throw new Error(`Blocked "${method}" on ${model}: odoo-read is strictly read-only.`);
   }
-  return rpc('object', 'execute_kw', [await resolveDb(), await uid(), ODOO_KEY, model, method, args, kwargs || {}]);
+  await uid();   // discovers + caches the working database name in _db
+  return rpc('object', 'execute_kw', [_db, _uid, ODOO_KEY, model, method, args, kwargs || {}]);
 }
 
 // Schema tolerance: only ask for partner fields this Odoo actually has, and pick
