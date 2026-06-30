@@ -4149,6 +4149,11 @@ function appendTimesheetLink(main, role) {
             <h2 class="workbench-title">Hourly Timesheet</h2>
             <span class="workbench-meta">Approve &amp; export</span>
         </div>`;
+    // Wrap tiles in a .dept-list so they get the same gap + top spacing as every
+    // other dashboard group (keeps the two tiles from touching).
+    const list = document.createElement('div');
+    list.className = 'dept-list';
+
     const tile = document.createElement('a');
     tile.className = 'dept-row fade-in';
     tile.href = 'hr/time-clock/timesheet.html';
@@ -4159,7 +4164,7 @@ function appendTimesheetLink(main, role) {
             <span class="dept-note">Review hours, fix a punch, approve, and export to the Controller.</span>
         </span>
         <span class="dept-arrow">→</span>`;
-    section.appendChild(tile);
+    list.appendChild(tile);
 
     const insightsTile = document.createElement('a');
     insightsTile.className = 'dept-row fade-in';
@@ -4171,8 +4176,9 @@ function appendTimesheetLink(main, role) {
             <span class="dept-note">On-time, overtime, absences and reliability — grade your team and track output.</span>
         </span>
         <span class="dept-arrow">→</span>`;
-    section.appendChild(insightsTile);
+    list.appendChild(insightsTile);
 
+    section.appendChild(list);
     main.appendChild(section);
 }
 
