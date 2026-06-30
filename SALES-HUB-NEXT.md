@@ -28,7 +28,10 @@ Surfaced on the Hub home as **Field Sales Tool** (Tier 2/3). Owner: Russ.
 - My Month — running scorecard (visits / cold / coverage / QA / engagement / admin),
   pace line, coaching nudge, grade.
 - Playbook — scoring rules, targets, grade scale, coaching.
-- Navigation — hash routing, history-aware Back, breadcrumbs, desktop two-column.
+- Navigation — top sub-header tabs, hash routing, history-aware Back, breadcrumbs, desktop two-column.
+- Calendar — real month grid (today + planned-day dots, tap a day) over the agenda; prominent Subscribe popup with Apple/Outlook how-to and per-rep links for managers.
+- Per-account — brand/product toggles (+ a list filter for carries/missing) and water-filter date + 1–12-month reminder.
+- Calmer UI pass, default Top $ sort, plain-language sort labels, and a bold Sales-Hub launcher on the field reps' Personal Dashboard.
 - **Live Odoo read (in review on this branch)** — see below.
 
 ## In flight — Live Odoo read (this branch)
@@ -62,10 +65,13 @@ breaks before then. **Go-live + verification steps:** [`sales/field-tool/GO-LIVE
    Customers list (risk score, "slowing down" flag, smarter default sort).
 5. **Monthly Report Card PDF** — the "Generate" button on My Month is a stub; wire
    the real 3-page PDF (score dashboard, summary + coaching, 6-month trend).
-6. **Real ICS feed** — the Calendar "Subscribe" link is a placeholder; back it with a
-   `sales-calendar.ics` function (mirror `calendar-ics.js`) so visits sync to Apple/
-   Outlook.
-7. **Routing (Stage 2)** — only if Stage 1 lands and reps actually use routing daily.
+6. **Real ICS feed** — the Calendar Subscribe popup + per-rep links are built, but
+   the `/api/sales-calendar.ics?rep=…` endpoint is still a placeholder; back it with a
+   `sales-calendar.ics` function (mirror `calendar-ics.js`) so the links actually
+   resolve and visits sync to Apple/Outlook.
+7. **Confirm the brand list** — `BRANDS` in `sales/field-tool/index.html` is seeded
+   from the named lines (1883 syrups, oat milk, Idle tea, …); confirm/extend it.
+8. **Routing (Stage 2)** — only if Stage 1 lands and reps actually use routing daily.
    Lasso-and-optimize-my-day (Google Routes API + OR-Tools). The hard 20%; earn it.
 
 ## Open questions to resolve
