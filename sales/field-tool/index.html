@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Fratello Hub — Field Sales Tool</title>
+<title>Sales-Hub — Fratello</title>
 <link rel="icon" type="image/png" href="/assets/Fratello_Favicon_Blue.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
 #app{font-family:'Montserrat','Helvetica Neue',Arial,sans-serif;color:var(--ink)}
 .app{max-width:434px;margin:0 auto;background:#fff;min-height:88vh;display:flex;flex-direction:column;position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 body.ft-checking #app{opacity:.4}
-.view{flex:1;padding:0 0 92px}
+.view{flex:1;padding:0 0 28px}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 6px}
 .wm{font-size:14px;font-weight:900;letter-spacing:.1em;color:var(--teal)}
 .live{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--teal);text-transform:uppercase;display:flex;align-items:center;gap:5px}
@@ -43,14 +43,14 @@ body.ft-checking #app{opacity:.4}
 .dot{width:9px;height:9px;border-radius:50%;flex:none}
 .d-a{background:var(--teal)}.d-w{background:var(--amber)}.d-c{background:var(--coral)}
 .ri{flex:1;min-width:0}
-.nm{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb{font-size:11.5px;font-weight:500;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .rt{font-size:11px;font-weight:600;color:var(--grey);text-align:right;white-space:nowrap}
-.rt b{display:block;color:var(--ink);font-weight:800;font-size:13px}
-.tabbar{position:sticky;bottom:0;display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:9px 0 12px;background:#fff}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#AEADA7;cursor:pointer;flex:1}
-.tab.on{color:var(--teal)}
-.tab i{font-size:21px}
+.rt b{display:block;color:var(--ink);font-weight:700;font-size:13px}
+.tabbar{display:flex;border-bottom:1px solid var(--line);background:#fff;padding:0 6px}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:#9b9a94;cursor:pointer;padding:13px 4px;border-bottom:2px solid transparent}
+.tab.on{color:var(--teald);border-bottom-color:var(--teal)}
+.tab i{font-size:16px}
 .back{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--grey);padding:16px 18px 4px;cursor:pointer}
 .crumbbar{display:flex;align-items:center;gap:10px;padding:14px 18px 4px;flex-wrap:wrap}
 .backchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px 6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--teald);font-size:12px;font-weight:700;cursor:pointer}
@@ -179,7 +179,7 @@ textarea{min-height:96px;resize:vertical}
 @media(min-width:820px){
  body{background:#EEEDEA}
  .app{max-width:880px;margin:20px auto;border-radius:18px;min-height:auto;box-shadow:0 2px 16px rgba(0,0,0,.05)}
- .tabbar{max-width:880px;border-radius:0 0 18px 18px}
+ .tabbar{max-width:880px}
  .h1{font-size:30px}
  #cust-rows{display:grid;grid-template-columns:1fr 1fr;column-gap:0}
  #cust-rows .row{border-top:1px solid #F0EEEA}
@@ -274,14 +274,14 @@ function crumb(segs){const back=segs.length>1?segs[segs.length-2].go:segs[0].go;
 function tabbar(active){const t=(k,ic,l)=>`<div class="tab ${active===k?'on':''}" onclick="go('${k}')"><i class="ti ti-${ic}"></i>${l}</div>`;return `<div class="tabbar">${t('customers','users','Customers')}${t('calendar','calendar','Calendar')}${t('month','chart-bar','My Month')}${t('playbook','book-2','Playbook')}</div>`;}
 
 function renderList(){
- const SORTS={dollar:'Top $',noorder:'Stale order',novisit:'Stale visit',recent:'Recent order',name:'A–Z'};
+ const SORTS={dollar:'Top $',noorder:'Longest since order',novisit:'Longest since visit',recent:'Most recent order',name:'A–Z'};
  const provs=[...new Set(DATA.accounts.map(a=>a.province).filter(Boolean))].sort();
  const cities=[...new Set(DATA.accounts.map(a=>a.city).filter(Boolean))].sort();
  const areas=[...new Set(DATA.accounts.map(a=>area(a)).filter(Boolean))].sort();
  let list=DATA.accounts.filter(a=>(F.cat==='All'||a.channel===F.cat)&&(F.prov==='All'||a.province===F.prov)&&(F.city==='All'||a.city===F.city)&&(F.area==='All'||area(a)===F.area)&&(F.kind==='all'||(F.kind==='wholesale'?!a.ecom:a.ecom))&&a.name.toLowerCase().includes(F.q.toLowerCase())&&(a.ytd==null||a.ytd>=F.minD)&&(F.nv===0||wkVisit(a)>=F.nv)&&(F.no===0||wkOrder(a)>=F.no));
  list.sort((a,b)=>F.sort==='dollar'?(b.ytd||0)-(a.ytd||0):F.sort==='noorder'?wkOrder(b)-wkOrder(a):F.sort==='novisit'?wkVisit(b)-wkVisit(a):F.sort==='recent'?wkOrder(a)-wkOrder(b):a.name.localeCompare(b.name));
  const activeN=(F.cat!=='All')+(F.kind!=='all')+(F.prov!=='All')+(F.city!=='All')+(F.area!=='All')+(F.minD?1:0)+(F.nv?1:0)+(F.no?1:0);
- const rows=list.map(a=>{const st=statusOf(a),od=overdue(a),ct=custType(a.id),ln=meta(a.id).loaner;const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';const tags=(ct!=='Customer'?` · <span style='color:var(--amber);font-weight:700'>${ct}</span>`:'')+(ln?` · <span style='color:#4A4A4A;font-weight:700'>loaner</span>`:'')+(od?` · <span style='color:var(--coral);font-weight:700'>due</span>`:'');return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last order ${ord} · Last visit ${vis}${tags}</div></div><div class="rt"><b>${money(a.ytd)}</b>12-mo</div></div>`;}).join('');
+ const rows=list.map(a=>{const st=statusOf(a);const ord=a.lastOrder?rel(a.lastOrder):'—';const lt=lastTouch(a.id);const vis=lt?rel(lt):'—';return `<div class="row" onclick="go('account',${a.id})"><span class="dot d-${st}"></span><div class="ri"><div class="nm">${esc(a.name)}</div><div class="sb">Last visit ${vis} · Last order ${ord}</div></div><div class="rt"><b>${a.ytd==null?'—':money(a.ytd)}</b>12-mo</div></div>`;}).join('');
  const sortChips=Object.keys(SORTS).map(k=>`<span class="pill ${F.sort===k?'on':''}" onclick="F.sort='${k}';renderList()">${SORTS[k]}</span>`).join('');
  const flab=lab=>`<span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--grey);text-transform:uppercase;padding:9px 18px 3px;display:block">${lab}</span>`;
  const selFor=(field,values)=>`<div style="padding:0 18px 4px"><select onchange="F.${field}=this.value;renderList()">${['All',...values].map(v=>`<option ${F[field]===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>`;
@@ -290,14 +290,14 @@ function renderList(){
  const reps=FC.visibleReps();
  const picker=(FC.isManager()&&reps.length>1)?`<select class="repsel" onchange="switchRep(this.value)">${reps.map(r=>`<option value="${r.id}" ${REP.id===r.id?'selected':''}>${r.id==='all'?'All customers':'Viewing: '+esc(r.name)}</option>`).join('')}</select>`:'';
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">FIELD TOOL</span><span style="display:flex;align-items:center;gap:12px"><i class="ti ti-map-pin hicon" title="Map" onclick="go('map')"></i><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></span></div>
-   <div class="ey">${esc(DATA.rep.name)} · showing ${list.length} of ${DATA.accounts.length}</div>
+   <div class="topbar"><span class="wm">SALES-HUB</span><span style="display:flex;align-items:center;gap:12px"><i class="ti ti-map-pin hicon" title="Map" onclick="go('map')"></i><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></span></div>
+   ${tabbar('customers')}<div class="ey">${esc(DATA.rep.name)} · showing ${list.length} of ${DATA.accounts.length}</div>
    <div class="h1">Customers</div>${picker}
    <div class="srch"><i class="ti ti-search"></i><input placeholder="Search customers" value="${esc(F.q)}" oninput="F.q=this.value;renderList()"></div>
    <div class="toolbar"><div class="sortwrap"><span class="sortlbl">Sort</span><select class="sortsel" onchange="F.sort=this.value;renderList()">${Object.keys(SORTS).map(k=>`<option value="${k}" ${F.sort===k?'selected':''}>${SORTS[k]}</option>`).join('')}</select></div><span class="fbtn ${activeN?'on':''}" onclick="F.panel=!F.panel;renderList()"><i class="ti ti-adjustments-horizontal" style="font-size:14px;vertical-align:-2px"></i> Filters${activeN?' ('+activeN+')':''}</span></div>
    ${F.panel?`<div class="panelwrap">${panel}${activeN?`<div style="padding:4px 18px 0"><span class="pill" onclick="F.cat='All';F.kind='all';F.prov='All';F.city='All';F.area='All';F.minD=0;F.nv=0;F.no=0;renderList()">Clear all filters</span></div>`:''}</div>`:''}
    ${rows?`<div id="cust-rows">${rows}</div>`:'<div class="empty"><i class="ti ti-search-off"></i>No customers match these filters.</div>'}
-  </div>${tabbar('customers')}</div>`;
+  </div></div>`;
  const inp=document.querySelector('.srch input');if(inp&&F.q){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
 }
 
@@ -316,7 +316,7 @@ function renderAccount(){
  $('app').innerHTML=`<div class="app"><div class="view">
    ${crumb([{label:'Customers',go:"go('customers')"},{label:esc(a.name)}])}
    <div class="h1" style="padding-top:2px">${esc(a.name)}</div>
-   <div class="badges"><span class="bdg ${ctcls}">${ct}</span><span class="bdg cat">${esc(a.channel)}</span><span class="bdg pr">${esc(a.priceLevel)}</span>${s.loaner?'<span class="bdg loan"><i class="ti ti-device-desktop"></i>Loaner</span>':''}<span class="bdg imp ${impPill}"><i class="ti ti-flag"></i>${impTxt}</span></div>
+   <div class="badges"><span class="bdg ${ctcls}">${ct}</span><span class="bdg cat">${esc(a.channel)}</span><span class="bdg pr">${esc(a.priceLevel)}</span></div>
    <div class="actions">
     <div class="actmain" onclick="go('checkin',${a.id})"><i class="ti ti-circle-plus"></i> Check in</div>
     <div class="act2" onclick="go('schedule',${a.id})"><i class="ti ti-calendar-plus"></i> Schedule next visit / call</div>
@@ -330,7 +330,7 @@ function renderAccount(){
     <div class="rep">Your rep: ${esc(repName(a))}${ct==='Customer'?' · '+(touched?'<span style="color:var(--teald)">Touched this month ✓</span>':'<span style="color:var(--coral)">Not touched this month</span>'):''}</div>
    </div>
    <div class="card"><div class="clab">Visit history <span class="mut">your notes</span></div>${vlist}</div>
-   <div class="stats"><div class="stat"><div class="sl">Last order</div><div class="sv teal">${a.lastOrder?rel(a.lastOrder):'—'}</div></div><div class="stat"><div class="sl">12-mo</div><div class="sv">${money(a.ytd)}</div></div><div class="stat"><div class="sl">Orders</div><div class="sv">${a.orders??'—'}</div></div></div>
+   <div class="stats"><div class="stat"><div class="sl">Last visit</div><div class="sv teal">${lastTouch(a.id)?rel(lastTouch(a.id)):'—'}</div></div><div class="stat"><div class="sl">Last order</div><div class="sv">${a.lastOrder?rel(a.lastOrder):'—'}</div></div><div class="stat"><div class="sl">12-mo $</div><div class="sv">${a.ytd==null?'—':money(a.ytd)}</div></div></div>
    <div class="card"><div class="clab">Purchases <span class="mut">last 12 months</span></div><div class="chart">${bars}</div><div class="xax"><span>${esc(a.months[0]?a.months[0].label:'')}</span><span>${esc(a.months[a.months.length-1]?a.months[a.months.length-1].label:'')}</span></div></div>
    <div class="card"><div class="clab">Top products <span class="mut">they buy</span></div>${prods}</div>
    <div class="card"><div class="clab">Recent orders <span class="mut">tap to open</span></div>${ords}</div>
@@ -338,7 +338,6 @@ function renderAccount(){
     <div class="ctrl"><div class="ctrlL">Type<small>Customer book = Customers only</small></div><div class="seg">${['Customer','Prospect','Lead'].map(k=>`<span class="segb ${ct===k?'on':''}" onclick="setType(${a.id},'${k}')">${k}</span>`).join('')}</div></div>
     <div class="ctrl"><div class="ctrlL">Importance</div><div class="seg">${['low','med','high'].map(k=>`<span class="segb ${s.importance===k?'on':''}" onclick="setImp(${a.id},'${k}')">${k==='med'?'Med':k[0].toUpperCase()+k.slice(1)}</span>`).join('')}</div></div>
     <div class="ctrl"><div class="ctrlL">Visit cadence<small>Reach out every…</small></div><div class="step"><button onclick="setCad(${a.id},-1)">−</button><b>${s.cadence||3} wk${(s.cadence||3)>1?'s':''}</b><button onclick="setCad(${a.id},1)">+</button></div></div>
-    <div class="ctrl"><div class="ctrlL">Loaner equipment<small>We have a machine here</small></div><div class="tg ${s.loaner?'':'off'}" onclick="setLoan(${a.id})"><b></b></div></div>
    </div>
    </div>
   </div></div>`;
@@ -391,7 +390,7 @@ function renderCalendar(){
  let body='';Object.keys(buckets).forEach(k=>{if(buckets[k].length)body+=`<div class="datehd">${k}</div>`+buckets[k].map(item).join('');});
  const sub=showSub?`<div class="card"><div class="clab"><i class="ti ti-rss" style="color:var(--teal)"></i>&nbsp;Subscribe in Apple / Outlook</div><div style="font-size:12px;color:#5f5e5a;font-weight:500;line-height:1.5;margin-bottom:9px">Paste this link into your calendar (Apple: File → New Calendar Subscription. Outlook: Add calendar → Subscribe from web). Your scheduled visits appear and auto-update. Russ can subscribe to yours too.</div><div class="suburl">https://hub.fratellocoffee.com/api/sales-calendar.ics?rep=${esc(REP.slug)}&token=••••••</div><div class="btn2" style="margin:10px 0 0" onclick="copySub()"><i class="ti ti-copy"></i> Copy link</div></div>`:'';
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="pill ${showSub?'on':''}" onclick="showSub=!showSub;renderCalendar()"><i class="ti ti-rss" style="font-size:13px;vertical-align:-2px"></i> Subscribe</span></div>
+   <div class="topbar"><span class="wm">SALES-HUB</span><span class="pill ${showSub?'on':''}" onclick="showSub=!showSub;renderCalendar()"><i class="ti ti-rss" style="font-size:13px;vertical-align:-2px"></i> Subscribe</span></div>
    <div class="ey">${esc(DATA.rep.name)} · ${fu.length} planned</div><div class="h1">Calendar</div>
    ${sub}${body||'<div class="empty"><i class="ti ti-calendar-plus"></i>Nothing planned. Open a customer and tap “Schedule next visit”.</div>'}
    <div class="btn2" onclick="go('customers')"><i class="ti ti-plus"></i> Schedule from a customer</div>
@@ -446,8 +445,8 @@ function renderMonth(){
  const coach=gaps.length?`<div class="card" style="border-color:#EAD8AE;background:var(--amberbg)"><div style="font-size:12.5px;font-weight:700;color:#8a5d12"><i class="ti ti-bulb"></i> Focus: ${gaps[0].l}</div><div style="font-size:11.5px;color:#8a5d12;font-weight:500;margin-top:3px">About ${gaps[0].need} more to be on pace for the month.</div></div>`:`<div class="card" style="border-color:#BFE5DD;background:var(--mint)"><div style="font-size:12.5px;font-weight:700;color:var(--teald)"><i class="ti ti-circle-check"></i> On pace across the board. Keep it up.</div></div>`;
  const mix=[['Visits',c.visits],['Cold',c.cold],['QA/Train',c.qa],['Engage',c.engage]].map(x=>`<div style="flex:1;text-align:center"><div style="font-size:16px;font-weight:800">${x[1]}</div><div style="font-size:10px;font-weight:700;color:var(--grey);text-transform:uppercase">${x[0]}</div></div>`).join('');
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></div>
-   <div class="ey">${esc(DATA.rep.name)} · ${TODAY.toLocaleDateString('en-CA',{month:'long',year:'numeric'})} · day ${DOM}/${DIM}</div><div class="h1">My Month</div>
+   <div class="topbar"><span class="wm">SALES-HUB</span><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></div>
+   ${tabbar('month')}<div class="ey">${esc(DATA.rep.name)} · ${TODAY.toLocaleDateString('en-CA',{month:'long',year:'numeric'})} · day ${DOM}/${DIM}</div><div class="h1">My Month</div>
    <div class="score-hero"><div class="score-num" style="color:${col}">${c.score}</div><div class="score-grade" style="color:${col}">Grade ${c.grade} · running</div></div>
    <div style="margin-top:12px">${nudges.join('')}</div>${coach}
    <div class="card" style="display:flex;gap:6px">${mix}</div>
@@ -461,7 +460,7 @@ function renderMonth(){
    </div>
    <div class="note-pre" style="margin-bottom:4px">The thin black line on each bar = where you should be by today. Same math as Russ's monthly Report Card.</div>
    <div class="btn2" onclick="alert('In the live version this generates your 3-page Monthly Report Card as a PDF — score dashboard, summary + coaching, 6-month trend.')"><i class="ti ti-file-text"></i> Generate Monthly Report Card</div>
-  </div>${tabbar('month')}</div>`;
+  </div></div>`;
 }
 
 function renderPlaybook(){
@@ -469,8 +468,8 @@ function renderPlaybook(){
  const cheat=[['Drop In','Unique Visit'],['Service Call','Unique Visit'],['QA Inspection','Visit + QA/Training'],['Training','Visit + QA/Training'],['Cold Call Follow-Up','Unique Visit'],['In-House Meeting','Unique Visit'],['Cold Call','Cold Call'],['Phone / Email / Text','Engagement']].map(x=>`<div class="cheat"><span class="cl">${x[0]}</span><span class="cr">${x[1]}</span></div>`).join('');
  const grades=[['A','90–100','Setting the standard'],['B','80–89','Strong; small tweaks'],['C','70–79','Below target; plan together'],['D','60–69','Significant gap'],['F','<60','Support plan begins']].map(g=>`<div class="cheat"><span class="cl">${g[0]} · ${g[1]}</span><span class="cr" style="color:var(--grey);font-weight:600">${g[2]}</span></div>`).join('');
  $('app').innerHTML=`<div class="app"><div class="view">
-   <div class="topbar"><span class="wm">FIELD TOOL</span><span class="live"><span class="p"></span>Guide</span></div>
-   <div class="ey">Sales performance · v2.0</div><div class="h1">Playbook</div>
+   <div class="topbar"><span class="wm">SALES-HUB</span><span class="live"><span class="p"></span>Guide</span></div>
+   ${tabbar('playbook')}<div class="ey">Sales performance · v2.0</div><div class="h1">Playbook</div>
    <div class="card" style="background:var(--mint);border-color:#BFE5DD"><div style="font-weight:800;font-size:13px;color:var(--teald);margin-bottom:6px">Your 3 responsibilities</div><div style="font-size:12.5px;color:var(--teald);font-weight:600;line-height:1.7">1 · Stay connected — customers hear from us regularly.<br>2 · Protect relationships — every touch reflects Fratello.<br>3 · Keep accurate records — if it isn't logged, it didn't happen.</div></div>
    <div class="card"><div class="clab">How each touch scores</div>${cheat}</div>
    <div class="card"><div class="clab">Monthly targets</div><div class="cheat"><span class="cl">Unique visits</span><span class="cr">${TARGETS.visits}</span></div><div class="cheat"><span class="cl">Cold calls</span><span class="cr">${TARGETS.cold}</span></div><div class="cheat"><span class="cl">QA & training</span><span class="cr">${TARGETS.qa}</span></div><div class="cheat"><span class="cl">Engagement</span><span class="cr">${TARGETS.engage}</span></div><div class="cheat"><span class="cl">Coverage</span><span class="cr">100%</span></div><div class="cheat"><span class="cl">Admin accuracy</span><span class="cr">100%</span></div></div>
@@ -480,7 +479,7 @@ function renderPlaybook(){
     ${acc('What strong territory ownership looks like','• Plan the week before it starts.<br>• Notice risks early — a quieter order, a slower reply.<br>• Keep accounts warm on a cadence, not seasonally.<br>• Know who is growing and who is slowing.<br>• Records reflect reality; notes help the next visit.')}
     ${acc('If you are unsure — STOP and ask','A pricing question, an escalating issue, an account that looks at risk, a tag that is unclear. A quick message costs nothing; a missed signal can cost an account.')}
    </div>
-  </div>${tabbar('playbook')}</div>`;
+  </div></div>`;
 }
 function renderMap(){$('app').innerHTML=`<div class="app"><div class="view">${crumb([{label:'Customers',go:"go('customers')"},{label:'Map'}])}<div class="h1">Map</div><div class="empty"><i class="ti ti-map-2"></i>The map arrives next — your ${customerBook().length} customers as colored pins (active / watch / cold), tap to open the same account screen. Needs the one-time address geocoding step.</div></div></div>`;}
 
