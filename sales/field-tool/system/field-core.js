@@ -8,7 +8,7 @@
 // Swap-in for live Odoo: replace snapshotAccounts() with a fetch to the
 // odoo-read Netlify function once the API key is set — nothing else changes.
 // ═══════════════════════════════════════════════════════════════
-import { firebaseConfigured, onHubAuthChange, initFirebase, normalizeEmail } from '/system/fratello-auth.js';
+import { firebaseConfigured, onHubAuthChange, initFirebase, normalizeEmail, currentIdToken } from '/system/fratello-auth.js';
 import {
   collection, addDoc, getDocs, query, where, serverTimestamp, doc, setDoc, updateDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -56,6 +56,44 @@ export function visibleReps() {
 export function snapshotAccounts(repId) {
   return repId === 'all' ? SNAP.accounts.slice() : SNAP.accounts.filter(a => a.repId === repId);
 }
+// ── Live Odoo (via the secure /api/odoo/read function) with snapshot fallback ──
+const isLocal = () => location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+export function useLive() { return !isLocal(); }
+async function odoo(action, payload) {
+  const tok = await currentIdToken();
+  const r = await fetch('/api/odoo/read', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (tok || '') }, body: JSON.stringify(Object.assign({ action }, payload)) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+// All accounts for a view — live from Odoo, or the committed snapshot on localhost / before the key is set.
+export async function listAccounts(rep) {
+  if (useLive()) { try { const { accounts } = await odoo('list', { rep: rep.id }); if (accounts) return accounts; } catch (e) { console.warn('Odoo list failed; snapshot fallback:', e.message); } }
+  return snapshotAccounts(rep.id);
+}
+// Fill in 12-mo $ + last-order in the background (live only — snapshot already has them).
+export async function enrichAggregates(accounts, onProgress) {
+  if (!useLive()) return;
+  const byId = {}; accounts.forEach(a => { byId[a.id] = a; });
+  const todo = accounts.filter(a => a.ytd == null).map(a => a.id).slice(0, 1500);
+  for (let i = 0; i < todo.length; i += 300) {
+    const batch = todo.slice(i, i + 300);
+    try {
+      const { agg } = await odoo('agg', { ids: batch });
+      batch.forEach(id => { const a = byId[id]; if (a) { const g = agg[id] || {}; a.ytd = g.ytd || 0; a.lastOrder = g.lastOrder || ''; a.orders = g.orders || 0; } });
+    } catch (e) { break; }
+    if (onProgress) onProgress();
+  }
+}
+// Per-account detail (orders + line items + graph + products) — live on tap, or already in the snapshot.
+export function needsDetail(a) { return useLive() && a && !a.recentOrders; }
+export async function loadDetail(a) {
+  if (!needsDetail(a)) return a;
+  try { const { detail } = await odoo('detail', { id: a.id }); Object.assign(a, detail); }
+  catch (e) { a.recentOrders = a.recentOrders || []; a.months = a.months || []; a.topProducts = a.topProducts || []; }
+  return a;
+}
+
 function repForAccount(account) {
   return SNAP.reps.find(r => r.id === account.repId)
     || { id: account.repId || 'house', name: 'House', email: 'house@fratellocoffee.com' };
