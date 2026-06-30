@@ -2469,7 +2469,7 @@ const SECTIONS = {
         menuParent: '',
         cards: [
             { title: 'Wholesale Proposal Builder', href: 'sales/proposal-builder.html', badge: 'Live', quick: true },
-            { title: 'Field Sales Tool', href: 'sales/field-tool/index.html', badge: 'Live', quick: true },
+            { title: 'Sales-Hub', href: 'sales/field-tool/index.html', badge: 'Live', quick: true },
             { title: 'Sales Intelligence', href: '#', badge: 'Coming Soon' },
             { title: 'Sales Forecasting', href: '#', badge: 'Coming Soon' }
         ]
@@ -3683,6 +3683,10 @@ function renderDashboardHome(role) {
         notesNew: newNotesCount
     });
 
+    // Sales reps live in the Sales-Hub all day — give them a one-tap launcher
+    // right at the top so they never dig through menus to log a call.
+    appendSalesHubShortcut(main, role);
+
     if (tier !== 'staff' && attentionItems.length) {
         const section = document.createElement('section');
         section.className = 'workbench-section fade-in';
@@ -3737,6 +3741,35 @@ function renderDashboardHome(role) {
     }
 
     main.appendChild(notesSection);
+}
+
+// A bold, top-of-dashboard launcher into the Sales-Hub for the field reps
+// (Joel, D'Arcy) and their manager (Russ). Owners/Controllers reach it through
+// the Sales department, so it only shows for people who use it in the field.
+function appendSalesHubShortcut(main, role) {
+    const email = String((role.user && role.user.email) || '').toLowerCase();
+    const REP_EMAILS = [
+        'joel.may@fratellocoffee.com',
+        'darcy.watsham@fratellocoffee.com',
+        'russ@fratellocoffee.com',
+        'russ.prefontaine@fratellocoffee.com'
+    ];
+    if (!(role.key === 'sales' || REP_EMAILS.includes(email))) return;
+
+    const a = document.createElement('a');
+    a.href = 'sales/field-tool/index.html';
+    a.className = 'sales-hub-shortcut fade-in';
+    a.style.cssText = 'display:flex;align-items:center;gap:14px;text-decoration:none;margin:6px 0 18px;padding:18px 20px;border-radius:18px;background:#167C6E;color:#fff;box-shadow:0 8px 20px rgba(22,124,110,.22)';
+    a.innerHTML = `
+        <span style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.16);flex:none">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        </span>
+        <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:18px;font-weight:800;letter-spacing:-.01em">Open Sales-Hub</span>
+            <span style="display:block;font-size:13px;font-weight:500;opacity:.85;margin-top:2px">Log a call, pull up a customer, plan your day</span>
+        </span>
+        <span style="font-size:22px;font-weight:800;flex:none">&rarr;</span>`;
+    main.appendChild(a);
 }
 
 // Icon per department, used by the Departments page rows.
