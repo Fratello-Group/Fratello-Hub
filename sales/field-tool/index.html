@@ -60,10 +60,13 @@ body.ft-checking #app{opacity:.4}
 .backchip:hover{background:var(--mint)}
 .crumbs{font-size:12px;font-weight:600;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .crumbs b{color:var(--ink);font-weight:700}
-.fuact{display:flex;gap:6px;align-items:center}
-.fubtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--grey);cursor:pointer;font-size:15px}
-.fubtn.done{color:#fff;background:var(--teal);border-color:var(--teal)}
-.fubtn:active{background:var(--soft)}
+.due{font-size:11.5px;font-weight:700;color:var(--teald);background:var(--soft);border-radius:8px;padding:6px 9px;cursor:pointer;white-space:nowrap}
+.due:active{background:var(--mint)}
+.tick{width:26px;height:26px;border-radius:50%;border:2px solid #D5D3CC;flex:none;cursor:pointer;position:relative}
+.tick::after{content:'';position:absolute;left:7px;top:3px;width:6px;height:11px;border:solid var(--teal);border-width:0 2.5px 2.5px 0;transform:rotate(45deg);opacity:0;transition:opacity .12s}
+.tick:hover{border-color:var(--teal)}
+.tick:hover::after{opacity:.45}
+.tick:active{background:var(--mint);border-color:var(--teal)}
 .badges{display:flex;gap:6px;flex-wrap:wrap;padding:6px 18px 14px}
 .bdg{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px}
 .bdg.cat{background:var(--mint);color:var(--teald)}
@@ -435,7 +438,7 @@ function renderCalendar(){
  const days=[];for(let d=1;d<=dim;d++)days.push(`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
  const grid=`<div class="calgrid">${['S','M','T','W','T','F','S'].map(x=>`<div class="caldow">${x}</div>`).join('')}${days.map((iso,i)=>{const cls=['calday',iso===todayIso?'today':'',iso===calSel?'sel':''].filter(Boolean).join(' ');const st=i===0&&startDow>0?` style="grid-column-start:${startDow+1}"`:'';return `<div class="${cls}"${st} onclick="calPick('${iso}')">${Number(iso.slice(8))}${byDay[iso]?'<span class="cd"></span>':''}</div>`;}).join('')}</div>`;
  const mlabel=new Date(calY,calM,1).toLocaleDateString('en-CA',{month:'long',year:'numeric'});
- const item=f=>{const od=daysAgo(f.due)>0;return `<div class="row"><span class="dot ${od?'d-c':'d-a'}"></span><div class="ri" onclick="go('account',${f.acctId})"><div class="nm">${esc(f.acctName)}</div><div class="sb">${esc(f.type)} · ${esc(f.reason)}</div></div><div class="rt">${esc(f.due.slice(5))}</div><div class="fuact"><span class="fubtn" title="Edit / reschedule" onclick="go('editfu','${f.id}')"><i class="ti ti-pencil"></i></span><span class="fubtn done" title="Mark done" onclick="doneFu('${f.id}')"><i class="ti ti-check"></i></span></div></div>`;};
+ const item=f=>`<div class="row"><div class="ri" onclick="go('account',${f.acctId})"><div class="nm">${esc(f.acctName)}</div><div class="sb">${esc(f.type)} · ${esc(f.reason)}</div></div><span class="due" title="Tap to reschedule" onclick="go('editfu','${f.id}')">${esc(f.due.slice(5))}</span><span class="tick" title="Mark done" onclick="doneFu('${f.id}')"></span></div>`;
  let body;
  if(calSel){const day=fu.filter(f=>f.due===calSel);const lbl=new Date(calSel+'T12:00:00').toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'});body=`<div class="datehd">${lbl} · <span class="clink" onclick="calSel=null;renderCalendar()">show all</span></div>`+(day.length?day.map(item).join(''):'<div class="empty" style="padding:30px 18px"><i class="ti ti-calendar"></i>Nothing planned this day.</div>');}
  else{const b={Overdue:[],'This week':[],'Next week':[],Later:[]};fu.forEach(f=>{const d=daysAgo(f.due);if(d>0)b.Overdue.push(f);else if(d>=-7)b['This week'].push(f);else if(d>=-14)b['Next week'].push(f);else b.Later.push(f);});body='';Object.keys(b).forEach(k=>{if(b[k].length)body+=`<div class="datehd">${k}</div>`+b[k].map(item).join('');});if(!body)body='<div class="empty"><i class="ti ti-calendar-plus"></i>Nothing planned. Open a customer and tap “Schedule next visit”.</div>';}
@@ -445,7 +448,7 @@ function renderCalendar(){
    <div class="ey">${esc(DATA.rep.name)} · ${fu.length} planned</div><div class="h1">Calendar</div>
    <div class="calwrap"><div class="calhd"><span class="ml">${mlabel}</span><span class="nav"><button onclick="calShift(-1)" title="Previous month">‹</button><button onclick="calShift(1)" title="Next month">›</button></span></div>${grid}</div>
    <div class="subbtn" onclick="showSub=true;renderCalendar()"><i class="ti ti-rss"></i> Subscribe in Apple / Outlook</div>
-   ${calSel?'':`<div class="datehd" style="color:var(--ink);border-top:1px solid var(--line);margin-top:6px">Your to-do list</div><div class="note-pre" style="padding:0 18px 4px">Every visit or call you've lined up, soonest first. Tap a name to open the customer, the ✓ when it's done.</div>`}
+   ${calSel?'':`<div class="datehd" style="color:var(--ink);border-top:1px solid var(--line);margin-top:6px">Your to-do list</div><div class="note-pre" style="padding:0 18px 4px">Every visit or call you've lined up, soonest first. Tap a name to open it, the date to move it, or the circle to check it off.</div>`}
    ${body}
    <div class="btn2" onclick="go('customers')"><i class="ti ti-plus"></i> Schedule from a customer</div>
   </div>${modal}</div>`;
