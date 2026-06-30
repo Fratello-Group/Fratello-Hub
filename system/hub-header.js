@@ -203,6 +203,23 @@
         }
         back.setAttribute('href', backHref);
 
+        // Prefer real browser history so "Back" returns to the page you were
+        // actually on — not a fixed dashboard. The href above stays as the
+        // fallback for when there's no in-Hub history (a direct link, a fresh
+        // tab, or arriving from another site).
+        back.addEventListener('click', function (event) {
+            // Leave modified / non-primary clicks alone (open-in-new-tab etc.).
+            if (event.defaultPrevented || event.button !== 0 ||
+                event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            var ref = document.referrer || '';
+            var fromHub = ref.indexOf(window.location.origin + '/') === 0;
+            var notSelf = ref.split('#')[0] !== window.location.href.split('#')[0];
+            if (fromHub && notSelf && window.history.length > 1) {
+                event.preventDefault();
+                window.history.back();
+            }
+        });
+
         sub.appendChild(back);
         sub.appendChild(crumbs);
         return sub;
@@ -376,8 +393,27 @@
         metaTag('apple-mobile-web-app-title', 'Fratello Hub');
     }
 
+    // A freshly opened page should start at the top. Browsers usually do this,
+    // but a restored scroll position, an autofocus, or async layout shifts can
+    // leave you halfway down. Only force it on a real forward navigation (not
+    // Back/Forward, where the previous scroll position is the right one) and
+    // only when there's no #anchor the page is meant to jump to.
+    function resetScrollOnFreshLoad() {
+        try {
+            if (window.location.hash) return;
+            var navType;
+            if (window.performance && performance.getEntriesByType) {
+                var entries = performance.getEntriesByType('navigation');
+                if (entries && entries[0]) navType = entries[0].type;
+            }
+            if (navType === 'back_forward') return;   // keep the restored position
+            window.scrollTo(0, 0);
+        } catch (e) {}
+    }
+
     function start() {
         ensurePwaTags();
+        resetScrollOnFreshLoad();
         if ('serviceWorker' in navigator) {
             try { navigator.serviceWorker.register('/sw.js').catch(function () {}); } catch (e) {}
         }
