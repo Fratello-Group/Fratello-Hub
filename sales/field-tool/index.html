@@ -445,6 +445,7 @@ function renderCalendar(){
    <div class="ey">${esc(DATA.rep.name)} · ${fu.length} planned</div><div class="h1">Calendar</div>
    <div class="calwrap"><div class="calhd"><span class="ml">${mlabel}</span><span class="nav"><button onclick="calShift(-1)" title="Previous month">‹</button><button onclick="calShift(1)" title="Next month">›</button></span></div>${grid}</div>
    <div class="subbtn" onclick="showSub=true;renderCalendar()"><i class="ti ti-rss"></i> Subscribe in Apple / Outlook</div>
+   ${calSel?'':`<div class="datehd" style="color:var(--ink);border-top:1px solid var(--line);margin-top:6px">Your to-do list</div><div class="note-pre" style="padding:0 18px 4px">Every visit or call you've lined up, soonest first. Tap a name to open the customer, the ✓ when it's done.</div>`}
    ${body}
    <div class="btn2" onclick="go('customers')"><i class="ti ti-plus"></i> Schedule from a customer</div>
   </div>${modal}</div>`;
