@@ -82,6 +82,27 @@ function docIdForEmail(email) {
     return normalizeEmail(email);
 }
 
+// Document id for the company-wide (all-readable) directory. It must NOT be the
+// email: Firestore exposes document ids to anyone who can list a collection, so
+// keying the directory by email would leak everyone's address to every teammate.
+// This is a deterministic, non-reversible hash (two independent rolling hashes
+// widen the space so collisions are negligible for a roster), stable across
+// sessions so upsert/sync/delete keep hitting the same doc for a given person.
+function directoryDocId(email) {
+    const normalized = normalizeEmail(email);
+    if (!normalized) return '';
+    let h1 = 0x811c9dc5 >>> 0;                 // FNV-1a (32-bit)
+    for (let i = 0; i < normalized.length; i++) {
+        h1 ^= normalized.charCodeAt(i);
+        h1 = Math.imul(h1, 0x01000193) >>> 0;
+    }
+    let h2 = 0;                                // djb2 variant (independent)
+    for (let i = 0; i < normalized.length; i++) {
+        h2 = (Math.imul(h2, 33) + normalized.charCodeAt(i)) >>> 0;
+    }
+    return 'dir_' + h1.toString(36) + h2.toString(36);
+}
+
 function withId(snapshot) {
     return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 }
@@ -492,6 +513,12 @@ export async function getHolidays(options = {}) {
 // A company-wide, all-readable projection of the live roster (name + position
 // only). Read by every signed-in person for the dashboard directory; written
 // only by Owner/Controller, kept in sync from Manage People.
+//
+// PRIVACY: this collection is readable by EVERY signed-in teammate, so it must
+// never carry anything private. It holds name + title + department + tier only —
+// no email (not even as the document id; see directoryDocId), no phone, no
+// address. Emails and contact details stay in `users`/`hubProfiles`, which only
+// the person themselves and Owner/Controller can read.
 
 export async function getDirectory() {
     const { db } = requireFirestore();
@@ -506,10 +533,9 @@ export async function getDirectory() {
 export async function upsertDirectoryEntry(entry = {}) {
     blockIfPreview();
     const { db } = requireFirestore();
-    const id = docIdForEmail(entry.email || entry.id);
+    const id = directoryDocId(entry.email || entry.id);
     if (!id) return null;
     await setDoc(doc(db, COLLECTIONS.directory, id), {
-        email: id,
         name: cleanOptionalText(entry.name),
         title: cleanOptionalText(entry.title),
         department: cleanOptionalText(entry.department),
@@ -523,7 +549,7 @@ export async function upsertDirectoryEntry(entry = {}) {
 export async function removeDirectoryEntry(emailOrId) {
     blockIfPreview();
     const { db } = requireFirestore();
-    const id = docIdForEmail(emailOrId);
+    const id = directoryDocId(emailOrId);
     if (!id) return;
     await deleteDoc(doc(db, COLLECTIONS.directory, id));
 }
@@ -535,10 +561,9 @@ export async function syncDirectory(people = []) {
     const { db } = requireFirestore();
     const wanted = new Map();
     people.forEach(person => {
-        const id = docIdForEmail(person.email || person.id);
+        const id = directoryDocId(person.email || person.id);
         if (!id) return;
         wanted.set(id, {
-            email: id,
             name: cleanOptionalText(person.name),
             title: cleanOptionalText(person.title),
             department: cleanOptionalText(person.department),
