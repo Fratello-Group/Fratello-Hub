@@ -100,8 +100,13 @@ function parseBody(event) {
     }
 }
 
+// The signing secret must come from configuration. There is deliberately no
+// hardcoded fallback: a guessable default would let anyone forge a valid
+// session token. If nothing is configured, getSecret() returns '' and
+// sign()/verifySessionToken() below fail closed (no token can be minted or
+// verified) rather than trusting a well-known string.
 function getSecret() {
-    return process.env.AUTH_SESSION_SECRET || process.env.AUTH_OWNER || process.env.SITE_ID || 'fratello-dev-session-secret';
+    return process.env.AUTH_SESSION_SECRET || process.env.AUTH_OWNER || process.env.SITE_ID || '';
 }
 
 function base64url(input) {
@@ -125,6 +130,9 @@ function createSession(user) {
 }
 
 function verifySessionToken(token) {
+    // Fail closed when no signing secret is configured: with no secret we cannot
+    // distinguish a genuine token from a forged one, so trust nothing.
+    if (!getSecret()) return null;
     if (!token || !token.includes('.')) return null;
     const [encoded, signature] = token.split('.');
     const expected = sign(encoded);
@@ -294,28 +302,16 @@ async function requireOwner(event) {
     return null;
 }
 
-async function legacyCodeRole(code) {
-    const normalized = String(code || '').trim().toLowerCase();
-    if (!normalized) return null;
-
-    const roles = [
-        { password: process.env.AUTH_OWNER, profile: 'owner' },
-        { password: process.env.AUTH_CONTROLLER, profile: 'controller' },
-        { password: process.env.AUTH_MARKETING, profile: 'marketing' },
-        { password: process.env.AUTH_PRODUCTION, profile: 'production' },
-        { password: process.env.AUTH_SALES, profile: 'sales' },
-        { password: process.env.AUTH_STAFF, profile: 'staff' }
-    ];
-
-    const match = roles.find(item => item.password && item.password.toLowerCase() === normalized);
-    if (!match) return null;
-
-    const profile = PROFILES[match.profile];
-    return {
-        key: profile.key,
-        label: profile.label,
-        sections: profile.sections
-    };
+// DISABLED: the shared "access code" login is a security backdoor — a single
+// shared password (AUTH_OWNER / AUTH_CONTROLLER / …) granted a role to anyone
+// who knew it, with no per-person identity. The Hub now authenticates every
+// person individually through Firebase (see system/fratello-auth.js), so this
+// path is permanently turned off. It is kept as a no-op (returning null) only so
+// the callers that still reference it degrade cleanly to "access denied" instead
+// of crashing. To re-enable real code login you would have to replace this with
+// per-user credentials, not a shared secret.
+async function legacyCodeRole(_code) {
+    return null;
 }
 
 function buildInviteUrl(event, token) {

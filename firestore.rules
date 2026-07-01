@@ -81,6 +81,19 @@ service cloud.firestore {
         && data.active == true;
     }
 
+    // role_tier drives the server-side "is this an Owner?" decision in the
+    // Netlify functions (see roleTier() in templates/_runtime.js), and `active`
+    // gates authentication. Only an Owner may set or change either, so a
+    // Controller can never grant Owner (to themselves or anyone) by editing a
+    // users record. A Controller keeps full control of every other roster field.
+    function isOwnerTier(data) {
+      return data.get('role_tier', '') == 'Owner' || data.get('role_tier', '') == 'owner';
+    }
+    function controllerUserUpdateOk(before, after) {
+      return after.get('role_tier', '') == before.get('role_tier', '')
+        && after.get('active', true) == before.get('active', true);
+    }
+
     function isVacation(data) {
       return data.type == 'vacation';
     }
@@ -340,10 +353,15 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwnerOrController() || isSelfUserRecord(resource.data);
       allow list: if isOwnerOrController();
-      // Owner/Controller manage everyone. A person may also update their OWN
-      // record, but only contact details — never anything that grants access.
-      allow create: if isOwnerOrController();
-      allow update: if isOwnerOrController() || selfUserContactOnly(resource.data, request.resource.data);
+      // Owner manages everyone including the access fields (role_tier / active).
+      // A Controller manages the roster too, but may NOT set or change those
+      // access fields — otherwise a Controller could set their own role_tier to
+      // "Owner" and be treated as an Owner by the server functions. A person may
+      // also update their OWN record, but only contact details.
+      allow create: if isOwner() || (isController() && !isOwnerTier(request.resource.data));
+      allow update: if isOwner()
+        || (isController() && controllerUserUpdateOk(resource.data, request.resource.data))
+        || selfUserContactOnly(resource.data, request.resource.data);
       allow delete: if isOwner();
     }
 

@@ -1,3 +1,17 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// IMPORTANT — what this file is, and what it is NOT.
+//
+// This is a fast, dependency-free *logic simulation* of the access model. It
+// re-implements the rule predicates in plain JavaScript and asserts on them. It
+// is useful for catching logic mistakes quickly, but it does NOT execute the
+// real firestore.rules file, so on its own it cannot prove the deployed rules
+// behave the same way. Keep the predicates below in sync with firestore.rules by
+// hand.
+//
+// The authoritative test that runs against the ACTUAL rules is the Firebase
+// emulator suite in test/firestore-rules.emulator.test.js
+// (npm run test:rules:emulator). Prefer that when verifying a rules change.
+// ─────────────────────────────────────────────────────────────────────────────
 const assert = require('assert');
 
 const USERS = {
@@ -244,6 +258,38 @@ function canDeleteAvatarLog(requestAuth, data) {
         && (isOwnerOrController(requestAuth) || isAvatarCreator(requestAuth, data));
 }
 
+// ── users record: who may change access-granting fields ──
+// role_tier is what the Netlify functions read to decide "is this an Owner?"
+// and `active` gates authentication, so only an Owner may set/change them.
+function isOwnerTier(data) {
+    return data.role_tier === 'Owner' || data.role_tier === 'owner';
+}
+function activeOf(data) {
+    return data.active === undefined ? true : data.active;
+}
+function controllerUserUpdateOk(before, after) {
+    return (after.role_tier || '') === (before.role_tier || '')
+        && activeOf(after) === activeOf(before);
+}
+function selfUserContactOnly(requestAuth, before, after) {
+    return isSelfUserRecord(requestAuth, before)
+        && (after.email || '') === (before.email || '')
+        && (after.role_tier || '') === (before.role_tier || '')
+        && (after.department || '') === (before.department || '')
+        && (after.manager_id || '') === (before.manager_id || '')
+        && activeOf(after) === activeOf(before)
+        && (after.hourly || false) === (before.hourly || false)
+        && (after.title || '') === (before.title || '');
+}
+function canUpdateUser(requestAuth, before, after) {
+    return isOwner(requestAuth)
+        || (isController(requestAuth) && controllerUserUpdateOk(before, after))
+        || selfUserContactOnly(requestAuth, before, after);
+}
+function canCreateUser(requestAuth, data) {
+    return isOwner(requestAuth) || (isController(requestAuth) && !isOwnerTier(data));
+}
+
 const sungjooVacation = {
     user_id: 'sungjoo.hong@fratellocoffee.com',
     type: 'vacation',
@@ -381,7 +427,23 @@ function run() {
     assert.equal(canDeleteAvatarLog(auth('mateo'), mateoAvatar), true);
     assert.equal(canDeleteAvatarLog(auth('controller'), mateoAvatar), true);
     assert.equal(canDeleteAvatarLog(auth('kyle'), mateoAvatar), false);
+
+    // ── Controller cannot escalate to Owner via the users record ──
+    // role_tier drives the server-side Owner check; only an Owner may change it.
+    const controllerRecord = USERS['controller@fratellocoffee.com'];
+    assert.equal(canUpdateUser(auth('controller'), controllerRecord, { ...controllerRecord, title: 'Controller & Ops' }), true);
+    assert.equal(canUpdateUser(auth('controller'), controllerRecord, { ...controllerRecord, role_tier: 'Owner' }), false);
+    assert.equal(canUpdateUser(auth('controller'), controllerRecord, { ...controllerRecord, active: false }), false);
+    assert.equal(canUpdateUser(auth('owner'), controllerRecord, { ...controllerRecord, role_tier: 'Owner' }), true);
+    // ...and cannot seed a brand-new Owner-tier user either.
+    assert.equal(canCreateUser(auth('controller'), { email: 'x@fratellocoffee.com', role_tier: 'Owner', active: true }), false);
+    assert.equal(canCreateUser(auth('controller'), { email: 'x@fratellocoffee.com', role_tier: 'Staff', active: true }), true);
+    assert.equal(canCreateUser(auth('owner'), { email: 'x@fratellocoffee.com', role_tier: 'Owner', active: true }), true);
+    // A person may fix their own name, but never their role_tier.
+    const su = USERS['sungjoo.hong@fratellocoffee.com'];
+    assert.equal(canUpdateUser(auth('sungjoo'), su, { ...su, name: 'Sungjoo H.' }), true);
+    assert.equal(canUpdateUser(auth('sungjoo'), su, { ...su, role_tier: 'Owner' }), false);
 }
 
 run();
-console.log('Firestore rules policy simulation passed.');
+console.log('Firestore rules logic simulation passed (simulation only — run "npm run test:rules:emulator" to verify against the real rules).');
