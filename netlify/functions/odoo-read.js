@@ -44,8 +44,12 @@ const ymd = s => (s ? String(s).slice(0, 10) : '');
 // Trailing-12-month window start (first day of the month 11 months back), live.
 function windowStart() {
   const d = new Date();
-  d.setMonth(d.getMonth() - 11);
+  // Set the day to the 1st BEFORE shifting the month. Doing it the other way
+  // round overflows on days 29-31 (e.g. Mar 31 minus 11 months hits a shorter
+  // month and rolls forward), which would push the 12-month window start a
+  // month late and skew the revenue aggregation.
   d.setDate(1);
+  d.setMonth(d.getMonth() - 11);
   return d.toISOString().slice(0, 10);
 }
 
