@@ -608,7 +608,7 @@
                 : ['denyRequest', 'denyTimeOffRequest'];
 
             try {
-                const result = await callFirst(client, fnNames, currentRequest.id, { comment });
+                const result = await callFirst(client, fnNames, currentRequest.id, comment);
                 currentRequest.status = action;
                 renderDetails(currentRequest);
                 showMessage(result

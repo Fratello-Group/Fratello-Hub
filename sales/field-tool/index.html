@@ -450,7 +450,7 @@ function renderCalendar(){
    <div class="topbar"><span class="wm">SALES-HUB</span><span class="live"><span class="p"></span>${S._live?'Live':'Preview'}</span></div>
    <div class="ey">${esc(DATA.rep.name)} · ${fu.length} planned</div><div class="h1">Calendar</div>
    <div class="calwrap"><div class="calhd"><span class="ml">${mlabel}</span><span class="nav"><button onclick="calShift(-1)" title="Previous month">‹</button><button onclick="calShift(1)" title="Next month">›</button></span></div>${grid}</div>
-   <div class="subbtn" onclick="showSub=true;renderCalendar()"><i class="ti ti-rss"></i> Subscribe in Apple / Outlook</div>
+   <!-- Subscribe hidden until the sales-calendar.ics feed is built: the /api/sales-calendar.ics endpoint doesn't exist yet, so the links were dead. Restore this button once the feed + per-rep tokens are wired. -->
    ${calSel?'':`<div class="datehd" style="color:var(--ink);border-top:1px solid var(--line);margin-top:6px">Your to-do list</div><div class="note-pre" style="padding:0 18px 4px">Every visit or call you've lined up, soonest first. Tap a name to open it, the date to move it, or the circle to check it off.</div>`}
    ${body}
    <div class="btn2" onclick="go('customers')"><i class="ti ti-plus"></i> Schedule from a customer</div>
